@@ -33,6 +33,7 @@
             android:launchMode="singleTop"
             android:screenOrientation="sensorLandscape"
             android:theme="@style/Theme.StreamFlex" />
+        <activity android:name=".ui.test.MetadataTestActivity" />
 
     </application>
 
