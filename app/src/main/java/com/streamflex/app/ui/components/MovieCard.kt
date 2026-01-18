@@ -36,7 +36,7 @@ fun MovieCard(media: Media, onClick: () -> Unit) {
                 contentDescription = media.title,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(2f / 3f), // Standard Movie Poster ratio
+                    .aspectRatio(2f / 3f), // Standard Movie Poster ratio   
                 contentScale = ContentScale.Crop
             )
         }
