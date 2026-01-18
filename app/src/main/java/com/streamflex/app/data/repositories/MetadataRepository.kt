@@ -1,4 +1,4 @@
-package com.streamflex.app.data.repository
+package com.streamflex.app.data.repositories
 
 import com.streamflex.app.data.models.*
 import com.streamflex.app.data.network.ApiRoutes
