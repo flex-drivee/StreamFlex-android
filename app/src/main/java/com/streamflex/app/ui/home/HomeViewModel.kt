@@ -3,7 +3,6 @@ package com.streamflex.app.ui.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.streamflex.app.data.models.Media
-import com.streamflex.app.data.providers.ProviderManager
 import kotlinx.coroutines.Dispatchers // ⚡ Import this
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
