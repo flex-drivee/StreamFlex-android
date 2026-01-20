@@ -15,7 +15,8 @@ class ContentRepositoryImpl(
 ) : ContentRepository {
 
     // SECURE: Now reading from the generated BuildConfig
-    private val apiKey: String = BuildConfig.TMDB_API_KEY
+  //  private val apiKey: String = BuildConfig.TMDB_API_KEY
+    private val apiKey: String = "placeholder"
 
     override suspend fun search(query: String): List<SearchResult> = withContext(Dispatchers.IO) {
         val movies = tmdbApi.searchMovies(apiKey, query).results.map { TmdbMapper.toDomain(it) }

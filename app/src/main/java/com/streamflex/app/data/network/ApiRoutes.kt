@@ -19,5 +19,5 @@ object ApiRoutes {
 
     // Cinemeta (TV metadata mostly)
     const val CINEMETA_MOVIE = "movie/"
-    const const CINEMETA_SERIES = "series/"
+    const val CINEMETA_SERIES = "series/"
 }

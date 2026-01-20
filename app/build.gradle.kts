@@ -7,6 +7,7 @@ plugins {
     // If you are using Kotlin 2.0+, keep the compose plugin. 
     // If on older Kotlin (< 2.0), this might not be needed if set up in project gradle, but keeping it if it works for you.
     id("org.jetbrains.kotlin.plugin.compose")
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 // 1. Load the secrets (Using explicit imports fixes the "Unresolved reference" error)
@@ -79,6 +80,7 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0") // Added logging interceptor which you used in HttpClient
     implementation("com.squareup.okhttp3:okhttp-dnsoverhttps:4.12.0")
     implementation("com.google.code.gson:gson:2.10.1")
+    implementation("com.squareup.okhttp3:okhttp-urlconnection:4.12.0")
 
     // --- Retrofit (Required for your TmdbApi) ---
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
@@ -111,4 +113,6 @@ dependencies {
     // Debugging
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 }
