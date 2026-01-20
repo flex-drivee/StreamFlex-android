@@ -15,8 +15,8 @@ class ContentRepositoryImpl(
 ) : ContentRepository {
 
     // SECURE: Now reading from the generated BuildConfig
-  //  private val apiKey: String = BuildConfig.TMDB_API_KEY
-    private val apiKey: String = "placeholder"
+    private val apiKey: String = BuildConfig.TMDB_API_KEY
+  //  private val apiKey: String = "placeholder"
 
     override suspend fun search(query: String): List<SearchResult> = withContext(Dispatchers.IO) {
         val movies = tmdbApi.searchMovies(apiKey, query).results.map { TmdbMapper.toDomain(it) }
@@ -25,6 +25,7 @@ class ContentRepositoryImpl(
     }
 
     override suspend fun getPopularMovies(): List<SearchResult> = withContext(Dispatchers.IO) {
+        android.util.Log.d("DEBUG_KEY", "Using Key: '$apiKey'")
         return@withContext tmdbApi.getPopularMovies(apiKey).results.map { TmdbMapper.toDomain(it) }
     }
 
