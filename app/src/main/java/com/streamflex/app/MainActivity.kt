@@ -3,51 +3,46 @@ package com.streamflex.app
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.runtime.Composable
-import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import com.streamflex.app.ui.detail.DetailScreen
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.streamflex.app.data.metadata.TmdbApi
+import com.streamflex.app.data.repositories.ContentRepositoryImpl
 import com.streamflex.app.ui.home.HomeScreen
-import com.streamflex.app.ui.theme.StreamFlexTheme
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
+import com.streamflex.app.ui.home.HomeViewModelFactory
+import com.streamflex.app.ui.theme.StreamFlexTheme // Make sure this exists, or remove if not using custom theme
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // 1. Setup Retrofit
+        val retrofit = Retrofit.Builder()
+            .baseUrl("https://api.themoviedb.org/3/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        val tmdbApi = retrofit.create(TmdbApi::class.java)
+
+        // 2. Setup Repository
+        val repository = ContentRepositoryImpl(tmdbApi)
+
+        // 3. Setup ViewModel Factory
+        val viewModelFactory = HomeViewModelFactory(repository)
+
         setContent {
-            StreamFlexTheme {
-                AppNavigation()
-            }
-        }
-    }
-}
+            // StreamFlexTheme {  // Uncomment if you have a theme setup
+            // 4. Create ViewModel
+            val viewModel: com.streamflex.app.ui.home.HomeViewModel = viewModel(factory = viewModelFactory)
 
-@Composable
-fun AppNavigation() {
-    val navController = rememberNavController()
-
-    NavHost(navController = navController, startDestination = "home") {
-
-        // 1. Home Screen
-        composable("home") {
-            HomeScreen(onMovieClick = { movie ->
-                // Encode URL to pass it safely (slashes break navigation otherwise)
-                val encodedUrl = URLEncoder.encode(movie.url, StandardCharsets.UTF_8.toString())
-                navController.navigate("detail/$encodedUrl")
-            })
-        }
-
-        // 2. Detail Screen
-        composable(
-            route = "detail/{url}",
-            arguments = listOf(navArgument("url") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val url = backStackEntry.arguments?.getString("url") ?: ""
-            DetailScreen(url = url)
+            HomeScreen(
+                viewModel = viewModel,
+                onNavigateToDetail = { id ->
+                    // We will implement Navigation later
+                    println("Clicked on movie: $id")
+                }
+            )
+            // }
         }
     }
 }

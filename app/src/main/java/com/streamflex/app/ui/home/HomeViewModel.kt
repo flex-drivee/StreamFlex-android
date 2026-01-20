@@ -1,46 +1,63 @@
 package com.streamflex.app.ui.home
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.streamflex.app.data.models.Media
-import kotlinx.coroutines.Dispatchers // ⚡ Import this
+import com.streamflex.app.domain.models.SearchResult
+import com.streamflex.app.domain.repository.ContentRepository
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext // ⚡ Import this
 
-class HomeViewModel : ViewModel() {
+data class HomeUiState(
+    val isLoading: Boolean = true,
+    val popularMovies: List<SearchResult> = emptyList(),
+    val popularShows: List<SearchResult> = emptyList(),
+    val errorMessage: String? = null
+)
 
-    private val _movies = MutableStateFlow<List<Media>>(emptyList())
-    val movies = _movies.asStateFlow()
+class HomeViewModel(
+    private val repository: ContentRepository
+) : ViewModel() {
 
-    private val _isLoading = MutableStateFlow(true)
-    val isLoading = _isLoading.asStateFlow()
+    private val _uiState = MutableStateFlow(HomeUiState())
+    val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
     init {
-        loadHomePage()
+        loadHomeData()
     }
 
-    fun loadHomePage() {
+    fun loadHomeData() {
         viewModelScope.launch {
-            _isLoading.value = true
+            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
             try {
-                // ⚡ SWITCH TO IO THREAD FOR NETWORK CALLS
-                withContext(Dispatchers.IO) {
-                    val provider = ProviderManager.getAll().firstOrNull()
-                    if (provider != null) {
-                        println("StreamFlex: Loading from ${provider.name}")
-                        val results = provider.loadHome()
+                // Fetch both lists in parallel (optimization)
+                val movies = repository.getPopularMovies()
+                val shows = repository.getPopularShows()
 
-                        // ⚡ Switch back to Main Thread to update UI
-                        _movies.value = results
-                    }
-                }
+                _uiState.value = HomeUiState(
+                    isLoading = false,
+                    popularMovies = movies,
+                    popularShows = shows
+                )
             } catch (e: Exception) {
-                e.printStackTrace()
-            } finally {
-                _isLoading.value = false
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    errorMessage = "Failed to load content: ${e.localizedMessage}"
+                )
             }
         }
+    }
+}
+
+// Factory to pass the Repository to the ViewModel
+class HomeViewModelFactory(private val repository: ContentRepository) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(HomeViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return HomeViewModel(repository) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
