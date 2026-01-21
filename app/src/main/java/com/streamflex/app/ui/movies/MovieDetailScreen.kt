@@ -1,11 +1,14 @@
 package com.streamflex.app.ui.movies
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -36,14 +39,26 @@ fun MovieDetailScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
 
+    // Logic to differentiate Movie vs Show
     val isShow = state.show != null
     val title = state.movie?.title ?: state.show?.title ?: ""
     val backdrop = state.movie?.backdrop ?: state.show?.backdrop
     val overview = state.movie?.overview ?: state.show?.overview ?: ""
     val year = state.movie?.year ?: state.show?.year
     val rating = state.movie?.rating ?: state.show?.rating
-    // Movie runtime vs Episode runtime handled differently
     val movieRuntime = state.movie?.runtime
+
+    // --- UI STATE FOR INTERACTIVITY ---
+    // 1. Controls the "Slide Down" Season menu
+    var isSeasonMenuExpanded by remember { mutableStateOf(false) }
+
+    // 2. Controls the "Show More Episodes" arrow
+    var areAllEpisodesVisible by remember { mutableStateOf(false) }
+
+    // Reset episode expansion when the season changes
+    LaunchedEffect(state.selectedSeason) {
+        areAllEpisodesVisible = false
+    }
 
     Scaffold(
         containerColor = Color.Black
@@ -54,7 +69,9 @@ fun MovieDetailScreen(
             }
         } else {
             LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(bottom = 24.dp)
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 24.dp)
             ) {
                 // --- 1. HERO SECTION ---
                 item {
@@ -65,6 +82,7 @@ fun MovieDetailScreen(
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize()
                         )
+                        // Gradient Overlay
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -75,6 +93,7 @@ fun MovieDetailScreen(
                                     )
                                 )
                         )
+                        // Close Button
                         IconButton(
                             onClick = onBackClick,
                             modifier = Modifier
@@ -102,22 +121,13 @@ fun MovieDetailScreen(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(text = "${year ?: "N/A"}", color = Color.Gray, fontSize = 14.sp)
                             Spacer(modifier = Modifier.width(12.dp))
-                            Surface(
-                                color = Color.DarkGray,
-                                shape = RoundedCornerShape(4.dp)
-                            ) {
-                                Text(
-                                    text = "HD",
-                                    color = Color.White,
-                                    fontSize = 12.sp,
-                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
-                                )
+                            Surface(color = Color.DarkGray, shape = RoundedCornerShape(4.dp)) {
+                                Text("HD", color = Color.White, fontSize = 12.sp, modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp))
                             }
                             Spacer(modifier = Modifier.width(12.dp))
                             Icon(Icons.Default.Star, contentDescription = null, tint = Color.Yellow, modifier = Modifier.size(16.dp))
                             Text(text = " ${rating ?: "N/A"}", color = Color.LightGray, fontSize = 14.sp)
 
-                            // Show Duration for Movies
                             if (!isShow && movieRuntime != null && movieRuntime > 0) {
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Text(text = formatRuntime(movieRuntime), color = Color.LightGray, fontSize = 14.sp)
@@ -126,7 +136,7 @@ fun MovieDetailScreen(
                     }
                 }
 
-                // --- 3. ACTION BUTTONS ---
+                // --- 3. ACTION BUTTONS & OVERVIEW ---
                 item {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Button(
@@ -150,6 +160,7 @@ fun MovieDetailScreen(
                             Spacer(modifier = Modifier.width(8.dp))
                             Text("Download", color = Color.White, fontWeight = FontWeight.Bold)
                         }
+
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
                             text = overview,
@@ -159,6 +170,7 @@ fun MovieDetailScreen(
                             maxLines = 4,
                             overflow = TextOverflow.Ellipsis
                         )
+
                         Spacer(modifier = Modifier.height(24.dp))
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
                             ActionIcon(icon = Icons.Default.Add, label = "My List")
@@ -168,42 +180,105 @@ fun MovieDetailScreen(
                     }
                 }
 
-                // --- 4. SEASONS & EPISODES (Only if Show) ---
+                // --- 4. SHOW SPECIFIC (Seasons & Episodes) ---
                 if (isShow && state.show != null) {
                     item {
                         Divider(color = Color.DarkGray, thickness = 1.dp)
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // Season Selector
-                        LazyRow(
-                            contentPadding = PaddingValues(horizontal = 16.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            items(state.show!!.seasons) { season ->
-                                val isSelected = season.seasonNumber == state.selectedSeason
-                                FilterChip(
-                                    selected = isSelected,
-                                    onClick = { viewModel.loadSeason(season.seasonNumber) },
-                                    label = { Text("Season ${season.seasonNumber}") },
-                                    colors = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = Color.Red,
-                                        selectedLabelColor = Color.White,
-                                        containerColor = Color.DarkGray,
-                                        labelColor = Color.White
-                                    ),
-                                    border = null
+                        // --- NEW SEASON DROPDOWN ---
+                        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                            // The Clickable Header "Season X v"
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { isSeasonMenuExpanded = !isSeasonMenuExpanded }
+                                    .padding(vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Season ${state.selectedSeason}",
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 18.sp
                                 )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Icon(
+                                    imageVector = if (isSeasonMenuExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                                    contentDescription = "Expand Seasons",
+                                    tint = Color.White
+                                )
+                            }
+
+                            // The Slide Down List
+                            AnimatedVisibility(
+                                visible = isSeasonMenuExpanded,
+                                enter = expandVertically() + fadeIn(),
+                                exit = shrinkVertically() + fadeOut()
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(Color(0xFF1A1A1A), RoundedCornerShape(8.dp))
+                                        .padding(8.dp)
+                                ) {
+                                    state.show!!.seasons.forEach { season ->
+                                        Text(
+                                            text = "Season ${season.seasonNumber}",
+                                            color = if (season.seasonNumber == state.selectedSeason) Color.Red else Color.LightGray,
+                                            fontSize = 16.sp,
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clickable {
+                                                    viewModel.loadSeason(season.seasonNumber)
+                                                    isSeasonMenuExpanded = false // Auto Minimize
+                                                }
+                                                .padding(vertical = 12.dp, horizontal = 8.dp)
+                                        )
+                                        if (season.seasonNumber != state.show!!.seasons.last().seasonNumber) {
+                                            Divider(color = Color.DarkGray)
+                                        }
+                                    }
+                                }
                             }
                         }
                         Spacer(modifier = Modifier.height(8.dp))
                     }
 
-                    items(state.episodes) { episode ->
+                    // --- EPISODE LIST (With Truncation) ---
+
+                    // Logic: Show first 10, or ALL if expanded
+                    val episodesToShow = if (areAllEpisodesVisible) state.episodes else state.episodes.take(10)
+
+                    items(episodesToShow) { episode ->
                         EpisodeItem(episode = episode, onClick = { onPlayClick(episode.id) })
+                    }
+
+                    // --- "SHOW MORE" ARROW ---
+                    if (state.episodes.size > 10 && !areAllEpisodesVisible) {
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp)
+                                    .clickable { areAllEpisodesVisible = true }, // Click to Expand
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Divider(color = Color.DarkGray, modifier = Modifier.width(100.dp))
+                                    Icon(
+                                        imageVector = Icons.Default.KeyboardArrowDown,
+                                        contentDescription = "Show More",
+                                        tint = Color.Gray,
+                                        modifier = Modifier.size(32.dp)
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
 
-                // --- 5. MORE LIKE THIS (Grid 3x2) ---
+                // --- 5. MORE LIKE THIS (Grid) ---
                 item {
                     Spacer(modifier = Modifier.height(24.dp))
                     Text(
@@ -214,9 +289,8 @@ fun MovieDetailScreen(
                         modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp)
                     )
 
-                    // Simple Grid Implementation using Column + Rows
-                    val similarItems = state.similarContent.take(6) // Take only first 6
-                    val rows = similarItems.chunked(3) // Split into rows of 3
+                    val similarItems = state.similarContent.take(6)
+                    val rows = similarItems.chunked(3)
 
                     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                         rows.forEach { rowItems ->
@@ -228,16 +302,13 @@ fun MovieDetailScreen(
                                     Box(modifier = Modifier.weight(1f)) {
                                         VideoCard(
                                             video = video,
-                                            onClick = { /* Navigate to detail */ },
-                                            modifier = Modifier.fillMaxWidth() // Allow card to fill space
+                                            onClick = { /* Navigate */ },
+                                            modifier = Modifier.fillMaxWidth()
                                         )
                                     }
                                 }
-                                // Fill empty spaces if last row has fewer than 3 items
                                 if (rowItems.size < 3) {
-                                    repeat(3 - rowItems.size) {
-                                        Spacer(modifier = Modifier.weight(1f))
-                                    }
+                                    repeat(3 - rowItems.size) { Spacer(modifier = Modifier.weight(1f)) }
                                 }
                             }
                         }
@@ -282,10 +353,8 @@ fun EpisodeItem(episode: Episode, onClick: () -> Unit) {
                 .background(Color.DarkGray, RoundedCornerShape(4.dp)),
             contentAlignment = Alignment.Center
         ) {
-            // Overlay Play Icon
             Icon(Icons.Default.PlayArrow, contentDescription = null, tint = Color.White)
 
-            // Duration Badge (Bottom Right of thumbnail)
             if (episode.runtime != null && episode.runtime > 0) {
                 Box(
                     modifier = Modifier
