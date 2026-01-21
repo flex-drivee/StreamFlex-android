@@ -1,6 +1,7 @@
 package com.streamflex.app.ui.movies
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,6 +23,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.streamflex.app.domain.models.Episode
 import com.streamflex.app.domain.models.SearchResult
 import com.streamflex.app.ui.components.VideoCard
 
@@ -34,13 +36,14 @@ fun MovieDetailScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
 
-    // Determine if it's a Movie or Show
     val isShow = state.show != null
     val title = state.movie?.title ?: state.show?.title ?: ""
     val backdrop = state.movie?.backdrop ?: state.show?.backdrop
     val overview = state.movie?.overview ?: state.show?.overview ?: ""
     val year = state.movie?.year ?: state.show?.year
     val rating = state.movie?.rating ?: state.show?.rating
+    // Movie runtime vs Episode runtime handled differently
+    val movieRuntime = state.movie?.runtime
 
     Scaffold(
         containerColor = Color.Black
@@ -53,7 +56,7 @@ fun MovieDetailScreen(
             LazyColumn(
                 modifier = Modifier.fillMaxSize().padding(bottom = 24.dp)
             ) {
-                // --- 1. HERO SECTION (Banner) ---
+                // --- 1. HERO SECTION ---
                 item {
                     Box(modifier = Modifier.height(450.dp).fillMaxWidth()) {
                         AsyncImage(
@@ -62,7 +65,6 @@ fun MovieDetailScreen(
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize()
                         )
-                        // Gradient Overlay (Bottom to Top)
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -73,8 +75,6 @@ fun MovieDetailScreen(
                                     )
                                 )
                         )
-
-                        // Close Button
                         IconButton(
                             onClick = onBackClick,
                             modifier = Modifier
@@ -116,6 +116,12 @@ fun MovieDetailScreen(
                             Spacer(modifier = Modifier.width(12.dp))
                             Icon(Icons.Default.Star, contentDescription = null, tint = Color.Yellow, modifier = Modifier.size(16.dp))
                             Text(text = " ${rating ?: "N/A"}", color = Color.LightGray, fontSize = 14.sp)
+
+                            // Show Duration for Movies
+                            if (!isShow && movieRuntime != null && movieRuntime > 0) {
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Text(text = formatRuntime(movieRuntime), color = Color.LightGray, fontSize = 14.sp)
+                            }
                         }
                     }
                 }
@@ -133,11 +139,9 @@ fun MovieDetailScreen(
                             Spacer(modifier = Modifier.width(8.dp))
                             Text("Play", color = Color.Black, fontWeight = FontWeight.Bold)
                         }
-
                         Spacer(modifier = Modifier.height(8.dp))
-
                         Button(
-                            onClick = { /* Download Logic */ },
+                            onClick = { /* Download */ },
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF333333)),
                             shape = RoundedCornerShape(4.dp),
                             modifier = Modifier.fillMaxWidth().height(48.dp)
@@ -146,9 +150,7 @@ fun MovieDetailScreen(
                             Spacer(modifier = Modifier.width(8.dp))
                             Text("Download", color = Color.White, fontWeight = FontWeight.Bold)
                         }
-
                         Spacer(modifier = Modifier.height(16.dp))
-
                         Text(
                             text = overview,
                             color = Color.White,
@@ -157,10 +159,7 @@ fun MovieDetailScreen(
                             maxLines = 4,
                             overflow = TextOverflow.Ellipsis
                         )
-
                         Spacer(modifier = Modifier.height(24.dp))
-
-                        // Action Icons Row (My List, Share)
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
                             ActionIcon(icon = Icons.Default.Add, label = "My List")
                             Spacer(modifier = Modifier.width(32.dp))
@@ -169,20 +168,34 @@ fun MovieDetailScreen(
                     }
                 }
 
-                // --- 4. EPISODES (Only if Show) ---
-                if (isShow) {
+                // --- 4. SEASONS & EPISODES (Only if Show) ---
+                if (isShow && state.show != null) {
                     item {
                         Divider(color = Color.DarkGray, thickness = 1.dp)
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // Season Selector (Simple Row for now)
-                        Text(
-                            text = "Episodes",
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                        )
+                        // Season Selector
+                        LazyRow(
+                            contentPadding = PaddingValues(horizontal = 16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(state.show!!.seasons) { season ->
+                                val isSelected = season.seasonNumber == state.selectedSeason
+                                FilterChip(
+                                    selected = isSelected,
+                                    onClick = { viewModel.loadSeason(season.seasonNumber) },
+                                    label = { Text("Season ${season.seasonNumber}") },
+                                    colors = FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = Color.Red,
+                                        selectedLabelColor = Color.White,
+                                        containerColor = Color.DarkGray,
+                                        labelColor = Color.White
+                                    ),
+                                    border = null
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
                     }
 
                     items(state.episodes) { episode ->
@@ -190,7 +203,7 @@ fun MovieDetailScreen(
                     }
                 }
 
-                // --- 5. MORE LIKE THIS ---
+                // --- 5. MORE LIKE THIS (Grid 3x2) ---
                 item {
                     Spacer(modifier = Modifier.height(24.dp))
                     Text(
@@ -201,18 +214,47 @@ fun MovieDetailScreen(
                         modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp)
                     )
 
-                    LazyRow(
-                        contentPadding = PaddingValues(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(state.similarContent) { similar ->
-                            VideoCard(video = similar, onClick = { /* Navigate to another detail */ })
+                    // Simple Grid Implementation using Column + Rows
+                    val similarItems = state.similarContent.take(6) // Take only first 6
+                    val rows = similarItems.chunked(3) // Split into rows of 3
+
+                    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                        rows.forEach { rowItems ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                for (video in rowItems) {
+                                    Box(modifier = Modifier.weight(1f)) {
+                                        VideoCard(
+                                            video = video,
+                                            onClick = { /* Navigate to detail */ },
+                                            modifier = Modifier.fillMaxWidth() // Allow card to fill space
+                                        )
+                                    }
+                                }
+                                // Fill empty spaces if last row has fewer than 3 items
+                                if (rowItems.size < 3) {
+                                    repeat(3 - rowItems.size) {
+                                        Spacer(modifier = Modifier.weight(1f))
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
         }
     }
+}
+
+// --- Helper Components ---
+
+fun formatRuntime(minutes: Int?): String {
+    if (minutes == null || minutes == 0) return ""
+    val hours = minutes / 60
+    val mins = minutes % 60
+    return if (hours > 0) "${hours}h ${mins}m" else "${mins}m"
 }
 
 @Composable
@@ -225,7 +267,7 @@ fun ActionIcon(icon: ImageVector, label: String) {
 }
 
 @Composable
-fun EpisodeItem(episode: com.streamflex.app.domain.models.Episode, onClick: () -> Unit) {
+fun EpisodeItem(episode: Episode, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -233,7 +275,6 @@ fun EpisodeItem(episode: com.streamflex.app.domain.models.Episode, onClick: () -
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Placeholder thumbnail for episode (using a gray box if no image)
         Box(
             modifier = Modifier
                 .width(120.dp)
@@ -241,7 +282,26 @@ fun EpisodeItem(episode: com.streamflex.app.domain.models.Episode, onClick: () -
                 .background(Color.DarkGray, RoundedCornerShape(4.dp)),
             contentAlignment = Alignment.Center
         ) {
+            // Overlay Play Icon
             Icon(Icons.Default.PlayArrow, contentDescription = null, tint = Color.White)
+
+            // Duration Badge (Bottom Right of thumbnail)
+            if (episode.runtime != null && episode.runtime > 0) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(4.dp)
+                        .background(Color.Black.copy(alpha = 0.7f), RoundedCornerShape(2.dp))
+                        .padding(horizontal = 4.dp, vertical = 2.dp)
+                ) {
+                    Text(
+                        text = "${episode.runtime}m",
+                        color = Color.White,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
         }
 
         Spacer(modifier = Modifier.width(12.dp))
@@ -254,7 +314,7 @@ fun EpisodeItem(episode: com.streamflex.app.domain.models.Episode, onClick: () -
                 fontSize = 14.sp
             )
             Text(
-                text = "${episode.overview ?: "No description"}",
+                text = episode.overview ?: "No description",
                 color = Color.Gray,
                 fontSize = 12.sp,
                 maxLines = 2,

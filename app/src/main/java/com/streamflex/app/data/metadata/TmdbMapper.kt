@@ -43,6 +43,7 @@ object TmdbMapper {
             backdrop = details.backdropPath?.let { "${BACKDROP_BASE_URL}$it" },
             year = year,
             rating = details.voteAverage,
+            runtime = details.runtime,
             genres = details.genres?.map { it.name } ?: emptyList(),
             providerSources = emptyList(),
             streams = emptyList()

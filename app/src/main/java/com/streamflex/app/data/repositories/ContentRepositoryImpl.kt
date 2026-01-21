@@ -66,7 +66,8 @@ class ContentRepositoryImpl(
                 title = tmdbEp.title ?: "Episode ${tmdbEp.episodeNumber}",
                 episodeNumber = tmdbEp.episodeNumber,
                 overview = tmdbEp.overview,
-                airDate = tmdbEp.airDate
+                airDate = tmdbEp.airDate,
+                runtime = tmdbEp.runtime
             )
         } ?: emptyList()
     }
