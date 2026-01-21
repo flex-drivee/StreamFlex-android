@@ -94,3 +94,14 @@ data class TmdbGenre(
     @SerializedName("id") val id: Int,
     @SerializedName("name") val name: String
 )
+
+data class TmdbSeasonDetails(
+    @SerializedName("_id") val _id: String,
+    @SerializedName("air_date") val airDate: String?,
+    @SerializedName("name") val name: String?,
+    @SerializedName("overview") val overview: String?,
+    @SerializedName("id") val id: Int,
+    @SerializedName("poster_path") val posterPath: String?,
+    @SerializedName("season_number") val seasonNumber: Int,
+    @SerializedName("episodes") val episodes: List<TmdbEpisodeDetails>?
+)
