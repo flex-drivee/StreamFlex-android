@@ -90,9 +90,10 @@ dependencies {
     implementation("org.jsoup:jsoup:1.17.2")
 
     // --- Media (ExoPlayer) ---
-    implementation("androidx.media3:media3-exoplayer:1.3.0")
-    implementation("androidx.media3:media3-ui:1.3.0")
-    implementation("androidx.media3:media3-exoplayer-hls:1.3.0")
+    implementation("androidx.media3:media3-exoplayer:1.3.1")
+    implementation("androidx.media3:media3-ui:1.3.1")
+    implementation("androidx.media3:media3-exoplayer-hls:1.3.1")
+    implementation("androidx.media3:media3-common:1.3.1")
 
     // --- Compose ---
     implementation(platform("androidx.compose:compose-bom:2024.02.00"))
