@@ -9,6 +9,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import android.util.Log
+import kotlinx.coroutines.Dispatchers
+import com.streamflex.app.data.providers.hdhub4u.Hdhub4uProvider
+
 
 data class HomeUiState(
     val isLoading: Boolean = true,
@@ -26,7 +30,26 @@ class HomeViewModel(
 
     init {
         loadHomeData()
+        testHdhub4uSearch() // ← temporary
     }
+
+
+    private fun testHdhub4uSearch() {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val provider = Hdhub4uProvider()
+                val results = provider.searchMovies("John Wick")
+
+                Log.d("HDHUB4U_TEST", "Results Found: ${results.size}")
+                results.forEach {
+                    Log.d("HDHUB4U_TEST", "${it.title} | ${it.year} | ${it.url}")
+                }
+            } catch (e: Exception) {
+                Log.e("HDHUB4U_TEST", "Error: ${e.localizedMessage}")
+            }
+        }
+    }
+
 
     fun loadHomeData() {
         viewModelScope.launch {
