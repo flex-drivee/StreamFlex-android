@@ -37,7 +37,7 @@ object Hdhub4uParser {
             val type = if (title.contains("Season", ignoreCase = true) ||
                 title.contains("Episodes", ignoreCase = true)
             ) {
-                ContentType.TV_SHOW
+                ContentType.SHOW
             } else {
                 ContentType.MOVIE
             }
@@ -45,8 +45,8 @@ object Hdhub4uParser {
             results.add(
                 SearchResult(
                     title = title,
-                    url = detailUrl,
-                    posterUrl = poster,
+                    id = detailUrl,
+                    poster = poster,
                     type = type,
                     provider = "HDHub4u"
                 )
