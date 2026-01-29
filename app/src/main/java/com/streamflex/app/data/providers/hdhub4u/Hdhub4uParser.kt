@@ -1,85 +1,106 @@
 package com.streamflex.app.data.providers.hdhub4u
 
-import com.streamflex.app.data.network.HttpClient
-import com.streamflex.app.domain.models.SearchResult
-import com.streamflex.app.domain.models.ContentType
-import org.jsoup.Jsoup
+import com.streamflex.app.domain.models.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
-object Hdhub4uParser {
-
-    private const val BASE_URL = "https://new3.hdhub4u.fo"
+class Hdhub4uParser {
 
     /**
-     * Search movies / shows by query
+     * TEMP SEARCH
+     * This is only to verify UI + pipeline.
+     * We will replace with real scraping later.
      */
-    fun search(query: String): List<SearchResult> {
-        val searchUrl = "$BASE_URL/?s=${query.trim().replace(" ", "+")}"
-
-        val response = HttpClient.get(searchUrl)
-        val html = response.body?.string().orEmpty()
-
-        val document = Jsoup.parse(html)
-        val results = mutableListOf<SearchResult>()
-
-        // Your confirmed selector
-        val items = document.select("#results-grid li.movie-card")
-
-        for (item in items) {
-            val linkEl = item.selectFirst("a") ?: continue
-            val titleEl = item.selectFirst("h3.movie-title")
-            val imgEl = item.selectFirst("img")
-
-            val detailUrl = linkEl.absUrl("href")
-            val title = titleEl?.text()?.trim().orEmpty()
-            val poster = imgEl?.absUrl("src")
-
-            // Very basic type detection (we'll improve later)
-            val type = if (title.contains("Season", ignoreCase = true) ||
-                title.contains("Episodes", ignoreCase = true)
-            ) {
-                ContentType.SHOW
-            } else {
-                ContentType.MOVIE
-            }
-
-            results.add(
-                SearchResult(
-                    title = title,
-                    id = detailUrl,
-                    poster = poster,
-                    type = type,
-                    provider = "HDHub4u"
-                )
+    suspend fun search(query: String): List<SearchResult> = withContext(Dispatchers.IO) {
+        listOf(
+            SearchResult(
+                id = "https://hdhub4u.fake/movie/1",
+                title = "HDHub4u Test Movie",
+                poster = null,
+                type = ContentType.MOVIE,
+                year = 2024,
+                rating = null
+            ),
+            SearchResult(
+                id = "https://hdhub4u.fake/show/1",
+                title = "HDHub4u Test Show",
+                poster = null,
+                type = ContentType.SHOW,
+                year = 2023,
+                rating = null
             )
-        }
-
-        return results
+        )
     }
 
     /**
-     * Load detail page (movie or show)
-     * For now: returns download page URLs only
+     * MOVIE DETAILS
      */
-    fun load(detailUrl: String): List<String> {
-        val response = HttpClient.get(detailUrl)
-        val html = response.body?.string().orEmpty()
-        val document = Jsoup.parse(html)
+    suspend fun getMovieDetails(id: String): Movie = withContext(Dispatchers.IO) {
+        Movie(
+            id = id,
+            title = "HDHub4u Sample Movie",
+            overview = "This is a temporary movie description.",
+            poster = null,
+            backdrop = null,
+            year = 2024,
+            rating = null,
+            runtime = 130
+        )
+    }
 
-        val downloadLinks = mutableListOf<String>()
+    /**
+     * SHOW DETAILS (Seasons only, episodes loaded separately)
+     */
+    suspend fun getShowDetails(id: String): Show = withContext(Dispatchers.IO) {
+        Show(
+            id = id,
+            title = "HDHub4u Sample Show",
+            overview = "This is a temporary show description.",
+            poster = null,
+            backdrop = null,
+            year = 2023,
+            rating = null,
+            seasons = listOf(
+                Season(seasonNumber = 1),
+                Season(seasonNumber = 2)
+            )
+        )
+    }
 
-        // HDHub4u usually puts download buttons in <a> tags
-        document.select("a").forEach { a ->
-            val href = a.absUrl("href")
-            if (
-                href.contains("hubdrive", true) ||
-                href.contains("hubstream", true) ||
-                href.contains("mixdrop", true) ||
-                href.contains("streamsb", true)
-            ) {
-                downloadLinks.add(href)
-            }
+    /**
+     * EPISODES FOR A SEASON
+     */
+    suspend fun getSeasonEpisodes(
+        showId: String,
+        season: Int
+    ): List<Episode> = withContext(Dispatchers.IO) {
+        (1..12).map { ep ->
+            Episode(
+                id = "$showId/season/$season/episode/$ep",
+                title = "Episode $ep",
+                episodeNumber = ep,
+                overview = "Episode $ep overview",
+                runtime = 45
+            )
         }
+    }
 
-        return downloadLinks.distinct()
+    /**
+     * SIMILAR CONTENT
+     */
+    suspend fun getSimilarContent(
+        id: String,
+        type: ContentType
+    ): List<SearchResult> = withContext(Dispatchers.IO) {
+        listOf(
+            SearchResult(
+                id = "https://hdhub4u.fake/similar/1",
+                title = "Similar Content 1",
+                poster = null,
+                type = type,
+                year = 2022,
+                rating = null
+            )
+        )
     }
 }
