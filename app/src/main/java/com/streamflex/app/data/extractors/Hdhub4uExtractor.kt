@@ -9,7 +9,7 @@ import kotlinx.coroutines.withContext
  */
 class Hdhub4uExtractor {
 
-    suspend fun extractVideoLinks(pageUrl: String): List<String> =
+    suspend fun extract(pageUrl: String): List<String> =
         withContext(Dispatchers.IO) {
 
             // TEMP: test playback link

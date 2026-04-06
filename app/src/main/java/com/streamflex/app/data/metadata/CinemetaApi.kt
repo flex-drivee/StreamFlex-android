@@ -25,5 +25,6 @@ data class CinemetaMeta(
     @SerializedName("background") val background: String?,
     @SerializedName("description") val description: String?,
     @SerializedName("year") val year: String?, // Cinemeta often sends year as string e.g. "2023-2024"
-    @SerializedName("imdbRating") val imdbRating: String?
+    @SerializedName("imdbRating") val imdbRating: String?,
+    @SerializedName( value= "rating") val rating: String?
 )

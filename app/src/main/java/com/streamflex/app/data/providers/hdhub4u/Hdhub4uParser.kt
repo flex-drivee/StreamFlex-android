@@ -18,16 +18,14 @@ class Hdhub4uParser {
                 title = "HDHub4u Test Movie",
                 poster = null,
                 type = ContentType.MOVIE,
-                year = 2024,
-                rating = null
+                year = 2024
             ),
             SearchResult(
                 id = "https://hdhub4u.fake/show/1",
                 title = "HDHub4u Test Show",
                 poster = null,
                 type = ContentType.SHOW,
-                year = 2023,
-                rating = null
+                year = 2023
             )
         )
     }
@@ -98,8 +96,7 @@ class Hdhub4uParser {
                 title = "Similar Content 1",
                 poster = null,
                 type = type,
-                year = 2022,
-                rating = null
+                year = 2022
             )
         )
     }

@@ -86,7 +86,7 @@ class MovieDetailViewModel(
 
                 // Search using title + year (smart matching)
                 val results = provider.search(
-                    "${movie.title} ${movie.year.take(4) ?: ""}"
+                    "${movie.title} ${movie.year ?: ""}"
                 )
 
                 if (results.isEmpty()) {
