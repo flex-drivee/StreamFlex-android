@@ -30,6 +30,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.media3.common.MediaItem
+import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
@@ -70,6 +71,7 @@ fun PlayerScreen(videoUrl: String, onBack: () -> Unit) {
             playWhenReady = true
         }
     }
+    Log.d("PLAYER_DEBUG", "URL: $videoUrl")
 
     DisposableEffect(Unit) {
         onDispose { exoPlayer.release() }

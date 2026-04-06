@@ -1,5 +1,9 @@
 package com.streamflex.app.ui.navigation
 
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
@@ -28,6 +32,7 @@ fun AppNavigation(
 ) {
     val navController = rememberNavController()
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     NavHost(
         navController = navController,
@@ -78,12 +83,28 @@ fun AppNavigation(
             MovieDetailScreen(
                 viewModel = viewModel,
                 onBackClick = { navController.popBackStack() },
-                onPlayClick = { videoUrl ->
-                    // Launch Player Activity
-                    val intent = Intent(context, PlayerActivity::class.java).apply {
-                        putExtra("VIDEO_URL", videoUrl) // Pass the URL to player
+                onPlayClick = { movieId ->
+                    android.util.Log.d("NAV_DEBUG", "Clicked ID: $movieId")
+
+                    scope.launch {
+
+                        val provider = com.streamflex.app.data.providers.hdhub4u.Hdhub4uProvider()
+                        val streams = provider.load(movieId)
+
+                        if (streams.isNotEmpty()) {
+                            val realUrl = streams.first().url
+
+                            android.util.Log.d("STREAM_DEBUG", "Final URL: $realUrl")
+
+                            val intent = Intent(context, PlayerActivity::class.java).apply {
+                                putExtra("VIDEO_URL", realUrl)
+                            }
+                            context.startActivity(intent)
+
+                        } else {
+                            android.util.Log.e("STREAM_DEBUG", "No streams found")
+                        }
                     }
-                    context.startActivity(intent)
                 }
             )
         }

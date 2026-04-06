@@ -140,7 +140,10 @@ fun MovieDetailScreen(
                 item {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Button(
-                            onClick = { onPlayClick("play") },
+                            onClick = {
+                                val id = state.movie?.id ?: return@Button
+                                onPlayClick(id)
+                            },
                             colors = ButtonDefaults.buttonColors(containerColor = Color.White),
                             shape = RoundedCornerShape(4.dp),
                             modifier = Modifier.fillMaxWidth().height(48.dp)
