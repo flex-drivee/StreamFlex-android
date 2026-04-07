@@ -1,103 +1,67 @@
 package com.streamflex.app.data.providers.hdhub4u
 
-import com.streamflex.app.domain.models.*
+import com.streamflex.app.domain.models.ContentType
+import com.streamflex.app.domain.models.SearchResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
+import java.net.HttpURLConnection
+import java.net.URL
 
 class Hdhub4uParser {
+    // The working domain from the plugin
+    private val mainUrl = "https://hdhub4u.rehab"
 
-    /**
-     * TEMP SEARCH
-     * This is only to verify UI + pipeline.
-     * We will replace with real scraping later.
-     */
+    // The required headers to bypass basic bot protection
+    private val headers = mapOf(
+        "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0",
+        "Cookie" to "xla=s4t",
+        "Referer" to mainUrl
+    )
+
     suspend fun search(query: String): List<SearchResult> = withContext(Dispatchers.IO) {
-        listOf(
-            SearchResult(
-                id = "https://hdhub4u.fake/movie/1",
-                title = "HDHub4u Test Movie",
-                poster = null,
-                type = ContentType.MOVIE,
-                year = 2024
-            ),
-            SearchResult(
-                id = "https://hdhub4u.fake/show/1",
-                title = "HDHub4u Test Show",
-                poster = null,
-                type = ContentType.SHOW,
-                year = 2023
-            )
-        )
-    }
+        val results = mutableListOf<SearchResult>()
 
-    /**
-     * MOVIE DETAILS
-     */
-    suspend fun getMovieDetails(id: String): Movie = withContext(Dispatchers.IO) {
-        Movie(
-            id = id,
-            title = "HDHub4u Sample Movie",
-            overview = "This is a temporary movie description.",
-            poster = null,
-            backdrop = null,
-            year = 2024,
-            rating = null,
-            runtime = 130
-        )
-    }
+        try {
+            // Using the exact Pingora API from the Phisher plugin
+            val searchUrl = "https://search.pingora.fyi/collections/post/documents/search" +
+                    "?q=${query.replace(" ", "+")}" +
+                    "&query_by=post_title,category" +
+                    "&query_by_weights=4,2" +
+                    "&sort_by=sort_by_date:desc" +
+                    "&limit=15"
 
-    /**
-     * SHOW DETAILS (Seasons only, episodes loaded separately)
-     */
-    suspend fun getShowDetails(id: String): Show = withContext(Dispatchers.IO) {
-        Show(
-            id = id,
-            title = "HDHub4u Sample Show",
-            overview = "This is a temporary show description.",
-            poster = null,
-            backdrop = null,
-            year = 2023,
-            rating = null,
-            seasons = listOf(
-                Season(seasonNumber = 1),
-                Season(seasonNumber = 2)
-            )
-        )
-    }
+            val connection = URL(searchUrl).openConnection() as HttpURLConnection
+            connection.requestMethod = "GET"
+            headers.forEach { (key, value) -> connection.setRequestProperty(key, value) }
 
-    /**
-     * EPISODES FOR A SEASON
-     */
-    suspend fun getSeasonEpisodes(
-        showId: String,
-        season: Int
-    ): List<Episode> = withContext(Dispatchers.IO) {
-        (1..12).map { ep ->
-            Episode(
-                id = "$showId/season/$season/episode/$ep",
-                title = "Episode $ep",
-                episodeNumber = ep,
-                overview = "Episode $ep overview",
-                runtime = 45
-            )
+            if (connection.responseCode == 200) {
+                val jsonResponse = connection.inputStream.bufferedReader().readText()
+                val jsonObject = JSONObject(jsonResponse)
+                val hits = jsonObject.optJSONArray("hits") ?: return@withContext emptyList()
+
+                for (i in 0 until hits.length()) {
+                    val document = hits.getJSONObject(i).getJSONObject("document")
+
+                    val title = document.optString("post_title")
+                    val permalink = document.optString("permalink") // This is the movie URL
+                    val thumbnail = document.optString("post_thumbnail")
+
+                    results.add(
+                        SearchResult(
+                            id = permalink, // Send the URL to the Extractor
+                            title = title,
+                            poster = thumbnail,
+                            type = ContentType.MOVIE,
+                            year = null
+                        )
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("HDHub4u_DEBUG", "API Search Failed: ${e.message}")
         }
-    }
 
-    /**
-     * SIMILAR CONTENT
-     */
-    suspend fun getSimilarContent(
-        id: String,
-        type: ContentType
-    ): List<SearchResult> = withContext(Dispatchers.IO) {
-        listOf(
-            SearchResult(
-                id = "https://hdhub4u.fake/similar/1",
-                title = "Similar Content 1",
-                poster = null,
-                type = type,
-                year = 2022
-            )
-        )
+        return@withContext results
     }
 }
