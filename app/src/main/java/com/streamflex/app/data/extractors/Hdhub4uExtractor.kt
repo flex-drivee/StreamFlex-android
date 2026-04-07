@@ -14,7 +14,7 @@ class Hdhub4uExtractor {
 
             // TEMP: test playback link
             listOf(
-                "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+                "https://storage.googleapis.com/exoplayer-test-media-0/BigBuckBunny_320x180.mp4"
             )
         }
 }
