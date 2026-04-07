@@ -83,28 +83,14 @@ fun AppNavigation(
             MovieDetailScreen(
                 viewModel = viewModel,
                 onBackClick = { navController.popBackStack() },
-                onPlayClick = { movieId ->
-                    android.util.Log.d("NAV_DEBUG", "Clicked ID: $movieId")
+                onPlayClick = { videoUrl ->
+                    // We are now receiving the actual video URL from the ViewModel
+                    android.util.Log.d("STREAM_DEBUG", "Final URL going to player: $videoUrl")
 
-                    scope.launch {
-
-                        val provider = com.streamflex.app.data.providers.hdhub4u.Hdhub4uProvider()
-                        val streams = provider.load(movieId)
-
-                        if (streams.isNotEmpty()) {
-                            val realUrl = streams.first().url
-
-                            android.util.Log.d("STREAM_DEBUG", "Final URL: $realUrl")
-
-                            val intent = Intent(context, PlayerActivity::class.java).apply {
-                                putExtra("VIDEO_URL", realUrl)
-                            }
-                            context.startActivity(intent)
-
-                        } else {
-                            android.util.Log.e("STREAM_DEBUG", "No streams found")
-                        }
+                    val intent = Intent(context, PlayerActivity::class.java).apply {
+                        putExtra("VIDEO_URL", videoUrl)
                     }
+                    context.startActivity(intent)
                 }
             )
         }

@@ -62,11 +62,27 @@ fun PlayerScreen(videoUrl: String, onBack: () -> Unit) {
     // Initialize ExoPlayer
     val exoPlayer = remember {
         ExoPlayer.Builder(context).build().apply {
-            val playUrl = if (videoUrl == "play" || videoUrl == "play_movie")
-                "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-            else videoUrl
+            // Use the official ExoPlayer test HTTPS link
+            val playUrl = if (videoUrl == "play" || videoUrl == "play_movie" || videoUrl.isEmpty()) {
+                "https://storage.googleapis.com/exoplayer-test-media-0/BigBuckBunny_320x180.mp4"
+            } else {
+                videoUrl
+            }
 
-            setMediaItem(MediaItem.fromUri(playUrl))
+            val dataSourceFactory = androidx.media3.datasource.DefaultHttpDataSource.Factory()
+                .setDefaultRequestProperties(
+                    mapOf(
+                        "User-Agent" to "Mozilla/5.0",
+                        "Referer" to "https://hdhub4u.com/"
+                    )
+                )
+
+            val mediaItem = MediaItem.fromUri(playUrl)
+
+            setMediaSource(
+                androidx.media3.exoplayer.source.ProgressiveMediaSource.Factory(dataSourceFactory)
+                    .createMediaSource(mediaItem)
+            )
             prepare()
             playWhenReady = true
         }

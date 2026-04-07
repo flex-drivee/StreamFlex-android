@@ -141,8 +141,14 @@ fun MovieDetailScreen(
                     Column(modifier = Modifier.padding(16.dp)) {
                         Button(
                             onClick = {
-                                val id = state.movie?.id ?: return@Button
-                                onPlayClick(id)
+                                // Ask the ViewModel to handle the scraping pipeline
+                                viewModel.loadStreams { streams ->
+                                    if (streams.isNotEmpty()) {
+                                        // Pass the actual video URL to the navigation, not the TMDB ID
+                                        val realUrl = streams.first().url
+                                        onPlayClick(realUrl)
+                                    }
+                                }
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = Color.White),
                             shape = RoundedCornerShape(4.dp),
