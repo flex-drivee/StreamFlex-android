@@ -46,26 +46,68 @@ class Hdhub4uExtractor {
 
             val hostLinks = mutableListOf<String>()
 
+
+            val skipPatterns = listOf(
+                "how-to-download",
+                "discord",
+                "imdb",
+                "facebook",
+                "twitter",
+                "telegram",
+                "/category/",
+                "/tag/"
+            )
+
             for (rawLink in potentialLinks) {
                 val linkLower = rawLink.lowercase()
+
+                // 🚫 Skip garbage EARLY
+                if (skipPatterns.any { linkLower.contains(it) }) {
+                    android.util.Log.d("HDHub4u_DEBUG", "Skipped useless link: $rawLink")
+                    continue
+                }
+
                 val realLink = if (linkLower.contains("?id=")) getRedirectLinks(rawLink) else rawLink
 
-                if (realLink.isNotEmpty() && !hostLinks.contains(realLink)) {
-                    hostLinks.add(realLink)
-                    android.util.Log.d("HDHub4u_DEBUG", "Host Link Added: $realLink")
+                // ✅ Only allow known host domains
+                if (
+                    realLink.contains("hubcloud", true) ||
+                    realLink.contains("hubdrive", true) ||
+                    realLink.contains("hubcdn", true) ||
+                    realLink.contains("hblinks", true) ||
+                    realLink.contains("hubstream", true)
+                ) {
+                    if (!hostLinks.contains(realLink)) {
+                        hostLinks.add(realLink)
+                        android.util.Log.d("HDHub4u_DEBUG", "Host Link Added: $realLink")
+                    }
                 }
             }
 
             android.util.Log.d("HDHub4u_DEBUG", "3. Decoded to ${hostLinks.size} host links")
 
-            for (hostLink in hostLinks) {
-                val finalVideoUrl = resolveHostToVideo(hostLink)
-                if (finalVideoUrl.isNotEmpty()) {
-                    streamLinks.add(finalVideoUrl)
-                    android.util.Log.d("HDHub4u_DEBUG", "4. SUCCESS! Found playable stream: $finalVideoUrl")
+            val sortedLinks = hostLinks.sortedBy {
+                when {
+                    it.contains("hubcdn", true) -> 1
+                    it.contains("hubcloud", true) -> 2
+                    it.contains("hubdrive", true) -> 3
+                    it.contains("hblinks", true) -> 4
+                    it.contains("hubstream", true) -> 5
+                    else -> 6
                 }
             }
 
+            android.util.Log.d("HDHub4u_DEBUG", "Sorted links by priority")
+
+            for (hostLink in sortedLinks) {
+                val finalVideoUrl = resolveHostToVideo(hostLink)
+
+                if (finalVideoUrl.isNotEmpty()) {
+                    streamLinks.add(finalVideoUrl)
+
+                    android.util.Log.d("HDHub4u_DEBUG", "Added stream (fallback list): $finalVideoUrl")
+                }
+            }
         } catch (e: Exception) {
             android.util.Log.e("HDHub4u_DEBUG", "Extraction Failed: ${e.message}")
             e.printStackTrace()
@@ -76,7 +118,7 @@ class Hdhub4uExtractor {
             streamLinks.add("https://storage.googleapis.com/exoplayer-test-media-0/BigBuckBunny_320x180.mp4")
         }
 
-        return@withContext streamLinks
+        return@withContext streamLinks.distinct()
     }
 
     private fun getActiveDomain(): String {
@@ -97,7 +139,7 @@ class Hdhub4uExtractor {
             var currentUrl = url
 
             if (currentUrl.contains("hblinks", ignoreCase = true)) {
-                val hbDoc = fetchDocument(currentUrl) // Use helper
+                val hbDoc = fetchDocument(currentUrl)
                 val hbLink = hbDoc.select("h3 a, h5 a, div.entry-content p a").map { it.attr("abs:href") }
                     .firstOrNull { it.contains("hubcloud", true) || it.contains("hubdrive", true) || it.contains("hubcdn", true) }
                 if (hbLink != null) {
@@ -107,7 +149,7 @@ class Hdhub4uExtractor {
             }
 
             if (currentUrl.contains("hubdrive", ignoreCase = true)) {
-                val driveDoc = fetchDocument(currentUrl) // Use helper
+                val driveDoc = fetchDocument(currentUrl)
                 val hubCloudLink = driveDoc.select("a.btn, a[class*='btn']").attr("abs:href")
                 if (hubCloudLink.isNotEmpty()) {
                     currentUrl = hubCloudLink
@@ -116,7 +158,7 @@ class Hdhub4uExtractor {
             }
 
             if (currentUrl.contains("hubcdn", ignoreCase = true)) {
-                val cdnDoc = fetchDocument(currentUrl) // Use helper
+                val cdnDoc = fetchDocument(currentUrl)
                 val scriptText = cdnDoc.selectFirst("script:containsData(var reurl)")?.data()
 
                 val encodedUrl = Regex("""reurl\s*=\s*"([^"]+)"""")
@@ -131,18 +173,56 @@ class Hdhub4uExtractor {
             }
 
             if (currentUrl.contains("hubcloud", ignoreCase = true)) {
-                val cloudDoc = fetchDocument(currentUrl) // Use helper
+                val cloudDoc = fetchDocument(currentUrl)
 
+                // STRATEGY A: Prioritize exact, direct video links (Google Servers, MKV, MP4)
                 val directFile = cloudDoc.select("a[href]").map { it.attr("abs:href") }
-                    .firstOrNull { it.endsWith(".mkv") || it.endsWith(".mp4") || it.contains(".m3u8") }
+                    .firstOrNull {
+                        it.contains("googleusercontent.com") ||
+                                it.endsWith(".mkv") ||
+                                it.endsWith(".mp4") ||
+                                it.contains(".m3u8")
+                    }
                 if (directFile != null) return directFile
 
+                // STRATEGY B: Dig through buttons, but handle gamerxyt proxies
                 val buttons = cloudDoc.select("a.btn, a[class*='btn']")
                 for (btn in buttons) {
                     val link = btn.attr("abs:href")
                     val label = btn.text().lowercase()
+
                     if (label.contains("download") || label.contains("server") || label.contains("fsl") || label.contains("direct") || label.contains("play")) {
-                        if (link.startsWith("http")) return link
+
+                        // If Hubcloud is hiding the video behind gamerxyt.com, we must visit the proxy page
+                        if (link.contains("gamerxyt.com") || link.contains(".php")) {
+                            try {
+                                android.util.Log.d("HDHub4u_DEBUG", "Bypassing Proxy: $link")
+                                val proxyDoc = fetchDocument(link)
+
+                                // Look for the true Google video link inside the proxy page
+                                val realLink =
+                                    proxyDoc.select("a[href*='googleusercontent']").map { it.attr("abs:href") }.firstOrNull()
+                                        ?: proxyDoc.select("source[src]").map { it.attr("abs:src") }.firstOrNull()
+                                        ?: Regex("""https://[^"]+googleusercontent[^"]+""")
+                                            .find(proxyDoc.html())
+                                            ?.value
+                                if (realLink != null) return realLink
+
+                            } catch(e: Exception) {
+                                android.util.Log.e("HDHub4u_DEBUG", "Proxy bypass failed: ${e.message}")
+                            }
+                            continue // Skip to the next button if proxy failed
+                        }
+
+                        // If it's a normal link (not a php proxy), return it
+                        if (
+                            link.contains("googleusercontent.com") ||
+                            link.endsWith(".mp4") ||
+                            link.endsWith(".mkv") ||
+                            link.contains(".m3u8")
+                        ) {
+                            return link
+                        }
                     }
                 }
 
@@ -180,7 +260,12 @@ class Hdhub4uExtractor {
             val wphttp1 = jsonObject.optString("blog_url", "").trim()
 
             val directlink = runCatching {
-                fetchDocument("$wphttp1?re=$data").select("body").text().trim() // Use helper
+                if (wphttp1.isNotEmpty() && data.isNotEmpty()) {
+                    fetchDocument("$wphttp1?re=$data")
+                        .select("body")
+                        .text()
+                        .trim()
+                } else ""
             }.getOrDefault("").trim()
 
             if (encodedurl.isNotEmpty()) encodedurl else directlink

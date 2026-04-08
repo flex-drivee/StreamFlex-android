@@ -4,6 +4,8 @@ package com.streamflex.app.ui.player
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.media3.datasource.DefaultHttpDataSource
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.activity.compose.setContent
 // 1. REMOVED: import androidx.annotation.OptIn (This was causing the conflict)
 import androidx.compose.foundation.background
@@ -61,31 +63,31 @@ fun PlayerScreen(videoUrl: String, onBack: () -> Unit) {
 
     // Initialize ExoPlayer
     val exoPlayer = remember {
-        ExoPlayer.Builder(context).build().apply {
-            // Use the official ExoPlayer test HTTPS link
-            val playUrl = if (videoUrl == "play" || videoUrl == "play_movie" || videoUrl.isEmpty()) {
-                "https://storage.googleapis.com/exoplayer-test-media-0/BigBuckBunny_320x180.mp4"
-            } else {
-                videoUrl
+        // 1. Define the exact same browser User-Agent we used in the Extractor
+        val userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0"
+
+        // 2. Create a DataSourceFactory that injects this User-Agent into every video request
+        val dataSourceFactory = DefaultHttpDataSource.Factory().setUserAgent(userAgent)
+
+        // 3. Create a MediaSourceFactory using our custom DataSource
+        val mediaSourceFactory = DefaultMediaSourceFactory(dataSourceFactory)
+
+        // 4. Build the ExoPlayer with the custom MediaSourceFactory
+        ExoPlayer.Builder(context)
+            .setMediaSourceFactory(mediaSourceFactory)
+            .build().apply {
+
+                // Your existing fallback logic
+                val finalPlayUrl = if (videoUrl == "play" || videoUrl == "play_movie" || videoUrl.isEmpty()) {
+                    "https://storage.googleapis.com/exoplayer-test-media-0/BigBuckBunny_320x180.mp4"
+                } else {
+                    videoUrl
+                }
+
+                setMediaItem(MediaItem.fromUri(finalPlayUrl))
+                prepare()
+                playWhenReady = true
             }
-
-            val dataSourceFactory = androidx.media3.datasource.DefaultHttpDataSource.Factory()
-                .setDefaultRequestProperties(
-                    mapOf(
-                        "User-Agent" to "Mozilla/5.0",
-                        "Referer" to "https://hdhub4u.com/"
-                    )
-                )
-
-            val mediaItem = MediaItem.fromUri(playUrl)
-
-            setMediaSource(
-                androidx.media3.exoplayer.source.ProgressiveMediaSource.Factory(dataSourceFactory)
-                    .createMediaSource(mediaItem)
-            )
-            prepare()
-            playWhenReady = true
-        }
     }
     Log.d("PLAYER_DEBUG", "URL: $videoUrl")
 
