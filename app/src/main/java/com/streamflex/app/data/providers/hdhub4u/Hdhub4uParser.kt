@@ -10,7 +10,7 @@ import java.net.URL
 
 class Hdhub4uParser {
     // The working domain from the plugin
-    private val mainUrl = "https://hdhub4u.rehab"
+    private val mainUrl = "https://new5.hdhub4u.fo"
 
     // The required headers to bypass basic bot protection
     private val headers = mapOf(
@@ -40,16 +40,25 @@ class Hdhub4uParser {
                 val jsonObject = JSONObject(jsonResponse)
                 val hits = jsonObject.optJSONArray("hits") ?: return@withContext emptyList()
 
+                // Inside the for loop in Hdhub4uParser.kt
                 for (i in 0 until hits.length()) {
                     val document = hits.getJSONObject(i).getJSONObject("document")
 
                     val title = document.optString("post_title")
-                    val permalink = document.optString("permalink") // This is the movie URL
+                    val rawPermalink = document.optString("permalink")
                     val thumbnail = document.optString("post_thumbnail")
+
+                    // FIX: Ensure the URL is absolute before sending it to the Extractor
+                    val absoluteUrl = if (rawPermalink.startsWith("http")) {
+                        rawPermalink
+                    } else {
+                        // Combine the base URL with the relative path
+                        "$mainUrl$rawPermalink"
+                    }
 
                     results.add(
                         SearchResult(
-                            id = permalink, // Send the URL to the Extractor
+                            id = absoluteUrl, // Use the full URL as the ID
                             title = title,
                             poster = thumbnail,
                             type = ContentType.MOVIE,
