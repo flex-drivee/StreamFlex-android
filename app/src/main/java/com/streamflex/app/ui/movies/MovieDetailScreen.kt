@@ -35,7 +35,7 @@ import com.streamflex.app.ui.components.VideoCard
 fun MovieDetailScreen(
     viewModel: MovieDetailViewModel,
     onBackClick: () -> Unit,
-    onPlayClick: (String) -> Unit
+    onPlayClick: (List<String>) -> Unit
 ) {
     val state by viewModel.uiState.collectAsState()
 
@@ -145,8 +145,8 @@ fun MovieDetailScreen(
                                 viewModel.loadStreams { streams ->
                                     if (streams.isNotEmpty()) {
                                         // Pass the actual video URL to the navigation, not the TMDB ID
-                                        val realUrl = streams.first().url
-                                        onPlayClick(realUrl)
+                                        val allUrls = streams.map { it.url } // Assuming 'url' is the string property
+                                        onPlayClick(allUrls)
                                     }
                                 }
                             },
@@ -260,7 +260,7 @@ fun MovieDetailScreen(
                     val episodesToShow = if (areAllEpisodesVisible) state.episodes else state.episodes.take(10)
 
                     items(episodesToShow) { episode ->
-                        EpisodeItem(episode = episode, onClick = { onPlayClick(episode.id) })
+                        EpisodeItem(episode = episode, onClick = { onPlayClick(listOf(episode.id)) })
                     }
 
                     // --- "SHOW MORE" ARROW ---

@@ -83,12 +83,13 @@ fun AppNavigation(
             MovieDetailScreen(
                 viewModel = viewModel,
                 onBackClick = { navController.popBackStack() },
-                onPlayClick = { videoUrl ->
-                    // We are now receiving the actual video URL from the ViewModel
-                    android.util.Log.d("STREAM_DEBUG", "Final URL going to player: $videoUrl")
+                // UPDATE THIS LINE: Accept a List of URLs
+                onPlayClick = { videoUrls: List<String> ->
+                    android.util.Log.d("STREAM_DEBUG", "Final URLs going to player: $videoUrls")
 
                     val intent = Intent(context, PlayerActivity::class.java).apply {
-                        putExtra("VIDEO_URL", videoUrl)
+                        // Pass the entire list to the PlayerActivity
+                        putStringArrayListExtra("VIDEO_URLS", ArrayList(videoUrls))
                     }
                     context.startActivity(intent)
                 }

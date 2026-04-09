@@ -2,12 +2,12 @@
 
 package com.streamflex.app.ui.player
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.media3.datasource.DefaultHttpDataSource
-import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.activity.compose.setContent
-// 1. REMOVED: import androidx.annotation.OptIn (This was causing the conflict)
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -32,9 +32,13 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.Player
 import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.ui.PlayerView
 
 class PlayerActivity : ComponentActivity() {
@@ -46,10 +50,11 @@ class PlayerActivity : ComponentActivity() {
         windowInsetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
 
-        val videoUrl = intent.getStringExtra("VIDEO_URL") ?: ""
+        // 1. Receive the ArrayList of URLs instead of a single string
+        val videoUrls = intent.getStringArrayListExtra("VIDEO_URLS") ?: arrayListOf()
 
         setContent {
-            PlayerScreen(videoUrl = videoUrl, onBack = { finish() })
+            PlayerScreen(videoUrls = videoUrls, onBack = { finish() })
         }
     }
 }
@@ -57,46 +62,67 @@ class PlayerActivity : ComponentActivity() {
 // 2. FIXED ANNOTATION: Explicitly use the AndroidX OptIn for Media3
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
-fun PlayerScreen(videoUrl: String, onBack: () -> Unit) {
+fun PlayerScreen(videoUrls: ArrayList<String>, onBack: () -> Unit) {
     val context = LocalContext.current
     var showSettingsSheet by remember { mutableStateOf(false) }
 
-    // Initialize ExoPlayer
+    Log.d("PLAYER_DEBUG", "Received ${videoUrls.size} URLs")
+
     val exoPlayer = remember {
-        // 1. Define the exact same browser User-Agent we used in the Extractor
+        // Setup fallbacks for testing
+        val urlsToPlay = if (videoUrls.isEmpty() || (videoUrls.size == 1 && (videoUrls[0] == "play" || videoUrls[0] == "play_movie" || videoUrls[0].isEmpty()))) {
+            arrayListOf("https://storage.googleapis.com/exoplayer-test-media-0/BigBuckBunny_320x180.mp4")
+        } else {
+            videoUrls
+        }
+
+        // Add User-Agent AND fake Referer to trick the video host
         val userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0"
+        val dataSourceFactory = DefaultHttpDataSource.Factory()
+            .setUserAgent(userAgent)
+            .setDefaultRequestProperties(mapOf("Referer" to "https://hubcloud.foo/"))
 
-        // 2. Create a DataSourceFactory that injects this User-Agent into every video request
-        val dataSourceFactory = DefaultHttpDataSource.Factory().setUserAgent(userAgent)
-
-        // 3. Create a MediaSourceFactory using our custom DataSource
         val mediaSourceFactory = DefaultMediaSourceFactory(dataSourceFactory)
 
-        // 4. Build the ExoPlayer with the custom MediaSourceFactory
         ExoPlayer.Builder(context)
             .setMediaSourceFactory(mediaSourceFactory)
             .build().apply {
 
-                // Your existing fallback logic
-                val finalPlayUrl = if (videoUrl == "play" || videoUrl == "play_movie" || videoUrl.isEmpty()) {
-                    "https://storage.googleapis.com/exoplayer-test-media-0/BigBuckBunny_320x180.mp4"
-                } else {
-                    videoUrl
+                // --- THE MAGIC AUTOPLAY FALLBACK LISTENER ---
+                val listener = object : Player.Listener {
+                    var currentIndex = 0
+
+                    override fun onPlayerError(error: PlaybackException) {
+                        android.util.Log.e("PLAYER_DEBUG", "Link failed: ${urlsToPlay[currentIndex]} - Error: ${error.message}")
+
+                        currentIndex++ // Move to the next link
+
+                        if (currentIndex < urlsToPlay.size) {
+                            android.util.Log.d("PLAYER_DEBUG", "Trying next link fallback: ${urlsToPlay[currentIndex]}")
+                            setMediaItem(MediaItem.fromUri(urlsToPlay[currentIndex]))
+                            prepare()
+                            play() // Start playing the new link
+                        } else {
+                            android.util.Log.e("PLAYER_DEBUG", "All streaming links failed!")
+                            Toast.makeText(context, "All streaming links failed or expired.", Toast.LENGTH_LONG).show()
+                        }
+                    }
                 }
 
-                setMediaItem(MediaItem.fromUri(finalPlayUrl))
+                addListener(listener)
+
+                // Start by loading the very first link in the list
+                setMediaItem(MediaItem.fromUri(urlsToPlay[0]))
                 prepare()
                 playWhenReady = true
             }
     }
-    Log.d("PLAYER_DEBUG", "URL: $videoUrl")
 
     DisposableEffect(Unit) {
         onDispose { exoPlayer.release() }
     }
 
     Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
-        // 1. The Video Player
         AndroidView(
             factory = {
                 PlayerView(context).apply {
@@ -109,7 +135,7 @@ fun PlayerScreen(videoUrl: String, onBack: () -> Unit) {
             modifier = Modifier.fillMaxSize()
         )
 
-        // 2. Custom Top Overlay (Settings Icon)
+        // Custom Top Overlay (Settings Icon)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -125,7 +151,7 @@ fun PlayerScreen(videoUrl: String, onBack: () -> Unit) {
             }
         }
 
-        // 3. Settings Bottom Sheet
+        // Settings Bottom Sheet
         if (showSettingsSheet) {
             ModalBottomSheet(
                 onDismissRequest = { showSettingsSheet = false },
