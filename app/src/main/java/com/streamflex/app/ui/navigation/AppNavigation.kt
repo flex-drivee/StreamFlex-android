@@ -84,14 +84,18 @@ fun AppNavigation(
                 viewModel = viewModel,
                 onBackClick = { navController.popBackStack() },
                 // UPDATE THIS LINE: Accept a List of URLs
-                onPlayClick = { videoUrls: List<String> ->
-                    android.util.Log.d("STREAM_DEBUG", "Final URLs going to player: $videoUrls")
+                onPlayClick = { episode ->
 
-                    val intent = Intent(context, PlayerActivity::class.java).apply {
-                        // Pass the entire list to the PlayerActivity
-                        putStringArrayListExtra("VIDEO_URLS", ArrayList(videoUrls))
+                    viewModel.fetchEpisodeStreams(episode) { links ->
+
+                        android.util.Log.d("STREAM_DEBUG", "Final URLs going to player: $links")
+
+                        val intent = Intent(context, PlayerActivity::class.java).apply {
+                            putStringArrayListExtra("VIDEO_URLS", ArrayList(links))
+                        }
+
+                        context.startActivity(intent)
                     }
-                    context.startActivity(intent)
                 }
             )
         }

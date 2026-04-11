@@ -53,6 +53,7 @@ class PlayerActivity : ComponentActivity() {
         // 1. Receive the ArrayList of URLs instead of a single string
         val videoUrls = intent.getStringArrayListExtra("VIDEO_URLS") ?: arrayListOf()
 
+
         setContent {
             PlayerScreen(videoUrls = videoUrls, onBack = { finish() })
         }

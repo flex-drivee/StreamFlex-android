@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+private val hdhub4uParser = com.streamflex.app.data.providers.hdhub4u.Hdhub4uParser()
 
 data class MovieDetailUiState(
     val isLoading: Boolean = true,
@@ -77,6 +78,29 @@ class MovieDetailViewModel(
         }
     }
 
+    fun fetchEpisodeStreams(
+        episode: Episode,
+        onResult: (List<String>) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                val showTitle = uiState.value.show?.title ?: ""
+
+                val query = "$showTitle S${uiState.value.selectedSeason}E${episode.episodeNumber}"
+
+                android.util.Log.d("STREAM_DEBUG", "Searching for: $query")
+
+                // 🔥 CALL YOUR PARSER HERE
+                val links = hdhub4uParser.getMovieLinks(query)
+
+                onResult(links)
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                onResult(emptyList())
+            }
+        }
+    }
     fun loadStreams(onResult: (List<VideoStream>) -> Unit) {
         val movie = _uiState.value.movie ?: return
 

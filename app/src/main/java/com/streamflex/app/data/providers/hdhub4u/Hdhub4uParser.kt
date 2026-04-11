@@ -1,5 +1,6 @@
 package com.streamflex.app.data.providers.hdhub4u
 
+import com.streamflex.app.data.extractors.Hdhub4uExtractor
 import com.streamflex.app.domain.models.ContentType
 import com.streamflex.app.domain.models.SearchResult
 import kotlinx.coroutines.Dispatchers
@@ -9,21 +10,22 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 class Hdhub4uParser {
-    // The working domain from the plugin
+
     private val mainUrl = "https://new5.hdhub4u.fo"
 
-    // The required headers to bypass basic bot protection
     private val headers = mapOf(
-        "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0",
+        "User-Agent" to "Mozilla/5.0...",
         "Cookie" to "xla=s4t",
         "Referer" to mainUrl
     )
 
+    // -----------------------------
+    // EXISTING FUNCTION (NO CHANGE)
+    // -----------------------------
     suspend fun search(query: String): List<SearchResult> = withContext(Dispatchers.IO) {
         val results = mutableListOf<SearchResult>()
 
         try {
-            // Using the exact Pingora API from the Phisher plugin
             val searchUrl = "https://search.pingora.fyi/collections/post/documents/search" +
                     "?q=${query.replace(" ", "+")}" +
                     "&query_by=post_title,category" +
@@ -40,7 +42,6 @@ class Hdhub4uParser {
                 val jsonObject = JSONObject(jsonResponse)
                 val hits = jsonObject.optJSONArray("hits") ?: return@withContext emptyList()
 
-                // Inside the for loop in Hdhub4uParser.kt
                 for (i in 0 until hits.length()) {
                     val document = hits.getJSONObject(i).getJSONObject("document")
 
@@ -48,17 +49,15 @@ class Hdhub4uParser {
                     val rawPermalink = document.optString("permalink")
                     val thumbnail = document.optString("post_thumbnail")
 
-                    // FIX: Ensure the URL is absolute before sending it to the Extractor
                     val absoluteUrl = if (rawPermalink.startsWith("http")) {
                         rawPermalink
                     } else {
-                        // Combine the base URL with the relative path
                         "$mainUrl$rawPermalink"
                     }
 
                     results.add(
                         SearchResult(
-                            id = absoluteUrl, // Use the full URL as the ID
+                            id = absoluteUrl,
                             title = title,
                             poster = thumbnail,
                             type = ContentType.MOVIE,
@@ -72,5 +71,37 @@ class Hdhub4uParser {
         }
 
         return@withContext results
+    }
+
+    // -----------------------------------------
+    // ✅ ADD THIS FUNCTION RIGHT HERE 👇
+    // -----------------------------------------
+    suspend fun getMovieLinks(query: String): List<String> = withContext(Dispatchers.IO) {
+        val links = mutableListOf<String>()
+
+        try {
+            // 1. Search
+            val results = search(query)
+
+            if (results.isEmpty()) {
+                android.util.Log.e("HDHub4u_DEBUG", "No results found for: $query")
+                return@withContext emptyList()
+            }
+
+            val firstResult = results.first()
+            val pageUrl = firstResult.id
+
+            android.util.Log.d("HDHub4u_DEBUG", "Opening page: $pageUrl")
+
+            // 2. Extract links
+            val extractedLinks = Hdhub4uExtractor().extract(pageUrl)
+
+            links.addAll(extractedLinks)
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        return@withContext links
     }
 }
