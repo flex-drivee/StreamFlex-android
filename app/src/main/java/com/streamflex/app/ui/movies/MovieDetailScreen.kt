@@ -35,7 +35,7 @@ import com.streamflex.app.ui.components.VideoCard
 fun MovieDetailScreen(
     viewModel: MovieDetailViewModel,
     onBackClick: () -> Unit,
-    onPlayClick: (List<String>) -> Unit
+    onPlayClick: (Episode) -> Unit
 ) {
     val state by viewModel.uiState.collectAsState()
 
@@ -141,12 +141,15 @@ fun MovieDetailScreen(
                     Column(modifier = Modifier.padding(16.dp)) {
                         Button(
                             onClick = {
-                                // Ask the ViewModel to handle the scraping pipeline
                                 viewModel.loadStreams { streams ->
                                     if (streams.isNotEmpty()) {
-                                        // Pass the actual video URL to the navigation, not the TMDB ID
-                                        val allUrls = streams.map { it.url } // Assuming 'url' is the string property
-                                        onPlayClick(allUrls)
+                                        // Wrap movie into fake Episode (reuse same pipeline)
+                                        val fakeEpisode = Episode(
+                                            id = state.movie?.id ?: "movie",
+                                            title = state.movie?.title ?: "",
+                                            episodeNumber = 1
+                                        )
+                                        onPlayClick(fakeEpisode)
                                     }
                                 }
                             },
@@ -260,7 +263,7 @@ fun MovieDetailScreen(
                     val episodesToShow = if (areAllEpisodesVisible) state.episodes else state.episodes.take(10)
 
                     items(episodesToShow) { episode ->
-                        EpisodeItem(episode = episode, onClick = { onPlayClick(listOf(episode.id)) })
+                        EpisodeItem(episode = episode, onClick = { onPlayClick(episode) })
                     }
 
                     // --- "SHOW MORE" ARROW ---

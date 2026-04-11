@@ -1,6 +1,7 @@
 package com.streamflex.app.ui.movies
 
 import androidx.lifecycle.ViewModel
+import com.streamflex.app.data.providers.hdhub4u.Hdhub4uParser
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.streamflex.app.domain.models.*
@@ -9,7 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-private val hdhub4uParser = com.streamflex.app.data.providers.hdhub4u.Hdhub4uParser()
+private val hdhub4uParser = Hdhub4uParser()
 
 data class MovieDetailUiState(
     val isLoading: Boolean = true,
