@@ -22,7 +22,7 @@ data class NetworkResponse(
     val bytes: ByteArray? = null,
 
     /** Response headers */
-    val headers: Map<String, String> = emptyMap(),
+    val headers: Map<String, List<String>>,
 
     /** Cookies received from server */
     val cookies: Map<String, String> = emptyMap(),

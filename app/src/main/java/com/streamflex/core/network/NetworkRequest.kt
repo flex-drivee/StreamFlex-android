@@ -22,7 +22,11 @@ data class NetworkRequest(
 
     val allowRedirects: Boolean = true,
 
-    val timeout: Long? = null
+    val timeout: Long = 30000,
+
+    val followRedirects: Boolean = true,
+
+    val useCookies: Boolean = true
 )
 
 enum class HttpMethod {

@@ -60,9 +60,11 @@ object HttpClient {
 
             val builder = Request.Builder()
                 .url(request.url)
-                .headers(request.headers)
+            request.headers.forEach { (key, value) ->
+                builder.addHeader(key, value)
+            }
 
-            when (request.method.uppercase()) {
+            when (request.method.toUpperCase()) {
 
                 "POST" -> {
                     builder.post(
