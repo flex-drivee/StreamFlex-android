@@ -15,4 +15,5 @@ object Cookies {
     fun clear() {
         cookieManager.cookieStore.removeAll()
     }
+    
 }
