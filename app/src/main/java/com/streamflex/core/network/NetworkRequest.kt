@@ -20,7 +20,6 @@ data class NetworkRequest(
 
     val body: ByteArray? = null,
 
-    val allowRedirects: Boolean = true,
 
     val timeout: Long = 30000,
 

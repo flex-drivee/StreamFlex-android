@@ -38,10 +38,7 @@ object NetworkUtils {
      * Encode URL.
      */
     fun encode(value: String): String {
-        return URLEncoder.encode(
-            value,
-            StandardCharsets.UTF_8
-        )
+        return URLEncoder.encode(value, StandardCharsets.UTF_8.toString())
     }
 
     /**
@@ -50,7 +47,7 @@ object NetworkUtils {
     fun decode(value: String): String {
         return URLDecoder.decode(
             value,
-            StandardCharsets.UTF_8
+            StandardCharsets.UTF_8.toString()
         )
     }
 

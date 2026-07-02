@@ -4,25 +4,31 @@ import android.util.Log
 
 object Logger {
 
-    private const val TAG = "StreamFlex"
+    private const val DEFAULT_TAG = "StreamFlex"
 
-    fun d(message: String) {
-        Log.d(TAG, message)
+    var enabled = true
+
+    fun d(message: String, tag: String = DEFAULT_TAG) {
+        if (enabled) Log.d(tag, message)
     }
 
-    fun i(message: String) {
-        Log.i(TAG, message)
+    fun i(message: String, tag: String = DEFAULT_TAG) {
+        if (enabled) Log.i(tag, message)
     }
 
-    fun w(message: String) {
-        Log.w(TAG, message)
+    fun w(message: String, tag: String = DEFAULT_TAG) {
+        if (enabled) Log.w(tag, message)
     }
 
-    fun e(message: String) {
-        Log.e(TAG, message)
+    fun e(message: String, tag: String = DEFAULT_TAG) {
+        if (enabled) Log.e(tag, message)
     }
 
-    fun e(message: String, throwable: Throwable) {
-        Log.e(TAG, message, throwable)
+    fun e(
+        message: String,
+        throwable: Throwable,
+        tag: String = DEFAULT_TAG
+    ) {
+        if (enabled) Log.e(tag, message, throwable)
     }
 }

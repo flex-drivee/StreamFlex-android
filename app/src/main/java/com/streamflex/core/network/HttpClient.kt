@@ -9,6 +9,9 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import java.net.CookieManager
 import java.net.CookiePolicy
 import java.util.concurrent.TimeUnit
+import com.streamflex.core.network.interceptor.LoggingInterceptor
+import com.streamflex.core.network.interceptor.RetryInterceptor
+import com.streamflex.core.network.interceptor.UserAgentInterceptor
 
 object HttpClient {
 
@@ -64,9 +67,11 @@ object HttpClient {
                 builder.addHeader(key, value)
             }
 
-            when (request.method.toUpperCase()) {
+            when (request.method) {
 
-                "POST" -> {
+                HttpMethod.GET -> builder.get()
+
+                HttpMethod.POST -> {
                     builder.post(
                         request.body?.toRequestBody(
                             "application/octet-stream".toMediaTypeOrNull()
@@ -74,7 +79,7 @@ object HttpClient {
                     )
                 }
 
-                "PUT" -> {
+                HttpMethod.PUT -> {
                     builder.put(
                         request.body?.toRequestBody(
                             "application/octet-stream".toMediaTypeOrNull()
@@ -82,9 +87,21 @@ object HttpClient {
                     )
                 }
 
-                "DELETE" -> builder.delete()
+                HttpMethod.DELETE -> builder.delete()
 
-                else -> builder.get()
+                HttpMethod.HEAD -> builder.head()
+
+                HttpMethod.PATCH -> {
+                    builder.patch(
+                        request.body?.toRequestBody(
+                            "application/octet-stream".toMediaTypeOrNull()
+                        ) ?: ByteArray(0).toRequestBody()
+                    )
+                }
+
+                HttpMethod.OPTIONS -> {
+                    builder.method("OPTIONS", null)
+                }
             }
 
             val client = buildClient(request)
@@ -98,7 +115,7 @@ object HttpClient {
                     code = response.code,
                     message = response.message,
                     body = response.body?.bytes(),
-                    headers = response.headers,
+                    headers = response.headers.toMultimap(),
                     url = response.request.url.toString(),
                     isSuccessful = response.isSuccessful
                 )
@@ -107,12 +124,12 @@ object HttpClient {
         } catch (e: Exception) {
 
             Logger.e(
-                tag = "HttpClient",
                 message = "Network request failed",
-                throwable = e
+                throwable = e,
+                tag = "HttpClient"
             )
 
-            NetworkResult.Error(e)
+            NetworkResult.Exception(e)
 
         }
     }

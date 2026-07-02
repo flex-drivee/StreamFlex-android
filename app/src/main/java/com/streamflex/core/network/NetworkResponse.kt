@@ -1,41 +1,47 @@
 package com.streamflex.core.network
 
-/**
- * Standard network response used throughout StreamFlex.
- * All OkHttp responses should be converted into this model.
- */
 data class NetworkResponse(
 
-    /** Final URL after redirects */
     val url: String,
 
-    /** HTTP status code (200, 404, etc.) */
     val code: Int,
 
-    /** True when status code is 2xx */
+    val message: String,
+
     val isSuccessful: Boolean,
 
-    /** Response body as String */
-    val body: String,
+    val body: ByteArray?,
 
-    /** Raw response bytes (videos, images, etc.) */
-    val bytes: ByteArray? = null,
-
-    /** Response headers */
     val headers: Map<String, List<String>>,
 
-    /** Cookies received from server */
     val cookies: Map<String, String> = emptyMap(),
 
-    /** Content-Type header */
     val contentType: String? = null,
 
-    /** Mime type (video/mp4, text/html, etc.) */
     val mimeType: String? = null,
 
-    /** Response size in bytes */
-    val contentLength: Long = -1L,
+    val contentLength: Long = -1,
 
-    /** Response time in milliseconds */
-    val responseTime: Long = 0L
-)
+    val responseTime: Long = 0
+) {
+
+    fun bodyAsString(): String {
+        return body?.toString(Charsets.UTF_8).orEmpty()
+    }
+
+    fun isHtml(): Boolean {
+        return contentType?.contains("text/html", true) == true
+    }
+
+    fun isJson(): Boolean {
+        return contentType?.contains("application/json", true) == true
+    }
+
+    fun isVideo(): Boolean {
+        return contentType?.startsWith("video/", true) == true
+    }
+
+    fun isM3U8(): Boolean {
+        return contentType?.contains("mpegurl", true) == true
+    }
+}
