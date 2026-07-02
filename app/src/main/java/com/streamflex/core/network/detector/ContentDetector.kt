@@ -1,6 +1,6 @@
 package com.streamflex.core.network.detector
 
-import com.streamflex.domain.models.ContentType
+import com.streamflex.core.network.detector.ContentType
 import okhttp3.Headers
 
 object ContentDetector {
