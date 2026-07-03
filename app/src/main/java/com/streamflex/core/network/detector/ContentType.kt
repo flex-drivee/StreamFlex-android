@@ -1,4 +1,4 @@
-package com.streamflex.domain.models
+package com.streamflex.core.network.detector
 
 enum class ContentType {
 
