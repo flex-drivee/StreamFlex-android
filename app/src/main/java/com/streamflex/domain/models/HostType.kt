@@ -12,6 +12,8 @@ enum class HostType {
     PIXELDRAIN,
     HUBCLOUD,
     HUBDRIVE,
+    HUBSTREAM,
+    HUBCDN,
     HBLINKS,
     FILEMOON,
     MIXDROP,
