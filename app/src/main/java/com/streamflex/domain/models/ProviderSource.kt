@@ -7,10 +7,10 @@ package com.streamflex.domain.models
  */
 data class ProviderSource(
 
-    /** Provider name (HDHub4u, MovieBox, etc.) */
+    /** Provider name (HDHub4u, MovieBox...) */
     val provider: String,
 
-    /** Host name (HubCloud, PixelDrain, VidStack, etc.) */
+    /** Host display name (HubCloud, PixelDrain...) */
     val host: String,
 
     /** Host type */
@@ -19,8 +19,14 @@ data class ProviderSource(
     /** URL to resolve */
     val url: String,
 
-    /** Display quality if known */
+    /** Quality reported by the provider */
     val quality: Quality = Quality.UNKNOWN,
+
+    /** Direct stream (no extractor required) */
+    val isDirect: Boolean = false,
+
+    /** Priority assigned by provider */
+    val priority: Int = 0,
 
     /** Required request headers */
     val headers: Map<String, String> = emptyMap(),
@@ -31,6 +37,6 @@ data class ProviderSource(
     /** Referer if required */
     val referer: String? = null,
 
-    /** Extra metadata for providers/extractors */
+    /** Extra provider-specific metadata */
     val metadata: Map<String, String> = emptyMap()
 )

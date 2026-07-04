@@ -1,6 +1,7 @@
 package com.streamflex.core.parser
 
 import com.google.gson.Gson
+import org.json.JSONObject
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonElement
 import com.google.gson.JsonParser
@@ -23,6 +24,12 @@ object JsonParser {
     inline fun <reified T> fromJson(json: String): T? {
         return runCatching {
             gson.fromJson(json, T::class.java)
+        }.getOrNull()
+    }
+
+    fun parseObject(json: String): JSONObject? {
+        return runCatching {
+            JSONObject(json)
         }.getOrNull()
     }
 

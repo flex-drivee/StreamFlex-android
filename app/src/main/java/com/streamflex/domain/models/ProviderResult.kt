@@ -6,11 +6,15 @@ package com.streamflex.domain.models
  */
 data class ProviderResult(
 
+    val id: String,
+
     val provider: String,
 
     val title: String,
 
-    val pageUrl: String,
+    val detailUrl: String,
+
+    val metadata: Map<String, String> = emptyMap(),
 
     val sources: List<ProviderSource>,
 
