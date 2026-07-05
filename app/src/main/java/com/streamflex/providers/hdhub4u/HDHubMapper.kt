@@ -1,5 +1,6 @@
 package com.streamflex.providers.hdhub4u
 
+import com.streamflex.domain.models.HostType
 import com.streamflex.domain.models.MediaType
 import com.streamflex.domain.models.ProviderResult
 import com.streamflex.domain.models.ProviderSource
@@ -24,10 +25,12 @@ object HDHubMapper {
 
         return SearchResult(
             id = detailUrl,
+            url = detailUrl,
+            provider = "HDHub4u",
             title = title,
-            poster = poster,
+            mediaType = mediaType,
             year = year,
-            mediaType = mediaType
+            poster = poster
         )
     }
 
@@ -44,7 +47,10 @@ object HDHubMapper {
         season: Int? = null,
         episode: Int? = null,
         poster: String? = null,
-        overview: String? = null
+        overview: String? = null,
+        success: Boolean = true,
+        error: String? = null,
+        metadata: Map<String, String> = emptyMap()
     ): ProviderResult {
 
         return ProviderResult(
@@ -52,30 +58,31 @@ object HDHubMapper {
             provider = provider,
             title = title,
             detailUrl = detailUrl,
+            metadata = metadata,
             sources = sources,
             mediaType = mediaType,
             year = year,
             season = season,
             episode = episode,
             poster = poster,
-            overview = overview
+            overview = overview,
+            success = success,
+            error = error
         )
     }
-
     /**
      * Create a ProviderSource.
      */
     fun toProviderSource(
         provider: String,
         host: String,
-        hostType: com.streamflex.domain.models.HostType,
+        hostType: HostType,
         url: String,
         quality: Quality = Quality.UNKNOWN,
         headers: Map<String, String> = emptyMap(),
         cookies: Map<String, String> = emptyMap(),
         referer: String? = null,
-        priority: Int = 0,
-        isDirect: Boolean = false
+        metadata: Map<String, String> = emptyMap()
     ): ProviderSource {
 
         return ProviderSource(
@@ -87,8 +94,7 @@ object HDHubMapper {
             headers = headers,
             cookies = cookies,
             referer = referer,
-            priority = priority,
-            isDirect = isDirect
+            metadata = metadata
         )
     }
 }

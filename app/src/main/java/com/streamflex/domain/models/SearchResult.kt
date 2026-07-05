@@ -9,6 +9,10 @@ data class SearchResult(
     /** Internal ID */
     val id: String,
 
+    val url: String,
+
+    val provider: String?= null,
+
     /** Title displayed to the user */
     val title: String,
 

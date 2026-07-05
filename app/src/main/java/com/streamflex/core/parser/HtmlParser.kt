@@ -45,6 +45,19 @@ object HtmlParser {
         return document.select(selector).toList()
     }
 
+    fun selectText(
+        document: Document,
+        selector: String
+    ): String {
+
+        return text(
+            selectFirst(
+                document,
+                selector
+            )
+        )
+    }
+
     /**
      * Safely returns element text.
      */

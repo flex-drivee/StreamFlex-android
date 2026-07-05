@@ -12,13 +12,14 @@ class HDHubSearch {
 
     companion object {
 
-        private const val BASE_URL = "https://new5.hdhub4u.fo"
+        private const val BASE_URL = "https://new2.hdhub4u.cl/?utm=mn1"
 
         private const val SEARCH_API =
             "https://search.pingora.fyi/collections/post/documents/search"
 
         private const val PROVIDER = "HDHub4u"
     }
+
 
     suspend fun search(query: String): List<SearchResult> {
 
