@@ -2,6 +2,7 @@ package com.streamflex.core.parser
 
 import com.google.gson.Gson
 import org.json.JSONObject
+import org.json.JSONArray
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonElement
 import com.google.gson.JsonParser
@@ -30,6 +31,91 @@ object JsonParser {
     fun parseObject(json: String): JSONObject? {
         return runCatching {
             JSONObject(json)
+        }.getOrNull()
+    }
+
+    /**
+     * Parse JSON array.
+     */
+    fun parseArray(json: String): JSONArray? {
+
+        return runCatching {
+            JSONArray(json)
+        }.getOrNull()
+    }
+
+    /**
+     * Read String safely.
+     */
+    fun string(
+        obj: JSONObject?,
+        key: String
+    ): String? {
+
+        return runCatching {
+            obj?.optString(key)
+        }.getOrNull()
+    }
+
+    /**
+     * Read Int safely.
+     */
+    fun int(
+        obj: JSONObject?,
+        key: String
+    ): Int? {
+
+        return runCatching {
+
+            if (obj == null || !obj.has(key))
+                null
+            else
+                obj.getInt(key)
+
+        }.getOrNull()
+    }
+
+    /**
+     * Read Boolean safely.
+     */
+    fun boolean(
+        obj: JSONObject?,
+        key: String
+    ): Boolean? {
+
+        return runCatching {
+
+            if (obj == null || !obj.has(key))
+                null
+            else
+                obj.getBoolean(key)
+
+        }.getOrNull()
+    }
+
+    /**
+     * Read nested object safely.
+     */
+    fun objectOf(
+        obj: JSONObject?,
+        key: String
+    ): JSONObject? {
+
+        return runCatching {
+            obj?.optJSONObject(key)
+        }.getOrNull()
+    }
+
+    /**
+     * Read array safely.
+     */
+    fun arrayOf(
+        obj: JSONObject?,
+        key: String
+    ): JSONArray? {
+
+        return runCatching {
+            obj?.optJSONArray(key)
         }.getOrNull()
     }
 
