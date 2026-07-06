@@ -10,6 +10,7 @@ enum class ContentType {
 
     // Video
     VIDEO,
+    HLS,
     M3U8,
     DASH,
 
