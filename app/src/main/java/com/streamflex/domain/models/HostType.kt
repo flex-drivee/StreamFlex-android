@@ -17,6 +17,7 @@ enum class HostType {
     HBLINKS,
     FILEMOON,
     MIXDROP,
+    REDIRECT,
     DOOD,
 
     UNKNOWN

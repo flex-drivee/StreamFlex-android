@@ -1,5 +1,6 @@
 package com.streamflex.extractors.common
 
+import com.streamflex.domain.models.ExtractionResult
 import com.streamflex.core.network.detector.ContentType
 import com.streamflex.core.network.detector.ContentTypeDetector
 import com.streamflex.domain.models.HostType
@@ -29,7 +30,7 @@ abstract class BaseExtractor {
      */
     abstract suspend fun extract(
         source: ProviderSource
-    ): List<StreamLink>
+    ): ExtractionResult
 
     /**
      * Creates a StreamLink using the ProviderSource defaults.
@@ -91,6 +92,65 @@ abstract class BaseExtractor {
     }
 
     /**
+     * Creates an ExtractionResult containing streams.
+     */
+    protected fun result(
+        vararg streams: StreamLink
+    ): ExtractionResult {
+
+        return ExtractionResult(
+            streams = streams.toList()
+        )
+    }
+
+    /**
+     * Creates an ExtractionResult containing streams.
+     */
+    protected fun result(
+        streams: List<StreamLink>
+    ): ExtractionResult {
+
+        return ExtractionResult(
+            streams = streams
+        )
+    }
+
+    /**
+     * Creates an ExtractionResult containing additional ProviderSources.
+     */
+    protected fun next(
+        vararg sources: ProviderSource
+    ): ExtractionResult {
+
+        return ExtractionResult(
+            sources = sources.toList()
+        )
+    }
+
+    /**
+     * Creates an ExtractionResult containing streams
+     * and additional ProviderSources.
+     */
+    protected fun result(
+        streams: List<StreamLink>,
+        sources: List<ProviderSource>
+    ): ExtractionResult {
+
+        return ExtractionResult(
+            streams = streams,
+            sources = sources
+        )
+    }
+
+    /**
+     * Empty extraction result.
+     */
+    protected fun emptyResult(): ExtractionResult {
+
+        return ExtractionResult.EMPTY
+    }
+
+    /**
      * Generates a readable stream name.
      */
     private fun buildName(
@@ -108,7 +168,7 @@ abstract class BaseExtractor {
             }
 
             append(" • ")
-            append(source.host)
+            append(source.hostType.name)
 
         }
     }

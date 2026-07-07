@@ -2,19 +2,27 @@ package com.streamflex.extractors
 
 import com.streamflex.domain.models.ProviderSource
 import com.streamflex.domain.models.StreamLink
+import com.streamflex.extractors.redirect.RedirectExtractor
 import com.streamflex.extractors.common.BaseExtractor
 import com.streamflex.extractors.googlevideo.GoogleVideoExtractor
 import com.streamflex.extractors.hblinks.HBLinksExtractor
 import com.streamflex.extractors.hubcloud.HubCloudExtractor
 import com.streamflex.extractors.hubdrive.HubDriveExtractor
+import java.util.ArrayDeque
 
 /**
- * Central registry for all StreamFlex extractors.
+ * Central extraction engine.
  *
- * Providers never talk directly to extractors.
- * They simply pass a ProviderSource to this manager.
+ * Handles recursive extraction automatically by processing
+ * ProviderSources until no more work remains.
  */
 object ExtractorManager {
+
+    /**
+     * Maximum number of sources processed during one extraction.
+     * Prevents infinite redirect loops.
+     */
+    private const val MAX_DEPTH = 30
 
     /**
      * Registered extractors.
@@ -27,16 +35,15 @@ object ExtractorManager {
 
         HBLinksExtractor(),
 
-        GoogleVideoExtractor()
+        GoogleVideoExtractor(),
 
-        // Future extractors:
+        RedirectExtractor()
         // PixelDrainExtractor()
         // StreamTapeExtractor()
         // FileMoonExtractor()
         // MixDropExtractor()
         // VidStackExtractor()
         // DoodExtractor()
-
     )
 
     /**
@@ -46,13 +53,46 @@ object ExtractorManager {
         source: ProviderSource
     ): List<StreamLink> {
 
-        val extractor = extractors.firstOrNull {
+        val queue = ArrayDeque<ProviderSource>()
 
-            it.supports(source)
+        val visited = mutableSetOf<String>()
 
-        } ?: return emptyList()
+        val streams = mutableListOf<StreamLink>()
 
-        return extractor.extract(source)
+        queue.add(source)
+
+        while (
+            queue.isNotEmpty() &&
+            visited.size < MAX_DEPTH
+        ) {
+
+            val current = queue.removeFirst()
+
+            if (!visited.add(current.url)) {
+                continue
+            }
+
+            val extractor = extractors.firstOrNull {
+
+                it.supports(current)
+
+            } ?: continue
+
+            val result = extractor.extract(current)
+
+            streams += result.streams
+
+            result.sources
+                .filter {
+
+                    it.url !in visited
+
+                }
+                .forEach(queue::addLast)
+        }
+
+        return streams
+            .distinctBy { it.url }
     }
 
     /**
@@ -63,6 +103,20 @@ object ExtractorManager {
     ): Boolean {
 
         return extractors.any {
+
+            it.supports(source)
+
+        }
+    }
+
+    /**
+     * Returns the extractor for debugging/testing.
+     */
+    fun findExtractor(
+        source: ProviderSource
+    ): BaseExtractor? {
+
+        return extractors.firstOrNull {
 
             it.supports(source)
 

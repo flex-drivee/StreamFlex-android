@@ -126,7 +126,7 @@ object ExtractorHelper {
      */
     fun parseJsonArray(
         text: String
-    ): JSONArray {
+    ): JSONArray? {
 
         return JsonParser.parseArray(text)
     }

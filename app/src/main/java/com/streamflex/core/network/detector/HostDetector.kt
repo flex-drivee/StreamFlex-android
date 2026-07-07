@@ -13,64 +13,123 @@ object HostDetector {
      */
     fun detect(url: String): HostType {
 
+        val lowerUrl = url.lowercase()
+
+        // ----------------------------------------------------
+        // Stage 1 : Direct media (highest priority)
+        // ----------------------------------------------------
+
+        when {
+
+            lowerUrl.contains(".m3u8") ->
+                return HostType.M3U8
+
+            lowerUrl.contains(".mpd") ->
+                return HostType.DASH
+
+            lowerUrl.endsWith(".mp4") ||
+                    lowerUrl.endsWith(".mkv") ||
+                    lowerUrl.endsWith(".avi") ||
+                    lowerUrl.endsWith(".mov") ||
+                    lowerUrl.endsWith(".webm") ->
+                return HostType.DIRECT
+        }
+
         val host = try {
             URL(url).host.lowercase()
         } catch (_: Exception) {
             return HostType.UNKNOWN
         }
 
-        return when {
+        // ----------------------------------------------------
+        // Stage 2 : Known hosts
+        // ----------------------------------------------------
 
-            // Direct video
+        when {
+
             host.contains("googlevideo") ||
                     host.contains("googleusercontent") ->
-                HostType.GOOGLE_VIDEO
+                return HostType.GOOGLE_VIDEO
 
-            // Hub family
             host.contains("hubcloud") ->
-                HostType.HUBCLOUD
+                return HostType.HUBCLOUD
 
             host.contains("hubdrive") ->
-                HostType.HUBDRIVE
+                return HostType.HUBDRIVE
 
             host.contains("hubcdn") ->
-                HostType.HUBCDN
+                return HostType.HUBCDN
 
             host.contains("hblinks") ->
-                HostType.HBLINKS
+                return HostType.HBLINKS
 
             host.contains("hubstream") ->
-                HostType.HUBSTREAM
+                return HostType.HUBSTREAM
 
-            // Popular hosts
             host.contains("pixeldrain") ->
-                HostType.PIXELDRAIN
+                return HostType.PIXELDRAIN
 
             host.contains("streamtape") ->
-                HostType.STREAMTAPE
+                return HostType.STREAMTAPE
 
             host.contains("mixdrop") ->
-                HostType.MIXDROP
+                return HostType.MIXDROP
 
             host.contains("filemoon") ->
-                HostType.FILEMOON
+                return HostType.FILEMOON
 
             host.contains("dood") ->
-                HostType.DOOD
+                return HostType.DOOD
 
             host.contains("vidstack") ->
-                HostType.VIDSTACK
-
-            else ->
-                HostType.UNKNOWN
+                return HostType.VIDSTACK
         }
+
+        // ----------------------------------------------------
+        // Stage 3 : Redirect patterns
+        // ----------------------------------------------------
+
+        when {
+
+            host.contains("gamerxyt") ->
+
+                return HostType.REDIRECT
+
+            lowerUrl.endsWith(".php") ->
+
+                return HostType.REDIRECT
+
+            lowerUrl.contains("/redirect") ->
+
+                return HostType.REDIRECT
+
+            lowerUrl.contains("/download") ->
+
+                return HostType.REDIRECT
+
+            lowerUrl.contains("?go=") ->
+
+                return HostType.REDIRECT
+
+            lowerUrl.contains("?url=") ->
+
+                return HostType.REDIRECT
+
+            lowerUrl.contains("?r=") ->
+
+                return HostType.REDIRECT
+        }
+
+        return HostType.UNKNOWN
     }
 
     /**
      * True if this host can usually be played directly.
      */
     fun isDirect(type: HostType): Boolean {
+
         return when (type) {
+
             HostType.DIRECT,
             HostType.GOOGLE_VIDEO,
             HostType.M3U8,
@@ -80,11 +139,28 @@ object HostDetector {
         }
     }
 
+    fun isRedirect(type: HostType): Boolean {
+
+        return type == HostType.REDIRECT
+    }
+
+
     /**
      * True if an extractor is required.
      */
-    fun requiresExtractor(type: HostType): Boolean {
-        return !isDirect(type) &&
-                type != HostType.UNKNOWN
+    fun requiresExtractor(
+        type: HostType
+    ): Boolean {
+
+        return when (type) {
+
+            HostType.UNKNOWN,
+            HostType.DIRECT,
+            HostType.GOOGLE_VIDEO,
+            HostType.M3U8,
+            HostType.DASH -> false
+
+            else -> true
+        }
     }
 }
