@@ -111,6 +111,7 @@ object ExtractorUtils {
                 || lower.endsWith(".m3u8")
                 || lower.endsWith(".mpd")
                 || lower.contains("googlevideo")
+                || lower.contains("videoplayback")
                 || lower.contains("googleusercontent")
     }
 

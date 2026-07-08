@@ -5,11 +5,10 @@ package com.streamflex.domain.models
  *
  * An extractor may:
  *
- * 1. Produce playable streams.
- * 2. Produce additional ProviderSources that require
- *    another extractor.
- * 3. Produce both.
- * 4. Produce neither.
+ * • Produce playable streams.
+ * • Produce additional ProviderSources.
+ * • Produce both.
+ * • Produce neither.
  */
 data class ExtractionResult(
 
@@ -19,59 +18,64 @@ data class ExtractionResult(
     val streams: List<StreamLink> = emptyList(),
 
     /**
-     * Additional sources that require further extraction.
+     * Additional sources requiring another extractor.
      */
     val sources: List<ProviderSource> = emptyList()
 
 ) {
 
     /**
-     * True if nothing was extracted.
+     * Nothing extracted.
      */
     val isEmpty: Boolean
         get() = streams.isEmpty() && sources.isEmpty()
 
     /**
-     * True if playable streams exist.
+     * Playable streams exist.
      */
     val hasStreams: Boolean
         get() = streams.isNotEmpty()
 
     /**
-     * True if more extraction work remains.
+     * More extraction work remains.
      */
     val hasSources: Boolean
         get() = sources.isNotEmpty()
 
+    /**
+     * Merge another ExtractionResult.
+     */
+    operator fun plus(
+        other: ExtractionResult
+    ): ExtractionResult {
+
+        return ExtractionResult(
+
+            streams =
+                (streams + other.streams)
+                    .distinctBy { it.url },
+
+            sources =
+                (sources + other.sources)
+                    .distinctBy { it.url }
+
+        )
+    }
+
     companion object {
 
-        /**
-         * Empty result.
-         */
         val EMPTY = ExtractionResult()
 
-        /**
-         * Convenience factory for streams.
-         */
         fun streams(
             vararg links: StreamLink
-        ): ExtractionResult {
+        ) = ExtractionResult(
+            streams = links.toList()
+        )
 
-            return ExtractionResult(
-                streams = links.toList()
-            )
-        }
-
-        /**
-         * Convenience factory for sources.
-         */
         fun sources(
             vararg providerSources: ProviderSource
-        ): ExtractionResult {
-
-            return ExtractionResult(
-                sources = providerSources.toList()
-            )
-        }
+        ) = ExtractionResult(
+            sources = providerSources.toList()
+        )
     }
 }

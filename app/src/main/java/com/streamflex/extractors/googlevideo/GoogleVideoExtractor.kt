@@ -1,16 +1,18 @@
 package com.streamflex.extractors.googlevideo
 
+import com.streamflex.core.network.detector.ContentTypeDetector
+import com.streamflex.domain.models.ExtractionResult
 import com.streamflex.domain.models.HostType
 import com.streamflex.domain.models.ProviderSource
-import com.streamflex.domain.models.StreamLink
 import com.streamflex.extractors.common.BaseExtractor
 import com.streamflex.extractors.shared.ExtractorUtils
 
 /**
- * Extractor for Google Video direct links.
+ * Google Video extractor.
  *
- * These URLs are already playable and usually require
- * no additional extraction.
+ * Google Video links are already direct playable streams.
+ *
+ * No additional extraction is required.
  */
 class GoogleVideoExtractor : BaseExtractor() {
 
@@ -18,27 +20,37 @@ class GoogleVideoExtractor : BaseExtractor() {
 
     override suspend fun extract(
         source: ProviderSource
-    ): List<StreamLink> {
+    ): ExtractionResult {
 
         if (!supports(source)) {
-            return emptyList()
+            return ExtractionResult.EMPTY
         }
 
-        val url = source.url
+        val url = source.url.trim()
 
         if (url.isBlank()) {
-            return emptyList()
+            return ExtractionResult.EMPTY
         }
 
-        if (!ExtractorUtils.isVideoUrl(url)) {
-            return emptyList()
+        // Accept Google's direct media links even if
+        // the URL doesn't end with a video extension.
+        val playable =
+
+            url.contains("googlevideo.com", true) ||
+                    url.contains("googleusercontent.com", true) ||
+                    ExtractorUtils.isVideoUrl(url)
+
+        if (!playable) {
+            return ExtractionResult.EMPTY
         }
 
-        return listOf(
-            createStream(
-                source = source,
-                url = url
-            )
+        val stream = createStream(
+            source = source,
+            url = url
+        )
+
+        return ExtractionResult.streams(
+            stream
         )
     }
 }

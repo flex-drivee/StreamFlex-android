@@ -1,28 +1,35 @@
 package com.streamflex.extractors
 
+import com.streamflex.domain.models.HostType
 import com.streamflex.domain.models.ProviderSource
 import com.streamflex.domain.models.StreamLink
-import com.streamflex.extractors.redirect.RedirectExtractor
 import com.streamflex.extractors.common.BaseExtractor
 import com.streamflex.extractors.googlevideo.GoogleVideoExtractor
 import com.streamflex.extractors.hblinks.HBLinksExtractor
+import com.streamflex.extractors.hubcdn.HubCDNExtractor
 import com.streamflex.extractors.hubcloud.HubCloudExtractor
 import com.streamflex.extractors.hubdrive.HubDriveExtractor
+import com.streamflex.extractors.redirect.RedirectExtractor
 import java.util.ArrayDeque
 
 /**
  * Central extraction engine.
  *
- * Handles recursive extraction automatically by processing
- * ProviderSources until no more work remains.
+ * Providers return ProviderSources.
+ * Extractors resolve those ProviderSources into:
+ *
+ * - StreamLinks
+ * - More ProviderSources
+ *
+ * The manager continues processing until no more
+ * ProviderSources remain.
  */
 object ExtractorManager {
 
     /**
-     * Maximum number of sources processed during one extraction.
-     * Prevents infinite redirect loops.
+     * Prevent infinite redirect loops.
      */
-    private const val MAX_DEPTH = 30
+    private const val MAX_SOURCES = 30
 
     /**
      * Registered extractors.
@@ -33,11 +40,15 @@ object ExtractorManager {
 
         HubDriveExtractor(),
 
+        HubCDNExtractor(),
+
         HBLinksExtractor(),
 
-        GoogleVideoExtractor(),
+        RedirectExtractor(),
 
-        RedirectExtractor()
+        GoogleVideoExtractor()
+
+        // Future:
         // PixelDrainExtractor()
         // StreamTapeExtractor()
         // FileMoonExtractor()
@@ -45,6 +56,12 @@ object ExtractorManager {
         // VidStackExtractor()
         // DoodExtractor()
     )
+
+    /**
+     * Fast lookup by HostType.
+     */
+    private val extractorMap =
+        extractors.associateBy { it.hostType }
 
     /**
      * Resolve a ProviderSource into playable streams.
@@ -55,15 +72,18 @@ object ExtractorManager {
 
         val queue = ArrayDeque<ProviderSource>()
 
+        val queued = mutableSetOf<String>()
+
         val visited = mutableSetOf<String>()
 
         val streams = mutableListOf<StreamLink>()
 
         queue.add(source)
+        queued.add(source.url)
 
         while (
             queue.isNotEmpty() &&
-            visited.size < MAX_DEPTH
+            visited.size < MAX_SOURCES
         ) {
 
             val current = queue.removeFirst()
@@ -72,11 +92,9 @@ object ExtractorManager {
                 continue
             }
 
-            val extractor = extractors.firstOrNull {
-
-                it.supports(current)
-
-            } ?: continue
+            val extractor =
+                extractorMap[current.hostType]
+                    ?: continue
 
             val result = extractor.extract(current)
 
@@ -85,7 +103,10 @@ object ExtractorManager {
             result.sources
                 .filter {
 
-                    it.url !in visited
+                    it.url.isNotBlank() &&
+                            it.hostType != HostType.UNKNOWN &&
+                            it.url !in visited &&
+                            queued.add(it.url)
 
                 }
                 .forEach(queue::addLast)
@@ -102,24 +123,20 @@ object ExtractorManager {
         source: ProviderSource
     ): Boolean {
 
-        return extractors.any {
-
-            it.supports(source)
-
-        }
+        return extractorMap.containsKey(
+            source.hostType
+        )
     }
 
     /**
-     * Returns the extractor for debugging/testing.
+     * Returns extractor for debugging/testing.
      */
     fun findExtractor(
         source: ProviderSource
     ): BaseExtractor? {
 
-        return extractors.firstOrNull {
-
-            it.supports(source)
-
-        }
+        return extractorMap[
+            source.hostType
+        ]
     }
 }

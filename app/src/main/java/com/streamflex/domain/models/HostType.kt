@@ -20,5 +20,5 @@ enum class HostType {
     REDIRECT,
     DOOD,
 
-    UNKNOWN
+    UNKNOWN,
 }
