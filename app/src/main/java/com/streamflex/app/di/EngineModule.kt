@@ -23,9 +23,6 @@ import com.streamflex.engine.stream.StreamEngine
  */
 object EngineModule {
 
-    /**
-     * Shared ProviderRepository.
-     */
     val providerRepository: ProviderRepository
         get() = ProviderModule.repository
 
