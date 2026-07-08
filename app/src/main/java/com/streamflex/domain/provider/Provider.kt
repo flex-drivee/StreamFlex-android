@@ -21,6 +21,11 @@ interface Provider {
     val name: String
 
     /**
+     * Stable provider identifier.
+     */
+    val id: String
+
+    /**
      * Main website.
      */
     val baseUrl: String

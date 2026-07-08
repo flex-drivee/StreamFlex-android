@@ -9,9 +9,22 @@ data class SearchResult(
     /** Internal ID */
     val id: String,
 
+    /** Provider page URL */
     val url: String,
 
-    val provider: String?= null,
+    /**
+     * Stable provider identifier.
+     * Example:
+     * hdhub4u
+     * moviebox
+     * ottmirror
+     */
+    val providerId: String,
+
+    /**
+     * Display name shown in UI.
+     */
+    val providerName: String,
 
     /** Title displayed to the user */
     val title: String,
