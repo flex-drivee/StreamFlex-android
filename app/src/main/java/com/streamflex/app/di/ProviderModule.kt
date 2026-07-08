@@ -1,22 +1,46 @@
 package com.streamflex.app.di
 
-import com.streamflex.extractors.ExtractorManager
+import com.streamflex.domain.provider.Provider
+import com.streamflex.domain.repositories.ProviderRepository
+import com.streamflex.providers.hdhub4u.HDHubProvider
 
 /**
- * Dependency module for the extraction system.
+ * Dependency module for streaming providers.
  *
- * Currently, ExtractorManager is implemented as a singleton object.
- * This module exposes it so the rest of the application depends on
- * the DI layer instead of directly referencing the implementation.
- *
- * If ExtractorManager is converted into a class in the future,
- * only this module will need to change.
+ * This module is responsible for creating every provider
+ * used by the application and exposing a shared
+ * ProviderRepository.
  */
-object ExtractorModule {
+object ProviderModule {
 
     /**
-     * Shared extraction manager.
+     * Registered providers.
+     *
+     * Add new providers here as they are implemented.
      */
-    val manager: ExtractorManager
-        get() = ExtractorManager
+    val providers: List<Provider> by lazy {
+
+        listOf(
+
+            HDHubProvider()
+
+            // Future:
+            // MovieBoxProvider()
+            // OTTMirrorProvider()
+            // NetMirrorProvider()
+            // AnimeProvider()
+
+        )
+    }
+
+    /**
+     * Shared ProviderRepository.
+     */
+    val repository: ProviderRepository by lazy {
+
+        ProviderRepository(
+            providers = providers
+        )
+
+    }
 }
