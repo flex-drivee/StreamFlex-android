@@ -1,6 +1,6 @@
 package com.streamflex.app.di
 
-import com.streamflex.domain.repositories.ContentRepository
+import com.streamflex.domain.repositories.StreamRepository
 import com.streamflex.domain.repositories.ProviderRepository
 import com.streamflex.engine.stream.StreamEngine
 import com.streamflex.extractors.ExtractorManager
@@ -60,6 +60,6 @@ object AppModule {
     /**
      * Main repository exposed to the UI.
      */
-    val contentRepository: ContentRepository
-        get() = engineModule.contentRepository
+    val streamRepository: StreamRepository
+        get() = engineModule.streamRepository
 }

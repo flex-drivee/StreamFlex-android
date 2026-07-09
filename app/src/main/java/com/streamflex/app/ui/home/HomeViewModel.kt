@@ -30,25 +30,8 @@ class HomeViewModel(
 
     init {
         loadHomeData()
-        testHdhub4uSearch() // ← temporary
     }
 
-
-    private fun testHdhub4uSearch() {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                val provider = Hdhub4uProvider()
-                val results = provider.search("John Wick")
-
-                Log.d("HDHUB4U_TEST", "Results Found: ${results.size}")
-                results.forEach {
-                    Log.d("HDHUB4U_TEST", "${it.title} | ${it.year} | ${it.id}")
-                }
-            } catch (e: Exception) {
-                Log.e("HDHUB4U_TEST", "Error: ${e.localizedMessage}")
-            }
-        }
-    }
 
 
     fun loadHomeData() {

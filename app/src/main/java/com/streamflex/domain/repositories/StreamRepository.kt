@@ -10,7 +10,7 @@ import com.streamflex.engine.stream.StreamEngine
  *
  * Hides all provider and extraction logic.
  */
-class ContentRepository(
+class StreamRepository(
 
     private val providerRepository: ProviderRepository,
 
@@ -64,7 +64,7 @@ class ContentRepository(
 
         val providerResult =
             loadContent(item)
-                ?: return FinalStreams.EMPTY
+                ?: return FinalStreams.Companion.EMPTY
 
         return getStreams(providerResult)
     }

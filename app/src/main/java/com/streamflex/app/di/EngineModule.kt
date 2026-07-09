@@ -1,6 +1,6 @@
 package com.streamflex.app.di
 
-import com.streamflex.domain.repositories.ContentRepository
+import com.streamflex.domain.repositories.StreamRepository
 import com.streamflex.domain.repositories.ProviderRepository
 import com.streamflex.engine.stream.StreamEngine
 
@@ -15,9 +15,9 @@ object EngineModule {
     val streamEngine: StreamEngine
         get() = StreamEngine
 
-    val contentRepository: ContentRepository by lazy {
+    val streamRepository: StreamRepository by lazy {
 
-        ContentRepository(
+        StreamRepository(
 
             providerRepository = providerRepository,
 

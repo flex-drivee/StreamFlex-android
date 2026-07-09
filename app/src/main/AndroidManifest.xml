@@ -12,6 +12,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.StreamFlex"
+        android:name="com.streamflex.app.StreamFlexApplication"
         tools:targetApi="31">
 
         <activity

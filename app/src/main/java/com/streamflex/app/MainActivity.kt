@@ -9,25 +9,42 @@ import com.streamflex.app.ui.navigation.AppNavigation
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
+/**
+ * Main entry point of the application.
+ *
+ * Currently the UI still uses the legacy TMDB repository.
+ * The new backend (ProviderRepository + StreamEngine)
+ * will be integrated screen-by-screen.
+ */
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
 
-        // 1. Setup Retrofit
         val retrofit = Retrofit.Builder()
+
             .baseUrl("https://api.themoviedb.org/3/")
-            .addConverterFactory(GsonConverterFactory.create())
+
+            .addConverterFactory(
+                GsonConverterFactory.create()
+            )
+
             .build()
 
-        val tmdbApi = retrofit.create(TmdbApi::class.java)
+        val tmdbApi = retrofit.create(
+            TmdbApi::class.java
+        )
 
-        // 2. Setup Repository
-        val repository = ContentRepositoryImpl(tmdbApi)
+        val repository =
+            ContentRepositoryImpl(tmdbApi)
 
         setContent {
-            // 3. Launch the Navigation
-            // (We pass the repository down so ViewModels can use it)
-            AppNavigation(repository = repository)
+
+            AppNavigation(
+                repository = repository
+            )
+
         }
     }
 }
