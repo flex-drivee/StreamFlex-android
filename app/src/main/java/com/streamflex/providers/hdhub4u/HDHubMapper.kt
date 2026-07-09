@@ -6,6 +6,7 @@ import com.streamflex.domain.models.ProviderResult
 import com.streamflex.domain.models.ProviderSource
 import com.streamflex.domain.models.Quality
 import com.streamflex.domain.models.SearchResult
+import com.streamflex.domain.models.ProviderSeason
 
 /**
  * Maps HDHub4u raw data into StreamFlex domain models.
@@ -26,7 +27,8 @@ object HDHubMapper {
         return SearchResult(
             id = detailUrl,
             url = detailUrl,
-            provider = "HDHub4u",
+            providerId = "hdhub4u",
+            providerName = "HDHub4u",
             title = title,
             mediaType = mediaType,
             year = year,
@@ -38,14 +40,13 @@ object HDHubMapper {
      * Create a ProviderResult.
      */
     fun toProviderResult(
-        provider: String,
+        providerId: String,
         title: String,
         detailUrl: String,
-        sources: List<ProviderSource>,
+        sources: List<ProviderSource> = emptyList(),
         mediaType: MediaType,
+        seasons: List<ProviderSeason> = emptyList(),
         year: Int? = null,
-        season: Int? = null,
-        episode: Int? = null,
         poster: String? = null,
         overview: String? = null,
         success: Boolean = true,
@@ -55,17 +56,16 @@ object HDHubMapper {
 
         return ProviderResult(
             id = detailUrl,
-            provider = provider,
+            providerId = providerId,
             title = title,
             detailUrl = detailUrl,
-            metadata = metadata,
-            sources = sources,
             mediaType = mediaType,
+            sources = sources,
+            seasons = seasons,
             year = year,
-            season = season,
-            episode = episode,
             poster = poster,
             overview = overview,
+            metadata = metadata,
             success = success,
             error = error
         )

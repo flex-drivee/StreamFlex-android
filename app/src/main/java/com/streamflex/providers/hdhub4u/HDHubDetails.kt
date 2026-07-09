@@ -5,6 +5,7 @@ import com.streamflex.core.network.detector.QualityDetector
 import com.streamflex.core.network.HttpClient
 import com.streamflex.core.network.NetworkResult
 import com.streamflex.core.network.RequestBuilder
+import com.streamflex.domain.models.MediaType
 import com.streamflex.domain.models.ProviderResult
 import com.streamflex.domain.models.ProviderSource
 import com.streamflex.domain.models.SearchResult
@@ -19,7 +20,7 @@ import com.streamflex.core.parser.HtmlParser
 class HDHubDetails {
 
     companion object {
-        private const val PROVIDER = "HDHub4u"
+        private const val PROVIDER_ID = "hdhub4u"
     }
 
 
@@ -45,23 +46,40 @@ class HDHubDetails {
 
                 val html = response.data.bodyAsString()
 
-                val sources = parseSources(html)
+                if (result.mediaType == MediaType.MOVIE) {
 
-                HDHubMapper.toProviderResult(
-                    provider = PROVIDER,
-                    title = result.title,
-                    detailUrl = pageUrl,
-                    sources = sources,
-                    mediaType = result.mediaType,
-                    year = result.year,
-                    poster = result.poster
-                )
+                    val sources = parseSources(html)
+
+                    HDHubMapper.toProviderResult(
+                        providerId = PROVIDER_ID,
+                        title = result.title,
+                        detailUrl = pageUrl,
+                        sources = sources,
+                        mediaType = result.mediaType,
+                        year = result.year,
+                        poster = result.poster
+                    )
+
+                } else {
+
+                    // TV support will be implemented later.
+
+                    HDHubMapper.toProviderResult(
+                        providerId = PROVIDER_ID,
+                        title = result.title,
+                        detailUrl = pageUrl,
+                        seasons = emptyList(),
+                        mediaType = result.mediaType,
+                        year = result.year,
+                        poster = result.poster
+                    )
+                }
             }
 
             else -> {
 
                 HDHubMapper.toProviderResult(
-                    provider = PROVIDER,
+                    providerId = PROVIDER_ID,
                     title = result.title,
                     detailUrl = pageUrl,
                     sources = emptyList(),
@@ -166,7 +184,7 @@ class HDHubDetails {
 
             sources += HDHubMapper.toProviderSource(
 
-                provider = PROVIDER,
+                provider = PROVIDER_ID,
 
                 host = hostType.name,
 

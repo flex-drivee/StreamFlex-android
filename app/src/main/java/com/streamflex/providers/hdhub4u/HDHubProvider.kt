@@ -6,12 +6,19 @@ import com.streamflex.domain.models.SearchResult
 import com.streamflex.domain.provider.Provider
 
 /**
- * Main entry point for the HDHub4u provider.
+ * HDHub4u provider implementation.
  *
  * Responsibilities:
- * - Search movies/TV shows
- * - Load detail pages
- * * Produce ProviderSources (through HDHubDetails)
+ * - Search movies and TV shows.
+ * - Load provider content.
+ *
+ * This class intentionally contains no scraping logic.
+ *
+ * Search parsing is handled by:
+ *      HDHubSearch
+ *
+ * Detail parsing is handled by:
+ *      HDHubDetails
  */
 class HDHubProvider : Provider {
 
@@ -19,7 +26,8 @@ class HDHubProvider : Provider {
 
     override val name = "HDHub4u"
 
-    override val baseUrl = "https://new2.hdhub4u.cl/?utm=mn1"
+    override val baseUrl =
+        "https://new2.hdhub4u.cl/?utm=mn1"
 
     override val supportedMedia = setOf(
         MediaType.MOVIE,
@@ -41,7 +49,13 @@ class HDHubProvider : Provider {
     }
 
     /**
-     * Load provider sources.
+     * Load provider data.
+     *
+     * Movies:
+     *      ProviderResult.sources
+     *
+     * TV Shows:
+     *      ProviderResult.seasons
      */
     override suspend fun load(
         searchResult: SearchResult
@@ -50,6 +64,11 @@ class HDHubProvider : Provider {
         return runCatching {
 
             details.load(searchResult)
+
+        }.onFailure {
+
+            // Logger.e(...)
+            // (We'll hook our Logger here later.)
 
         }.getOrNull()
     }
