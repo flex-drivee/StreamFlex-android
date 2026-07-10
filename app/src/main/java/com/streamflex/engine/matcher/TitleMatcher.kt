@@ -1,7 +1,7 @@
 package com.streamflex.engine.matcher
 
-import java.util.Locale
 import kotlin.math.max
+
 
 /**
  * Utility for comparing movie and TV titles.
@@ -19,12 +19,9 @@ object TitleMatcher {
         title: String
     ): String {
 
-        return title
-            .lowercase(Locale.ROOT)
+        return SearchNormalizer
+            .normalize(title)
             .replace("&", "and")
-            .replace(Regex("[^a-z0-9 ]"), " ")
-            .replace(Regex("\\s+"), " ")
-            .trim()
     }
 
     /**
@@ -49,6 +46,14 @@ object TitleMatcher {
 
         val a = normalize(first)
         val b = normalize(second)
+
+        // Exact containment bonus
+        if (
+            a.contains(b) ||
+            b.contains(a)
+        ) {
+            return 0.95
+        }
 
         if (a == b) {
             return 1.0

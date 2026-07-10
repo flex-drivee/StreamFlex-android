@@ -4,6 +4,7 @@ import com.streamflex.domain.models.FinalStreams
 import com.streamflex.domain.models.ProviderResult
 import com.streamflex.domain.models.SearchResult
 import com.streamflex.engine.stream.StreamEngine
+import com.streamflex.engine.matcher.EpisodeMatcher
 import com.streamflex.engine.matcher.MovieMatcher
 
 /**
@@ -127,6 +128,9 @@ class StreamRepository(
      *
      * Matching logic will be improved later.
      */
+    /**
+     * Resolve a TV episode.
+     */
     suspend fun resolveEpisode(
         title: String,
         season: Int,
@@ -134,9 +138,19 @@ class StreamRepository(
         year: Int? = null
     ): FinalStreams {
 
-        return resolveMovie(
+        val results = search(title)
+
+        if (results.isEmpty()) {
+            return FinalStreams.EMPTY
+        }
+
+        val selected = EpisodeMatcher.bestMatch(
             title = title,
-            year = year
-        )
+            season = season,
+            episode = episode,
+            results = results
+        ) ?: return FinalStreams.EMPTY
+
+        return getStreams(selected)
     }
 }

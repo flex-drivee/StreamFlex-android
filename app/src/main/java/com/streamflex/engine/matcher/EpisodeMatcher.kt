@@ -1,151 +1,123 @@
 package com.streamflex.engine.matcher
 
-import com.streamflex.domain.models.MediaType
 import com.streamflex.domain.models.SearchResult
-import kotlin.math.abs
 
 /**
- * Selects the best TV episode/show match from provider search results.
+ * Finds the best episode match from provider search results.
  *
- * Version 1:
- * - Title similarity
- * - Year bonus
- * - Prefer TV content
- *
- * Future:
- * - Season matching
- * - Episode matching
- * - Multi-language titles
+ * This class only compares titles.
+ * It does not perform searching or loading.
  */
 object EpisodeMatcher {
 
     /**
-     * Minimum confidence required.
-     */
-    private const val MIN_SCORE = 0.75
-
-    /**
-     * Returns the best matching search result.
+     * Returns the highest scoring episode.
      */
     fun bestMatch(
         title: String,
         season: Int,
         episode: Int,
-        year: Int?,
         results: List<SearchResult>
     ): SearchResult? {
 
-        if (results.isEmpty()) {
-            return null
-        }
-
-        val best = results
-
-            .map {
-
-                it to score(
-                    title = title,
-                    season = season,
-                    episode = episode,
-                    year = year,
-                    result = it
-                )
-
-            }
-
+        return results
             .maxByOrNull {
 
-                it.second
-
+                score(
+                    title,
+                    season,
+                    episode,
+                    it
+                )
             }
+            ?.takeIf {
 
-        return if (
-            best != null &&
-            best.second >= MIN_SCORE
-        ) {
-
-            best.first
-
-        } else {
-
-            null
-
-        }
+                score(
+                    title,
+                    season,
+                    episode,
+                    it
+                ) > 0
+            }
     }
 
     /**
-     * Score a search result.
+     * Calculates a confidence score.
      */
     private fun score(
-        title: String,
+        expectedTitle: String,
         season: Int,
         episode: Int,
-        year: Int?,
         result: SearchResult
-    ): Double {
+    ): Int {
 
-        var score = 0.0
+        var score = 0
 
-        //--------------------------------------------------
-        // Title similarity
-        //--------------------------------------------------
-
-        score += TitleMatcher.similarity(
-            title,
-            result.title
-        )
-
-        //--------------------------------------------------
-        // Original title bonus
-        //--------------------------------------------------
-
-        result.originalTitle?.let {
-
-            score = maxOf(
-                score,
-                TitleMatcher.similarity(
-                    title,
-                    it
-                )
+        val title =
+            SearchNormalizer.normalize(
+                result.title
             )
+
+        val expected =
+            SearchNormalizer.normalize(
+                expectedTitle
+            )
+
+        // Exact title
+
+        if (title.contains(expected)) {
+
+            score += 50
+
         }
 
-        //--------------------------------------------------
-        // Year bonus
-        //--------------------------------------------------
+        // S01E01
 
-        if (
-            year != null &&
-            result.year != null
-        ) {
+        if (title.contains("s%02de%02d".format(season, episode).lowercase())) {
 
-            when {
+            score += 100
 
-                result.year == year ->
-                    score += 0.40
-
-                abs(result.year - year) == 1 ->
-                    score += 0.20
-            }
         }
 
-        //--------------------------------------------------
-        // Prefer TV content
-        //--------------------------------------------------
+        // S1E1
 
-        if (
-            result.mediaType == MediaType.TV
-        ) {
+        if (title.contains("s${season}e${episode}".lowercase())) {
 
-            score += 0.20
+            score += 100
+
         }
 
-        //--------------------------------------------------
-        // Reserved for future episode parsing
-        //--------------------------------------------------
+        // 1x01
 
-        // season
-        // episode
+        if (title.contains("${season}x%02d".format(episode))) {
+
+            score += 90
+
+        }
+
+        // Season 1
+
+        if (title.contains("season $season")) {
+
+            score += 40
+
+        }
+
+        // Episode 1
+
+        if (title.contains("episode $episode")) {
+
+            score += 40
+
+        }
+
+        // Ep 1
+
+        if (title.contains("ep $episode")) {
+
+            score += 35
+
+        }
 
         return score
     }
