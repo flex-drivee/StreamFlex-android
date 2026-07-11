@@ -14,6 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.streamflex.app.domain.repository.ContentRepository
+import com.streamflex.domain.repositories.StreamRepository
 import com.streamflex.app.ui.home.HomeScreen
 import com.streamflex.app.ui.home.HomeViewModel
 import com.streamflex.app.ui.home.HomeViewModelFactory
@@ -28,7 +29,8 @@ import com.streamflex.app.ui.search.SearchViewModelFactory
 
 @Composable
 fun AppNavigation(
-    repository: ContentRepository
+    repository: ContentRepository,
+    streamRepository: StreamRepository
 ) {
     val navController = rememberNavController()
     val context = LocalContext.current
@@ -77,7 +79,16 @@ fun AppNavigation(
             arguments = listOf(navArgument("movieId") { type = NavType.StringType })
         ) { backStackEntry ->
             val movieId = backStackEntry.arguments?.getString("movieId") ?: return@composable
-            val viewModelFactory = MovieDetailViewModelFactory(repository, movieId)
+            val viewModelFactory =
+                MovieDetailViewModelFactory(
+
+                    contentRepository = repository,
+
+                    streamRepository = streamRepository,
+
+                    contentId = movieId
+
+                )
             val viewModel: MovieDetailViewModel = viewModel(factory = viewModelFactory)
 
             MovieDetailScreen(

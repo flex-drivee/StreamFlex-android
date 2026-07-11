@@ -22,7 +22,14 @@ class StreamFlexApplication : Application() {
      */
     private fun initializeModules() {
 
-        // Force creation of lazy modules.
-        AppModule.streamRepository
+        AppModule.network
+        AppModule.provider
+        AppModule.extractor
+        AppModule.engine
+        AppModule.repository
+
+        // Force lazy initialization
+        AppModule.repository.contentRepository
+        AppModule.repository.streamRepository
     }
 }
