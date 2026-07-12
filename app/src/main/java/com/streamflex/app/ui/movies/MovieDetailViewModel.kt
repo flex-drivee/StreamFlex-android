@@ -1,16 +1,15 @@
 package com.streamflex.app.ui.movies
 
 import androidx.lifecycle.ViewModel
-import com.streamflex.app.data.providers.hdhub4u.Hdhub4uParser
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.streamflex.app.domain.models.*
 import com.streamflex.app.domain.repository.ContentRepository
+import com.streamflex.domain.repositories.StreamRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-private val hdhub4uParser = Hdhub4uParser()
 
 data class MovieDetailUiState(
     val isLoading: Boolean = true,
@@ -23,8 +22,13 @@ data class MovieDetailUiState(
 )
 
 class MovieDetailViewModel(
-    private val repository: ContentRepository,
+
+    private val contentRepository: ContentRepository,
+
+    private val streamRepository: StreamRepository,
+
     private val contentId: String
+
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MovieDetailUiState())
@@ -47,8 +51,8 @@ class MovieDetailViewModel(
                 // Better approach: Update your Screen.kt to pass `/{type}/{id}`
 
                 // Fetching Movie Logic (Update this if you pass type properly)
-                val movie = repository.getMovieDetails(contentId)
-                val similar = repository.getSimilarContent(contentId, ContentType.MOVIE)
+                val movie = contentRepository.getMovieDetails(contentId)
+                val similar = contentRepository.getSimilarContent(contentId, ContentType.MOVIE)
 
                 _uiState.value = MovieDetailUiState(
                     isLoading = false,
@@ -59,9 +63,9 @@ class MovieDetailViewModel(
             } catch (e: Exception) {
                 // If movie failed, try Show
                 try {
-                    val show = repository.getShowDetails(contentId)
-                    val similar = repository.getSimilarContent(contentId, ContentType.SHOW)
-                    val episodes = repository.getSeasonEpisodes(contentId, 1) // Load Season 1 by default
+                    val show = contentRepository.getShowDetails(contentId)
+                    val similar = contentRepository.getSimilarContent(contentId, ContentType.SHOW)
+                    val episodes = contentRepository.getSeasonEpisodes(contentId, 1) // Load Season 1 by default
 
                     _uiState.value = MovieDetailUiState(
                         isLoading = false,
@@ -79,29 +83,6 @@ class MovieDetailViewModel(
         }
     }
 
-    fun fetchEpisodeStreams(
-        episode: Episode,
-        onResult: (List<String>) -> Unit
-    ) {
-        viewModelScope.launch {
-            try {
-                val showTitle = uiState.value.show?.title ?: ""
-
-                val query = "$showTitle S${uiState.value.selectedSeason}E${episode.episodeNumber}"
-
-                android.util.Log.d("STREAM_DEBUG", "Searching for: $query")
-
-                // 🔥 CALL YOUR PARSER HERE
-                val links = hdhub4uParser.getMovieLinks(query)
-
-                onResult(links)
-
-            } catch (e: Exception) {
-                e.printStackTrace()
-                onResult(emptyList())
-            }
-        }
-    }
     fun loadStreams(onResult: (List<VideoStream>) -> Unit) {
         val movie = _uiState.value.movie ?: return
 
@@ -130,22 +111,98 @@ class MovieDetailViewModel(
             }
         }
     }
+    fun fetchEpisodeStreams(
+        episode: Episode,
+        onResult: (List<String>) -> Unit
+    ) {
 
+        viewModelScope.launch {
+
+            try {
+
+                val show = uiState.value.show
+
+                if (show == null) {
+
+                    onResult(emptyList())
+
+                    return@launch
+
+                }
+
+                val streams = streamRepository.resolveEpisode(
+
+                    title = show.title,
+
+                    season = uiState.value.selectedSeason,
+
+                    episode = episode.episodeNumber,
+
+                    year = show.year
+
+                )
+
+                onResult(
+
+                    streams.streams.map {
+
+                        it.url
+
+                    }
+
+                )
+
+            } catch (e: Exception) {
+
+                e.printStackTrace()
+
+                onResult(emptyList())
+
+            }
+
+        }
+    }
 
     fun loadSeason(seasonNumber: Int) {
         val showId = _uiState.value.show?.id ?: return
+
         viewModelScope.launch {
-            val eps = repository.getSeasonEpisodes(showId, seasonNumber)
-            _uiState.value = _uiState.value.copy(selectedSeason = seasonNumber, episodes = eps)
+
+            val eps = contentRepository.getSeasonEpisodes(
+                showId,
+                seasonNumber
+            )
+
+            _uiState.value = _uiState.value.copy(
+                selectedSeason = seasonNumber,
+                episodes = eps
+            )
         }
     }
 }
 
 class MovieDetailViewModelFactory(
-    private val repository: ContentRepository,
+
+    private val contentRepository: ContentRepository,
+
+    private val streamRepository: StreamRepository,
+
     private val contentId: String
+
 ) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return MovieDetailViewModel(repository, contentId) as T
+
+    override fun <T : ViewModel> create(
+        modelClass: Class<T>
+    ): T {
+
+        return MovieDetailViewModel(
+
+            contentRepository = contentRepository,
+
+            streamRepository = streamRepository,
+
+            contentId = contentId
+
+        ) as T
     }
 }
