@@ -10,6 +10,7 @@ import com.streamflex.domain.models.ProviderResult
 import com.streamflex.domain.models.ProviderSource
 import com.streamflex.domain.models.SearchResult
 import com.streamflex.core.parser.HtmlParser
+import com.streamflex.core.utils.StreamLogger
 
 /**
  * Loads a movie/episode detail page and extracts provider sources.
@@ -33,6 +34,26 @@ class HDHubDetails {
     ): ProviderResult {
 
         val pageUrl = normalizeUrl(result.url)
+        StreamLogger.info(
+            "HDHubDetails",
+            "Loading detail page"
+        )
+
+        StreamLogger.debug(
+            "HDHubDetails",
+            "Title: ${result.title}"
+        )
+
+        StreamLogger.debug(
+            "HDHubDetails",
+            "MediaType: ${result.mediaType}"
+        )
+
+        StreamLogger.debug(
+            "HDHubDetails",
+            "URL: $pageUrl"
+        )
+
 
         val request = RequestBuilder()
             .url(pageUrl)
@@ -45,10 +66,26 @@ class HDHubDetails {
             is NetworkResult.Success -> {
 
                 val html = response.data.bodyAsString()
+                StreamLogger.debug(
+                    "HDHubDetails",
+                    "Downloaded HTML (${html.length} chars)"
+                )
 
                 if (result.mediaType == MediaType.MOVIE) {
 
                     val sources = parseSources(html)
+                    StreamLogger.info(
+                        "HDHubDetails",
+                        "Found ${sources.size} provider source(s)"
+                    )
+
+                    sources.forEachIndexed { index, source ->
+
+                        StreamLogger.debug(
+                            "HDHubDetails",
+                            "Source ${index + 1}: ${source.hostType} | ${source.url}"
+                        )
+                    }
 
                     HDHubMapper.toProviderResult(
                         providerId = PROVIDER_ID,
@@ -61,6 +98,10 @@ class HDHubDetails {
                     )
 
                 } else {
+                    StreamLogger.warn(
+                        "HDHubDetails",
+                        "TV detail page detected - season parser not implemented yet"
+                    )
 
                     // TV support will be implemented later.
 
@@ -77,7 +118,10 @@ class HDHubDetails {
             }
 
             else -> {
-
+                StreamLogger.error(
+                    "HDHubDetails",
+                    "Failed to load detail page: $pageUrl (${response})"
+                )
                 HDHubMapper.toProviderResult(
                     providerId = PROVIDER_ID,
                     title = result.title,
@@ -103,6 +147,10 @@ class HDHubDetails {
         val document = HtmlParser.parse(html)
 
         val sources = mutableListOf<ProviderSource>()
+        StreamLogger.debug(
+            "HDHubDetails",
+            "Scanning HTML for provider links"
+        )
 
         val elements = HtmlParser.select(
             document,
@@ -157,10 +205,19 @@ class HDHubDetails {
             //----------------------------------------------------
 
             val hostType = HostDetector.detect(url)
+            StreamLogger.debug(
+                "HDHubDetails",
+                "Detected host: $hostType"
+            )
 
             if (hostType == com.streamflex.domain.models.HostType.UNKNOWN)
+
                 continue
 
+            StreamLogger.debug(
+                "HDHubDetails",
+                "Detected host: $hostType"
+            )
             //----------------------------------------------------
             // Detect quality
             //----------------------------------------------------
@@ -202,7 +259,15 @@ class HDHubDetails {
             )
         }
 
-        return sources.distinctBy { it.url }
+        val finalSources =
+            sources.distinctBy { it.url }
+
+        StreamLogger.info(
+            "HDHubDetails",
+            "Returning ${finalSources.size} unique provider source(s)"
+        )
+
+        return finalSources
     }
 
     /**
@@ -294,6 +359,10 @@ class HDHubDetails {
                 is NetworkResult.Success -> {
 
                     val html = response.data.bodyAsString()
+                    StreamLogger.debug(
+                        "HDHubDetails",
+                        "Downloaded HTML (${html.length} chars)"
+                    )
 
                     val regex =
                         """s\('o','([A-Za-z0-9+/=]+)'|ck\('_wp_http_\d+','([^']+)'"""

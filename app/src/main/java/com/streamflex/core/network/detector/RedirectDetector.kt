@@ -15,8 +15,9 @@ object RedirectDetector {
      * Returns redirect destination if available.
      */
     fun getRedirectUrl(response: NetworkResponse): String? {
-        return response.headers["Location"]
-            ?: response.headers["location"]
+
+        return response.header("Location")
+
     }
 
     /**

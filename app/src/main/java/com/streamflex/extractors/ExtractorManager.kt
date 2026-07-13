@@ -10,6 +10,7 @@ import com.streamflex.extractors.hubcdn.HubCDNExtractor
 import com.streamflex.extractors.hubcloud.HubCloudExtractor
 import com.streamflex.extractors.hubdrive.HubDriveExtractor
 import com.streamflex.extractors.redirect.RedirectExtractor
+import com.streamflex.core.utils.StreamLogger
 import java.util.ArrayDeque
 
 /**
@@ -70,6 +71,11 @@ object ExtractorManager {
         source: ProviderSource
     ): List<StreamLink> {
 
+        StreamLogger.info(
+            "ExtractorManager",
+            "Starting extraction pipeline"
+        )
+
         val queue = ArrayDeque<ProviderSource>()
 
         val queued = mutableSetOf<String>()
@@ -88,32 +94,85 @@ object ExtractorManager {
 
             val current = queue.removeFirst()
 
+            StreamLogger.debug(
+                "ExtractorManager",
+                "Processing ${current.hostType} -> ${current.url}"
+            )
+
             if (!visited.add(current.url)) {
+
+                StreamLogger.debug(
+                    "ExtractorManager",
+                    "Already visited. Skipping."
+                )
+
                 continue
             }
 
             val extractor =
                 extractorMap[current.hostType]
-                    ?: continue
 
-            val result = extractor.extract(current)
+            if (extractor == null) {
 
-            streams += result.streams
+                StreamLogger.warn(
+                    "ExtractorManager",
+                    "No extractor registered for ${current.hostType}"
+                )
 
-            result.sources
-                .filter {
+                continue
+            }
 
-                    it.url.isNotBlank() &&
-                            it.hostType != HostType.UNKNOWN &&
-                            it.url !in visited &&
-                            queued.add(it.url)
+            StreamLogger.debug(
+                "ExtractorManager",
+                "Using ${extractor.javaClass.simpleName}"
+            )
 
-                }
-                .forEach(queue::addLast)
+            try {
+
+                val result = extractor.extract(current)
+
+                StreamLogger.debug(
+                    "ExtractorManager",
+                    "Streams: ${result.streams.size}, Next Sources: ${result.sources.size}"
+                )
+
+                streams += result.streams
+
+                result.sources
+                    .filter {
+
+                        it.url.isNotBlank() &&
+                                it.hostType != HostType.UNKNOWN &&
+                                it.url !in visited &&
+                                queued.add(it.url)
+
+                    }
+                    .forEach {
+
+                        StreamLogger.debug(
+                            "ExtractorManager",
+                            "Queued next source: ${it.hostType}"
+                        )
+
+                        queue.addLast(it)
+                    }
+
+            } catch (e: Exception) {
+
+                StreamLogger.error(
+                    "ExtractorManager",
+                    "Extractor ${extractor.javaClass.simpleName} failed",
+                    e
+                )
+            }
         }
 
-        return streams
-            .distinctBy { it.url }
+        StreamLogger.info(
+            "ExtractorManager",
+            "Extraction finished. Total streams: ${streams.size}"
+        )
+
+        return streams.distinctBy { it.url }
     }
 
     /**

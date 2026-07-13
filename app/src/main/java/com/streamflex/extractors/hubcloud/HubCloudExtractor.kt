@@ -7,6 +7,8 @@ import com.streamflex.core.network.detector.HostDetector
 import com.streamflex.extractors.common.BaseExtractor
 import com.streamflex.extractors.shared.ExtractorUtils
 import com.streamflex.extractors.shared.ExtractorHelper
+import com.streamflex.domain.models.ExtractionResult
+import com.streamflex.core.utils.StreamLogger
 
 /**
  * Extractor for HubCloud.
@@ -20,19 +22,44 @@ class HubCloudExtractor
 
     override suspend fun extract(
         source: ProviderSource
-    ): List<StreamLink> {
+    ): ExtractionResult {
+        StreamLogger.info(
+            "HubCloudExtractor",
+            "Extracting HubCloud page"
+        )
+
+        StreamLogger.debug(
+            "HubCloudExtractor",
+            "URL: ${source.url}"
+        )
 
         if (!supports(source)) {
-            return emptyList()
+
+            StreamLogger.warn(
+                "HubCloudExtractor",
+                "Unsupported source: ${source.hostType}"
+            )
+
+            return emptyResult()
         }
 
         val document = ExtractorHelper.fetchDocument(
+
             source.url,
             source.headers
         )
-        return parseHubCloud(
-            source,
-            document
+        StreamLogger.debug(
+            "HubCloudExtractor",
+            "Document downloaded"
+        )
+        return result(
+
+            parseHubCloud(
+                source,
+                document
+            )
+
+
         )
     }
 
@@ -45,6 +72,10 @@ class HubCloudExtractor
     ): List<StreamLink> {
 
         val candidates = linkedSetOf<String>()
+        StreamLogger.debug(
+            "HubCloudExtractor",
+            "Scanning page for candidate URLs..."
+        )
 
         // ----------------------------------------------------
         // 1. Video tags
@@ -91,9 +122,14 @@ class HubCloudExtractor
             }
 
         if (candidates.isEmpty()) {
+
+            StreamLogger.warn(
+                "HubCloudExtractor",
+                "No candidate URLs found"
+            )
+
             return emptyList()
         }
-
         return buildCandidateStreams(
             source,
             candidates.toList()

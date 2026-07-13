@@ -44,4 +44,23 @@ data class NetworkResponse(
     fun isM3U8(): Boolean {
         return contentType?.contains("mpegurl", true) == true
     }
+
+    /**
+     * Returns the first value of a response header.
+     */
+    fun header(name: String): String? {
+
+        return headers[name]
+            ?.firstOrNull()
+
+            ?: headers.entries
+                .firstOrNull {
+
+                    it.key.equals(name, ignoreCase = true)
+
+                }
+                ?.value
+                ?.firstOrNull()
+    }
+
 }
