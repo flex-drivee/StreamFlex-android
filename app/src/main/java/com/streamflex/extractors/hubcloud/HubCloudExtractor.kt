@@ -125,7 +125,7 @@ class HubCloudExtractor
 
             StreamLogger.warn(
                 "HubCloudExtractor",
-                "No candidate URLs found"
+                "No candidate URLs found."
             )
 
             return emptyList()
