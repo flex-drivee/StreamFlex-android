@@ -174,6 +174,10 @@ class HubCloudExtractor
                 HostType.M3U8,
                 HostType.DIRECT,
                 HostType.GOOGLE_VIDEO -> {
+                    StreamLogger.info(
+                        "HubCloudExtractor",
+                        "Playable stream detected: $type"
+                    )
 
                     streams += createStream(
                         source = source,
@@ -182,6 +186,10 @@ class HubCloudExtractor
                 }
 
                 else -> {
+                    StreamLogger.info(
+                        "HubCloudExtractor",
+                        "Forwarding to extractor: $type"
+                    )
 
                     pendingSources += buildProviderSource(
                         source,
@@ -191,7 +199,15 @@ class HubCloudExtractor
                 }
             }
         }
+        StreamLogger.info(
+            "HubCloudExtractor",
+            "Returning ${streams.size} stream(s)"
+        )
 
+        StreamLogger.info(
+            "HubCloudExtractor",
+            "Forwarding ${pendingSources.size} source(s)"
+        )
         return streams.distinctBy(StreamLink::url)
         // Remaining ProviderSources will be forwarded
 // by ExtractorManager after recursive extraction
