@@ -83,34 +83,53 @@ class MovieDetailViewModel(
         }
     }
 
-    fun loadStreams(onResult: (List<VideoStream>) -> Unit) {
-        val movie = _uiState.value.movie ?: return
+    fun fetchMovieStreams(
+        onResult: (List<String>) -> Unit
+    ) {
 
         viewModelScope.launch {
+
             try {
-                val provider = com.streamflex.app.data.providers.hdhub4u.Hdhub4uProvider()
 
-                // Search using title + year (smart matching)
-                val results = provider.search(
-                    "${movie.title} ${movie.year ?: ""}"
-                )
+                val movie = uiState.value.movie
 
-                if (results.isEmpty()) {
+                if (movie == null) {
+
                     onResult(emptyList())
+
                     return@launch
+
                 }
 
-                // Pick best match (first for now, later we improve scoring)
-                val best = results.first()
+                val streams = streamRepository.resolveMovie(
 
-                val streams = provider.load(best.id)
-                onResult(streams)
+                    title = movie.title,
+
+                    year = movie.year
+
+                )
+
+                onResult(
+
+                    streams.streams.map {
+
+                        it.url
+
+                    }
+
+                )
 
             } catch (e: Exception) {
+
+                e.printStackTrace()
+
                 onResult(emptyList())
+
             }
+
         }
     }
+
     fun fetchEpisodeStreams(
         episode: Episode,
         onResult: (List<String>) -> Unit

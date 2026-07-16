@@ -35,7 +35,8 @@ import com.streamflex.app.ui.components.VideoCard
 fun MovieDetailScreen(
     viewModel: MovieDetailViewModel,
     onBackClick: () -> Unit,
-    onPlayClick: (Episode) -> Unit
+    onMoviePlayClick: (List<String>) -> Unit,
+    onEpisodePlayClick: (Episode) -> Unit
 ) {
     val state by viewModel.uiState.collectAsState()
 
@@ -141,17 +142,17 @@ fun MovieDetailScreen(
                     Column(modifier = Modifier.padding(16.dp)) {
                         Button(
                             onClick = {
-                                viewModel.loadStreams { streams ->
-                                    if (streams.isNotEmpty()) {
-                                        // Wrap movie into fake Episode (reuse same pipeline)
-                                        val fakeEpisode = Episode(
-                                            id = state.movie?.id ?: "movie",
-                                            title = state.movie?.title ?: "",
-                                            episodeNumber = 1
-                                        )
-                                        onPlayClick(fakeEpisode)
+
+                                viewModel.fetchMovieStreams { links ->
+
+                                    if (links.isNotEmpty()) {
+
+                                        onMoviePlayClick(links)
+
                                     }
+
                                 }
+
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = Color.White),
                             shape = RoundedCornerShape(4.dp),
@@ -263,7 +264,12 @@ fun MovieDetailScreen(
                     val episodesToShow = if (areAllEpisodesVisible) state.episodes else state.episodes.take(10)
 
                     items(episodesToShow) { episode ->
-                        EpisodeItem(episode = episode, onClick = { onPlayClick(episode) })
+                        EpisodeItem(
+                            episode = episode,
+                            onClick = {
+                                onEpisodePlayClick(episode)
+                            }
+                        )
                     }
 
                     // --- "SHOW MORE" ARROW ---

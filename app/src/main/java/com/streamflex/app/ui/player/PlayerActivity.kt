@@ -71,12 +71,20 @@ fun PlayerScreen(videoUrls: ArrayList<String>, onBack: () -> Unit) {
 
     val exoPlayer = remember {
         // Setup fallbacks for testing
-        val urlsToPlay = if (videoUrls.isEmpty() || (videoUrls.size == 1 && (videoUrls[0] == "play" || videoUrls[0] == "play_movie" || videoUrls[0].isEmpty()))) {
-            arrayListOf("https://storage.googleapis.com/exoplayer-test-media-0/BigBuckBunny_320x180.mp4")
-        } else {
-            videoUrls
-        }
+        val urlsToPlay = videoUrls
 
+        if (urlsToPlay.isEmpty()) {
+
+            Toast.makeText(
+                context,
+                "No playable streams found.",
+                Toast.LENGTH_LONG
+            ).show()
+
+            (context as Activity).finish()
+
+            return@remember ExoPlayer.Builder(context).build()
+        }
         // Add User-Agent AND fake Referer to trick the video host
         val userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0"
         val dataSourceFactory = DefaultHttpDataSource.Factory()

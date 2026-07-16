@@ -92,22 +92,67 @@ fun AppNavigation(
             val viewModel: MovieDetailViewModel = viewModel(factory = viewModelFactory)
 
             MovieDetailScreen(
+
                 viewModel = viewModel,
-                onBackClick = { navController.popBackStack() },
-                // UPDATE THIS LINE: Accept a List of URLs
-                onPlayClick = { episode ->
 
-                    viewModel.fetchEpisodeStreams(episode) { links ->
+                onBackClick = {
 
-                        android.util.Log.d("STREAM_DEBUG", "Final URLs going to player: $links")
+                    navController.popBackStack()
 
-                        val intent = Intent(context, PlayerActivity::class.java).apply {
-                            putStringArrayListExtra("VIDEO_URLS", ArrayList(links))
+                },
+
+                onMoviePlayClick = { links ->
+
+                    android.util.Log.d(
+                        "STREAM_DEBUG",
+                        "Movie URLs: $links"
+                    )
+
+                    val intent = Intent(
+                        context,
+                        PlayerActivity::class.java
+                    ).apply {
+
+                        putStringArrayListExtra(
+                            "VIDEO_URLS",
+                            ArrayList(links)
+                        )
+
+                    }
+
+                    context.startActivity(intent)
+
+                },
+
+                onEpisodePlayClick = { episode ->
+
+                    viewModel.fetchEpisodeStreams(
+                        episode
+                    ) { links ->
+
+                        android.util.Log.d(
+                            "STREAM_DEBUG",
+                            "Episode URLs: $links"
+                        )
+
+                        val intent = Intent(
+                            context,
+                            PlayerActivity::class.java
+                        ).apply {
+
+                            putStringArrayListExtra(
+                                "VIDEO_URLS",
+                                ArrayList(links)
+                            )
+
                         }
 
                         context.startActivity(intent)
+
                     }
+
                 }
+
             )
         }
     }
