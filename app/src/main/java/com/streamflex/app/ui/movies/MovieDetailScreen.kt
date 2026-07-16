@@ -145,9 +145,30 @@ fun MovieDetailScreen(
 
                                 viewModel.fetchMovieStreams { links ->
 
+                                    android.util.Log.d(
+                                        "MOVIE_PLAY",
+                                        "Returned ${links.size} links"
+                                    )
+
+                                    links.forEach {
+
+                                        android.util.Log.d(
+                                            "MOVIE_PLAY",
+                                            it
+                                        )
+
+                                    }
+
                                     if (links.isNotEmpty()) {
 
                                         onMoviePlayClick(links)
+
+                                    } else {
+
+                                        android.util.Log.d(
+                                            "MOVIE_PLAY",
+                                            "NO LINKS!"
+                                        )
 
                                     }
 

@@ -100,6 +100,10 @@ class MovieDetailViewModel(
                     return@launch
 
                 }
+                android.util.Log.d(
+                    "MOVIE_DEBUG",
+                    "Resolving movie: ${movie.title} (${movie.year})"
+                )
 
                 val streams = streamRepository.resolveMovie(
 
@@ -108,7 +112,28 @@ class MovieDetailViewModel(
                     year = movie.year
 
                 )
+                android.util.Log.d(
+                    "MOVIE_DEBUG",
+                    "Playable = ${streams.isPlayable}"
+                )
 
+                android.util.Log.d(
+                    "MOVIE_DEBUG",
+                    "Stream count = ${streams.streamCount}"
+                )
+
+                streams.streams.forEachIndexed { index, stream ->
+
+                    android.util.Log.d(
+                        "MOVIE_DEBUG",
+                        "[$index] ${stream.host} | ${stream.quality} | ${stream.url}"
+                    )
+
+                }
+                android.util.Log.d(
+                    "MOVIE_DEBUG",
+                    "Returning ${streams.streams.size} URL(s) to UI"
+                )
                 onResult(
 
                     streams.streams.map {
