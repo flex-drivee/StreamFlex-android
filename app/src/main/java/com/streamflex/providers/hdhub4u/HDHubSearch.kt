@@ -1,5 +1,7 @@
 package com.streamflex.providers.hdhub4u
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import com.streamflex.core.network.HttpClient
 import com.streamflex.core.network.NetworkResult
 import com.streamflex.core.network.RequestBuilder
@@ -12,7 +14,7 @@ class HDHubSearch {
 
     companion object {
 
-        private const val BASE_URL = "https://new2.hdhub4u.cl/?utm=mn1"
+        private const val BASE_URL = "https://new3.hdhub4u.cl"
 
         private const val SEARCH_API =
             "https://search.pingora.fyi/collections/post/documents/search"
@@ -37,78 +39,83 @@ class HDHubSearch {
             .header("Referer", BASE_URL)
             .build()
 
-        return when (val response = HttpClient.execute(request)) {
+        return withContext(Dispatchers.IO) {
 
-            is NetworkResult.Success -> {
+            when (val response = HttpClient.execute(request)) {
 
-                try {
+                is NetworkResult.Success -> {
 
-                    val jsonString =
-                        response.data.body
-                            ?.toString(Charsets.UTF_8)
-                            ?: return emptyList()
+                    try {
 
-                    val json =
-                        JsonParser.parseObject(jsonString)
-                            ?: return emptyList()
+                        val jsonString =
+                            response.data.body
+                                ?.toString(Charsets.UTF_8)
+                                ?: return@withContext emptyList()
 
-                    val hits =
-                        json.optJSONArray("hits")
-                            ?: return emptyList()
+                        val json =
+                            JsonParser.parseObject(jsonString)
+                                ?: return@withContext emptyList()
 
-                    for (i in 0 until hits.length()) {
+                        val hits =
+                            json.optJSONArray("hits")
+                                ?: return@withContext emptyList()
 
-                        val document = hits
-                            .getJSONObject(i)
-                            .getJSONObject("document")
+                        for (i in 0 until hits.length()) {
 
-                        val title =
-                            document.optString("post_title")
+                            val document = hits
+                                .getJSONObject(i)
+                                .getJSONObject("document")
 
-                        val permalink =
-                            document.optString("permalink")
+                            val title =
+                                document.optString("post_title")
 
-                        val poster =
-                            document.optString("post_thumbnail")
-                                .takeIf { it.isNotBlank() }
+                            val permalink =
+                                document.optString("permalink")
 
-                        val detailUrl =
-                            if (permalink.startsWith("http"))
-                                permalink
-                            else
-                                BASE_URL + permalink
+                            val poster =
+                                document.optString("post_thumbnail")
+                                    .takeIf { it.isNotBlank() }
 
-                        val category =
-                            document.optString("category")
-                                .lowercase()
+                            val detailUrl =
+                                if (permalink.startsWith("http"))
+                                    permalink
+                                else
+                                    BASE_URL + permalink
 
-                        val mediaType =
-                            if (
-                                category.contains("series") ||
-                                category.contains("tv")
-                            ) {
-                                MediaType.TV
-                            } else {
-                                MediaType.MOVIE
-                            }
+                            val category =
+                                document.optString("category")
+                                    .lowercase()
 
-                        results += HDHubMapper.toSearchResult(
-                            title = title,
-                            detailUrl = detailUrl,
-                            poster = poster,
-                            year = null,
-                            mediaType = mediaType
-                        )
+                            val mediaType =
+                                if (
+                                    category.contains("series") ||
+                                    category.contains("tv")
+                                ) {
+                                    MediaType.TV
+                                } else {
+                                    MediaType.MOVIE
+                                }
+
+                            results += HDHubMapper.toSearchResult(
+                                title = title,
+                                detailUrl = detailUrl,
+                                poster = poster,
+                                year = null,
+                                mediaType = mediaType
+                            )
+                        }
+
+                    } catch (_: Exception) {
+
+                        return@withContext emptyList()
+
                     }
 
-                } catch (_: Exception) {
-                    return emptyList()
+                    results
                 }
 
-                results
+                else -> emptyList()
             }
-
-            else -> emptyList()
         }
     }
 }

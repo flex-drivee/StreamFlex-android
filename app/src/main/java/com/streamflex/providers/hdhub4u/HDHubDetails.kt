@@ -140,7 +140,7 @@ class HDHubDetails {
     /**
      * Implement in Part 2.
      */
-    private fun parseSources(
+    private suspend fun parseSources(
         html: String
     ): List<ProviderSource> {
 
@@ -162,6 +162,21 @@ class HDHubDetails {
         article a
         """.trimIndent()
         )
+        StreamLogger.debug(
+            "HDHubDetails",
+            "Found ${elements.size} candidate <a> tags"
+        )
+
+        StreamLogger.debug(
+            "HDHubDetails",
+            "Document title: ${document.title()}"
+        )
+
+        StreamLogger.debug(
+            "HDHubDetails",
+            "Body length: ${document.body()?.text()?.length ?: 0}"
+        )
+
 
         val visited = mutableSetOf<String>()
 
@@ -170,6 +185,10 @@ class HDHubDetails {
             var url = HtmlParser.absUrl(
                 element,
                 "href"
+            )
+            StreamLogger.debug(
+                "HDHubDetails",
+                "Raw URL: $url"
             )
 
             if (url.isBlank()) {
@@ -185,16 +204,32 @@ class HDHubDetails {
             if (!visited.add(url))
                 continue
 
-            if (shouldSkip(url))
+            if (shouldSkip(url)) {
+
+                StreamLogger.warn(
+                    "HDHubDetails",
+                    "Skipped: $url"
+                )
+
                 continue
+            }
 
             //----------------------------------------------------
             // HDHub redirect page
             //----------------------------------------------------
-
             if (url.contains("?id=")) {
 
+                StreamLogger.debug(
+                    "HDHubDetails",
+                    "Redirect page: $url"
+                )
+
                 url = decodeRedirect(url)
+
+                StreamLogger.debug(
+                    "HDHubDetails",
+                    "Decoded redirect: $url"
+                )
 
                 if (url.isBlank())
                     continue
@@ -203,6 +238,11 @@ class HDHubDetails {
             //----------------------------------------------------
             // Detect host
             //----------------------------------------------------
+
+            StreamLogger.debug(
+                "HDHubDetails",
+                "Detecting host for: $url"
+            )
 
             val hostType = HostDetector.detect(url)
             StreamLogger.debug(
@@ -273,7 +313,7 @@ class HDHubDetails {
     /**
      * Implement in Part 4.
      */
-    private fun normalizeUrl(
+    private suspend fun normalizeUrl(
         url: String
     ): String {
 
@@ -288,7 +328,7 @@ class HDHubDetails {
     @Volatile
     private var cachedDomain: String? = null
 
-    private fun getActiveDomain(): String {
+    private suspend fun getActiveDomain(): String {
 
         cachedDomain?.let {
             return it
@@ -342,7 +382,8 @@ class HDHubDetails {
         }
     }
 
-    private fun decodeRedirect(
+
+    private suspend fun decodeRedirect(
         url: String
     ): String {
 
@@ -359,6 +400,11 @@ class HDHubDetails {
                 is NetworkResult.Success -> {
 
                     val html = response.data.bodyAsString()
+                    html.lines()
+                        .take(200)
+                        .forEach {
+                            android.util.Log.d("HDHUB_HTML", it)
+                        }
                     StreamLogger.debug(
                         "HDHubDetails",
                         "Downloaded HTML (${html.length} chars)"

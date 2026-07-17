@@ -1,5 +1,7 @@
 package com.streamflex.core.network
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import com.streamflex.core.logger.Logger
 import okhttp3.JavaNetCookieJar
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -57,12 +59,15 @@ object HttpClient {
         return builder.build()
     }
 
-    fun execute(request: NetworkRequest): NetworkResult<NetworkResponse> {
+    suspend fun execute(
+        request: NetworkRequest
+    ): NetworkResult<NetworkResponse> = withContext(Dispatchers.IO) {
 
-        return try {
+        try {
 
             val builder = Request.Builder()
                 .url(request.url)
+
             request.headers.forEach { (key, value) ->
                 builder.addHeader(key, value)
             }
@@ -130,7 +135,6 @@ object HttpClient {
             )
 
             NetworkResult.Exception(e)
-
         }
     }
 

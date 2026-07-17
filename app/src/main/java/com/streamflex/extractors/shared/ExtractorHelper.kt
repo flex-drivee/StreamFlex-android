@@ -21,7 +21,7 @@ object ExtractorHelper {
     /**
      * Execute GET request.
      */
-    fun get(
+    suspend fun get(
         url: String,
         headers: Map<String, String> = emptyMap()
     ): NetworkResult<NetworkResponse> {
@@ -39,7 +39,7 @@ object ExtractorHelper {
     /**
      * Download raw text.
      */
-    fun getText(
+    suspend fun getText(
         url: String,
         headers: Map<String, String> = emptyMap()
     ): String {
@@ -57,7 +57,7 @@ object ExtractorHelper {
     /**
      * Download HTML.
      */
-    fun getHtml(
+    suspend fun getHtml(
         url: String,
         headers: Map<String, String> = emptyMap()
     ): String {
@@ -68,7 +68,7 @@ object ExtractorHelper {
     /**
      * Download and parse HTML.
      */
-    fun fetchDocument(
+    suspend fun fetchDocument(
         url: String,
         headers: Map<String, String> = emptyMap()
     ): Document {
@@ -113,7 +113,7 @@ object ExtractorHelper {
     /**
      * Returns true if request succeeded.
      */
-    fun exists(
+    suspend fun exists(
         url: String,
         headers: Map<String, String> = emptyMap()
     ): Boolean {

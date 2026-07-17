@@ -15,7 +15,7 @@ object HDHubConfig {
      * Default full-site domain.
      * Updated whenever HDHub changes domains.
      */
-    const val DEFAULT_DOMAIN = "https://new2.hdhub4u.cl"
+    const val DEFAULT_DOMAIN = "https://new3.hdhub4u.cl"
 
     /**
      * Search API.

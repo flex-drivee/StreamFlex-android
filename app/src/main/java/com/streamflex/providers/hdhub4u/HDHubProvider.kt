@@ -27,7 +27,7 @@ class HDHubProvider : Provider {
     override val name = "HDHub4u"
 
     override val baseUrl =
-        "https://new2.hdhub4u.cl/?utm=mn1"
+        "https://new3.hdhub4u.cl"
 
     override val supportedMedia = setOf(
         MediaType.MOVIE,

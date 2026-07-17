@@ -118,6 +118,10 @@ object HostDetector {
             lowerUrl.contains("?r=") ->
 
                 return HostType.REDIRECT
+
+            lowerUrl.contains("?id=") ->
+
+                return HostType.REDIRECT
         }
 
         return HostType.UNKNOWN
