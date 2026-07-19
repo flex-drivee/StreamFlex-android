@@ -24,7 +24,7 @@ object HDHubConfig {
         "https://search.pingora.fyi/collections/post/documents/search"
 
     /**
-     * Remote domain configuration.
+     * Remote domain configuration.!
      */
     const val DOMAIN_CONFIG_URL =
         "https://raw.githubusercontent.com/phisher98/TVVVV/refs/heads/main/domains.json"
