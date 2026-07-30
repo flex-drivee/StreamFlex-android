@@ -66,6 +66,10 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.9"
     }
+
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
 }
 
 dependencies {

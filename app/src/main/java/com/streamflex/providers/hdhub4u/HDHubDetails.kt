@@ -5,55 +5,53 @@ import com.streamflex.core.network.detector.QualityDetector
 import com.streamflex.core.network.HttpClient
 import com.streamflex.core.network.NetworkResult
 import com.streamflex.core.network.RequestBuilder
-import com.streamflex.domain.models.MediaType
-import com.streamflex.domain.models.ProviderResult
-import com.streamflex.domain.models.ProviderSource
-import com.streamflex.domain.models.SearchResult
+import com.streamflex.core.parser.DetailParser
 import com.streamflex.core.parser.HtmlParser
+import com.streamflex.core.parser.SourceParser
+import com.streamflex.core.parser.TransportResult
 import com.streamflex.core.utils.StreamLogger
+import com.streamflex.domain.models.HostType
+import com.streamflex.domain.models.MediaType
+import com.streamflex.domain.models.ProviderEpisode
+import com.streamflex.domain.models.ProviderResult
+import com.streamflex.domain.models.ProviderSeason
+import com.streamflex.domain.models.ProviderSource
+import com.streamflex.domain.models.Quality
+import com.streamflex.domain.models.SearchResult
+import org.jsoup.nodes.Document
+import org.jsoup.nodes.Element
 
 /**
- * Loads a movie/episode detail page and extracts provider sources.
+ * HDHub4U Detail Parser implementation (Phase 1.3 & Phase 1.7).
  *
- * This class DOES NOT resolve playable streams.
- * It only discovers host pages (HubCloud, HubDrive, etc.).
+ * Implements [DetailParser]:
+ * - Scrapes movie/show metadata and returns canonical [ProviderResult]
+ *   (with movie sources OR TV seasons/episodes).
+ *
+ * Consistent with Phase 1.7 roadmap rules:
+ *   - Does NOT implement redirect unwrapping (e.g. WP ?id= decoding).
+ *   - Does NOT resolve iframes or run extractors.
+ *   - ResolverEngine & ExtractorManager own the entire resolution pipeline.
  */
-class HDHubDetails {
+class HDHubDetails : DetailParser {
 
     companion object {
         private const val PROVIDER_ID = "hdhub4u"
+        private const val PROVIDER_NAME = "HDHub4u"
+        private const val TAG = "HDHubDetails"
     }
 
-
+    private val sourceParser = HDHubSourceParser()
 
     /**
-     * Load a movie detail page.
+     * Load detail page via network call and delegate to [parse].
      */
     suspend fun load(
         result: SearchResult
     ): ProviderResult {
 
         val pageUrl = normalizeUrl(result.url)
-        StreamLogger.info(
-            "HDHubDetails",
-            "Loading detail page"
-        )
-
-        StreamLogger.debug(
-            "HDHubDetails",
-            "Title: ${result.title}"
-        )
-
-        StreamLogger.debug(
-            "HDHubDetails",
-            "MediaType: ${result.mediaType}"
-        )
-
-        StreamLogger.debug(
-            "HDHubDetails",
-            "URL: $pageUrl"
-        )
-
+        StreamLogger.info(TAG, "Loading detail page: $pageUrl (${result.mediaType})")
 
         val request = RequestBuilder()
             .url(pageUrl)
@@ -62,442 +60,201 @@ class HDHubDetails {
             .build()
 
         return when (val response = HttpClient.execute(request)) {
-
             is NetworkResult.Success -> {
-
                 val html = response.data.bodyAsString()
-                StreamLogger.debug(
-                    "HDHubDetails",
-                    "Downloaded HTML (${html.length} chars)"
+                StreamLogger.debug(TAG, "Downloaded HTML (${html.length} chars)")
+
+                val transport = TransportResult.HtmlResponse(
+                    html = html,
+                    url = pageUrl
                 )
+                val parsed = parse(transport, pageUrl)
 
-                if (result.mediaType == MediaType.MOVIE) {
-
-                    val sources = parseSources(html)
-                    StreamLogger.info(
-                        "HDHubDetails",
-                        "Found ${sources.size} provider source(s)"
-                    )
-
-                    sources.forEachIndexed { index, source ->
-
-                        StreamLogger.debug(
-                            "HDHubDetails",
-                            "Source ${index + 1}: ${source.hostType} | ${source.url}"
-                        )
-                    }
-
-                    HDHubMapper.toProviderResult(
-                        providerId = PROVIDER_ID,
-                        title = result.title,
-                        detailUrl = pageUrl,
-                        sources = sources,
-                        mediaType = result.mediaType,
-                        year = result.year,
-                        poster = result.poster
-                    )
-
-                } else {
-                    StreamLogger.warn(
-                        "HDHubDetails",
-                        "TV detail page detected - season parser not implemented yet"
-                    )
-
-                    // TV support will be implemented later.
-
-                    HDHubMapper.toProviderResult(
-                        providerId = PROVIDER_ID,
-                        title = result.title,
-                        detailUrl = pageUrl,
-                        seasons = emptyList(),
-                        mediaType = result.mediaType,
-                        year = result.year,
-                        poster = result.poster
-                    )
-                }
+                val newTitle = if (parsed.title.isNotBlank() && parsed.title != pageUrl) parsed.title else result.title
+                HDHubMapper.toProviderResult(
+                    providerId = PROVIDER_ID,
+                    title = newTitle,
+                    detailUrl = pageUrl,
+                    sources = parsed.sources,
+                    mediaType = result.mediaType,
+                    seasons = parsed.seasons,
+                    year = parsed.year ?: result.year,
+                    poster = parsed.poster ?: result.poster,
+                    overview = parsed.overview,
+                    success = parsed.success,
+                    error = parsed.error
+                )
             }
-
             else -> {
-                StreamLogger.error(
-                    "HDHubDetails",
-                    "Failed to load detail page: $pageUrl (${response})"
-                )
+                StreamLogger.error(TAG, "Failed to load detail page: $pageUrl ($response)")
                 HDHubMapper.toProviderResult(
                     providerId = PROVIDER_ID,
                     title = result.title,
                     detailUrl = pageUrl,
                     sources = emptyList(),
                     mediaType = result.mediaType,
-                    year = result.year,
-                    poster = result.poster,
                     success = false,
-                    error = "Failed to load detail page."
+                    error = "HTTP request failed"
                 )
             }
         }
     }
 
-    /**
-     * Implement in Part 2.
-     */
-    private suspend fun parseSources(
-        html: String
-    ): List<ProviderSource> {
+    override fun parse(raw: TransportResult, detailUrl: String): ProviderResult {
+        val html = raw.asString()
+        if (html.isBlank()) {
+            return HDHubMapper.toProviderResult(
+                providerId = PROVIDER_ID,
+                title = detailUrl,
+                detailUrl = detailUrl,
+                mediaType = MediaType.MOVIE,
+                success = false,
+                error = "Empty HTML content"
+            )
+        }
 
         val document = HtmlParser.parse(html)
+        val title = extractTitle(document, detailUrl)
+        val poster = extractPoster(document)
+        val plot = extractOverview(document)
+        val isSeries = isTvSeries(document, detailUrl)
 
-        val sources = mutableListOf<ProviderSource>()
-        StreamLogger.debug(
-            "HDHubDetails",
-            "Scanning HTML for provider links"
-        )
+        val mediaType = if (isSeries) MediaType.TV else MediaType.MOVIE
 
-        val elements = HtmlParser.select(
-            document,
-            """
-        h3 a,
-        h4 a,
-        .page-body a,
-        .entry-content a,
-        article a
-        """.trimIndent()
-        )
-        StreamLogger.debug(
-            "HDHubDetails",
-            "Found ${elements.size} candidate <a> tags"
-        )
+        if (mediaType == MediaType.MOVIE) {
+            val sources = sourceParser.parseDocument(document, detailUrl)
+            StreamLogger.info(TAG, "Found ${sources.size} movie provider source(s)")
 
-        StreamLogger.debug(
-            "HDHubDetails",
-            "Document title: ${document.title()}"
-        )
-
-        StreamLogger.debug(
-            "HDHubDetails",
-            "Body length: ${document.body()?.text()?.length ?: 0}"
-        )
-
-
-        val visited = mutableSetOf<String>()
-
-        for (element in elements) {
-
-            var url = HtmlParser.absUrl(
-                element,
-                "href"
+            return HDHubMapper.toProviderResult(
+                providerId = PROVIDER_ID,
+                title = title,
+                detailUrl = detailUrl,
+                sources = sources,
+                mediaType = MediaType.MOVIE,
+                poster = poster,
+                overview = plot
             )
-            StreamLogger.debug(
-                "HDHubDetails",
-                "Raw URL: $url"
+        } else {
+            val seasons = parseSeasons(document, detailUrl)
+            StreamLogger.info(TAG, "Found ${seasons.size} season(s) with TV episodes")
+
+            return HDHubMapper.toProviderResult(
+                providerId = PROVIDER_ID,
+                title = title,
+                detailUrl = detailUrl,
+                seasons = seasons,
+                mediaType = MediaType.TV,
+                poster = poster,
+                overview = plot
             )
+        }
+    }
 
-            if (url.isBlank()) {
-                url = HtmlParser.attr(
-                    element,
-                    "href"
-                )
-            }
+    // ─── TV Shows (Season & Episode) Parsing (inspired by CloudStream reference) ───
 
-            if (url.isBlank())
-                continue
+    private fun parseSeasons(
+        document: Document,
+        detailUrl: String
+    ): List<ProviderSeason> {
+        val epLinksMap = mutableMapOf<Int, MutableList<String>>()
+        val episodeRegex = Regex("EPiSODE\\s*(\\d+)", RegexOption.IGNORE_CASE)
 
-            if (!visited.add(url))
-                continue
-
-            if (shouldSkip(url)) {
-
-                StreamLogger.warn(
-                    "HDHubDetails",
-                    "Skipped: $url"
-                )
-
-                continue
-            }
-
-            //----------------------------------------------------
-            // HDHub redirect page
-            //----------------------------------------------------
-            if (url.contains("?id=")) {
-
-                StreamLogger.debug(
-                    "HDHubDetails",
-                    "Redirect page: $url"
-                )
-
-                url = decodeRedirect(url)
-
-                StreamLogger.debug(
-                    "HDHubDetails",
-                    "Decoded redirect: $url"
-                )
-
-                if (url.isBlank())
-                    continue
-            }
-
-            //----------------------------------------------------
-            // Detect host
-            //----------------------------------------------------
-
-            StreamLogger.debug(
-                "HDHubDetails",
-                "Detecting host for: $url"
-            )
-
-            val hostType = HostDetector.detect(url)
-            StreamLogger.debug(
-                "HDHubDetails",
-                "Detected host: $hostType"
-            )
-
-            if (hostType == com.streamflex.domain.models.HostType.UNKNOWN)
-
-                continue
-
-            StreamLogger.debug(
-                "HDHubDetails",
-                "Detected host: $hostType"
-            )
-            //----------------------------------------------------
-            // Detect quality
-            //----------------------------------------------------
-
-            val quality = QualityDetector.detect(
-
-                text = buildString {
-
-                    append(
-                        HtmlParser.text(element)
-                    )
-                    append(" ")
-                    append(url)
-
+        document.select("h3, h4").forEach { element ->
+            val epNum = episodeRegex.find(element.text())?.groupValues?.get(1)?.toIntOrNull()
+            if (epNum != null) {
+                val baseLinks = element.select("a[href]").mapNotNull {
+                    it.attr("href").takeIf { u -> u.isNotBlank() && !sourceParser.shouldSkipUrl(u) }
                 }
-            )
+                val allLinks = mutableSetOf<String>()
+                allLinks.addAll(baseLinks)
 
-            //----------------------------------------------------
-            // Create ProviderSource
-            //----------------------------------------------------
+                if (element.tagName() == "h4" || element.tagName() == "h3") {
+                    var nextElement: Element? = element.nextElementSibling()
+                    while (nextElement != null && nextElement.tagName() != "hr" && nextElement.tagName() != "h3" && nextElement.tagName() != "h4") {
+                        val siblingLinks = nextElement.select("a[href]").mapNotNull {
+                            it.attr("href").takeIf { u -> u.isNotBlank() && !sourceParser.shouldSkipUrl(u) }
+                        }
+                        allLinks.addAll(siblingLinks)
+                        nextElement = nextElement.nextElementSibling()
+                    }
+                }
 
-            sources += HDHubMapper.toProviderSource(
-
-                provider = PROVIDER_ID,
-
-                host = hostType.name,
-
-                hostType = hostType,
-
-                url = url,
-
-                quality = quality,
-
-                referer = HDHubConfig.DEFAULT_DOMAIN,
-
-                cookies = mapOf(
-                    "xla" to "s4t"
-                )
-            )
-        }
-
-        val finalSources =
-            sources.distinctBy { it.url }
-
-        StreamLogger.info(
-            "HDHubDetails",
-            "Returning ${finalSources.size} unique provider source(s)"
-        )
-
-        return finalSources
-    }
-
-    /**
-     * Implement in Part 4.
-     */
-    private suspend fun normalizeUrl(
-        url: String
-    ): String {
-
-        val domain = getActiveDomain()
-
-        return url.replace(
-            Regex("https?://[^/]+"),
-            domain
-        )
-    }
-
-    @Volatile
-    private var cachedDomain: String? = null
-
-    private suspend fun getActiveDomain(): String {
-
-        cachedDomain?.let {
-            return it
-        }
-
-        val request = RequestBuilder()
-            .url(HDHubConfig.DOMAIN_CONFIG_URL)
-            .build()
-
-        val domain = when (val response = HttpClient.execute(request)) {
-
-            is NetworkResult.Success -> {
-
-                val json = response.data.bodyAsString()
-
-                val obj = com.streamflex.core.parser.JsonParser
-                    .parseObject(json)
-
-                obj?.optString(
-                    "HDHUB4u",
-                    HDHubConfig.DEFAULT_DOMAIN
-                ) ?: HDHubConfig.DEFAULT_DOMAIN
+                if (allLinks.isNotEmpty()) {
+                    epLinksMap.getOrPut(epNum) { mutableListOf() }.addAll(allLinks.distinct())
+                }
             }
-
-            else -> HDHubConfig.DEFAULT_DOMAIN
         }
 
-        cachedDomain = domain
+        if (epLinksMap.isEmpty()) return emptyList()
 
-        return domain
-    }
-    private fun shouldSkip(
-        url: String
-    ): Boolean {
-
-        val lower = url.lowercase()
+        val episodes = epLinksMap.toSortedMap().map { (epNum, links) ->
+            val epSources = links.mapNotNull { url ->
+                var hostType = HostDetector.detect(url)
+                if (hostType == HostType.UNKNOWN && url.contains("?id=")) {
+                    hostType = HostType.REDIRECT
+                }
+                if (hostType == HostType.UNKNOWN) null
+                else {
+                    HDHubMapper.toProviderSource(
+                        provider = PROVIDER_NAME,
+                        host = hostType.name,
+                        hostType = hostType,
+                        url = url,
+                        quality = Quality.UNKNOWN,
+                        referer = detailUrl
+                    )
+                }
+            }
+            ProviderEpisode(
+                number = epNum,
+                title = "Episode $epNum",
+                sources = epSources
+            )
+        }
 
         return listOf(
+            ProviderSeason(
+                number = 1,
+                title = "Season 1",
+                episodes = episodes
+            )
+        )
+    }
 
-            "facebook",
-            "twitter",
-            "telegram",
-            "discord",
-            "imdb",
-            "/tag/",
-            "/category/",
-            "how-to-download"
+    // ─── Metadata Helpers ─────────────────────────────────────────────────────
 
-        ).any {
-            lower.contains(it)
+    private fun extractTitle(document: Document, fallback: String): String {
+        val titleEl = document.selectFirst(
+            ".page-body h2[data-ved], h2[data-ved], h1.page-title span, h1.page-title"
+        )
+        val text = titleEl?.text()?.trim()
+        return if (!text.isNullOrBlank()) text else fallback
+    }
+
+    private fun extractPoster(document: Document): String? {
+        return document.selectFirst("meta[property=og:image]")?.attr("content")
+            ?: document.selectFirst("main.page-body img.aligncenter")?.attr("src")
+    }
+
+    private fun extractOverview(document: Document): String? {
+        return document.selectFirst(".kno-rdesc, .page-body p, p")?.text()?.trim()
+    }
+
+    private fun isTvSeries(document: Document, detailUrl: String): Boolean {
+        val titleText = document.selectFirst("h1.page-title span, h1.page-title")?.text() ?: ""
+        if (titleText.contains("series", ignoreCase = true) || titleText.contains("season", ignoreCase = true)) {
+            return true
+        }
+        if (detailUrl.contains("/series/") || detailUrl.contains("/web-series/") || detailUrl.contains("season")) {
+            return true
+        }
+        return document.select("h3, h4").any { el ->
+            el.text().contains("EPiSODE", ignoreCase = true)
         }
     }
 
-
-    private suspend fun decodeRedirect(
-        url: String
-    ): String {
-
-        return runCatching {
-
-            val request = RequestBuilder()
-                .url(url)
-                .header("Referer", HDHubConfig.DEFAULT_DOMAIN)
-                .header("Cookie", HDHubConfig.COOKIE)
-                .build()
-
-            when (val response = HttpClient.execute(request)) {
-
-                is NetworkResult.Success -> {
-
-                    val html = response.data.bodyAsString()
-                    html.lines()
-                        .take(200)
-                        .forEach {
-                            android.util.Log.d("HDHUB_HTML", it)
-                        }
-                    StreamLogger.debug(
-                        "HDHubDetails",
-                        "Downloaded HTML (${html.length} chars)"
-                    )
-
-                    val regex =
-                        """s\('o','([A-Za-z0-9+/=]+)'|ck\('_wp_http_\d+','([^']+)'"""
-                            .toRegex()
-
-                    val encoded = buildString {
-
-                        regex.findAll(html).forEach {
-
-                            val value =
-                                it.groups[1]?.value
-                                    ?: it.groups[2]?.value
-
-                            if (!value.isNullOrBlank()) {
-                                append(value)
-                            }
-                        }
-                    }
-
-                    if (encoded.isBlank()) {
-                        return url
-                    }
-
-                    val step1 = String(
-                        android.util.Base64.decode(
-                            encoded,
-                            android.util.Base64.DEFAULT
-                        )
-                    )
-
-                    val step2 = String(
-                        android.util.Base64.decode(
-                            step1,
-                            android.util.Base64.DEFAULT
-                        )
-                    )
-
-                    val step3 = pen(step2)
-
-                    val decoded = String(
-                        android.util.Base64.decode(
-                            step3,
-                            android.util.Base64.DEFAULT
-                        )
-                    )
-
-                    val json =
-                        com.streamflex.core.parser.JsonParser
-                            .parseObject(decoded)
-
-                    val encodedUrl =
-                        json?.optString("o")
-                            ?.takeIf { it.isNotBlank() }
-                            ?.let {
-
-                                String(
-                                    android.util.Base64.decode(
-                                        it,
-                                        android.util.Base64.DEFAULT
-                                    )
-                                )
-                            }
-
-                    encodedUrl ?: url
-                }
-
-                else -> url
-            }
-
-        }.getOrDefault(url)
-    }
-    private fun pen(
-        value: String
-    ): String {
-
-        return value.map {
-
-            when (it) {
-
-                in 'A'..'Z' ->
-                    ((it - 'A' + 13) % 26 + 'A'.code).toChar()
-
-                in 'a'..'z' ->
-                    ((it - 'a' + 13) % 26 + 'a'.code).toChar()
-
-                else ->
-                    it
-            }
-
-        }.joinToString("")
+    private fun normalizeUrl(url: String): String {
+        return if (url.startsWith("http")) url
+        else HDHubConfig.DEFAULT_DOMAIN.trimEnd('/') + "/" + url.trimStart('/')
     }
 }

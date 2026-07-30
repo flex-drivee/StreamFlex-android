@@ -7,15 +7,27 @@ object StreamLogger {
     private const val TAG = "STREAM_PIPELINE"
 
     fun info(stage: String, message: String) {
-        Log.i(TAG, "[$stage] $message")
+        runCatching {
+            Log.i(TAG, "[$stage] $message")
+        }.onFailure {
+            println("INFO [$TAG] [$stage] $message")
+        }
     }
 
     fun debug(stage: String, message: String) {
-        Log.d(TAG, "[$stage] $message")
+        runCatching {
+            Log.d(TAG, "[$stage] $message")
+        }.onFailure {
+            println("DEBUG [$TAG] [$stage] $message")
+        }
     }
 
     fun warn(stage: String, message: String) {
-        Log.w(TAG, "[$stage] $message")
+        runCatching {
+            Log.w(TAG, "[$stage] $message")
+        }.onFailure {
+            println("WARN [$TAG] [$stage] $message")
+        }
     }
 
     fun error(
@@ -23,6 +35,10 @@ object StreamLogger {
         message: String,
         throwable: Throwable? = null
     ) {
-        Log.e(TAG, "[$stage] $message", throwable)
+        runCatching {
+            Log.e(TAG, "[$stage] $message", throwable)
+        }.onFailure {
+            println("ERROR [$TAG] [$stage] $message (${throwable?.message})")
+        }
     }
 }

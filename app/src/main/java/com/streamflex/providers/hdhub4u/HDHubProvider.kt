@@ -144,7 +144,7 @@ class HDHubProvider(
     override suspend fun search(query: String): List<SearchResult> {
         ensureDomain()
         return runCatching {
-            searchImpl.search(query = query)
+            searchImpl.search(query = query, baseUrl = baseUrl)
         }.onFailure {
             Logger.e("[$id] Search failed for '$query': ${it.message}", TAG)
         }.getOrDefault(emptyList())

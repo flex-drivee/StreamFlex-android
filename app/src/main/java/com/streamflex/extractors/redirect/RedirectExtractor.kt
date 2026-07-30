@@ -90,6 +90,23 @@ class RedirectExtractor : BaseExtractor() {
                     .forEach(candidates::add)
             }
 
+        // ---------- HDHub4u / WP Encoded Redirects ----------
+        val html = document.html()
+        val wpRegex = """s\('o','([A-Za-z0-9+/=]+)'|ck\('_wp_http_\d+','([^']+)'""".toRegex()
+        val combinedEncoded = buildString {
+            wpRegex.findAll(html).forEach { matchResult ->
+                val extractedValue = matchResult.groups[1]?.value ?: matchResult.groups[2]?.value
+                if (!extractedValue.isNullOrEmpty()) append(extractedValue)
+            }
+        }
+        if (combinedEncoded.isNotEmpty()) {
+            decodeWpRedirect(combinedEncoded)?.let { decodedUrl ->
+                if (decodedUrl.isNotBlank() && decodedUrl.startsWith("http")) {
+                    candidates += decodedUrl
+                }
+            }
+        }
+
         if (candidates.isEmpty()) {
             return ExtractionResult()
         }
@@ -140,5 +157,47 @@ class RedirectExtractor : BaseExtractor() {
         return ExtractionResult(
             sources = nextSources.distinctBy { it.url }
         )
+    }
+
+    /**
+     * Helper to decode Base64 safely across Android devices and JVM unit tests.
+     */
+    private fun decodeBase64Safe(input: String): ByteArray {
+        return try {
+            val res = android.util.Base64.decode(input, android.util.Base64.DEFAULT)
+            if (res != null && res.isNotEmpty()) res
+            else java.util.Base64.getDecoder().decode(input)
+        } catch (_: Exception) {
+            java.util.Base64.getDecoder().decode(input)
+        }
+    }
+
+    /**
+     * Decodes WordPress / HDHub4u base64 + rot13 script redirects.
+     * Inspired by CloudStream HDhub4u reference Utils.kt (getRedirectLinks).
+     */
+    private fun decodeWpRedirect(combined: String): String? {
+        return try {
+            val b1 = decodeBase64Safe(combined)
+            val b2 = decodeBase64Safe(String(b1))
+            val rot13 = String(b2).map { ch ->
+                when (ch) {
+                    in 'A'..'Z' -> ((ch - 'A' + 13) % 26 + 'A'.code).toChar()
+                    in 'a'..'z' -> ((ch - 'a' + 13) % 26 + 'a'.code).toChar()
+                    else -> ch
+                }
+            }.joinToString("")
+            val b3 = decodeBase64Safe(rot13)
+            val jsonStr = String(b3, Charsets.UTF_8)
+            val root = com.streamflex.core.parser.JsonParser.parse(jsonStr)
+            val encodedUrl = com.streamflex.core.parser.JsonParser.string(root, "o")?.trim() ?: ""
+            if (encodedUrl.isNotEmpty()) {
+                String(decodeBase64Safe(encodedUrl), Charsets.UTF_8).trim()
+            } else {
+                null
+            }
+        } catch (_: Exception) {
+            null
+        }
     }
 }

@@ -19,27 +19,27 @@ object Logger {
     // ─── Convenience methods ─────────────────────────────────────────────────
 
     fun v(message: String, tag: String = DEFAULT_TAG) {
-        if (enabled) Log.v(tag, message)
+        if (enabled) runCatching { Log.v(tag, message) }.onFailure { println("VERBOSE [$tag] $message") }
     }
 
     fun d(message: String, tag: String = DEFAULT_TAG) {
-        if (enabled) Log.d(tag, message)
+        if (enabled) runCatching { Log.d(tag, message) }.onFailure { println("DEBUG [$tag] $message") }
     }
 
     fun i(message: String, tag: String = DEFAULT_TAG) {
-        if (enabled) Log.i(tag, message)
+        if (enabled) runCatching { Log.i(tag, message) }.onFailure { println("INFO [$tag] $message") }
     }
 
     fun w(message: String, tag: String = DEFAULT_TAG) {
-        if (enabled) Log.w(tag, message)
+        if (enabled) runCatching { Log.w(tag, message) }.onFailure { println("WARN [$tag] $message") }
     }
 
     fun e(message: String, tag: String = DEFAULT_TAG) {
-        if (enabled) Log.e(tag, message)
+        if (enabled) runCatching { Log.e(tag, message) }.onFailure { println("ERROR [$tag] $message") }
     }
 
     fun e(message: String, throwable: Throwable, tag: String = DEFAULT_TAG) {
-        if (enabled) Log.e(tag, message, throwable)
+        if (enabled) runCatching { Log.e(tag, message, throwable) }.onFailure { println("ERROR [$tag] $message (${throwable.message})") }
     }
 
     // ─── Programmatic level dispatch ─────────────────────────────────────────
@@ -47,11 +47,11 @@ object Logger {
     fun log(level: Level, message: String, tag: String = DEFAULT_TAG) {
         if (!enabled) return
         when (level) {
-            Level.VERBOSE -> Log.v(tag, message)
-            Level.DEBUG   -> Log.d(tag, message)
-            Level.INFO    -> Log.i(tag, message)
-            Level.WARN    -> Log.w(tag, message)
-            Level.ERROR   -> Log.e(tag, message)
+            Level.VERBOSE -> v(message, tag)
+            Level.DEBUG   -> d(message, tag)
+            Level.INFO    -> i(message, tag)
+            Level.WARN    -> w(message, tag)
+            Level.ERROR   -> e(message, tag)
         }
     }
 }
