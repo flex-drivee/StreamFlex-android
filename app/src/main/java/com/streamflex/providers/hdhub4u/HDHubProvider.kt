@@ -43,8 +43,8 @@ import com.streamflex.domain.provider.Provider
  * Our approach: lazy, coroutine-native, 5-step, persisted.
  */
 class HDHubProvider(
-    private val resolver     : DomainResolver,
-    private val cacheManager : CacheManager
+    private val cacheManager : CacheManager = CacheManager(),
+    private val resolver     : DomainResolver = DomainResolver(cacheManager)
 ) : Provider {
 
     override val id   = HDHubConfig.PROVIDER_ID
@@ -142,9 +142,9 @@ class HDHubProvider(
      * stable CDN-backed endpoint that doesn't require domain resolution itself.
      */
     override suspend fun search(query: String): List<SearchResult> {
-        val domain = ensureDomain()
+        ensureDomain()
         return runCatching {
-            searchImpl.search(query = query, baseUrl = domain)
+            searchImpl.search(query = query)
         }.onFailure {
             Logger.e("[$id] Search failed for '$query': ${it.message}", TAG)
         }.getOrDefault(emptyList())
@@ -160,11 +160,10 @@ class HDHubProvider(
      * Returns null on failure — the engine falls back to the next provider.
      */
     override suspend fun load(searchResult: SearchResult): ProviderResult? {
-        val domain = ensureDomain()
+        ensureDomain()
         return runCatching {
             detailsImpl.load(
-                searchResult = searchResult,
-                baseUrl      = domain
+                result = searchResult
             )
         }.onFailure {
             Logger.e("[$id] Load failed for '${searchResult.title}': ${it.message}", TAG)

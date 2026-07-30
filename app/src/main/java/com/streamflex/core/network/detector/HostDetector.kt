@@ -1,6 +1,7 @@
 package com.streamflex.core.network.detector
 
 import com.streamflex.domain.models.HostType
+import com.streamflex.extractors.ExtractorRegistry
 import java.net.URL
 
 /**
@@ -83,6 +84,12 @@ object HostDetector {
 
             host.contains("vidstack") ->
                 return HostType.VIDSTACK
+        }
+
+        // Check dynamic domains in ExtractorRegistry (from remote registry.json / defaults)
+        val registryType = ExtractorRegistry.getHostTypeForUrl(url)
+        if (registryType != HostType.UNKNOWN) {
+            return registryType
         }
 
         // ----------------------------------------------------

@@ -3,24 +3,16 @@ package com.streamflex.engine.stream
 import com.streamflex.core.utils.StreamLogger
 import com.streamflex.domain.models.ProviderSource
 import com.streamflex.domain.models.StreamLink
-import com.streamflex.extractors.ExtractorManager
+import com.streamflex.engine.resolver.ResolverEngine
 
 /**
  * Collects playable streams from ProviderSources.
  *
- * This class is intentionally simple.
- *
- * It does NOT:
- * - sort streams
- * - remove duplicates
- * - filter streams
- * - rank quality
- *
- * It only asks ExtractorManager to resolve every source.
+ * Delegates to [ResolverEngine] (Phase 1.5) to execute the complete
+ * 12-stage resolution chain (Direct Fast-Path, Redirects, Iframes,
+ * Extractor Dispatch, and Header Injection).
  */
 object StreamCollector {
-
-    private val extractorManager = ExtractorManager
 
     /**
      * Resolve a single ProviderSource.
@@ -34,18 +26,18 @@ object StreamCollector {
             "Resolving source: ${source.provider} | ${source.hostType}"
         )
 
-        val streams = extractorManager.extract(source)
+        val streams = ResolverEngine.resolve(source)
 
         StreamLogger.debug(
             "StreamCollector",
-            "Extractor returned ${streams.size} stream(s)"
+            "ResolverEngine returned ${streams.size} stream(s)"
         )
 
         return streams
     }
 
     /**
-     * Resolve multiple ProviderSources.
+     * Resolve multiple ProviderSources concurrently.
      */
     suspend fun collect(
         sources: List<ProviderSource>
@@ -53,46 +45,14 @@ object StreamCollector {
 
         StreamLogger.info(
             "StreamCollector",
-            "Resolving ${sources.size} provider source(s)"
+            "Resolving ${sources.size} provider source(s) via ResolverEngine"
         )
 
-        val streams = mutableListOf<StreamLink>()
-
-        sources.forEachIndexed { index, source ->
-
-            StreamLogger.debug(
-                "StreamCollector",
-                "Source ${index + 1}/${sources.size}"
-            )
-
-            StreamLogger.debug(
-                "StreamCollector",
-                "Provider: ${source.provider}"
-            )
-
-            StreamLogger.debug(
-                "StreamCollector",
-                "Host: ${source.hostType}"
-            )
-
-            StreamLogger.debug(
-                "StreamCollector",
-                "URL: ${source.url}"
-            )
-
-            val extracted = extractorManager.extract(source)
-
-            StreamLogger.debug(
-                "StreamCollector",
-                "Extractor produced ${extracted.size} stream(s)"
-            )
-
-            streams += extracted
-        }
+        val streams = ResolverEngine.resolveAll(sources)
 
         StreamLogger.info(
             "StreamCollector",
-            "Collected ${streams.size} total stream(s)"
+            "Collected ${streams.size} total stream(s) across all sources"
         )
 
         return streams

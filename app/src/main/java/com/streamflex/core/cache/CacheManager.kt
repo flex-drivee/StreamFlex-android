@@ -65,8 +65,8 @@ import com.streamflex.core.logger.Logger
  * ```
  */
 class CacheManager(
-    private val configPrefs : SharedPreferences,
-    private val domainPrefs : SharedPreferences
+    private val configPrefs : SharedPreferences? = null,
+    private val domainPrefs : SharedPreferences? = null
 ) {
 
     companion object {
@@ -108,17 +108,18 @@ class CacheManager(
 
     // ─── SharedPreferences Helpers ───────────────────────────────────────────
 
-    private fun SharedPreferences.putWithTimestamp(key: String, value: String) {
-        edit()
-            .putString(key, value)
-            .putLong("${key}_ts", System.currentTimeMillis())
-            .apply()
+    private fun SharedPreferences?.putWithTimestamp(key: String, value: String) {
+        this?.edit()
+            ?.putString(key, value)
+            ?.putLong("${key}_ts", System.currentTimeMillis())
+            ?.apply()
     }
 
-    private fun SharedPreferences.getIfFresh(key: String, ttlMs: Long): String? {
-        val ts  = getLong("${key}_ts", 0L)
+    private fun SharedPreferences?.getIfFresh(key: String, ttlMs: Long): String? {
+        val prefs = this ?: return null
+        val ts  = prefs.getLong("${key}_ts", 0L)
         val age = System.currentTimeMillis() - ts
-        return if (age < ttlMs) getString(key, null) else null
+        return if (age < ttlMs) prefs.getString(key, null) else null
     }
 
     // ─── Provider Manifests ──────────────────────────────────────────────────
@@ -259,17 +260,19 @@ class CacheManager(
     // ─── Cache Clearing ───────────────────────────────────────────────────────
 
     fun clearProviderManifests() {
-        configPrefs.edit().let { editor ->
-            configPrefs.all.keys
-                .filter { it.startsWith("manifest_") }
-                .forEach { editor.remove(it).remove("${it}_ts") }
-            editor.apply()
+        configPrefs?.let { prefs ->
+            prefs.edit().let { editor ->
+                prefs.all.keys
+                    .filter { it.startsWith("manifest_") }
+                    .forEach { editor.remove(it).remove("${it}_ts") }
+                editor.apply()
+            }
         }
         Logger.i(message = "Cache: cleared all provider manifests", tag = TAG)
     }
 
     fun clearDomains() {
-        domainPrefs.edit().clear().apply()
+        domainPrefs?.edit()?.clear()?.apply()
         Logger.i(message = "Cache: cleared all domains", tag = TAG)
     }
 

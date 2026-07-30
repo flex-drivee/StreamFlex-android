@@ -118,7 +118,6 @@ object StreamFlexHttpClient {
             // SecurityInterceptor also validates redirect targets.
             .followRedirects(true)
             .followSslRedirects(true)
-            .maxFollowRedirects(Constants.MAX_REDIRECT_HOPS)
 
             // ─── Timeouts ──────────────────────────────────────────────────
             .connectTimeout(Constants.CONNECT_TIMEOUT_MS, TimeUnit.MILLISECONDS)

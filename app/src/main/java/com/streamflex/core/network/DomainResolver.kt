@@ -92,7 +92,7 @@ import org.json.JSONObject
  * ```
  */
 class DomainResolver(
-    private val cache  : CacheManager,
+    private val cache  : CacheManager = CacheManager(),
     private val http   : StreamFlexHttpClient = StreamFlexHttpClient
 ) {
 

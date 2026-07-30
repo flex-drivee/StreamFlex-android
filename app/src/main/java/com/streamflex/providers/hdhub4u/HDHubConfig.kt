@@ -48,6 +48,11 @@ object HDHubConfig {
      * Source: CloudStream HDhub4uProvider.kt line 68 `Cookie" to "xla=s4t"`.
      */
     const val REQUIRED_COOKIE = "xla=s4t"
+    const val COOKIE = REQUIRED_COOKIE
+
+    /** GitHub config URL alias */
+    const val DOMAIN_CONFIG_URL =
+        "https://raw.githubusercontent.com/flex-drivee/streamflex-providers/main/providers/hdhub4u.json"
 
     /**
      * HDHub4u checks UA for bot detection. Chrome 131 is what the reference extension uses.

@@ -103,8 +103,7 @@ object StreamEngine {
         }
 
         return finalStreams
-            return finalStreams
-        }
+    }
 
     /**
      * Convenience overload for one source.
