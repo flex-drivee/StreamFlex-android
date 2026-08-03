@@ -31,6 +31,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.streamflex.app.ui.theme.*
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
@@ -164,8 +165,8 @@ fun PlayerScreen(videoUrls: ArrayList<String>, onBack: () -> Unit) {
         if (showSettingsSheet) {
             ModalBottomSheet(
                 onDismissRequest = { showSettingsSheet = false },
-                containerColor = Color(0xFF1A1A1A),
-                dragHandle = { BottomSheetDefaults.DragHandle() }
+                containerColor   = SFBgSurface,
+                dragHandle       = { BottomSheetDefaults.DragHandle(color = SFOutline) }
             ) {
                 PlayerSettingsContent(
                     onClose = { showSettingsSheet = false }
@@ -190,9 +191,12 @@ fun PlayerSettingsContent(onClose: () -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Settings", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+            Text("Settings",
+                color      = SFTextPrimary,
+                fontWeight = FontWeight.Bold,
+                style      = MaterialTheme.typography.titleLarge)
             IconButton(onClick = onClose) {
-                Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.LightGray)
+                Icon(Icons.Default.Close, contentDescription = "Close", tint = SFTextSecondary)
             }
         }
 
@@ -213,7 +217,7 @@ fun PlayerSettingsContent(onClose: () -> Unit) {
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-        Divider(color = Color.DarkGray)
+        HorizontalDivider(color = SFDivider)
 
         LazyColumn(modifier = Modifier.height(200.dp)) {
             if (selectedTab == 0) {
@@ -241,14 +245,14 @@ fun PlayerSettingsContent(onClose: () -> Unit) {
 fun SettingTab(text: String, isSelected: Boolean, onClick: () -> Unit) {
     Column(modifier = Modifier.clickable { onClick() }) {
         Text(
-            text = text,
-            color = if (isSelected) Color.White else Color.Gray,
+            text       = text,
+            color      = if (isSelected) SFTextPrimary else SFTextSecondary,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-            fontSize = 16.sp,
-            modifier = Modifier.padding(bottom = 8.dp)
+            style      = MaterialTheme.typography.titleMedium,
+            modifier   = Modifier.padding(bottom = 8.dp)
         )
         if (isSelected) {
-            Box(modifier = Modifier.height(2.dp).width(40.dp).background(Color.Red))
+            Box(modifier = Modifier.height(2.dp).width(40.dp).background(SFAccent))
         }
     }
 }
@@ -263,11 +267,15 @@ fun SettingItem(text: String, isSelected: Boolean, onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (isSelected) {
-            Icon(Icons.Default.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+            Icon(Icons.Default.Check, null, tint = SFAccent, modifier = Modifier.size(20.dp))
         } else {
             Spacer(modifier = Modifier.size(20.dp))
         }
         Spacer(modifier = Modifier.width(12.dp))
-        Text(text = text, color = if (isSelected) Color.White else Color.LightGray, fontSize = 16.sp)
+        Text(
+            text  = text,
+            color = if (isSelected) SFTextPrimary else SFTextSecondary,
+            style = MaterialTheme.typography.bodyLarge
+        )
     }
 }
