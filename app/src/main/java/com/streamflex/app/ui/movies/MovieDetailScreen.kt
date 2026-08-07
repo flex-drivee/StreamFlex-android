@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -290,7 +292,7 @@ fun MovieDetailScreen(
                     .clickable { onBackClick() },
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.ArrowBack, "Back",
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back",
                     tint = SFTextPrimary, modifier = Modifier.size(22.dp))
             }
         }
@@ -537,7 +539,7 @@ fun SFEpisodeItem(episode: Episode, onClick: () -> Unit) {
             )
         }
 
-        Icon(Icons.Default.KeyboardArrowRight, null,
+        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null,
             tint = SFTextDisabled, modifier = Modifier.size(20.dp))
     }
 }
