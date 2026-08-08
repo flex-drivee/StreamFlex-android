@@ -61,9 +61,10 @@ class NetMirrorExtractor : BaseExtractor() {
                     val root = JsonParser.parse(json) ?: return@withContext ExtractorResult()
                     
                     val status = JsonParser.string(root, "status")
-                    if (status != "ok") return@withContext ExtractorResult()
+                    val videoLink = JsonParser.string(root, "video_link")
+
+                    if (videoLink.isNullOrBlank()) return@withContext ExtractorResult()
                     
-                    val videoLink = JsonParser.string(root, "video_link") ?: return@withContext ExtractorResult()
                     val referer = JsonParser.string(root, "referer") ?: apiBase
 
                     val stream = StreamLink(
