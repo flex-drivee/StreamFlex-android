@@ -51,12 +51,13 @@ class PlayerActivity : ComponentActivity() {
         windowInsetsController.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
 
-        // 1. Receive the ArrayList of URLs instead of a single string
         val videoUrls = intent.getStringArrayListExtra("VIDEO_URLS") ?: arrayListOf()
-
+        val videoReferers = intent.getStringArrayListExtra("VIDEO_REFERERS") ?: arrayListOf()
+        val videoCookies = intent.getStringArrayListExtra("VIDEO_COOKIES") ?: arrayListOf()
+        val videoUserAgents = intent.getStringArrayListExtra("VIDEO_USER_AGENTS") ?: arrayListOf()
 
         setContent {
-            PlayerScreen(videoUrls = videoUrls, onBack = { finish() })
+            PlayerScreen(videoUrls = videoUrls, videoReferers = videoReferers, videoCookies = videoCookies, videoUserAgents = videoUserAgents, onBack = { finish() })
         }
     }
 }
@@ -64,7 +65,7 @@ class PlayerActivity : ComponentActivity() {
 // 2. FIXED ANNOTATION: Explicitly use the AndroidX OptIn for Media3
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
-fun PlayerScreen(videoUrls: ArrayList<String>, onBack: () -> Unit) {
+fun PlayerScreen(videoUrls: ArrayList<String>, videoReferers: ArrayList<String>, videoCookies: ArrayList<String>, videoUserAgents: ArrayList<String>, onBack: () -> Unit) {
     val context = LocalContext.current
     var showSettingsSheet by remember { mutableStateOf(false) }
 
@@ -86,11 +87,29 @@ fun PlayerScreen(videoUrls: ArrayList<String>, onBack: () -> Unit) {
 
             return@remember ExoPlayer.Builder(context).build()
         }
-        // Add User-Agent AND fake Referer to trick the video host
-        val userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0"
+        
+        val defaultReferer = videoReferers.firstOrNull { it.isNotEmpty() } ?: ""
+        val defaultCookie = videoCookies.firstOrNull { it.isNotEmpty() } ?: ""
+        val defaultUserAgent = videoUserAgents.firstOrNull { it.isNotEmpty() } ?: ""
+        
+        val requestProperties = mutableMapOf<String, String>()
+        if (defaultReferer.isNotEmpty()) {
+            requestProperties["Referer"] = defaultReferer
+        }
+        if (defaultCookie.isNotEmpty()) {
+            requestProperties["Cookie"] = defaultCookie
+        }
+
+        // Add User-Agent AND dynamic Referer/Cookies
+        val userAgent = if (defaultUserAgent.isNotEmpty()) {
+            defaultUserAgent
+        } else {
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0"
+        }
+        
         val dataSourceFactory = DefaultHttpDataSource.Factory()
             .setUserAgent(userAgent)
-            .setDefaultRequestProperties(mapOf("Referer" to "https://hubcloud.foo/"))
+            .setDefaultRequestProperties(requestProperties)
 
         val mediaSourceFactory = DefaultMediaSourceFactory(dataSourceFactory)
 

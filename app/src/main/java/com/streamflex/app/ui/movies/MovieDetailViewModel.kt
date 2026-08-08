@@ -84,7 +84,7 @@ class MovieDetailViewModel(
     }
 
     fun fetchMovieStreams(
-        onResult: (List<String>) -> Unit
+        onResult: (List<com.streamflex.domain.models.StreamLink>) -> Unit
     ) {
 
         viewModelScope.launch {
@@ -135,13 +135,7 @@ class MovieDetailViewModel(
                     "Returning ${streams.streams.size} URL(s) to UI"
                 )
                 onResult(
-
-                    streams.streams.map {
-
-                        it.url
-
-                    }
-
+                    streams.streams
                 )
 
             } catch (e: Exception) {
@@ -157,7 +151,7 @@ class MovieDetailViewModel(
 
     fun fetchEpisodeStreams(
         episode: Episode,
-        onResult: (List<String>) -> Unit
+        onResult: (List<com.streamflex.domain.models.StreamLink>) -> Unit
     ) {
 
         viewModelScope.launch {
@@ -187,13 +181,7 @@ class MovieDetailViewModel(
                 )
 
                 onResult(
-
-                    streams.streams.map {
-
-                        it.url
-
-                    }
-
+                    streams.streams
                 )
 
             } catch (e: Exception) {

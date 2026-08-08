@@ -38,7 +38,7 @@ import com.streamflex.app.ui.theme.*
 fun MovieDetailScreen(
     viewModel: MovieDetailViewModel,
     onBackClick: () -> Unit,
-    onMoviePlayClick: (List<String>) -> Unit,
+    onMoviePlayClick: (List<com.streamflex.domain.models.StreamLink>) -> Unit,
     onEpisodePlayClick: (Episode) -> Unit
 ) {
     val state by viewModel.uiState.collectAsState()

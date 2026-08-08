@@ -176,6 +176,17 @@ object ExtractorRegistry {
                 requiresReferer = false,
                 headers = emptyMap(),
                 androidClass = "com.streamflex.extractors.redirect.RedirectExtractor"
+            ),
+            ExtractorDefinition(
+                id = "netmirror",
+                name = "NetMirror",
+                priority = 98,
+                status = "active",
+                domains = listOf("netmirror"),
+                outputFormats = listOf("mp4", "m3u8"),
+                requiresReferer = false,
+                headers = emptyMap(),
+                androidClass = "com.streamflex.extractors.netmirror.NetMirrorExtractor"
             )
         ),
         qualityPatterns = mapOf(
@@ -305,6 +316,7 @@ object ExtractorRegistry {
             "mixdrop"     -> HostType.MIXDROP
             "redirect"    -> HostType.REDIRECT
             "vidstack"    -> HostType.VIDSTACK
+            "netmirror"   -> HostType.NETMIRROR
             else          -> HostType.UNKNOWN
         }
     }
@@ -355,6 +367,7 @@ object ExtractorRegistry {
             HostType.MIXDROP      -> "mixdrop"
             HostType.REDIRECT     -> "redirect"
             HostType.VIDSTACK     -> "vidstack"
+            HostType.NETMIRROR    -> "netmirror"
             else                  -> return 50
         }
         return getPriority(id)

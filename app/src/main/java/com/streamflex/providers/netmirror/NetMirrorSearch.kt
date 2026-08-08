@@ -17,14 +17,16 @@ class NetMirrorSearch : SearchResultParser {
     suspend fun search(
         query: String,
         baseUrl: String,
-        ott: String
+        ott: String,
+        providerId: String,
+        providerName: String
     ): List<SearchResult> {
 
         val endpoint = when (ott) {
-            NetMirrorConfig.OTT_NETFLIX -> "/mobile/search.php"
-            NetMirrorConfig.OTT_PRIME -> "/mobile/pv/search.php"
-            NetMirrorConfig.OTT_HOTSTAR, NetMirrorConfig.OTT_DISNEY -> "/mobile/hs/search.php"
-            else -> "/mobile/search.php"
+            NetMirrorConfig.OTT_NETFLIX -> "/search.php"
+            NetMirrorConfig.OTT_PRIME -> "/pv/search.php"
+            NetMirrorConfig.OTT_HOTSTAR, NetMirrorConfig.OTT_DISNEY -> "/hs/search.php"
+            else -> "/search.php"
         }
 
         val timestamp = System.currentTimeMillis() / 1000
@@ -42,7 +44,7 @@ class NetMirrorSearch : SearchResultParser {
                 is NetworkResult.Success -> {
                     val jsonString = response.data.body?.toString(Charsets.UTF_8) ?: return@withContext emptyList()
                     val rawTransport = TransportResult.TextResponse(text = jsonString, url = searchUrl)
-                    parseResult(rawTransport, baseUrl, ott)
+                    parseResult(rawTransport, baseUrl, ott, providerId, providerName)
                 }
                 else -> emptyList()
             }
@@ -50,10 +52,10 @@ class NetMirrorSearch : SearchResultParser {
     }
 
     override fun parse(raw: TransportResult): List<SearchResult> {
-        return parseResult(raw, NetMirrorConfig.DEFAULT_DOMAIN, NetMirrorConfig.OTT_NETFLIX)
+        return parseResult(raw, NetMirrorConfig.DEFAULT_DOMAIN, NetMirrorConfig.OTT_NETFLIX, "netflixmirror", "NetflixMirror")
     }
 
-    private fun parseResult(raw: TransportResult, baseUrl: String, ott: String): List<SearchResult> {
+    private fun parseResult(raw: TransportResult, baseUrl: String, ott: String, providerId: String, providerName: String): List<SearchResult> {
         val root = JsonParser.parse(raw.asString()) ?: return emptyList()
         val results = mutableListOf<SearchResult>()
 
@@ -69,8 +71,10 @@ class NetMirrorSearch : SearchResultParser {
                     else -> "https://imgcdn.kim/poster/v/150/$id.jpg"
                 }
 
-                // In StreamFlex, detailUrl often carries the ID or full URL to the detail page.
-                // We'll pack the ID and OTT inside the detailUrl so NetMirrorDetails can extract it.
+                val rStr = JsonParser.string(item, "r")
+                val isSeries = rStr?.equals("Series", ignoreCase = true) == true
+                val resolvedMediaType = if (isSeries) MediaType.TV else MediaType.MOVIE
+                
                 val detailUrl = "netmirror://$ott/$id"
 
                 results += SearchResult(
@@ -78,10 +82,10 @@ class NetMirrorSearch : SearchResultParser {
                     title = title,
                     url = detailUrl,
                     poster = poster,
-                    year = null,
-                    mediaType = MediaType.MOVIE, // NetMirror returns mixed results, we resolve type in Details
-                    providerId = "netmirror",
-                    providerName = "NetMirror"
+                    year = JsonParser.string(item, "y")?.toIntOrNull(),
+                    mediaType = resolvedMediaType,
+                    providerId = providerId,
+                    providerName = providerName
                 )
             }
         } catch (_: Exception) {

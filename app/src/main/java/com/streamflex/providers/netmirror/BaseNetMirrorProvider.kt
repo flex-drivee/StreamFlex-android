@@ -28,7 +28,7 @@ abstract class BaseNetMirrorProvider(
 
     override suspend fun search(query: String): List<SearchResult> {
         return runCatching {
-            searchImpl.search(query = query, baseUrl = baseUrl, ott = ottType)
+            searchImpl.search(query = query, baseUrl = baseUrl, ott = ottType, providerId = id, providerName = name)
         }.onFailure {
             Logger.e("[$id] Search failed for '$query': ${it.message}", TAG)
         }.getOrDefault(emptyList())

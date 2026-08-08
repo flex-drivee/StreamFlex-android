@@ -49,7 +49,21 @@ fun AppNavigation(
                 viewModel = viewModel,
                 onNavigateToDetail = { id -> navController.navigate(Screen.Detail.createRoute(id)) },
                 onSearchClick = { navController.navigate(Screen.Search.route) },
-                onSettingsClick = { /* Navigate to Settings */ }
+                onSettingsClick = { navController.navigate(Screen.Settings.route) }
+            )
+        }
+        
+        // --- SETTINGS ---
+        composable(route = Screen.Settings.route) {
+            com.streamflex.app.ui.settings.SettingsScreen(
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        // --- DOWNLOADS ---
+        composable(route = Screen.Downloads.route) {
+            com.streamflex.app.ui.downloads.DownloadsScreen(
+                onBackClick = { navController.popBackStack() }
             )
         }
 
@@ -105,19 +119,21 @@ fun AppNavigation(
 
                     android.util.Log.d(
                         "STREAM_DEBUG",
-                        "Movie URLs: $links"
+                        "Movie URLs: ${links.map { it.url }}"
                     )
 
                     val intent = Intent(
                         context,
                         PlayerActivity::class.java
                     ).apply {
-
-                        putStringArrayListExtra(
-                            "VIDEO_URLS",
-                            ArrayList(links)
-                        )
-
+                        val urls = ArrayList(links.map { it.url })
+                        val referers = ArrayList(links.map { it.headers["Referer"] ?: it.referer ?: "" })
+                        val cookies = ArrayList(links.map { it.headers["Cookie"] ?: it.cookies.entries.joinToString("; ") { c -> "${c.key}=${c.value}" } })
+                        val userAgents = ArrayList(links.map { it.headers["User-Agent"] ?: "" })
+                        putStringArrayListExtra("VIDEO_URLS", urls)
+                        putStringArrayListExtra("VIDEO_REFERERS", referers)
+                        putStringArrayListExtra("VIDEO_COOKIES", cookies)
+                        putStringArrayListExtra("VIDEO_USER_AGENTS", userAgents)
                     }
 
                     context.startActivity(intent)
@@ -132,19 +148,21 @@ fun AppNavigation(
 
                         android.util.Log.d(
                             "STREAM_DEBUG",
-                            "Episode URLs: $links"
+                            "Episode URLs: ${links.map { it.url }}"
                         )
 
                         val intent = Intent(
                             context,
                             PlayerActivity::class.java
                         ).apply {
-
-                            putStringArrayListExtra(
-                                "VIDEO_URLS",
-                                ArrayList(links)
-                            )
-
+                            val urls = ArrayList(links.map { it.url })
+                            val referers = ArrayList(links.map { it.headers["Referer"] ?: it.referer ?: "" })
+                            val cookies = ArrayList(links.map { it.headers["Cookie"] ?: it.cookies.entries.joinToString("; ") { c -> "${c.key}=${c.value}" } })
+                            val userAgents = ArrayList(links.map { it.headers["User-Agent"] ?: "" })
+                            putStringArrayListExtra("VIDEO_URLS", urls)
+                            putStringArrayListExtra("VIDEO_REFERERS", referers)
+                            putStringArrayListExtra("VIDEO_COOKIES", cookies)
+                            putStringArrayListExtra("VIDEO_USER_AGENTS", userAgents)
                         }
 
                         context.startActivity(intent)
