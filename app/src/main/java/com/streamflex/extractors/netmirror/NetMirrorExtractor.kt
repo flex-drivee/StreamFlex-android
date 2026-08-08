@@ -35,61 +35,83 @@ class NetMirrorExtractor : BaseExtractor() {
     private var resolvedApiUrl: String = ""
 
     override suspend fun extract(source: ProviderSource): ExtractorResult {
-        // source.url format: netmirror://player?id=$id&ott=$ott&base=$baseUrl
+        // source.url format: netmirror://player?id=$id&ott=$ott&base=$baseUrl&title=$title
         val uri = Uri.parse(source.url)
         val id = uri.getQueryParameter("id") ?: return ExtractorResult()
         val ott = uri.getQueryParameter("ott") ?: return ExtractorResult()
         val baseUrl = uri.getQueryParameter("base") ?: com.streamflex.providers.netmirror.NetMirrorConfig.DEFAULT_DOMAIN
+        val title = uri.getQueryParameter("title") ?: source.provider
 
-        val cookies = HttpClient.getCookies(baseUrl)
-        val rawTHashT = cookies.firstOrNull { it.name == "t_hash_t" }?.value ?: ""
-        val tHashT = runCatching { URLDecoder.decode(rawTHashT, "UTF-8") }.getOrDefault(rawTHashT)
-        val usertoken = if (tHashT.contains("::")) tHashT.substringAfter("::").substringBefore("::") else ""
-
-        val apiBase = resolveApiUrl() ?: return ExtractorResult()
+        val playUrl = "$baseUrl/play.php"
+        val playlistBaseUrl = "$baseUrl/playlist.php"
         
-        val playerUrl = "$apiBase/newtv/player.php?id=$id"
-        
-        val request = RequestBuilder()
-            .url(playerUrl)
-            .header("Cache-Control", "no-cache, no-store, must-revalidate")
-            .header("Pragma", "no-cache")
-            .header("Expires", "0")
-            .header("X-Requested-With", "NetmirrorNewTV v1.0")
+        val playRequest = RequestBuilder()
+            .url(playUrl)
+            .method(com.streamflex.core.network.HttpMethod.POST)
+            .body("id=$id")
+            .header("Accept", "application/json, text/javascript, */*; q=0.01")
+            .header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+            .header("Origin", baseUrl)
+            .header("Referer", "$baseUrl/home")
+            .header("X-Requested-With", "XMLHttpRequest")
             .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0 /OS.GatuNewTV v1.0")
-            .header("Accept", "application/json, text/plain, */*")
-            .header("Ott", ott)
-            .header("Usertoken", usertoken)
             .build()
-
+            
         return withContext(Dispatchers.IO) {
-            when (val response = HttpClient.execute(request)) {
-                is NetworkResult.Success -> {
-                    val json = response.data.body?.toString(Charsets.UTF_8) ?: return@withContext ExtractorResult()
-                    val root = JsonParser.parse(json) ?: return@withContext ExtractorResult()
-                    
-                    val status = JsonParser.string(root, "status")
-                    val videoLink = JsonParser.string(root, "video_link")
-
-                    if (videoLink.isNullOrBlank()) return@withContext ExtractorResult()
-                    
-                    val referer = JsonParser.string(root, "referer") ?: apiBase
-
-                    val stream = StreamLink(
+            val playResponse = HttpClient.execute(playRequest)
+            if (playResponse !is NetworkResult.Success) return@withContext ExtractorResult()
+            
+            val playJson = playResponse.data.body?.toString(Charsets.UTF_8) ?: return@withContext ExtractorResult()
+            val playRoot = JsonParser.parse(playJson) ?: return@withContext ExtractorResult()
+            val h = JsonParser.string(playRoot, "h") ?: return@withContext ExtractorResult()
+            
+            val timestamp = System.currentTimeMillis() / 1000
+            val encodedTitle = java.net.URLEncoder.encode(title, "UTF-8")
+            val encodedH = java.net.URLEncoder.encode(h, "UTF-8")
+            val playlistUrl = "$playlistBaseUrl?id=$id&t=$encodedTitle&tm=$timestamp&h=$encodedH"
+            
+            val playlistRequest = RequestBuilder()
+                .url(playlistUrl)
+                .header("Accept", "application/json, text/javascript, */*; q=0.01")
+                .header("Origin", baseUrl)
+                .header("Referer", "$baseUrl/home")
+                .header("X-Requested-With", "XMLHttpRequest")
+                .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0 /OS.GatuNewTV v1.0")
+                .build()
+                
+            val playlistResp = HttpClient.execute(playlistRequest)
+            if (playlistResp !is NetworkResult.Success) return@withContext ExtractorResult()
+            
+            val playlistJson = playlistResp.data.body?.toString(Charsets.UTF_8) ?: return@withContext ExtractorResult()
+            val playlistArray = JsonParser.parse(playlistJson)?.takeIf { it.isJsonArray }?.asJsonArray ?: return@withContext ExtractorResult()
+            if (playlistArray.isEmpty) return@withContext ExtractorResult()
+            
+            val item = playlistArray.get(0).asJsonObject
+            val sourcesArray = item.getAsJsonArray("sources") ?: return@withContext ExtractorResult()
+            
+            val streams = mutableListOf<StreamLink>()
+            for (sourceElement in sourcesArray) {
+                val sourceObj = sourceElement.asJsonObject
+                val file = sourceObj.get("file")?.asString ?: continue
+                val label = sourceObj.get("label")?.asString ?: "Unknown"
+                
+                val streamUrl = if (file.startsWith("http")) file else baseUrl + file
+                
+                streams.add(
+                    StreamLink(
                         provider = source.provider,
-                        title = source.provider,
-                        url = videoLink,
-                        isM3U8 = videoLink.contains(".m3u8", ignoreCase = true),
+                        title = "${source.provider} - $label",
+                        url = streamUrl,
+                        isM3U8 = streamUrl.contains(".m3u8", ignoreCase = true),
                         headers = mapOf(
-                            "Referer" to referer,
+                            "Referer" to "$baseUrl/home",
                             "Cookie" to "hd=on"
                         )
                     )
-
-                    ExtractorResult(streams = listOf(stream))
-                }
-                else -> ExtractorResult()
+                )
             }
+            
+            ExtractorResult(streams = streams)
         }
     }
 

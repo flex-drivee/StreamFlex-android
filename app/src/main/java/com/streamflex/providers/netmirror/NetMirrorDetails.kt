@@ -69,7 +69,7 @@ class NetMirrorDetails {
         val seasonsMap = mutableMapOf<Int, MutableList<ProviderEpisode>>()
 
         if (isMovie) {
-            sources += createPlayerSource(id, ott, baseUrl, providerName)
+            sources += createPlayerSource(id, ott, baseUrl, providerName, title)
         } else {
             for (epObj in episodesArray) {
                 val epId = JsonParser.string(epObj, "id") ?: continue
@@ -87,7 +87,7 @@ class NetMirrorDetails {
                     else -> "https://imgcdn.kim/poster/v/150/$epId.jpg"
                 }
 
-                val epSource = createPlayerSource(epId, ott, baseUrl, providerName)
+                val epSource = createPlayerSource(epId, ott, baseUrl, providerName, "$title $seasonStr$epStr")
 
                 val episode = ProviderEpisode(
                     number = epNum,
@@ -128,10 +128,12 @@ class NetMirrorDetails {
         id: String,
         ott: String,
         baseUrl: String,
-        providerName: String
+        providerName: String,
+        title: String
     ): ProviderSource {
         // Create a custom URI scheme so our Extractor can intercept it
-        val playerUri = "netmirror://player?id=$id&ott=$ott&base=${baseUrl}"
+        val encodedTitle = android.net.Uri.encode(title)
+        val playerUri = "netmirror://player?id=$id&ott=$ott&base=${baseUrl}&title=$encodedTitle"
         
         return ProviderSource(
             provider = providerName,
