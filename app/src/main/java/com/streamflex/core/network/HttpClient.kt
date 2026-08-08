@@ -141,6 +141,15 @@ object HttpClient {
     fun clearCookies() {
         cookieManager.cookieStore.removeAll()
     }
+
+    fun getCookies(url: String): List<java.net.HttpCookie> {
+        return try {
+            cookieManager.cookieStore.get(java.net.URI.create(url))
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
     private object NoCookieJar : okhttp3.CookieJar {
 
         override fun saveFromResponse(

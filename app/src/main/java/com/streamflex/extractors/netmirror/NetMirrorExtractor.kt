@@ -38,6 +38,11 @@ class NetMirrorExtractor : BaseExtractor() {
         val uri = Uri.parse(source.url)
         val id = uri.getQueryParameter("id") ?: return ExtractorResult()
         val ott = uri.getQueryParameter("ott") ?: return ExtractorResult()
+        val baseUrl = uri.getQueryParameter("base") ?: com.streamflex.providers.netmirror.NetMirrorConfig.DEFAULT_DOMAIN
+
+        val cookies = HttpClient.getCookies(baseUrl)
+        val tHashT = cookies.firstOrNull { it.name == "t_hash_t" }?.value ?: ""
+        val usertoken = if (tHashT.contains("::")) tHashT.substringAfter("::").substringBefore("::") else ""
 
         val apiBase = resolveApiUrl() ?: return ExtractorResult()
         
@@ -52,7 +57,7 @@ class NetMirrorExtractor : BaseExtractor() {
             .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0 /OS.GatuNewTV v1.0")
             .header("Accept", "application/json, text/plain, */*")
             .header("Ott", ott)
-            .header("Usertoken", "")
+            .header("Usertoken", usertoken)
             .build()
 
         return withContext(Dispatchers.IO) {
