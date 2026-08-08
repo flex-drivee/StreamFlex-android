@@ -4,7 +4,7 @@ import com.streamflex.core.network.HttpClient
 import com.streamflex.core.network.NetworkResult
 import com.streamflex.core.network.RequestBuilder
 import com.streamflex.core.parser.JsonParser
-import com.streamflex.domain.models.ExtractorResult
+import com.streamflex.domain.models.ExtractionResult
 import com.streamflex.domain.models.HostType
 import com.streamflex.domain.models.ProviderSource
 import com.streamflex.domain.models.StreamLink
@@ -16,7 +16,6 @@ import kotlinx.coroutines.withContext
 import android.net.Uri
 
 class NetMirrorExtractor : BaseExtractor() {
-    override val name = "NetMirror API"
     override val hostType = HostType.NETMIRROR
 
     // Note: In CloudStream, these are base64 encoded. We decode them at runtime.
@@ -34,11 +33,11 @@ class NetMirrorExtractor : BaseExtractor() {
 
     private var resolvedApiUrl: String = ""
 
-    override suspend fun extract(source: ProviderSource): ExtractorResult {
+    override suspend fun extract(source: ProviderSource): ExtractionResult {
         // source.url format: netmirror://player?id=$id&ott=$ott&base=$baseUrl&title=$title
         val uri = Uri.parse(source.url)
-        val id = uri.getQueryParameter("id") ?: return ExtractorResult()
-        val ott = uri.getQueryParameter("ott") ?: return ExtractorResult()
+        val id = uri.getQueryParameter("id") ?: return emptyResult()
+        val ott = uri.getQueryParameter("ott") ?: return emptyResult()
         val baseUrl = uri.getQueryParameter("base") ?: com.streamflex.providers.netmirror.NetMirrorConfig.DEFAULT_DOMAIN
         val title = uri.getQueryParameter("title") ?: source.provider
 
@@ -47,8 +46,7 @@ class NetMirrorExtractor : BaseExtractor() {
         
         val playRequest = RequestBuilder()
             .url(playUrl)
-            .method(com.streamflex.core.network.HttpMethod.POST)
-            .body("id=$id")
+            .post("id=$id".toByteArray(Charsets.UTF_8))
             .header("Accept", "application/json, text/javascript, */*; q=0.01")
             .header("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
             .header("Origin", baseUrl)
@@ -59,11 +57,11 @@ class NetMirrorExtractor : BaseExtractor() {
             
         return withContext(Dispatchers.IO) {
             val playResponse = HttpClient.execute(playRequest)
-            if (playResponse !is NetworkResult.Success) return@withContext ExtractorResult()
+            if (playResponse !is NetworkResult.Success) return@withContext emptyResult()
             
-            val playJson = playResponse.data.body?.toString(Charsets.UTF_8) ?: return@withContext ExtractorResult()
-            val playRoot = JsonParser.parse(playJson) ?: return@withContext ExtractorResult()
-            val h = JsonParser.string(playRoot, "h") ?: return@withContext ExtractorResult()
+            val playJson = playResponse.data.body?.toString(Charsets.UTF_8) ?: return@withContext emptyResult()
+            val playRoot = JsonParser.parse(playJson) ?: return@withContext emptyResult()
+            val h = JsonParser.string(playRoot, "h") ?: return@withContext emptyResult()
             
             val timestamp = System.currentTimeMillis() / 1000
             val encodedTitle = java.net.URLEncoder.encode(title, "UTF-8")
@@ -80,14 +78,14 @@ class NetMirrorExtractor : BaseExtractor() {
                 .build()
                 
             val playlistResp = HttpClient.execute(playlistRequest)
-            if (playlistResp !is NetworkResult.Success) return@withContext ExtractorResult()
+            if (playlistResp !is NetworkResult.Success) return@withContext emptyResult()
             
-            val playlistJson = playlistResp.data.body?.toString(Charsets.UTF_8) ?: return@withContext ExtractorResult()
-            val playlistArray = JsonParser.parse(playlistJson)?.takeIf { it.isJsonArray }?.asJsonArray ?: return@withContext ExtractorResult()
-            if (playlistArray.isEmpty) return@withContext ExtractorResult()
+            val playlistJson = playlistResp.data.body?.toString(Charsets.UTF_8) ?: return@withContext emptyResult()
+            val playlistArray = JsonParser.parse(playlistJson)?.takeIf { it.isJsonArray }?.asJsonArray ?: return@withContext emptyResult()
+            if (playlistArray.isEmpty) return@withContext emptyResult()
             
             val item = playlistArray.get(0).asJsonObject
-            val sourcesArray = item.getAsJsonArray("sources") ?: return@withContext ExtractorResult()
+            val sourcesArray = item.getAsJsonArray("sources") ?: return@withContext emptyResult()
             
             val streams = mutableListOf<StreamLink>()
             for (sourceElement in sourcesArray) {
@@ -99,10 +97,9 @@ class NetMirrorExtractor : BaseExtractor() {
                 
                 streams.add(
                     StreamLink(
-                        provider = source.provider,
-                        title = "${source.provider} - $label",
+                        name = "${source.provider} - $label",
                         url = streamUrl,
-                        isM3U8 = streamUrl.contains(".m3u8", ignoreCase = true),
+                        host = source.hostType,
                         headers = mapOf(
                             "Referer" to "$baseUrl/home",
                             "Cookie" to "hd=on"
@@ -111,7 +108,7 @@ class NetMirrorExtractor : BaseExtractor() {
                 )
             }
             
-            ExtractorResult(streams = streams)
+            result(streams)
         }
     }
 

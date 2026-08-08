@@ -78,7 +78,8 @@ class NetMirrorSearch : SearchResultParser {
                     poster = poster,
                     year = null,
                     mediaType = MediaType.MOVIE, // NetMirror returns mixed results, we resolve type in Details
-                    provider = "NetMirror"
+                    providerId = "netmirror",
+                    providerName = "NetMirror"
                 )
             }
         } catch (_: Exception) {

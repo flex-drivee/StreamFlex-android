@@ -63,7 +63,7 @@ class NetMirrorDetails {
         val year = JsonParser.string(root, "year")?.toIntOrNull()
 
         val episodesArray = JsonParser.array(root, "episodes")
-        val isMovie = episodesArray.isEmpty() || JsonParser.objectOf(episodesArray.first()) == null
+        val isMovie = episodesArray.isEmpty() || !episodesArray.first().isJsonObject
 
         val sources = mutableListOf<ProviderSource>()
         val seasonsMap = mutableMapOf<Int, MutableList<ProviderEpisode>>()
