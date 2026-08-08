@@ -34,6 +34,8 @@ class NetMirrorDetails {
         val request = RequestBuilder()
             .url(postUrl)
             .header("Referer", "$baseUrl/home")
+            .header("X-Requested-With", "XMLHttpRequest")
+            .header("User-Agent", "Mozilla/5.0 (Linux; Android 13; Pixel 5 Build/TQ3A.230901.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/144.0.7559.132 Safari/537.36 /OS.Gatu v3.0")
             .build()
 
         return withContext(Dispatchers.IO) {
