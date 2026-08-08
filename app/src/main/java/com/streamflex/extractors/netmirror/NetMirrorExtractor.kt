@@ -9,6 +9,7 @@ import com.streamflex.domain.models.HostType
 import com.streamflex.domain.models.ProviderSource
 import com.streamflex.domain.models.StreamLink
 import com.streamflex.extractors.common.BaseExtractor
+import java.net.URLDecoder
 import java.util.Base64
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -41,7 +42,8 @@ class NetMirrorExtractor : BaseExtractor() {
         val baseUrl = uri.getQueryParameter("base") ?: com.streamflex.providers.netmirror.NetMirrorConfig.DEFAULT_DOMAIN
 
         val cookies = HttpClient.getCookies(baseUrl)
-        val tHashT = cookies.firstOrNull { it.name == "t_hash_t" }?.value ?: ""
+        val rawTHashT = cookies.firstOrNull { it.name == "t_hash_t" }?.value ?: ""
+        val tHashT = runCatching { URLDecoder.decode(rawTHashT, "UTF-8") }.getOrDefault(rawTHashT)
         val usertoken = if (tHashT.contains("::")) tHashT.substringAfter("::").substringBefore("::") else ""
 
         val apiBase = resolveApiUrl() ?: return ExtractorResult()
