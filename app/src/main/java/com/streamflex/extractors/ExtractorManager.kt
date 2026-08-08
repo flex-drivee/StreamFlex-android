@@ -12,6 +12,7 @@ import com.streamflex.extractors.hubdrive.HubDriveExtractor
 import com.streamflex.extractors.redirect.RedirectExtractor
 import com.streamflex.extractors.dood.DoodExtractor
 import com.streamflex.extractors.pixeldrain.PixelDrainExtractor
+import com.streamflex.extractors.netmirror.NetMirrorExtractor
 import com.streamflex.core.utils.StreamLogger
 import java.util.ArrayDeque
 
@@ -54,11 +55,13 @@ object ExtractorManager {
         // Phase 3 — HDHub4U complete extractors
         DoodExtractor(),
 
-        PixelDrainExtractor()
+        PixelDrainExtractor(),
+
+        // Phase 3 — NetMirror complete extractors
+        NetMirrorExtractor()
 
         // Future (Phase 3+ providers):
         // StreamTapeExtractor()  ← OTTMirror
-        // MixDropExtractor()     ← NetMirror
         // VidStackExtractor()    ← VegaMovies
     )
 

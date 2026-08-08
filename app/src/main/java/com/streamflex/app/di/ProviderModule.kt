@@ -3,6 +3,10 @@ package com.streamflex.app.di
 import com.streamflex.domain.provider.Provider
 import com.streamflex.domain.repositories.ProviderRepository
 import com.streamflex.providers.hdhub4u.HDHubProvider
+import com.streamflex.providers.netmirror.NetflixMirrorProvider
+import com.streamflex.providers.netmirror.PrimeVideoMirrorProvider
+import com.streamflex.providers.netmirror.HotStarMirrorProvider
+import com.streamflex.providers.netmirror.DisneyPlusMirrorProvider
 
 /**
  * Dependency module for streaming providers.
@@ -22,7 +26,12 @@ object ProviderModule {
 
         listOf(
 
-            HDHubProvider()
+            HDHubProvider(),
+
+            NetflixMirrorProvider(),
+            PrimeVideoMirrorProvider(),
+            HotStarMirrorProvider(),
+            DisneyPlusMirrorProvider()
 
             // Future:
             // MovieBoxProvider()

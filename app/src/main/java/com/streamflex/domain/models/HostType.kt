@@ -19,6 +19,7 @@ enum class HostType {
     MIXDROP,
     REDIRECT,
     DOOD,
+    NETMIRROR,
 
     UNKNOWN,
 }
