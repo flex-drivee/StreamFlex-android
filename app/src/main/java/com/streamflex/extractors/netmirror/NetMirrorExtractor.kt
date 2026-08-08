@@ -52,6 +52,7 @@ class NetMirrorExtractor : BaseExtractor() {
             .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0 /OS.GatuNewTV v1.0")
             .header("Accept", "application/json, text/plain, */*")
             .header("Ott", ott)
+            .header("Usertoken", "")
             .build()
 
         return withContext(Dispatchers.IO) {
@@ -72,7 +73,10 @@ class NetMirrorExtractor : BaseExtractor() {
                         title = source.provider,
                         url = videoLink,
                         isM3U8 = videoLink.contains(".m3u8", ignoreCase = true),
-                        headers = mapOf("Referer" to referer)
+                        headers = mapOf(
+                            "Referer" to referer,
+                            "Cookie" to "hd=on"
+                        )
                     )
 
                     ExtractorResult(streams = listOf(stream))

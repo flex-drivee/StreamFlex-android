@@ -6,7 +6,7 @@ object NetMirrorConfig {
     const val PROVIDER_ID_HOTSTAR = "hotstarmirror"
     const val PROVIDER_ID_DISNEY = "disneymirror"
     
-    const val DEFAULT_DOMAIN = "https://net52.cc"
+    const val DEFAULT_DOMAIN = "https://net77.cc"
 
     // Types of OTT
     const val OTT_NETFLIX = "nf"
