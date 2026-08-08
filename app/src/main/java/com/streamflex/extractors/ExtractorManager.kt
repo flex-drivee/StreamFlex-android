@@ -10,6 +10,8 @@ import com.streamflex.extractors.hubcdn.HubCDNExtractor
 import com.streamflex.extractors.hubcloud.HubCloudExtractor
 import com.streamflex.extractors.hubdrive.HubDriveExtractor
 import com.streamflex.extractors.redirect.RedirectExtractor
+import com.streamflex.extractors.dood.DoodExtractor
+import com.streamflex.extractors.pixeldrain.PixelDrainExtractor
 import com.streamflex.core.utils.StreamLogger
 import java.util.ArrayDeque
 
@@ -47,15 +49,17 @@ object ExtractorManager {
 
         RedirectExtractor(),
 
-        GoogleVideoExtractor()
+        GoogleVideoExtractor(),
 
-        // Future:
-        // PixelDrainExtractor()
-        // StreamTapeExtractor()
-        // FileMoonExtractor()
-        // MixDropExtractor()
-        // VidStackExtractor()
-        // DoodExtractor()
+        // Phase 3 — HDHub4U complete extractors
+        DoodExtractor(),
+
+        PixelDrainExtractor()
+
+        // Future (Phase 3+ providers):
+        // StreamTapeExtractor()  ← OTTMirror
+        // MixDropExtractor()     ← NetMirror
+        // VidStackExtractor()    ← VegaMovies
     )
 
     /**

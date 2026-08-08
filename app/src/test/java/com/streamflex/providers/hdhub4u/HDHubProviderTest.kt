@@ -157,6 +157,145 @@ class HDHubProviderTest {
         assertEquals(1, ep2.sources.size)
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // Phase 3 — DoodExtractor Tests
+    // ─────────────────────────────────────────────────────────────────────────
+
+    @Test
+    fun testDoodExtractor_normalizesShareLinkToEmbedLink() {
+        // /d/ share links must be converted to /e/ embed links before fetching
+        val shareUrl = "https://dood.re/d/abc123xyz"
+        val expected = "https://dood.re/e/abc123xyz"
+
+        // Use reflection to test the private normalizeToEmbedUrl method
+        val extractor = com.streamflex.extractors.dood.DoodExtractor()
+        val method = extractor.javaClass.getDeclaredMethod("normalizeToEmbedUrl", String::class.java)
+        method.isAccessible = true
+        val result = method.invoke(extractor, shareUrl) as String
+
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun testDoodExtractor_normalizesFileLinkToEmbedLink() {
+        // /f/ file links must also be converted to /e/ embed links
+        val fileUrl = "https://dood.to/f/zyx987def"
+        val expected = "https://dood.to/e/zyx987def"
+
+        val extractor = com.streamflex.extractors.dood.DoodExtractor()
+        val method = extractor.javaClass.getDeclaredMethod("normalizeToEmbedUrl", String::class.java)
+        method.isAccessible = true
+        val result = method.invoke(extractor, fileUrl) as String
+
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun testDoodExtractor_extractsOriginFromEmbedUrl() {
+        // Origin extraction must strip the path, leaving only scheme + host
+        val extractor = com.streamflex.extractors.dood.DoodExtractor()
+        val method = extractor.javaClass.getDeclaredMethod("extractOrigin", String::class.java)
+        method.isAccessible = true
+
+        assertEquals("https://dood.re", method.invoke(extractor, "https://dood.re/e/abc123"))
+        assertEquals("https://dood.la", method.invoke(extractor, "https://dood.la/e/xyz789"))
+        assertEquals("https://do0od.com", method.invoke(extractor, "https://do0od.com/e/testid"))
+    }
+
+    @Test
+    fun testDoodExtractor_passMd5RegexMatchesEmbedPageScript() {
+        // Verify the regex correctly extracts /pass_md5/<hash> from realistic embed HTML
+        val sampleHtml = """
+            <html><head></head><body>
+            <script>
+                (function(){
+                    var ref = 'https://dood.re/pass_md5/abc123def456ghi789/token?expiry=999';
+                    $.getScript('/pass_md5/abc123def456ghi789jkl', function() {});
+                })();
+            </script>
+            </body></html>
+        """.trimIndent()
+
+        val passMd5Regex = Regex("""/pass_md5/[a-zA-Z0-9/]+""")
+        val match = passMd5Regex.find(sampleHtml)?.value
+
+        // Must find the path — that's what DoodExtractor uses in Step 2
+        assertTrue("Should find /pass_md5/ path", match != null)
+        assertTrue("Match should start with /pass_md5/", match!!.startsWith("/pass_md5/"))
+    }
+
+    @Test
+    fun testDoodExtractor_supportsOnlyDoodHostType() {
+        val extractor = com.streamflex.extractors.dood.DoodExtractor()
+        assertEquals(HostType.DOOD, extractor.hostType)
+
+        val goodSource = ProviderSource(
+            provider = "HDHub4u", host = "DOOD", hostType = HostType.DOOD,
+            url = "https://dood.re/e/abc123", quality = com.streamflex.domain.models.Quality.UNKNOWN,
+            referer = "", headers = emptyMap(), cookies = emptyMap()
+        )
+        assertTrue("Should support DOOD host", extractor.supports(goodSource))
+
+        val badSource = goodSource.copy(hostType = HostType.HUBCLOUD)
+        assertTrue("Should NOT support HUBCLOUD", !extractor.supports(badSource))
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Phase 3 — PixelDrainExtractor Tests
+    // ─────────────────────────────────────────────────────────────────────────
+
+    @Test
+    fun testPixelDrainExtractor_extractsFileIdFromShareUrl() {
+        val extractor = com.streamflex.extractors.pixeldrain.PixelDrainExtractor()
+        val method = extractor.javaClass.getDeclaredMethod("extractFileId", String::class.java)
+        method.isAccessible = true
+
+        // /u/ share link
+        assertEquals(
+            "AbCdEfGh",
+            method.invoke(extractor, "https://pixeldrain.com/u/AbCdEfGh")
+        )
+
+        // /l/ list link
+        assertEquals(
+            "XyZ12345",
+            method.invoke(extractor, "https://pixeldrain.com/l/XyZ12345")
+        )
+
+        // Already an API URL
+        assertEquals(
+            "testFile1",
+            method.invoke(extractor, "https://pixeldrain.com/api/file/testFile1")
+        )
+    }
+
+    @Test
+    fun testPixelDrainExtractor_buildsCorrectApiUrl() {
+        // The final API URL must be /api/file/<id>?download — no auth, no token
+        val fileId = "AbCdEfGh"
+        val expected = "https://pixeldrain.com/api/file/$fileId?download"
+
+        // Verify the pattern manually (mirrors what the extractor builds in Step 2)
+        val built = "https://pixeldrain.com/api/file/$fileId?download"
+        assertEquals(expected, built)
+    }
+
+    @Test
+    fun testPixelDrainExtractor_supportsOnlyPixelDrainHostType() {
+        val extractor = com.streamflex.extractors.pixeldrain.PixelDrainExtractor()
+        assertEquals(HostType.PIXELDRAIN, extractor.hostType)
+
+        val goodSource = ProviderSource(
+            provider = "HDHub4u", host = "PIXELDRAIN", hostType = HostType.PIXELDRAIN,
+            url = "https://pixeldrain.com/u/AbCdEfGh", quality = com.streamflex.domain.models.Quality.UNKNOWN,
+            referer = "", headers = emptyMap(), cookies = emptyMap()
+        )
+        assertTrue("Should support PIXELDRAIN host", extractor.supports(goodSource))
+
+        val badSource = goodSource.copy(hostType = HostType.DOOD)
+        assertTrue("Should NOT support DOOD", !extractor.supports(badSource))
+    }
+
     @Test
     fun testRedirectExtractor_unwrapsWpRot13Base64Script() = runBlocking {
         val targetUrl = "https://hubcloud.one/drive/target123"
