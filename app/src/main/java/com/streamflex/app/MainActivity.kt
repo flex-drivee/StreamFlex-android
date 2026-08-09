@@ -30,15 +30,15 @@ class MainActivity : ComponentActivity() {
             val prefs = context.getSharedPreferences("streamflex_settings", android.content.Context.MODE_PRIVATE)
             
             // Re-read preference explicitly on recomposition if needed, or use a state
-            var isDarkMode by androidx.compose.runtime.remember {
-                androidx.compose.runtime.mutableStateOf(prefs.getBoolean("dark_mode", true))
+            var appTheme by androidx.compose.runtime.remember {
+                androidx.compose.runtime.mutableStateOf(prefs.getString("app_theme", "SKY_DARK") ?: "SKY_DARK")
             }
             
             // Listen for changes
             androidx.compose.runtime.DisposableEffect(prefs) {
                 val listener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
-                    if (key == "dark_mode") {
-                        isDarkMode = sharedPreferences.getBoolean("dark_mode", true)
+                    if (key == "app_theme") {
+                        appTheme = sharedPreferences.getString("app_theme", "SKY_DARK") ?: "SKY_DARK"
                     }
                 }
                 prefs.registerOnSharedPreferenceChangeListener(listener)
@@ -47,7 +47,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            com.streamflex.app.ui.theme.StreamFlexTheme(darkTheme = isDarkMode) {
+            com.streamflex.app.ui.theme.StreamFlexTheme(appTheme = appTheme) {
                 androidx.compose.material3.Surface(
                     modifier = androidx.compose.ui.Modifier.fillMaxSize(),
                     color = androidx.compose.material3.MaterialTheme.colorScheme.background

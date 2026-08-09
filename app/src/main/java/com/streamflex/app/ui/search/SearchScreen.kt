@@ -50,7 +50,7 @@ fun SearchScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(SFBgPrimary)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
 
@@ -58,7 +58,7 @@ fun SearchScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(SFBgPrimary)
+                    .background(MaterialTheme.colorScheme.background)
                     .statusBarsPadding()
                     .padding(horizontal = 12.dp, vertical = 10.dp)
             ) {
@@ -72,7 +72,7 @@ fun SearchScreen(
                         modifier = Modifier.size(40.dp)
                     ) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back",
-                            tint = SFTextPrimary, modifier = Modifier.size(22.dp))
+                            tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(22.dp))
                     }
 
                     // Search field
@@ -81,7 +81,7 @@ fun SearchScreen(
                             .weight(1f)
                             .height(46.dp)
                             .clip(RoundedCornerShape(10.dp))
-                            .background(SFBgElevated)
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
                     ) {
                         TextField(
                             value            = state.query,
@@ -100,14 +100,14 @@ fun SearchScreen(
                                 unfocusedContainerColor = Color.Transparent,
                                 focusedIndicatorColor   = Color.Transparent,
                                 unfocusedIndicatorColor = Color.Transparent,
-                                focusedTextColor        = SFTextPrimary,
-                                unfocusedTextColor      = SFTextPrimary,
-                                cursorColor             = SFAccent
+                                focusedTextColor        = MaterialTheme.colorScheme.onBackground,
+                                unfocusedTextColor      = MaterialTheme.colorScheme.onBackground,
+                                cursorColor             = MaterialTheme.colorScheme.primary
                             ),
                             textStyle        = MaterialTheme.typography.bodyMedium,
                             leadingIcon      = {
                                 Icon(Icons.Default.Search, null,
-                                    tint = SFTextSecondary, modifier = Modifier.size(20.dp))
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
                             },
                             trailingIcon     = {
                                 if (state.query.isNotEmpty()) {
@@ -116,7 +116,7 @@ fun SearchScreen(
                                         focusRequester.requestFocus()
                                     }) {
                                         Icon(Icons.Default.Close, "Clear",
-                                            tint = SFTextSecondary, modifier = Modifier.size(18.dp))
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
                                     }
                                 }
                             }
@@ -138,9 +138,9 @@ fun SearchScreen(
                     Box(
                         modifier = Modifier
                             .clip(CircleShape)
-                            .background(if (selected) SFAccent else SFBgElevated)
+                            .background(if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant)
                             .border(
-                                BorderStroke(1.dp, if (selected) SFAccent else SFOutline),
+                                BorderStroke(1.dp, if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline),
                                 CircleShape
                             )
                             .clickable { selectedFilter = index }
@@ -152,7 +152,7 @@ fun SearchScreen(
                             style = MaterialTheme.typography.labelMedium.copy(
                                 fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
                             ),
-                            color = if (selected) Color.White else SFTextSecondary
+                            color = if (selected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -183,7 +183,7 @@ fun SearchScreen(
                             Spacer(Modifier.height(16.dp))
                             Text("No results for \"${state.query}\"",
                                 style = MaterialTheme.typography.titleMedium,
-                                color = SFTextSecondary)
+                                color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Spacer(Modifier.height(6.dp))
                             Text("Try different keywords",
                                 style = MaterialTheme.typography.bodyMedium,
@@ -239,7 +239,7 @@ private fun SFSearchCard(
                 .fillMaxWidth()
                 .aspectRatio(2f / 3f)
                 .clip(RoundedCornerShape(8.dp))
-                .background(SFBgCard)
+                .background(MaterialTheme.colorScheme.surface)
         ) {
             AsyncImage(
                 model              = item.poster,
@@ -253,7 +253,7 @@ private fun SFSearchCard(
                     .fillMaxHeight(0.35f)
                     .align(Alignment.BottomCenter)
                     .background(
-                        Brush.verticalGradient(listOf(Color.Transparent, SFBgPrimary.copy(0.9f)))
+                        Brush.verticalGradient(listOf(Color.Transparent, MaterialTheme.colorScheme.background.copy(0.9f)))
                     )
             )
             // HD badge
@@ -262,7 +262,7 @@ private fun SFSearchCard(
                     .align(Alignment.TopEnd)
                     .padding(5.dp)
                     .clip(RoundedCornerShape(3.dp))
-                    .background(SFBgPrimary.copy(0.75f))
+                    .background(MaterialTheme.colorScheme.background.copy(0.75f))
                     .padding(horizontal = 4.dp, vertical = 2.dp)
             ) {
                 Text("HD", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
@@ -273,7 +273,7 @@ private fun SFSearchCard(
         Text(
             text     = item.title,
             style    = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-            color    = SFTextPrimary,
+            color    = MaterialTheme.colorScheme.onBackground,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -294,10 +294,10 @@ private fun SFSearchCard(
 @Composable
 private fun SFBrowseCategories() {
     val genres = listOf(
-        "Action"    to SFAccent,
+        "Action"    to MaterialTheme.colorScheme.primary,
         "Drama"     to Color(0xFF9B59B6),
         "Comedy"    to Color(0xFFE67E22),
-        "Thriller"  to SFAccentAlt,
+        "Thriller"  to MaterialTheme.colorScheme.secondary,
         "Romance"   to Color(0xFFE91E63),
         "Sci-Fi"    to Color(0xFF00BCD4),
         "Horror"    to Color(0xFF795548),
@@ -312,7 +312,7 @@ private fun SFBrowseCategories() {
         Text(
             "Browse by Genre",
             style    = MaterialTheme.typography.headlineMedium.copy(fontSize = 16.sp),
-            color    = SFTextPrimary,
+            color    = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)
         )
 
@@ -363,7 +363,7 @@ private fun SFSearchShimmerGrid() {
         label         = "shimmerX"
     )
     val brush = Brush.linearGradient(
-        listOf(SFBgCard, SFBgElevated, SFBgCard),
+        listOf(MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.colorScheme.surface),
         start = androidx.compose.ui.geometry.Offset(shimmerX, 0f),
         end   = androidx.compose.ui.geometry.Offset(shimmerX + 500f, 300f)
     )

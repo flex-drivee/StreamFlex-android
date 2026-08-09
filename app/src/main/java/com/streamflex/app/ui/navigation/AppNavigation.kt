@@ -1,16 +1,31 @@
 package com.streamflex.app.ui.navigation
 
-import kotlinx.coroutines.launch
-import androidx.compose.runtime.rememberCoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import android.content.Intent
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.streamflex.app.domain.repository.ContentRepository
@@ -27,6 +42,14 @@ import com.streamflex.app.ui.search.SearchScreen
 import com.streamflex.app.ui.search.SearchViewModel
 import com.streamflex.app.ui.search.SearchViewModelFactory
 
+sealed class BottomNavItem(val route: String, val icon: ImageVector, val selectedIcon: ImageVector) {
+    object Home : BottomNavItem(Screen.Home.route, Icons.Outlined.Home, Icons.Filled.Home)
+    object Search : BottomNavItem(Screen.Search.route, Icons.Outlined.Search, Icons.Filled.Search)
+    object Explore : BottomNavItem("explore", Icons.Outlined.Explore, Icons.Filled.Explore)
+    object Library : BottomNavItem("library", Icons.Outlined.VideoLibrary, Icons.Filled.VideoLibrary)
+    object Settings : BottomNavItem(Screen.Settings.route, Icons.Outlined.Settings, Icons.Filled.Settings)
+}
+
 @Composable
 fun AppNavigation(
     repository: ContentRepository,
@@ -34,127 +57,98 @@ fun AppNavigation(
 ) {
     val navController = rememberNavController()
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
 
-    NavHost(
-        navController = navController,
-        startDestination = Screen.Home.route
-    ) {
-        // --- HOME ---
-        composable(route = Screen.Home.route) {
-            val viewModelFactory = HomeViewModelFactory(repository)
-            val viewModel: HomeViewModel = viewModel(factory = viewModelFactory)
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
 
-            HomeScreen(
-                viewModel = viewModel,
-                onNavigateToDetail = { id -> navController.navigate(Screen.Detail.createRoute(id)) },
-                onSearchClick = { navController.navigate(Screen.Search.route) },
-                onSettingsClick = { navController.navigate(Screen.Settings.route) }
-            )
-        }
-        
-        // --- SETTINGS ---
-        composable(route = Screen.Settings.route) {
-            com.streamflex.app.ui.settings.SettingsScreen(
-                onBackClick = { navController.popBackStack() }
-            )
-        }
+    // Define which routes should show the floating bottom bar
+    val showBottomBar = currentDestination?.route in listOf(
+        Screen.Home.route,
+        Screen.Search.route,
+        "explore",
+        "library",
+        Screen.Settings.route
+    )
 
-        // --- DOWNLOADS ---
-        composable(route = Screen.Downloads.route) {
-            com.streamflex.app.ui.downloads.DownloadsScreen(
-                onBackClick = { navController.popBackStack() }
-            )
-        }
+    Box(modifier = Modifier.fillMaxSize()) {
+        NavHost(
+            navController = navController,
+            startDestination = Screen.Home.route,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            // --- HOME ---
+            composable(route = Screen.Home.route) {
+                val viewModelFactory = HomeViewModelFactory(repository)
+                val viewModel: HomeViewModel = viewModel(factory = viewModelFactory)
 
-        // --- SEARCH ---
-        composable(route = Screen.Search.route) {
-            val viewModelFactory = SearchViewModelFactory(repository)
-            val viewModel: SearchViewModel = viewModel(factory = viewModelFactory)
-
-            SearchScreen(
-                viewModel = viewModel,
-                onBackClick = { navController.popBackStack() },
-                onItemClick = { id -> navController.navigate(Screen.Detail.createRoute(id)) }
-            )
-        }
-
-        // --- MY LIST (Placeholder for now) ---
-        composable(route = Screen.MyList.route) {
-            MyListScreen(
-                onBackClick = { navController.popBackStack() },
-                onItemClick = { id -> navController.navigate(Screen.Detail.createRoute(id)) }
-            )
-        }
-
-        // --- DETAIL ---
-        composable(
-            route = Screen.Detail.route,
-            arguments = listOf(navArgument("movieId") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val movieId = backStackEntry.arguments?.getString("movieId") ?: return@composable
-            val viewModelFactory =
-                MovieDetailViewModelFactory(
-
-                    contentRepository = repository,
-
-                    streamRepository = streamRepository,
-
-                    contentId = movieId
-
+                HomeScreen(
+                    viewModel = viewModel,
+                    onNavigateToDetail = { id -> navController.navigate(Screen.Detail.createRoute(id)) },
+                    onSearchClick = { navController.navigate(Screen.Search.route) },
+                    onSettingsClick = { navController.navigate(Screen.Settings.route) },
+                    onDownloadsClick = { navController.navigate(Screen.Downloads.route) }
                 )
-            val viewModel: MovieDetailViewModel = viewModel(factory = viewModelFactory)
+            }
+            
+            // --- SETTINGS ---
+            composable(route = Screen.Settings.route) {
+                com.streamflex.app.ui.settings.SettingsScreen(
+                    onBackClick = { navController.popBackStack() }
+                )
+            }
 
-            MovieDetailScreen(
+            // --- DOWNLOADS ---
+            composable(route = Screen.Downloads.route) {
+                com.streamflex.app.ui.downloads.DownloadsScreen(
+                    onBackClick = { navController.popBackStack() }
+                )
+            }
 
-                viewModel = viewModel,
+            // --- SEARCH ---
+            composable(route = Screen.Search.route) {
+                val viewModelFactory = SearchViewModelFactory(repository)
+                val viewModel: SearchViewModel = viewModel(factory = viewModelFactory)
 
-                onBackClick = {
+                SearchScreen(
+                    viewModel = viewModel,
+                    onBackClick = { navController.popBackStack() },
+                    onItemClick = { id -> navController.navigate(Screen.Detail.createRoute(id)) }
+                )
+            }
 
-                    navController.popBackStack()
+                // --- EXPLORE ---
+            composable(route = "explore") {
+                com.streamflex.app.ui.explore.ExploreScreen(
+                    onItemClick = { id -> navController.navigate(Screen.Detail.createRoute(id)) }
+                )
+            }
 
-                },
+            // --- LIBRARY (Downloads & Bookmarks) ---
+            composable(route = "library") {
+                com.streamflex.app.ui.library.LibraryScreen(
+                    onBackClick = { navController.popBackStack() },
+                    onItemClick = { id -> navController.navigate(Screen.Detail.createRoute(id)) }
+                )
+            }
 
-                onMoviePlayClick = { links ->
+            // --- DETAIL ---
+            composable(
+                route = Screen.Detail.route,
+                arguments = listOf(navArgument("movieId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val movieId = backStackEntry.arguments?.getString("movieId") ?: return@composable
+                val viewModelFactory = MovieDetailViewModelFactory(
+                    contentRepository = repository,
+                    streamRepository = streamRepository,
+                    contentId = movieId
+                )
+                val viewModel: MovieDetailViewModel = viewModel(factory = viewModelFactory)
 
-                    android.util.Log.d(
-                        "STREAM_DEBUG",
-                        "Movie URLs: ${links.map { it.url }}"
-                    )
-
-                    val intent = Intent(
-                        context,
-                        PlayerActivity::class.java
-                    ).apply {
-                        val urls = ArrayList(links.map { it.url })
-                        val referers = ArrayList(links.map { it.headers["Referer"] ?: it.referer ?: "" })
-                        val cookies = ArrayList(links.map { it.headers["Cookie"] ?: it.cookies.entries.joinToString("; ") { c -> "${c.key}=${c.value}" } })
-                        val userAgents = ArrayList(links.map { it.headers["User-Agent"] ?: "" })
-                        putStringArrayListExtra("VIDEO_URLS", urls)
-                        putStringArrayListExtra("VIDEO_REFERERS", referers)
-                        putStringArrayListExtra("VIDEO_COOKIES", cookies)
-                        putStringArrayListExtra("VIDEO_USER_AGENTS", userAgents)
-                    }
-
-                    context.startActivity(intent)
-
-                },
-
-                onEpisodePlayClick = { episode ->
-
-                    viewModel.fetchEpisodeStreams(
-                        episode
-                    ) { links ->
-
-                        android.util.Log.d(
-                            "STREAM_DEBUG",
-                            "Episode URLs: ${links.map { it.url }}"
-                        )
-
-                        val intent = Intent(
-                            context,
-                            PlayerActivity::class.java
-                        ).apply {
+                MovieDetailScreen(
+                    viewModel = viewModel,
+                    onBackClick = { navController.popBackStack() },
+                    onMoviePlayClick = { links ->
+                        val intent = Intent(context, PlayerActivity::class.java).apply {
                             val urls = ArrayList(links.map { it.url })
                             val referers = ArrayList(links.map { it.headers["Referer"] ?: it.referer ?: "" })
                             val cookies = ArrayList(links.map { it.headers["Cookie"] ?: it.cookies.entries.joinToString("; ") { c -> "${c.key}=${c.value}" } })
@@ -164,14 +158,82 @@ fun AppNavigation(
                             putStringArrayListExtra("VIDEO_COOKIES", cookies)
                             putStringArrayListExtra("VIDEO_USER_AGENTS", userAgents)
                         }
-
                         context.startActivity(intent)
-
+                    },
+                    onEpisodePlayClick = { episode ->
+                        viewModel.fetchEpisodeStreams(episode) { links ->
+                            val intent = Intent(context, PlayerActivity::class.java).apply {
+                                val urls = ArrayList(links.map { it.url })
+                                val referers = ArrayList(links.map { it.headers["Referer"] ?: it.referer ?: "" })
+                                val cookies = ArrayList(links.map { it.headers["Cookie"] ?: it.cookies.entries.joinToString("; ") { c -> "${c.key}=${c.value}" } })
+                                val userAgents = ArrayList(links.map { it.headers["User-Agent"] ?: "" })
+                                putStringArrayListExtra("VIDEO_URLS", urls)
+                                putStringArrayListExtra("VIDEO_REFERERS", referers)
+                                putStringArrayListExtra("VIDEO_COOKIES", cookies)
+                                putStringArrayListExtra("VIDEO_USER_AGENTS", userAgents)
+                            }
+                            context.startActivity(intent)
+                        }
                     }
+                )
+            }
+        }
 
-                }
-
+        // Floating Bottom Navigation Bar
+        if (showBottomBar) {
+            val items = listOf(
+                BottomNavItem.Home,
+                BottomNavItem.Search,
+                BottomNavItem.Explore,
+                BottomNavItem.Library,
+                BottomNavItem.Settings
             )
+            
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 12.dp) // Lowered from 24.dp
+                    .fillMaxWidth()
+                    .padding(horizontal = 40.dp) // Thinner width (increased horizontal padding from 24.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .shadow(8.dp, RoundedCornerShape(32.dp))
+                        .clip(RoundedCornerShape(32.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.95f))
+                        .padding(vertical = 8.dp, horizontal = 12.dp), // Thinner height
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    items.forEach { item ->
+                        val isSelected = currentDestination?.hierarchy?.any { it.route == item.route } == true
+                        Box(
+                            modifier = Modifier
+                                .size(44.dp) // Slightly smaller touch target to fit in thinner bar
+                                .clip(CircleShape)
+                                .background(if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else Color.Transparent)
+                                .clickable {
+                                    navController.navigate(item.route) {
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = if (isSelected) item.selectedIcon else item.icon,
+                                contentDescription = null,
+                                tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }

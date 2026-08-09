@@ -62,7 +62,7 @@ fun MovieDetailScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(SFBgPrimary)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         if (state.isLoading) {
             SFDetailShimmer()
@@ -137,13 +137,13 @@ fun MovieDetailScreen(
                                 onClick  = {},
                                 modifier = Modifier.weight(1f).height(46.dp),
                                 shape    = RoundedCornerShape(6.dp),
-                                border   = BorderStroke(1.dp, SFOutline),
-                                colors   = ButtonDefaults.outlinedButtonColors(containerColor = SFBgElevated)
+                                border   = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                                colors   = ButtonDefaults.outlinedButtonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                             ) {
                                 Icon(Icons.Default.ArrowDropDown, null,
-                                    tint = SFTextPrimary, modifier = Modifier.size(20.dp))
+                                    tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(20.dp))
                                 Spacer(Modifier.width(4.dp))
-                                Text("Download", color = SFTextPrimary,
+                                Text("Download", color = MaterialTheme.colorScheme.onBackground,
                                     style = MaterialTheme.typography.bodyMedium)
                             }
 
@@ -153,8 +153,8 @@ fun MovieDetailScreen(
                                 modifier = Modifier
                                     .size(46.dp)
                                     .clip(RoundedCornerShape(6.dp))
-                                    .background(if (isInMyList) SFAccent else SFBgElevated)
-                                    .border(BorderStroke(1.dp, SFOutline), RoundedCornerShape(6.dp))
+                                    .background(if (isInMyList) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant)
+                                    .border(BorderStroke(1.dp, MaterialTheme.colorScheme.outline), RoundedCornerShape(6.dp))
                             ) {
                                 Icon(
                                     if (isInMyList) Icons.Default.Check else Icons.Default.Add,
@@ -168,11 +168,11 @@ fun MovieDetailScreen(
                                 modifier = Modifier
                                     .size(46.dp)
                                     .clip(RoundedCornerShape(6.dp))
-                                    .background(SFBgElevated)
-                                    .border(BorderStroke(1.dp, SFOutline), RoundedCornerShape(6.dp))
+                                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                                    .border(BorderStroke(1.dp, MaterialTheme.colorScheme.outline), RoundedCornerShape(6.dp))
                             ) {
                                 Icon(Icons.Default.Share, null,
-                                    tint = SFTextPrimary, modifier = Modifier.size(20.dp))
+                                    tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(20.dp))
                             }
                         }
                     }
@@ -189,7 +189,7 @@ fun MovieDetailScreen(
                         Text(
                             text     = overview,
                             style    = MaterialTheme.typography.bodyMedium,
-                            color    = SFTextSecondary,
+                            color    = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = if (expanded) Int.MAX_VALUE else 3,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -197,7 +197,7 @@ fun MovieDetailScreen(
                             Text(
                                 text     = if (expanded) "Less ▲" else "More ▼",
                                 style    = MaterialTheme.typography.labelMedium,
-                                color    = SFAccent,
+                                color    = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier
                                     .padding(top = 4.dp)
                                     .clickable { expanded = !expanded }
@@ -208,7 +208,7 @@ fun MovieDetailScreen(
 
                 // ── 4. DIVIDER ────────────────────────────────────────────────
                 item {
-                    HorizontalDivider(color = SFDivider, modifier = Modifier.padding(horizontal = 16.dp))
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, modifier = Modifier.padding(horizontal = 16.dp))
                 }
 
                 // ── 5. SEASONS + EPISODES (TV only) ───────────────────────────
@@ -254,17 +254,17 @@ fun MovieDetailScreen(
                                     Text(
                                         "Show all ${state.episodes.size} episodes",
                                         style = MaterialTheme.typography.labelMedium,
-                                        color = SFAccent
+                                        color = MaterialTheme.colorScheme.primary
                                     )
                                     Icon(Icons.Default.KeyboardArrowDown,
-                                        null, tint = SFAccent, modifier = Modifier.size(18.dp))
+                                        null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
                                 }
                             }
                         }
                     }
 
                     item {
-                        HorizontalDivider(color = SFDivider,
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant,
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
                     }
                 }
@@ -288,12 +288,12 @@ fun MovieDetailScreen(
                     .padding(12.dp)
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(SFBgPrimary.copy(alpha = 0.75f))
+                    .background(MaterialTheme.colorScheme.background.copy(alpha = 0.75f))
                     .clickable { onBackClick() },
                 contentAlignment = Alignment.Center
             ) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back",
-                    tint = SFTextPrimary, modifier = Modifier.size(22.dp))
+                    tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(22.dp))
             }
         }
     }
@@ -324,7 +324,7 @@ private fun SFDetailHero(
             contentDescription = title,
             contentScale       = ContentScale.Crop,
             loading            = {
-                Box(Modifier.fillMaxSize().background(SFBgElevated))
+                Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant))
             },
             modifier           = Modifier.fillMaxSize()
         )
@@ -338,8 +338,8 @@ private fun SFDetailHero(
                         colorStops = arrayOf(
                             0.0f to Color.Black.copy(0.4f),
                             0.5f to Color.Transparent,
-                            0.8f to SFBgPrimary.copy(0.6f),
-                            1.0f to SFBgPrimary
+                            0.8f to MaterialTheme.colorScheme.background.copy(0.6f),
+                            1.0f to MaterialTheme.colorScheme.background
                         )
                     )
                 )
@@ -358,7 +358,7 @@ private fun SFDetailHero(
                     fontWeight = FontWeight.ExtraBold,
                     fontSize   = 26.sp
                 ),
-                color    = SFTextPrimary,
+                color    = MaterialTheme.colorScheme.onBackground,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
@@ -369,14 +369,14 @@ private fun SFDetailHero(
             ) {
                 year?.let {
                     Text(it.toString(), style = MaterialTheme.typography.bodyMedium,
-                        color = SFTextSecondary)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 SFBadge("HD", SFHDTag, Color.Black)
                 if (isShow) SFBadge("SERIES", SFDubBg, Color.White)
                 runtime?.let {
                     if (it > 0) {
                         Text(formatRuntime(it),
-                            style = MaterialTheme.typography.bodyMedium, color = SFTextSecondary)
+                            style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
                 rating?.let {
@@ -385,7 +385,7 @@ private fun SFDetailHero(
                         Icon(Icons.Default.Star, null, tint = SFRatingBg,
                             modifier = Modifier.size(14.dp))
                         Text(String.format("%.1f", it),
-                            style = MaterialTheme.typography.bodyMedium, color = SFTextSecondary)
+                            style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }
@@ -410,7 +410,7 @@ private fun SFSeasonSelector(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(8.dp))
-                .background(SFBgElevated)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
                 .clickable { onToggleMenu() }
                 .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment          = Alignment.CenterVertically,
@@ -419,12 +419,12 @@ private fun SFSeasonSelector(
             Text(
                 "Season $selectedSeason",
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = SFTextPrimary
+                color = MaterialTheme.colorScheme.onBackground
             )
             Icon(
                 if (isMenuExpanded) Icons.Default.KeyboardArrowUp
                 else Icons.Default.KeyboardArrowDown,
-                null, tint = SFTextSecondary
+                null, tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 
@@ -437,7 +437,7 @@ private fun SFSeasonSelector(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp))
-                    .background(SFBgSurface)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
                     .padding(vertical = 4.dp)
             ) {
                 show.seasons.forEach { season ->
@@ -446,7 +446,7 @@ private fun SFSeasonSelector(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable { onSeasonSelected(season.seasonNumber) }
-                            .background(if (isSelected) SFAccent.copy(0.1f) else Color.Transparent)
+                            .background(if (isSelected) MaterialTheme.colorScheme.primary.copy(0.1f) else Color.Transparent)
                             .padding(horizontal = 16.dp, vertical = 14.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
@@ -456,15 +456,15 @@ private fun SFSeasonSelector(
                             style = MaterialTheme.typography.bodyLarge.copy(
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                             ),
-                            color = if (isSelected) SFAccent else SFTextPrimary
+                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
                         )
                         if (isSelected) {
                             Icon(Icons.Default.Check, null,
-                                tint = SFAccent, modifier = Modifier.size(18.dp))
+                                tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
                         }
                     }
                     if (season.seasonNumber != show.seasons.last().seasonNumber) {
-                        HorizontalDivider(color = SFDivider)
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                     }
                 }
             }
@@ -491,7 +491,7 @@ fun SFEpisodeItem(episode: Episode, onClick: () -> Unit) {
                 .width(130.dp)
                 .height(76.dp)
                 .clip(RoundedCornerShape(8.dp))
-                .background(SFBgElevated),
+                .background(MaterialTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.Center
         ) {
             // Placeholder — no stillPath in Episode model yet
@@ -525,7 +525,7 @@ fun SFEpisodeItem(episode: Episode, onClick: () -> Unit) {
             Text(
                 "${episode.episodeNumber}. ${episode.title}",
                 style    = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
-                color    = SFTextPrimary,
+                color    = MaterialTheme.colorScheme.onBackground,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -533,7 +533,7 @@ fun SFEpisodeItem(episode: Episode, onClick: () -> Unit) {
             Text(
                 episode.overview ?: "No description available",
                 style    = MaterialTheme.typography.bodyMedium,
-                color    = SFTextSecondary,
+                color    = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
@@ -571,9 +571,9 @@ fun SFMoreLikeThis(
             Text(
                 "More Like This",
                 style = MaterialTheme.typography.headlineMedium.copy(fontSize = 17.sp),
-                color = SFTextPrimary
+                color = MaterialTheme.colorScheme.onBackground
             )
-            Text("See All", style = MaterialTheme.typography.labelMedium, color = SFAccent)
+            Text("See All", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
         }
 
         Spacer(Modifier.height(12.dp))
@@ -619,7 +619,7 @@ private fun SFDetailShimmer() {
         label         = "shimmerX"
     )
     val shimmerBrush = Brush.linearGradient(
-        colors = listOf(SFBgCard, SFBgElevated, SFBgCard),
+        colors = listOf(MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.colorScheme.surface),
         start  = androidx.compose.ui.geometry.Offset(shimmerX, 0f),
         end    = androidx.compose.ui.geometry.Offset(shimmerX + 500f, 300f)
     )
