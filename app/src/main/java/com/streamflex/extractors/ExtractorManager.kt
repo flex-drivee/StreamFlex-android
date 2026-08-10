@@ -13,6 +13,7 @@ import com.streamflex.extractors.redirect.RedirectExtractor
 import com.streamflex.extractors.dood.DoodExtractor
 import com.streamflex.extractors.pixeldrain.PixelDrainExtractor
 import com.streamflex.extractors.netmirror.NetMirrorExtractor
+import com.streamflex.extractors.moviebox.MovieBoxExtractor
 import com.streamflex.core.utils.StreamLogger
 import java.util.ArrayDeque
 
@@ -58,7 +59,9 @@ object ExtractorManager {
         PixelDrainExtractor(),
 
         // Phase 3 — NetMirror complete extractors
-        NetMirrorExtractor()
+        NetMirrorExtractor(),
+        
+        MovieBoxExtractor()
 
         // Future (Phase 3+ providers):
         // StreamTapeExtractor()  ← OTTMirror

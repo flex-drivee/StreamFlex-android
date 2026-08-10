@@ -7,6 +7,7 @@ import com.streamflex.providers.netmirror.NetflixMirrorProvider
 import com.streamflex.providers.netmirror.PrimeVideoMirrorProvider
 import com.streamflex.providers.netmirror.HotStarMirrorProvider
 import com.streamflex.providers.netmirror.DisneyPlusMirrorProvider
+import com.streamflex.providers.moviebox.MovieBoxProvider
 
 /**
  * Dependency module for streaming providers.
@@ -31,10 +32,10 @@ object ProviderModule {
             NetflixMirrorProvider(),
             PrimeVideoMirrorProvider(),
             HotStarMirrorProvider(),
-            DisneyPlusMirrorProvider()
+            DisneyPlusMirrorProvider(),
 
             // Future:
-            // MovieBoxProvider()
+            MovieBoxProvider()
             // OTTMirrorProvider()
             // NetMirrorProvider()
             // AnimeProvider()
