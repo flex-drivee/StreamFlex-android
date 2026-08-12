@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.*
 import coil.compose.AsyncImage
 import coil.compose.SubcomposeAsyncImage
 import com.streamflex.app.domain.models.SearchResult
+import com.streamflex.domain.repositories.ProviderRepository
 import com.streamflex.app.ui.theme.*
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -39,6 +40,7 @@ import com.streamflex.app.ui.theme.*
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
+    providerRepository: ProviderRepository,
     onNavigateToDetail: (String) -> Unit,
     onSearchClick: () -> Unit = {},
     onSettingsClick: () -> Unit = {},
@@ -164,6 +166,7 @@ fun HomeScreen(
                 alpha         = topBarAlpha,
                 selectedTab   = selectedTab,
                 tabs          = tabs,
+                providerRepository = providerRepository,
                 onTabSelected = { selectedTab = it },
                 onSearchClick = onSearchClick,
                 onProfileClick = onSettingsClick,
@@ -182,6 +185,7 @@ private fun SFTopBar(
     alpha: Float,
     selectedTab: Int,
     tabs: List<String>,
+    providerRepository: ProviderRepository,
     onTabSelected: (Int) -> Unit,
     onSearchClick: () -> Unit,
     onProfileClick: () -> Unit,
@@ -241,28 +245,60 @@ private fun SFTopBar(
                     }
                     
                     // Provider Selector Chip
-                    Row(
-                        modifier = Modifier
-                            .height(36.dp)
-                            .clip(RoundedCornerShape(18.dp))
-                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f))
-                            .clickable { /* TODO: Open Provider Selector */ }
-                            .padding(horizontal = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Extension,
-                            contentDescription = "Provider",
-                            tint = MaterialTheme.colorScheme.onBackground,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Text(
-                            text = "AnimeDubHindi",
-                            color = MaterialTheme.colorScheme.onBackground,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Medium
-                        )
+                    var showProviderDropdown by remember { mutableStateOf(false) }
+                    var selectedProviderName by remember { 
+                        mutableStateOf(providerRepository.provider(providerRepository.selectedProviderId ?: "")?.name ?: "All Providers") 
+                    }
+
+                    Box {
+                        Row(
+                            modifier = Modifier
+                                .height(36.dp)
+                                .clip(RoundedCornerShape(18.dp))
+                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f))
+                                .clickable { showProviderDropdown = true }
+                                .padding(horizontal = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Extension,
+                                contentDescription = "Provider",
+                                tint = MaterialTheme.colorScheme.onBackground,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Text(
+                                text = selectedProviderName,
+                                color = MaterialTheme.colorScheme.onBackground,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+
+                        DropdownMenu(
+                            expanded = showProviderDropdown,
+                            onDismissRequest = { showProviderDropdown = false },
+                            modifier = Modifier.background(MaterialTheme.colorScheme.surface)
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("All Providers", color = MaterialTheme.colorScheme.onSurface) },
+                                onClick = {
+                                    providerRepository.selectedProviderId = null
+                                    selectedProviderName = "All Providers"
+                                    showProviderDropdown = false
+                                }
+                            )
+                            providerRepository.enabledProviders().forEach { provider ->
+                                DropdownMenuItem(
+                                    text = { Text(provider.name, color = MaterialTheme.colorScheme.onSurface) },
+                                    onClick = {
+                                        providerRepository.selectedProviderId = provider.id
+                                        selectedProviderName = provider.name
+                                        showProviderDropdown = false
+                                    }
+                                )
+                            }
+                        }
                     }
                 }
             }

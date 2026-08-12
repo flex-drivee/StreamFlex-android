@@ -83,6 +83,7 @@ fun AppNavigation(
 
                 HomeScreen(
                     viewModel = viewModel,
+                    providerRepository = com.streamflex.app.di.ProviderModule.repository,
                     onNavigateToDetail = { id -> navController.navigate(Screen.Detail.createRoute(id)) },
                     onSearchClick = { navController.navigate(Screen.Search.route) },
                     onSettingsClick = { navController.navigate(Screen.Settings.route) },

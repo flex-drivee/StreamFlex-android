@@ -21,15 +21,25 @@ class ProviderRepository(
 ) {
 
     /**
+     * Currently selected provider ID.
+     * If set, only this provider will be searched.
+     */
+    var selectedProviderId: String? = null
+
+    /**
      * Search all enabled providers.
      */
     suspend fun search(
         query: String
     ): List<SearchResult> {
 
-        return providers
+        val targetProviders = if (selectedProviderId != null) {
+            providers.filter { it.enabled && it.id == selectedProviderId }
+        } else {
+            providers.filter { it.enabled }
+        }
 
-            .filter { it.enabled }
+        return targetProviders
 
             .flatMap { provider ->
 
