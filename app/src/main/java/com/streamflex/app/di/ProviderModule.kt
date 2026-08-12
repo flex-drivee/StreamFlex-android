@@ -27,6 +27,8 @@ object ProviderModule {
 
         listOf(
 
+            MovieBoxProvider(),
+
             HDHubProvider(),
 
             NetflixMirrorProvider(),
@@ -35,7 +37,6 @@ object ProviderModule {
             DisneyPlusMirrorProvider(),
 
             // Future:
-            MovieBoxProvider()
             // OTTMirrorProvider()
             // NetMirrorProvider()
             // AnimeProvider()

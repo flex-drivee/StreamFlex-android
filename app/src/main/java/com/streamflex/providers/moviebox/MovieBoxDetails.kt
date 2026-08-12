@@ -39,7 +39,9 @@ class MovieBoxDetails {
 
                     val title = JsonParser.string(data, "title") ?: result.title
                     val overview = JsonParser.string(data, "description")
-                    val poster = JsonParser.string(data, "coverUrl")
+                    
+                    val coverObj = JsonParser.objectOf(data, "cover")
+                    val poster = coverObj?.let { JsonParser.string(it, "url") }
 
                     if (result.mediaType == MediaType.MOVIE) {
                         val source = MovieBoxMapper.toProviderSource(
