@@ -107,6 +107,8 @@ class MovieDetailViewModel(
 
                 var firstStreamFired = false
 
+                com.streamflex.player.StreamStateHolder.clear()
+
                 val streams = streamRepository.resolveMovie(
 
                     title = movie.title,
@@ -114,6 +116,7 @@ class MovieDetailViewModel(
                     year = movie.year
 
                 ) { currentStreams ->
+                    com.streamflex.player.StreamStateHolder.streams.value = currentStreams.streams
                     if (currentStreams.isPlayable && !firstStreamFired) {
                         firstStreamFired = true
                         onResult(currentStreams.streams)
@@ -182,6 +185,8 @@ class MovieDetailViewModel(
 
                 var firstStreamFired = false
 
+                com.streamflex.player.StreamStateHolder.clear()
+
                 val streams = streamRepository.resolveEpisode(
 
                     title = show.title,
@@ -193,6 +198,7 @@ class MovieDetailViewModel(
                     year = show.year
 
                 ) { currentStreams ->
+                    com.streamflex.player.StreamStateHolder.streams.value = currentStreams.streams
                     if (currentStreams.isPlayable && !firstStreamFired) {
                         firstStreamFired = true
                         onResult(currentStreams.streams)

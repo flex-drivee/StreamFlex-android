@@ -61,10 +61,10 @@ object ExtractorManager {
         // Phase 3 — NetMirror complete extractors
         NetMirrorExtractor(),
         
-        MovieBoxExtractor()
-
-        // Future (Phase 3+ providers):
-        // StreamTapeExtractor()  ← OTTMirror
+        MovieBoxExtractor(),
+        
+        // Phase 3+ providers
+        com.streamflex.extractors.streamtape.StreamTapeExtractor()
         // VidStackExtractor()    ← VegaMovies
     )
 
@@ -103,6 +103,8 @@ object ExtractorManager {
             queue.isNotEmpty() &&
             visited.size < MAX_SOURCES
         ) {
+            // Check for cancellation if user exited the player
+            kotlinx.coroutines.yield()
 
             val current = queue.removeFirst()
 

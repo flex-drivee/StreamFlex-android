@@ -87,7 +87,21 @@ class HubDriveExtractor : BaseExtractor() {
                 lower.contains("discord") ||
                 lower.contains("imdb") ||
                 lower.contains("/category/") ||
-                lower.contains("/tag/")
+                lower.contains("/tag/") ||
+                lower.contains("/page/") ||
+                lower.contains("/sign") ||
+                lower.contains("/login") ||
+                lower.contains("/register") ||
+                lower.contains("/contact") ||
+                lower.contains("/about") ||
+                lower.endsWith(".tips/") ||
+                lower.endsWith(".tips") ||
+                lower.endsWith(".fans/") ||
+                lower.endsWith(".fans") ||
+                lower.endsWith(".cx/") ||
+                lower.endsWith(".cx") ||
+                lower.endsWith(".co/") ||
+                lower.endsWith(".co")
             ) {
                 return@forEach
             }

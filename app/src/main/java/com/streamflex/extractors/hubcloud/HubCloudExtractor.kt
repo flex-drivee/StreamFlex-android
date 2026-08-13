@@ -162,6 +162,41 @@ class HubCloudExtractor
 
         sorted.forEach { url ->
 
+            val lower = url.lowercase()
+
+            // Skip obvious garbage
+            if (
+                lower == source.url.lowercase() ||
+                lower.startsWith("javascript:") ||
+                lower == "#" ||
+                lower.isBlank() ||
+                lower.contains("facebook") ||
+                lower.contains("twitter") ||
+                lower.contains("telegram") ||
+                lower.contains("discord") ||
+                lower.contains("imdb") ||
+                lower.contains("/category/") ||
+                lower.contains("/tag/") ||
+                lower.contains("/page/") ||
+                lower.contains("/sign") ||
+                lower.contains("/login") ||
+                lower.contains("/register") ||
+                lower.contains("/contact") ||
+                lower.contains("/about") ||
+                lower.endsWith(".tips/") ||
+                lower.endsWith(".tips") ||
+                lower.endsWith(".fans/") ||
+                lower.endsWith(".fans") ||
+                lower.endsWith(".cx/") ||
+                lower.endsWith(".cx") ||
+                lower.endsWith(".co/") ||
+                lower.endsWith(".co") ||
+                lower.endsWith(".ist/") ||
+                lower.endsWith(".ist")
+            ) {
+                return@forEach
+            }
+
             val type = HostDetector.detect(url)
 
             when (type) {

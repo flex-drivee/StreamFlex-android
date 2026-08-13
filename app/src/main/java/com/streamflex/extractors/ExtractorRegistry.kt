@@ -148,7 +148,7 @@ object ExtractorRegistry {
                 status = "active",
                 domains = listOf(
                     "streamtape.com", "streamtape.to", "streamtape.net",
-                    "streamtape.xyz", "strcloud.in", "shavetape.cash"
+                    "streamtape.xyz", "streamtape.cc", "strcloud.in", "shavetape.cash"
                 ),
                 outputFormats = listOf("mp4"),
                 requiresReferer = true,

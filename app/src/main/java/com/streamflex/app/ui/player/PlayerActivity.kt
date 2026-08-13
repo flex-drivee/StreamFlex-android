@@ -41,6 +41,9 @@ import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.ui.PlayerView
+import androidx.media3.common.C
+import androidx.media3.common.TrackSelectionOverride
+import androidx.media3.common.Tracks
 
 class PlayerActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -190,6 +193,7 @@ fun PlayerScreen(videoUrls: ArrayList<String>, videoReferers: ArrayList<String>,
                 dragHandle       = { BottomSheetDefaults.DragHandle(color = SFOutline) }
             ) {
                 PlayerSettingsContent(
+                    player = exoPlayer,
                     onClose = { showSettingsSheet = false }
                 )
             }
@@ -198,13 +202,30 @@ fun PlayerScreen(videoUrls: ArrayList<String>, videoReferers: ArrayList<String>,
 }
 
 @Composable
-fun PlayerSettingsContent(onClose: () -> Unit) {
+fun PlayerSettingsContent(player: Player, onClose: () -> Unit) {
     var selectedTab by remember { mutableStateOf(0) }
-    val audioTracks = listOf("English (Original)", "Spanish", "French")
-    val qualities = listOf("Auto", "1080p", "720p", "480p")
+    
+    var currentTracks by remember { mutableStateOf(player.currentTracks) }
+    var currentSpeed by remember { mutableStateOf(player.playbackParameters.speed) }
 
-    var currentAudio by remember { mutableStateOf("English (Original)") }
-    var currentQuality by remember { mutableStateOf("Auto") }
+    DisposableEffect(player) {
+        val listener = object : Player.Listener {
+            override fun onTracksChanged(tracks: Tracks) {
+                currentTracks = tracks
+            }
+            override fun onPlaybackParametersChanged(playbackParameters: androidx.media3.common.PlaybackParameters) {
+                currentSpeed = playbackParameters.speed
+            }
+        }
+        player.addListener(listener)
+        onDispose { player.removeListener(listener) }
+    }
+
+    val videoGroups = currentTracks.groups.filter { it.type == C.TRACK_TYPE_VIDEO }
+    val audioGroups = currentTracks.groups.filter { it.type == C.TRACK_TYPE_AUDIO }
+    val textGroups = currentTracks.groups.filter { it.type == C.TRACK_TYPE_TEXT }
+
+    val speeds = listOf(0.5f, 0.75f, 1.0f, 1.25f, 1.5f, 2.0f)
 
     Column(modifier = Modifier.fillMaxWidth().padding(bottom = 32.dp)) {
         Row(
@@ -212,7 +233,7 @@ fun PlayerSettingsContent(onClose: () -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Settings",
+            Text("Player Settings",
                 color      = SFTextPrimary,
                 fontWeight = FontWeight.Bold,
                 style      = MaterialTheme.typography.titleLarge)
@@ -224,38 +245,94 @@ fun PlayerSettingsContent(onClose: () -> Unit) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Row(modifier = Modifier.padding(horizontal = 16.dp)) {
-            SettingTab(
-                text = "Audio & Subtitles",
-                isSelected = selectedTab == 0,
-                onClick = { selectedTab = 0 }
-            )
+            SettingTab("Quality", selectedTab == 0) { selectedTab = 0 }
             Spacer(modifier = Modifier.width(16.dp))
-            SettingTab(
-                text = "Video Quality",
-                isSelected = selectedTab == 1,
-                onClick = { selectedTab = 1 }
-            )
+            SettingTab("Audio", selectedTab == 1) { selectedTab = 1 }
+            Spacer(modifier = Modifier.width(16.dp))
+            SettingTab("Subtitles", selectedTab == 2) { selectedTab = 2 }
+            Spacer(modifier = Modifier.width(16.dp))
+            SettingTab("Speed", selectedTab == 3) { selectedTab = 3 }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
         HorizontalDivider(color = SFDivider)
 
-        LazyColumn(modifier = Modifier.height(200.dp)) {
-            if (selectedTab == 0) {
-                items(audioTracks) { track ->
-                    SettingItem(
-                        text = track,
-                        isSelected = track == currentAudio,
-                        onClick = { currentAudio = track }
-                    )
+        LazyColumn(modifier = Modifier.height(250.dp)) {
+            when (selectedTab) {
+                0 -> { // Quality
+                    item {
+                        val isAuto = player.trackSelectionParameters.overrides.isEmpty()
+                        SettingItem(text = "Auto", isSelected = isAuto) {
+                            player.trackSelectionParameters = player.trackSelectionParameters.buildUpon()
+                                .clearOverridesOfType(C.TRACK_TYPE_VIDEO)
+                                .build()
+                        }
+                    }
+                    videoGroups.forEach { group ->
+                        items(group.length) { trackIndex ->
+                            val format = group.getTrackFormat(trackIndex)
+                            val isSelected = group.isTrackSelected(trackIndex) && player.trackSelectionParameters.overrides.isNotEmpty()
+                            val resolution = "${format.width}x${format.height}"
+                            SettingItem(text = resolution, isSelected = isSelected) {
+                                player.trackSelectionParameters = player.trackSelectionParameters.buildUpon()
+                                    .setOverrideForType(TrackSelectionOverride(group.mediaTrackGroup, trackIndex))
+                                    .build()
+                            }
+                        }
+                    }
                 }
-            } else {
-                items(qualities) { quality ->
-                    SettingItem(
-                        text = quality,
-                        isSelected = quality == currentQuality,
-                        onClick = { currentQuality = quality }
-                    )
+                1 -> { // Audio
+                    item {
+                        val isAuto = player.trackSelectionParameters.overrides.isEmpty()
+                        SettingItem(text = "Auto", isSelected = isAuto) {
+                            player.trackSelectionParameters = player.trackSelectionParameters.buildUpon()
+                                .clearOverridesOfType(C.TRACK_TYPE_AUDIO)
+                                .build()
+                        }
+                    }
+                    audioGroups.forEach { group ->
+                        items(group.length) { trackIndex ->
+                            val format = group.getTrackFormat(trackIndex)
+                            val isSelected = group.isTrackSelected(trackIndex) && player.trackSelectionParameters.overrides.isNotEmpty()
+                            val name = format.language ?: format.label ?: "Track ${trackIndex + 1}"
+                            SettingItem(text = name, isSelected = isSelected) {
+                                player.trackSelectionParameters = player.trackSelectionParameters.buildUpon()
+                                    .setOverrideForType(TrackSelectionOverride(group.mediaTrackGroup, trackIndex))
+                                    .build()
+                            }
+                        }
+                    }
+                }
+                2 -> { // Subtitles
+                    item {
+                        val isOff = player.trackSelectionParameters.disabledTrackTypes.contains(C.TRACK_TYPE_TEXT)
+                        SettingItem(text = "Off", isSelected = isOff) {
+                            player.trackSelectionParameters = player.trackSelectionParameters.buildUpon()
+                                .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, true)
+                                .build()
+                        }
+                    }
+                    textGroups.forEach { group ->
+                        items(group.length) { trackIndex ->
+                            val format = group.getTrackFormat(trackIndex)
+                            val isSelected = group.isTrackSelected(trackIndex) && !player.trackSelectionParameters.disabledTrackTypes.contains(C.TRACK_TYPE_TEXT)
+                            val name = format.language ?: format.label ?: "Subtitle ${trackIndex + 1}"
+                            SettingItem(text = name, isSelected = isSelected) {
+                                player.trackSelectionParameters = player.trackSelectionParameters.buildUpon()
+                                    .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, false)
+                                    .setOverrideForType(TrackSelectionOverride(group.mediaTrackGroup, trackIndex))
+                                    .build()
+                            }
+                        }
+                    }
+                }
+                3 -> { // Speed
+                    items(speeds) { speed ->
+                        val isSelected = currentSpeed == speed
+                        SettingItem(text = "${speed}x", isSelected = isSelected) {
+                            player.setPlaybackSpeed(speed)
+                        }
+                    }
                 }
             }
         }

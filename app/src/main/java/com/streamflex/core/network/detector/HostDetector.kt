@@ -64,6 +64,9 @@ object HostDetector {
 
             host.contains("vidstack") ->
                 return HostType.VIDSTACK
+                
+            host.contains("megaup") ->
+                return HostType.UNKNOWN
         }
 
         // Check dynamic domains in ExtractorRegistry (from remote registry.json / defaults)

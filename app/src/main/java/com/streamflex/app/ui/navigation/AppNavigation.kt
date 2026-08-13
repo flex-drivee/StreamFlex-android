@@ -37,7 +37,7 @@ import com.streamflex.app.ui.movies.MovieDetailScreen
 import com.streamflex.app.ui.movies.MovieDetailViewModel
 import com.streamflex.app.ui.movies.MovieDetailViewModelFactory
 import com.streamflex.app.ui.mylist.MyListScreen
-import com.streamflex.app.ui.player.PlayerActivity
+import com.streamflex.player.PlayerActivity
 import com.streamflex.app.ui.search.SearchScreen
 import com.streamflex.app.ui.search.SearchViewModel
 import com.streamflex.app.ui.search.SearchViewModelFactory

@@ -101,7 +101,9 @@ fun MovieDetailScreen(
                                 isStreamLoading = true
                                 viewModel.fetchMovieStreams { links ->
                                     isStreamLoading = false
-                                    if (links.isNotEmpty()) onMoviePlayClick(links)
+                                    if (links.isNotEmpty()) {
+                                        onMoviePlayClick(links)
+                                    }
                                 }
                             },
                             modifier = Modifier.fillMaxWidth().height(50.dp),
@@ -234,7 +236,9 @@ fun MovieDetailScreen(
                     items(episodesToShow, key = { it.episodeNumber }) { ep ->
                         SFEpisodeItem(
                             episode = ep,
-                            onClick = { onEpisodePlayClick(ep) }
+                            onClick = { 
+                                onEpisodePlayClick(ep) 
+                            }
                         )
                     }
 
@@ -289,7 +293,9 @@ fun MovieDetailScreen(
                     .size(40.dp)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.background.copy(alpha = 0.75f))
-                    .clickable { onBackClick() },
+                    .clickable { 
+                        onBackClick() 
+                    },
                 contentAlignment = Alignment.Center
             ) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back",
