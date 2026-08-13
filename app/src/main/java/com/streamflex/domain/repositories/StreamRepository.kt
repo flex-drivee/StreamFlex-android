@@ -72,25 +72,28 @@ class StreamRepository(
      * Resolve streams from a SearchResult.
      */
     suspend fun getStreams(
-        item: SearchResult
+        item: SearchResult,
+        onStreamFound: suspend (FinalStreams) -> Unit = {}
     ): FinalStreams {
 
         val providerResult =
             loadContent(item)
                 ?: return FinalStreams.EMPTY
 
-        return getStreams(providerResult)
+        return getStreams(providerResult, onStreamFound)
     }
 
     /**
      * Resolve streams from ProviderResult.
      */
     suspend fun getStreams(
-        providerResult: ProviderResult
+        providerResult: ProviderResult,
+        onStreamFound: suspend (FinalStreams) -> Unit = {}
     ): FinalStreams {
 
         return streamEngine.resolve(
-            providerResult.sources
+            providerResult.sources,
+            onStreamFound
         )
     }
 
@@ -105,7 +108,8 @@ class StreamRepository(
      */
     suspend fun resolveMovie(
         title: String,
-        year: Int? = null
+        year: Int? = null,
+        onStreamFound: suspend (FinalStreams) -> Unit = {}
     ): FinalStreams {
 
         val results =
@@ -120,7 +124,7 @@ class StreamRepository(
             year = year,
             results = results
         ) ?: return FinalStreams.EMPTY
-        return getStreams(selected)
+        return getStreams(selected, onStreamFound)
     }
 
     /**
@@ -135,7 +139,8 @@ class StreamRepository(
         title: String,
         season: Int,
         episode: Int,
-        year: Int? = null
+        year: Int? = null,
+        onStreamFound: suspend (FinalStreams) -> Unit = {}
     ): FinalStreams {
 
         val results = search(title)
@@ -151,6 +156,6 @@ class StreamRepository(
             results = results
         ) ?: return FinalStreams.EMPTY
 
-        return getStreams(selected)
+        return getStreams(selected, onStreamFound)
     }
 }

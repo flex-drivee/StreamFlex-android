@@ -104,7 +104,7 @@ fun PlayerScreen(videoUrls: ArrayList<String>, videoReferers: ArrayList<String>,
         val userAgent = if (defaultUserAgent.isNotEmpty()) {
             defaultUserAgent
         } else {
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0"
+            com.streamflex.core.constants.Constants.DEFAULT_USER_AGENT
         }
         
         val dataSourceFactory = DefaultHttpDataSource.Factory()
@@ -117,12 +117,12 @@ fun PlayerScreen(videoUrls: ArrayList<String>, videoReferers: ArrayList<String>,
             .setMediaSourceFactory(mediaSourceFactory)
             .build().apply {
 
-                // --- THE MAGIC AUTOPLAY FALLBACK LISTENER ---
                 val listener = object : Player.Listener {
                     var currentIndex = 0
 
                     override fun onPlayerError(error: PlaybackException) {
-                        android.util.Log.e("PLAYER_DEBUG", "Link failed: ${urlsToPlay[currentIndex]} - Error: ${error.message}")
+                        val currentUrl = urlsToPlay.getOrNull(currentIndex)
+                        android.util.Log.e("PLAYER_DEBUG", "Link failed: $currentUrl - Error: ${error.message}")
 
                         currentIndex++ // Move to the next link
 
@@ -134,6 +134,8 @@ fun PlayerScreen(videoUrls: ArrayList<String>, videoReferers: ArrayList<String>,
                         } else {
                             android.util.Log.e("PLAYER_DEBUG", "All streaming links failed!")
                             Toast.makeText(context, "All streaming links failed or expired.", Toast.LENGTH_LONG).show()
+                            stop() // Stop to prevent further retries or error events
+                            clearMediaItems()
                         }
                     }
                 }

@@ -52,14 +52,9 @@ class HubCloudExtractor
             "HubCloudExtractor",
             "Document downloaded"
         )
-        return result(
-
-            parseHubCloud(
-                source,
-                document
-            )
-
-
+        return parseHubCloud(
+            source,
+            document
         )
     }
 
@@ -69,7 +64,7 @@ class HubCloudExtractor
     private suspend fun parseHubCloud(
         source: ProviderSource,
         document: org.jsoup.nodes.Document
-    ): List<StreamLink> {
+    ): ExtractionResult {
 
         val candidates = linkedSetOf<String>()
         StreamLogger.debug(
@@ -128,7 +123,7 @@ class HubCloudExtractor
                 "No candidate URLs found."
             )
 
-            return emptyList()
+            return emptyResult()
         }
         return buildCandidateStreams(
             source,
@@ -138,7 +133,7 @@ class HubCloudExtractor
     private fun buildCandidateStreams(
         source: ProviderSource,
         urls: List<String>
-    ): List<StreamLink> {
+    ): ExtractionResult {
 
         val streams = mutableListOf<StreamLink>()
         val pendingSources = mutableListOf<ProviderSource>()
@@ -208,9 +203,10 @@ class HubCloudExtractor
             "HubCloudExtractor",
             "Forwarding ${pendingSources.size} source(s)"
         )
-        return streams.distinctBy(StreamLink::url)
-        // Remaining ProviderSources will be forwarded
-// by ExtractorManager after recursive extraction
+        return result(
+            streams = streams.distinctBy(StreamLink::url),
+            sources = pendingSources
+        )
     }
 
     private fun buildProviderSource(

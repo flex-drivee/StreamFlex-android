@@ -105,13 +105,21 @@ class MovieDetailViewModel(
                     "Resolving movie: ${movie.title} (${movie.year})"
                 )
 
+                var firstStreamFired = false
+
                 val streams = streamRepository.resolveMovie(
 
                     title = movie.title,
 
                     year = movie.year
 
-                )
+                ) { currentStreams ->
+                    if (currentStreams.isPlayable && !firstStreamFired) {
+                        firstStreamFired = true
+                        onResult(currentStreams.streams)
+                    }
+                }
+                
                 android.util.Log.d(
                     "MOVIE_DEBUG",
                     "Playable = ${streams.isPlayable}"
@@ -134,9 +142,13 @@ class MovieDetailViewModel(
                     "MOVIE_DEBUG",
                     "Returning ${streams.streams.size} URL(s) to UI"
                 )
-                onResult(
-                    streams.streams
-                )
+                
+                // If it finished but never fired (e.g. only 1 stream total, or no streams)
+                if (!firstStreamFired) {
+                    onResult(
+                        streams.streams
+                    )
+                }
 
             } catch (e: Exception) {
 
@@ -168,6 +180,8 @@ class MovieDetailViewModel(
 
                 }
 
+                var firstStreamFired = false
+
                 val streams = streamRepository.resolveEpisode(
 
                     title = show.title,
@@ -178,11 +192,18 @@ class MovieDetailViewModel(
 
                     year = show.year
 
-                )
+                ) { currentStreams ->
+                    if (currentStreams.isPlayable && !firstStreamFired) {
+                        firstStreamFired = true
+                        onResult(currentStreams.streams)
+                    }
+                }
 
-                onResult(
-                    streams.streams
-                )
+                if (!firstStreamFired) {
+                    onResult(
+                        streams.streams
+                    )
+                }
 
             } catch (e: Exception) {
 

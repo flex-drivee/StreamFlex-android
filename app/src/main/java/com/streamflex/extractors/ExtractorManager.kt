@@ -78,7 +78,8 @@ object ExtractorManager {
      * Resolve a ProviderSource into playable streams.
      */
     suspend fun extract(
-        source: ProviderSource
+        source: ProviderSource,
+        onStreamFound: suspend (StreamLink) -> Unit = {}
     ): List<StreamLink> {
 
         StreamLogger.info(
@@ -93,6 +94,7 @@ object ExtractorManager {
         val visited = mutableSetOf<String>()
 
         val streams = mutableListOf<StreamLink>()
+        val emittedUrls = mutableSetOf<String>()
 
         queue.add(source)
         queued.add(source.url)
@@ -116,6 +118,24 @@ object ExtractorManager {
                     "Already visited. Skipping."
                 )
 
+                continue
+            }
+
+            if (com.streamflex.core.network.detector.HostDetector.isDirect(current.hostType)) {
+                StreamLogger.debug("ExtractorManager", "Direct stream queued: ${current.url}")
+                val stream = com.streamflex.domain.models.StreamLink(
+                    name = "${current.provider} • Direct",
+                    url = current.url,
+                    quality = current.quality,
+                    host = current.hostType,
+                    headers = current.headers,
+                    cookies = current.cookies,
+                    referer = current.referer
+                )
+                if (emittedUrls.add(stream.url)) {
+                    onStreamFound(stream)
+                }
+                streams.add(stream)
                 continue
             }
 
@@ -146,6 +166,11 @@ object ExtractorManager {
                     "Streams: ${result.streams.size}, Next Sources: ${result.sources.size}"
                 )
 
+                result.streams.forEach { stream ->
+                    if (emittedUrls.add(stream.url)) {
+                        onStreamFound(stream)
+                    }
+                }
                 streams += result.streams
 
                 result.sources

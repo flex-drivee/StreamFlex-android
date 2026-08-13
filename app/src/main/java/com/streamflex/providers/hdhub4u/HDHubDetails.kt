@@ -201,7 +201,11 @@ class HDHubDetails : DetailParser {
                         hostType = hostType,
                         url = url,
                         quality = Quality.UNKNOWN,
-                        referer = detailUrl
+                        referer = detailUrl,
+                        headers = mapOf(
+                            "Referer" to detailUrl,
+                            "Cookie" to HDHubConfig.COOKIE
+                        )
                     )
                 }
             }

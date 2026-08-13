@@ -64,7 +64,11 @@ class HDHubSourceParser : SourceParser {
                 hostType = hostType,
                 url = url,
                 quality = quality,
-                referer = sourceUrl
+                referer = sourceUrl,
+                headers = mapOf(
+                    "Referer" to sourceUrl,
+                    "Cookie" to HDHubConfig.COOKIE
+                )
             )
         }
 
