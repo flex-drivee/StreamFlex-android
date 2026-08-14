@@ -38,6 +38,8 @@ object HttpClient {
             .build()
     }
 
+    fun getOkHttpClient(): OkHttpClient = baseClient
+
     private fun buildClient(request: NetworkRequest): OkHttpClient {
 
         val builder = baseClient.newBuilder()

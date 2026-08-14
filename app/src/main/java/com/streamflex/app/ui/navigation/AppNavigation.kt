@@ -149,6 +149,7 @@ fun AppNavigation(
                     viewModel = viewModel,
                     onBackClick = { navController.popBackStack() },
                     onMoviePlayClick = { links ->
+                        com.streamflex.player.StreamStateHolder.streams.value = links
                         val intent = Intent(context, PlayerActivity::class.java).apply {
                             val urls = ArrayList(links.map { it.url })
                             val referers = ArrayList(links.map { it.headers["Referer"] ?: it.referer ?: "" })
@@ -163,6 +164,7 @@ fun AppNavigation(
                     },
                     onEpisodePlayClick = { episode ->
                         viewModel.fetchEpisodeStreams(episode) { links ->
+                            com.streamflex.player.StreamStateHolder.streams.value = links
                             val intent = Intent(context, PlayerActivity::class.java).apply {
                                 val urls = ArrayList(links.map { it.url })
                                 val referers = ArrayList(links.map { it.headers["Referer"] ?: it.referer ?: "" })
