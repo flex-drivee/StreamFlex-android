@@ -13,123 +13,135 @@ import com.streamflex.core.utils.StreamLogger
 /**
  * Extractor for HubCloud.
  *
- * Responsible only for resolving HubCloud pages into playable streams.
+ * HubCloud pages embed download links. We scrape them out, classify
+ * them, and either emit a playable stream or forward for further resolution.
+ *
+ * Loop-protection: HubCloud pages frequently link back to other HubCloud
+ * sub-pages. ExtractorManager already deduplicates by URL via `visited`
+ * set, so we just need to NOT generate infinite pending sources by
+ * limiting what we forward.
  */
 class HubCloudExtractor
     : BaseExtractor() {
 
     override val hostType = HostType.HUBCLOUD
 
+    // URL fragments we will always skip — avoids forwarding social links,
+    // login pages, and same-domain roots back into the queue.
+    private val SKIP_PATTERNS = listOf(
+        "facebook", "twitter", "telegram", "discord", "imdb", "instagram",
+        "youtube.com", "google.com/search",
+        "/category/", "/tag/", "/page/", "/sign", "/login", "/register",
+        "/contact", "/about", "/privacy", "/terms",
+        "javascript:", "#"
+    )
+
+    // Domains whose ROOT we allow through (they have useful content pages)
+    // but whose bare domain home page we skip.
+    private val SKIP_BARE_DOMAINS = listOf(
+        ".tips", ".fans", ".cx", ".co", ".ist"
+    )
+
     override suspend fun extract(
         source: ProviderSource
     ): ExtractionResult {
-        StreamLogger.info(
-            "HubCloudExtractor",
-            "Extracting HubCloud page"
-        )
-
-        StreamLogger.debug(
-            "HubCloudExtractor",
-            "URL: ${source.url}"
-        )
+        StreamLogger.info("HubCloudExtractor", "Extracting HubCloud page")
+        StreamLogger.debug("HubCloudExtractor", "URL: ${source.url}")
 
         if (!supports(source)) {
-
-            StreamLogger.warn(
-                "HubCloudExtractor",
-                "Unsupported source: ${source.hostType}"
-            )
-
+            StreamLogger.warn("HubCloudExtractor", "Unsupported source: ${source.hostType}")
             return emptyResult()
         }
 
-        val document = ExtractorHelper.fetchDocument(
+        var document = ExtractorHelper.fetchDocument(source.url, source.headers)
+        var currentUrl = source.url
 
-            source.url,
-            source.headers
-        )
-        StreamLogger.debug(
-            "HubCloudExtractor",
-            "Document downloaded"
-        )
-        return parseHubCloud(
-            source,
-            document
-        )
+        // Intermediate step handling (HubCloud timer / gateway page):
+        // If the page has a #download button or `var url = '...'` script, follow to the actual download page
+        if (!currentUrl.contains("hubcloud.php")) {
+            val downloadBtnHref = document.selectFirst("#download")?.attr("href")?.takeIf { it.isNotBlank() }
+            val scriptUrlMatch = Regex("""var url = '([^']*)'""").find(document.html())?.groups?.get(1)?.value
+            val nextHref = downloadBtnHref ?: scriptUrlMatch
+
+            if (!nextHref.isNullOrBlank()) {
+                val absoluteNext = if (nextHref.startsWith("http")) nextHref
+                else {
+                    val base = try {
+                        val u = java.net.URL(currentUrl)
+                        "${u.protocol}://${u.host}"
+                    } catch (_: Exception) { currentUrl }
+                    "$base/${nextHref.trimStart('/')}"
+                }
+                StreamLogger.info("HubCloudExtractor", "Following intermediate HubCloud step: $absoluteNext")
+                val nextHeaders = source.headers.toMutableMap().apply { put("Referer", currentUrl) }
+                document = ExtractorHelper.fetchDocument(absoluteNext, nextHeaders)
+                currentUrl = absoluteNext
+            }
+        }
+
+        StreamLogger.debug("HubCloudExtractor", "Document downloaded")
+        return parseHubCloud(source.copy(url = currentUrl), document)
     }
 
-    /**
-     * Parse HubCloud page.
-     */
     private suspend fun parseHubCloud(
         source: ProviderSource,
         document: org.jsoup.nodes.Document
     ): ExtractionResult {
 
         val candidates = linkedSetOf<String>()
-        StreamLogger.debug(
-            "HubCloudExtractor",
-            "Scanning page for candidate URLs..."
-        )
+        StreamLogger.debug("HubCloudExtractor", "Scanning page for candidate URLs...")
 
-        // ----------------------------------------------------
-        // 1. Video tags
-        // ----------------------------------------------------
-
+        // 1. <video> tags
         document.select("video source[src]")
             .map { it.absUrl("src") }
             .filter { it.isNotBlank() }
             .forEach(candidates::add)
 
-        // ----------------------------------------------------
-        // 2. Download buttons
-        // ----------------------------------------------------
+        // 2. <a href> download links and button tags
+        document.select("a[href], a.btn, a[class*=btn], button.btn").forEach { el ->
+            val href = el.absUrl("href").takeIf { it.isNotBlank() } ?: el.attr("href")
+            if (href.isNotBlank() && href.startsWith("http")) {
+                candidates.add(href)
+            }
+            // Check onclick attribute (location.href = '...' or window.open('...'))
+            val onclick = el.attr("onclick")
+            if (onclick.isNotBlank()) {
+                val onclickMatch = Regex("""(?:location(?:\.href)?|window\.open)\s*=\s*['"]([^'"]+)['"]|window\.open\s*\(\s*['"]([^'"]+)['"]""", RegexOption.IGNORE_CASE).find(onclick)
+                val onclickUrl = onclickMatch?.groups?.get(1)?.value ?: onclickMatch?.groups?.get(2)?.value
+                if (!onclickUrl.isNullOrBlank() && onclickUrl.startsWith("http")) {
+                    candidates.add(onclickUrl)
+                }
+            }
+        }
 
-        document.select("a[href]")
-            .map { it.absUrl("href") }
-            .filter { it.isNotBlank() }
-            .forEach(candidates::add)
-
-        // ----------------------------------------------------
-        // 3. Iframes
-        // ----------------------------------------------------
-
+        // 3. <iframe src>
         document.select("iframe[src]")
             .map { it.absUrl("src") }
             .filter { it.isNotBlank() }
             .forEach(candidates::add)
 
-        // ----------------------------------------------------
-        // 4. JavaScript
-        // ----------------------------------------------------
+        // 4. Script tag URLs
+        document.select("script").forEach {
+            val html = it.data()
+            ExtractorUtils
+                .allMatches("""https?:\/\/[^\s"'<>\\]+""", html)
+                .forEach(candidates::add)
+        }
 
-        document.select("script")
-            .forEach {
-
-                val html = it.data()
-
-                ExtractorUtils
-                    .allMatches(
-                        """https?:\/\/[^\s"'<>\\]+""",
-                        html
-                    )
-                    .forEach(candidates::add)
-            }
+        // 5. Google Drive uc?export=download links embedded in data- attrs or text
+        val htmlText = document.html()
+        Regex("""https://drive\.google\.com/uc\?[^\s"'<>\\]+""")
+            .findAll(htmlText)
+            .forEach { candidates.add(it.value) }
 
         if (candidates.isEmpty()) {
-
-            StreamLogger.warn(
-                "HubCloudExtractor",
-                "No candidate URLs found."
-            )
-
+            StreamLogger.warn("HubCloudExtractor", "No candidate URLs found.")
             return emptyResult()
         }
-        return buildCandidateStreams(
-            source,
-            candidates.toList()
-        )
+
+        return buildCandidateStreams(source, candidates.toList())
     }
+
     private fun buildCandidateStreams(
         source: ProviderSource,
         urls: List<String>
@@ -138,121 +150,94 @@ class HubCloudExtractor
         val streams = mutableListOf<StreamLink>()
         val pendingSources = mutableListOf<ProviderSource>()
 
-        val sorted = urls
-            .distinct()
-            .sortedWith(
-                compareBy<String> {
-
-                    when {
-
-                        it.contains(".m3u8", true) -> 0
-
-                        it.endsWith(".mp4", true) -> 1
-
-                        it.endsWith(".mkv", true) -> 2
-
-                        it.contains("googlevideo", true) ||
-                                it.contains("googleusercontent", true) -> 3
-
-                        else -> 100
-                    }
-
+        // Sort: prefer direct video files, then Google Video, then everything else
+        val sorted = urls.distinct().sortedWith(
+            compareBy<String> {
+                when {
+                    it.contains(".m3u8", true) -> 0
+                    it.endsWith(".mp4", true) -> 1
+                    it.endsWith(".mkv", true) -> 2
+                    it.contains("googlevideo", true) ||
+                            it.contains("googleusercontent", true) -> 3
+                    it.contains("drive.google.com", true) -> 4
+                    else -> 100
                 }
-            )
+            }
+        )
 
         sorted.forEach { url ->
-
             val lower = url.lowercase()
 
-            // Skip obvious garbage
-            if (
-                lower == source.url.lowercase() ||
-                lower.startsWith("javascript:") ||
-                lower == "#" ||
-                lower.isBlank() ||
-                lower.contains("facebook") ||
-                lower.contains("twitter") ||
-                lower.contains("telegram") ||
-                lower.contains("discord") ||
-                lower.contains("imdb") ||
-                lower.contains("/category/") ||
-                lower.contains("/tag/") ||
-                lower.contains("/page/") ||
-                lower.contains("/sign") ||
-                lower.contains("/login") ||
-                lower.contains("/register") ||
-                lower.contains("/contact") ||
-                lower.contains("/about") ||
-                lower.endsWith(".tips/") ||
-                lower.endsWith(".tips") ||
-                lower.endsWith(".fans/") ||
-                lower.endsWith(".fans") ||
-                lower.endsWith(".cx/") ||
-                lower.endsWith(".cx") ||
-                lower.endsWith(".co/") ||
-                lower.endsWith(".co") ||
-                lower.endsWith(".ist/") ||
-                lower.endsWith(".ist")
-            ) {
-                return@forEach
+            // Skip patterns
+            if (SKIP_PATTERNS.any { lower.contains(it) }) return@forEach
+            if (lower.isBlank()) return@forEach
+
+            // Skip bare-domain root URLs (e.g. https://hubcloud.ist or https://hubdrive.tips)
+            // but NOT URLs with a meaningful path like https://hubcloud.ist/drive/abc123
+            val isBareRoot = SKIP_BARE_DOMAINS.any { ext ->
+                lower.endsWith(ext) || lower.endsWith("$ext/")
             }
+            if (isBareRoot) return@forEach
+
+            // Skip self-referential
+            if (lower == source.url.lowercase()) return@forEach
 
             val type = HostDetector.detect(url)
 
             when (type) {
-
                 HostType.M3U8,
                 HostType.DIRECT,
-                HostType.GOOGLE_VIDEO -> {
-                    StreamLogger.info(
-                        "HubCloudExtractor",
-                        "Playable stream detected: $type"
-                    )
+                HostType.GOOGLE_VIDEO,
+                HostType.DASH -> {
+                    StreamLogger.info("HubCloudExtractor", "Playable stream detected: $type → $url")
+                    streams += createStream(source = source, url = url)
+                }
 
-                    streams += createStream(
-                        source = source,
-                        url = url
-                    )
+                HostType.UNKNOWN -> {
+                    // Don't forward UNKNOWN — these are usually ad trackers, fonts, images
+                    // EXCEPTION: Google Drive direct download links
+                    if (lower.contains("drive.google.com/uc") ||
+                        lower.contains("docs.google.com/uc")) {
+                        StreamLogger.info("HubCloudExtractor", "Google Drive direct link: $url")
+                        streams += createStream(source = source, url = url)
+                    }
+                    // else: silently discard
                 }
 
                 else -> {
-                    StreamLogger.info(
-                        "HubCloudExtractor",
-                        "Forwarding to extractor: $type"
-                    )
+                    // Forward known extractable hosts (HubDrive, HubCDN, etc.)
+                    // but NOT another HUBCLOUD to prevent infinite loops
+                    if (type != HostType.HUBCLOUD) {
+                        StreamLogger.info("HubCloudExtractor", "Forwarding to extractor: $type")
+                        pendingSources += buildProviderSource(source, url)
+                    } else {
+                        // Only forward HubCloud sub-pages if path is different (prevents tight loops)
+                        val sourceHost = try { java.net.URL(source.url).host } catch (_: Exception) { "" }
+                        val targetHost = try { java.net.URL(url).host } catch (_: Exception) { "" }
+                        val sourcePath = try { java.net.URL(source.url).path } catch (_: Exception) { "" }
+                        val targetPath = try { java.net.URL(url).path } catch (_: Exception) { "" }
 
-                    pendingSources += buildProviderSource(
-                        source,
-                        url
-                    )
-
+                        if (sourceHost == targetHost && sourcePath == targetPath) {
+                            // exact same page — skip
+                        } else {
+                            StreamLogger.info("HubCloudExtractor", "Forwarding sub-HubCloud: $url")
+                            pendingSources += buildProviderSource(source, url)
+                        }
+                    }
                 }
             }
         }
-        StreamLogger.info(
-            "HubCloudExtractor",
-            "Returning ${streams.size} stream(s)"
-        )
 
-        StreamLogger.info(
-            "HubCloudExtractor",
-            "Forwarding ${pendingSources.size} source(s)"
-        )
+        StreamLogger.info("HubCloudExtractor", "Returning ${streams.size} stream(s)")
+        StreamLogger.info("HubCloudExtractor", "Forwarding ${pendingSources.size} source(s)")
+
         return result(
             streams = streams.distinctBy(StreamLink::url),
-            sources = pendingSources
+            sources = pendingSources.distinctBy { it.url }
         )
     }
 
-    private fun buildProviderSource(
-        source: ProviderSource,
-        url: String
-    ): ProviderSource {
-
-        return source.copy(
-            url = url,
-            hostType = HostDetector.detect(url)
-        )
+    private fun buildProviderSource(source: ProviderSource, url: String): ProviderSource {
+        return source.copy(url = url, hostType = HostDetector.detect(url))
     }
-
 }

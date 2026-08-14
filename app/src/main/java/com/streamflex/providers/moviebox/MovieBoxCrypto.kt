@@ -51,14 +51,15 @@ object MovieBoxCrypto {
         body: String?,
         timestamp: Long
     ): String {
-        val parsed = Uri.parse(url)
-        val path = parsed.path ?: ""
+        val uri = try { java.net.URI(url) } catch (_: Exception) { null }
+        val path = uri?.path ?: try { java.net.URL(url).path } catch (_: Exception) { "" }
+        val rawQuery = uri?.rawQuery ?: try { java.net.URL(url).query } catch (_: Exception) { "" }
 
-        val queryNames = parsed.queryParameterNames.sorted()
-        val query = if (queryNames.isNotEmpty()) {
-            queryNames.joinToString("&") { key ->
-                parsed.getQueryParameters(key).joinToString("&") { "$key=$it" }
-            }
+        val query = if (!rawQuery.isNullOrBlank()) {
+            rawQuery.split("&")
+                .filter { it.isNotBlank() }
+                .sorted()
+                .joinToString("&")
         } else {
             ""
         }
@@ -85,6 +86,22 @@ object MovieBoxCrypto {
         }
     }
 
+    private fun decodeB64(input: String): ByteArray {
+        return try {
+            java.util.Base64.getDecoder().decode(input)
+        } catch (_: Exception) {
+            android.util.Base64.decode(input, android.util.Base64.DEFAULT)
+        }
+    }
+
+    private fun encodeB64(input: ByteArray): String {
+        return try {
+            java.util.Base64.getEncoder().encodeToString(input)
+        } catch (_: Exception) {
+            android.util.Base64.encodeToString(input, android.util.Base64.NO_WRAP)
+        }
+    }
+
     fun generateXTrSignature(
         method: String,
         accept: String?,
@@ -99,13 +116,13 @@ object MovieBoxCrypto {
 
         val secretB64 =
             if (useAltKey) MovieBoxConfig.SECRET_KEY_ALT_B64 else MovieBoxConfig.SECRET_KEY_DEFAULT_B64
-        val secretBytes = Base64.decode(Base64.decode(secretB64, Base64.DEFAULT), Base64.DEFAULT)
+        val secretBytes = decodeB64(String(decodeB64(secretB64)))
 
         val mac = Mac.getInstance("HmacMD5")
         mac.init(SecretKeySpec(secretBytes, "HmacMD5"))
 
         val signature = mac.doFinal(canonical.toByteArray(Charsets.UTF_8))
-        val signatureB64 = Base64.encodeToString(signature, Base64.NO_WRAP)
+        val signatureB64 = encodeB64(signature)
 
         return "$timestamp|2|$signatureB64"
     }

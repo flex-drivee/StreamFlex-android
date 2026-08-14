@@ -20,10 +20,23 @@ class StreamTapeExtractor : BaseExtractor() {
         source: ProviderSource
     ): ExtractionResult {
         
-        val url = source.url.replace("/v/", "/e/")
-        
+        // StreamTape URL format: /v/VIDEO_ID/filename.mkv or /v/VIDEO_ID
+        // Embed URL must be: /e/VIDEO_ID  (no filename)
+        val rawUrl = source.url
+        val videoId = rawUrl
+            .replace(Regex("https?://[^/]+"), "")  // strip domain
+            .removePrefix("/v/")
+            .removePrefix("/e/")
+            .split("/").first()                       // keep only the ID segment
+
+        val baseHost = rawUrl
+            .let { Regex("https?://[^/]+").find(it)?.value }
+            ?: "https://streamtape.com"
+
+        val url = "$baseHost/e/$videoId"
+
         StreamLogger.info("StreamTapeExtractor", "Extracting StreamTape page: $url")
-        
+
         val document = ExtractorHelper.fetchDocument(
             url,
             source.headers
@@ -31,25 +44,24 @@ class StreamTapeExtractor : BaseExtractor() {
         
         val html = document.html()
         
-        // StreamTape hides the video link by joining two strings like:
-        // document.getElementById('ideoolink').innerHTML = "/streamtape.com/get_video?id=..." + "&expires=...";
-        val regex = """document\.getElementById\('robotlink'\)\.innerHTML\s*=\s*'([^']+)'\s*\+\s*'([^']+)';""".toRegex()
-        val match = regex.find(html)
-        
+        // StreamTape hides the video link by joining two strings. Patterns vary by version:
+        // Pattern A: document.getElementById('robotlink').innerHTML = '/streamtape.com/...' + '&t=...';
+        // Pattern B: innerHTML = "..." + "..."  (double quotes)
+        val regexSingle = Regex("""getElementById\('robotlink'\)\.innerHTML\s*=\s*'([^']+)'\s*\+\s*'([^']+)'""")
+        val regexDouble = Regex("""getElementById\("robotlink"\)\.innerHTML\s*=\s*"([^"]+)"\s*\+\s*"([^"]+)""")
+        // Pattern C: newer obfuscation — token + expiry concatenated
+        val regexToken  = Regex("""token=([\w-]+).*?expires=(\d+)""", RegexOption.DOT_MATCHES_ALL)
+
+        val match = regexSingle.find(html) ?: regexDouble.find(html)
+
         if (match != null) {
             val part1 = match.groupValues[1]
             val part2 = match.groupValues[2]
-            
             val streamUrl = "https:/" + part1 + part2
-            
-            val stream = createStream(
-                source = source,
-                url = streamUrl
-            )
-            
-            return result(
-                streams = listOf(stream)
-            )
+
+            StreamLogger.info("StreamTapeExtractor", "Found stream URL: $streamUrl")
+            val stream = createStream(source = source, url = streamUrl)
+            return result(streams = listOf(stream))
         }
         
         StreamLogger.warn("StreamTapeExtractor", "No StreamTape video link found")

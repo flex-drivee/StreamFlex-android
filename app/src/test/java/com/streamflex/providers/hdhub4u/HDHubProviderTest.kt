@@ -113,6 +113,38 @@ class HDHubProviderTest {
     }
 
     @Test
+    fun testDetailParser_movieUrlWithFullMovieKeyword_isNotTvSeries() {
+        val spiderManHtml = """
+        <html>
+          <body class="page-body">
+            <h1 class="page-title"><span>Spider-Man: No Way Home (2021) Extended Hindi WEBRip Full Movie</span></h1>
+            <p class="kno-rdesc">Spider-Man identity is revealed...</p>
+            <div class="links">
+              <a href="https://hubcloud.one/drive/spiderman1080p">1080p HubCloud Link</a>
+              <a href="https://hubdrive.co/file/spiderman720p">720p HubDrive Link</a>
+            </div>
+            <!-- Sidebars and related posts might contain series text, should not confuse parser -->
+            <div class="related-posts">
+              <a href="https://hdhub4u.fyi/some-series-season-1">Related Series Season 1 All Episodes</a>
+            </div>
+          </body>
+        </html>
+        """.trimIndent()
+
+        val parser = HDHubDetails()
+        val transport = TransportResult.HtmlResponse(
+            html = spiderManHtml,
+            url = "https://new1.hdhub4u.af/spider-man-no-way-home-2021-extended-hindi-webrip-full-movie/"
+        )
+
+        val result = parser.parse(transport, "https://new1.hdhub4u.af/spider-man-no-way-home-2021-extended-hindi-webrip-full-movie/")
+
+        assertEquals(MediaType.MOVIE, result.mediaType)
+        assertTrue(result.sources.isNotEmpty())
+        assertEquals(0, result.seasons.size)
+    }
+
+    @Test
     fun testDetailParser_parsesTvSeriesSeasonsAndEpisodes() {
         val sampleTvHtml = """
         <html>

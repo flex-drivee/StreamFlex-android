@@ -104,23 +104,18 @@ fun PlayerScreen(
     val allUrls = allStreams.map { it.url }
     
     var currentUrlIndex by remember { mutableStateOf(0) }
+    val allUrlsState = rememberUpdatedState(allUrls)
 
     Log.d("PLAYER_DEBUG", "Received ${allUrls.size} Total URLs")
 
     val exoPlayer = remember {
         // Setup fallbacks for testing
-        val urlsToPlay = allUrls
 
-        if (urlsToPlay.isEmpty()) {
-
-            Toast.makeText(
-                context,
-                "No playable streams found.",
-                Toast.LENGTH_LONG
-            ).show()
-
-            (context as Activity).finish()
-
+        // Don't exit if URLs are empty at startup — background extraction may still deliver links
+        // We'll wait for StreamStateHolder to update allStreams
+        val initialUrls = allUrlsState.value
+        if (initialUrls.isEmpty()) {
+            // Don't finish — just build an idle player
             return@remember ExoPlayer.Builder(context).build()
         }
         
@@ -157,29 +152,45 @@ fun PlayerScreen(
                     var currentIndex = 0
 
                     override fun onPlayerError(error: PlaybackException) {
-                        val currentUrl = urlsToPlay.getOrNull(currentUrlIndex)
+                        val currentUrls = allUrlsState.value
+                        val currentUrl = currentUrls.getOrNull(currentUrlIndex)
                         android.util.Log.e("PLAYER_DEBUG", "Link failed: $currentUrl - Error: ${error.message}")
 
                         currentUrlIndex++ // Move to the next link
 
-                        if (currentUrlIndex < urlsToPlay.size) {
-                            android.util.Log.d("PLAYER_DEBUG", "Trying next link fallback: ${urlsToPlay[currentUrlIndex]}")
-                            setMediaItem(MediaItem.fromUri(urlsToPlay[currentUrlIndex]))
+                        if (currentUrlIndex < currentUrls.size) {
+                            android.util.Log.d("PLAYER_DEBUG", "Trying next link fallback: ${currentUrls[currentUrlIndex]}")
+                            setMediaItem(MediaItem.fromUri(currentUrls[currentUrlIndex]))
                             prepare()
-                            play() // Start playing the new link
+                            play()
                         } else {
-                            android.util.Log.e("PLAYER_DEBUG", "All streaming links failed!")
-                            Toast.makeText(context, "All streaming links failed or expired.", Toast.LENGTH_LONG).show()
-                            stop() // Stop to prevent further retries or error events
-                            clearMediaItems()
+                            // Check if background extraction is still adding more links.
+                            // StreamStateHolder may have updated since we last checked.
+                            val latestUrls = allUrlsState.value
+                            if (latestUrls.size > currentUrlIndex) {
+                                android.util.Log.d("PLAYER_DEBUG", "Waiting — background extraction may provide more links")
+                                // New links arrived — try again
+                                setMediaItem(MediaItem.fromUri(latestUrls[currentUrlIndex]))
+                                prepare()
+                                play()
+                            } else {
+                                android.util.Log.e("PLAYER_DEBUG", "All streaming links failed!")
+                                // Only show toast if we actually had links to try
+                                if (currentUrls.isNotEmpty()) {
+                                    Toast.makeText(context, "All links failed. Try selecting another source from Settings.", Toast.LENGTH_LONG).show()
+                                }
+                                stop()
+                                clearMediaItems()
+                            }
                         }
                     }
                 }
 
                 addListener(listener)
 
-                if (urlsToPlay.isNotEmpty()) {
-                    setMediaItem(MediaItem.fromUri(urlsToPlay[currentUrlIndex]))
+                val initialUrls = allUrlsState.value
+                if (initialUrls.isNotEmpty()) {
+                    setMediaItem(MediaItem.fromUri(initialUrls[0]))
                     prepare()
                     playWhenReady = true
                 }
@@ -200,6 +211,21 @@ fun PlayerScreen(
             }
         }
     }
+
+    // Auto-start playback when background extraction delivers the first stream
+    // into an idle player (player had no URLs at launch time).
+    LaunchedEffect(allUrls) {
+        if (allUrls.isNotEmpty() &&
+            exoPlayer.currentMediaItem == null &&
+            exoPlayer.playbackState == Player.STATE_IDLE) {
+            val url = allUrls[0]
+            android.util.Log.d("PLAYER_DEBUG", "Background stream arrived — auto-starting: $url")
+            exoPlayer.setMediaItem(MediaItem.fromUri(url))
+            exoPlayer.prepare()
+            exoPlayer.playWhenReady = true
+        }
+    }
+
 
     DisposableEffect(Unit) {
         onDispose { exoPlayer.release() }

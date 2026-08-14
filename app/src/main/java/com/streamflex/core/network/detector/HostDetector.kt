@@ -29,7 +29,8 @@ object HostDetector {
         when {
 
             host.contains("googlevideo") ||
-                    host.contains("googleusercontent") ->
+                    host.contains("googleusercontent") ||
+                    host.contains("drive.google.com") ->
                 return HostType.GOOGLE_VIDEO
 
             host.contains("hubcloud") ->
