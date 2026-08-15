@@ -351,4 +351,46 @@ class HDHubProviderTest {
 
         assertEquals(targetUrl, decoded)
     }
+
+    @Test
+    fun testDetailParser_parsesMultiEpisodeTvShowWithMultipleServers() {
+        val wednesdayHtml = """
+        <html>
+          <body>
+            <h2>Download Wednesday S01 [Hindi Dubbed] All Episodes HD !</h2>
+            <h3><a href="https://greenmountmotors.com/?id=seasonpack480">480p x264 [1.5GB]</a></h3>
+            <h2>: Single Episode x264 Links :</h2>
+            <h4><strong>EPiSODE 1</strong></h4>
+            <h4>720p – <a href="https://hubcloud.cx/drive/ep1_720">Drive</a> | <a href="https://hubcdn.sbs/file/ep1_720">Instant</a> | <a href="https://hdstream4u.com/file/ep1_720">WATCH</a></h4>
+            <h4>1080p – <a href="https://hubcloud.cx/drive/ep1_1080">Drive</a> | <a href="https://hubcdn.sbs/file/ep1_1080">Instant</a></h4>
+            <hr>
+            <h4><strong>EPiSODE 2</strong></h4>
+            <h4>720p – <a href="https://hubcloud.cx/drive/ep2_720">Drive</a> | <a href="https://hubcdn.sbs/file/ep2_720">Instant</a> | <a href="https://hdstream4u.com/file/ep2_720">WATCH</a></h4>
+            <h4>1080p – <a href="https://hubcloud.cx/drive/ep2_1080">Drive</a> | <a href="https://hubcdn.sbs/file/ep2_1080">Instant</a></h4>
+          </body>
+        </html>
+        """.trimIndent()
+
+        val parser = HDHubDetails()
+        val transport = TransportResult.HtmlResponse(
+            html = wednesdayHtml,
+            url = "https://hdhub4u.fyi/wednesday-season-1"
+        )
+
+        val result = parser.parse(transport, "https://hdhub4u.fyi/wednesday-season-1")
+
+        assertEquals(MediaType.TV, result.mediaType)
+        assertEquals(1, result.seasons.size)
+
+        val season = result.seasons[0]
+        assertEquals(2, season.episodes.size)
+
+        val ep1 = season.episodes[0]
+        assertEquals(1, ep1.number)
+        assertEquals(5, ep1.sources.size)
+
+        val ep2 = season.episodes[1]
+        assertEquals(2, ep2.number)
+        assertEquals(5, ep2.sources.size)
+    }
 }

@@ -21,6 +21,7 @@ enum class HostType {
     DOOD,
     NETMIRROR,
     MOVIEBOX,
+    HDSTREAM4U,
 
     UNKNOWN,
 }

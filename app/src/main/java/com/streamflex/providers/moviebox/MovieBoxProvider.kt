@@ -38,31 +38,7 @@ class MovieBoxProvider(
     suspend fun ensureDomain(): String {
         resolvedDomain?.let { return it }
 
-        val result = resolver.resolve(
-            providerId   = id,
-            hardcoded    = MovieBoxConfig.DEFAULT_DOMAIN,
-            manifestPath = "providers/moviebox.json"
-        )
-
-        val domain = when (result) {
-            is DomainResult.Resolved  -> {
-                Logger.i("[$id] Domain resolved (${result.step}): ${result.domain}", TAG)
-                result.domain
-            }
-            is DomainResult.Mirror    -> {
-                Logger.i("[$id] Using mirror [${result.mirrorIndex}]: ${result.domain}", TAG)
-                result.domain
-            }
-            is DomainResult.Hardcoded -> {
-                Logger.w("[$id] Using hardcoded fallback: ${result.domain}", TAG)
-                result.domain
-            }
-            is DomainResult.Offline   -> {
-                Logger.e("[$id] Provider OFFLINE — tried: ${result.tried}", TAG)
-                MovieBoxConfig.DEFAULT_DOMAIN
-            }
-        }
-
+        val domain = MovieBoxConfig.DEFAULT_DOMAIN
         resolvedDomain = domain
         return domain
     }

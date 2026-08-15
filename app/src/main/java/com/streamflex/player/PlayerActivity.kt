@@ -100,6 +100,10 @@ private fun buildMediaSourceForStream(
         headers["Referer"] = stream.headers["Referer"]!!
     }
 
+    if (!stream.headers["Origin"].isNullOrBlank()) {
+        headers["Origin"] = stream.headers["Origin"]!!
+    }
+
     if (stream.cookies.isNotEmpty()) {
         headers["Cookie"] = stream.cookies.entries.joinToString("; ") { "${it.key}=${it.value}" }
     } else if (!stream.headers["Cookie"].isNullOrBlank()) {
@@ -120,8 +124,16 @@ private fun buildMediaSourceForStream(
     val dataSourceFactory = DefaultDataSource.Factory(context, httpDataSourceFactory)
     val extractorsFactory = DefaultExtractorsFactory()
 
+    val mediaItemBuilder = MediaItem.Builder().setUri(stream.url)
+    when {
+        stream.url.contains(".mpd") || stream.contentType == com.streamflex.core.network.detector.ContentType.DASH ->
+            mediaItemBuilder.setMimeType(androidx.media3.common.MimeTypes.APPLICATION_MPD)
+        stream.url.contains(".m3u8") || stream.contentType == com.streamflex.core.network.detector.ContentType.M3U8 ->
+            mediaItemBuilder.setMimeType(androidx.media3.common.MimeTypes.APPLICATION_M3U8)
+    }
+
     return DefaultMediaSourceFactory(dataSourceFactory, extractorsFactory)
-        .createMediaSource(MediaItem.fromUri(stream.url))
+        .createMediaSource(mediaItemBuilder.build())
 }
 
 @androidx.annotation.OptIn(UnstableApi::class)
@@ -137,24 +149,50 @@ fun PlayerScreen(
     val context = LocalContext.current
     var showSettingsSheet by remember { mutableStateOf(false) }
 
-    // Combine initial intent URLs with dynamically discovered streams
+    // Combine initial intent URLs with dynamically discovered streams (rich dynamicStreams take priority!)
     val allStreams = remember(videoUrls, dynamicStreams) {
         val initialLinks = videoUrls.mapIndexed { index, url ->
+            val cookieStr = videoCookies.getOrNull(index) ?: ""
+            val refererStr = videoReferers.getOrNull(index) ?: ""
+            val uaStr = videoUserAgents.getOrNull(index) ?: ""
+            val hdrs = mutableMapOf<String, String>()
+            if (refererStr.isNotBlank()) hdrs["Referer"] = refererStr
+            if (uaStr.isNotBlank()) hdrs["User-Agent"] = uaStr
+            if (cookieStr.isNotBlank()) hdrs["Cookie"] = cookieStr
+
+            val cookiesMap = mutableMapOf<String, String>()
+            if (cookieStr.isNotBlank()) {
+                cookieStr.split(";").forEach { c ->
+                    val p = c.trim().split("=", limit = 2)
+                    if (p.size == 2) cookiesMap[p[0].trim()] = p[1].trim()
+                }
+            }
+
             com.streamflex.domain.models.StreamLink(
                 name = "Source ${index + 1}",
                 url = url,
                 quality = com.streamflex.domain.models.Quality.UNKNOWN,
                 host = com.streamflex.domain.models.HostType.DIRECT,
-                referer = videoReferers.getOrNull(index)
+                referer = refererStr,
+                cookies = cookiesMap,
+                headers = hdrs,
+                contentType = when {
+                    url.contains(".mpd") -> com.streamflex.core.network.detector.ContentType.DASH
+                    url.contains(".m3u8") -> com.streamflex.core.network.detector.ContentType.M3U8
+                    else -> com.streamflex.core.network.detector.ContentType.VIDEO
+                },
+                adaptive = url.contains(".mpd") || url.contains(".m3u8")
             )
         }
-        (initialLinks + dynamicStreams).distinctBy { it.url }
+        if (dynamicStreams.isNotEmpty()) {
+            (dynamicStreams + initialLinks).distinctBy { it.url }
+        } else {
+            initialLinks
+        }
     }
 
     var currentStreamIndex by remember { mutableStateOf(0) }
     val allStreamsState = rememberUpdatedState(allStreams)
-
-    Log.d("PLAYER_DEBUG", "Total available streams: ${allStreams.size}")
 
     val exoPlayer = remember {
         val renderersFactory = DefaultRenderersFactory(context).apply {
@@ -185,60 +223,34 @@ fun PlayerScreen(
                         if (nextIndex < currentList.size) {
                             android.util.Log.d("PLAYER_DEBUG", "Auto-falling back to stream $nextIndex: ${currentList[nextIndex].url}")
                             currentStreamIndex = nextIndex
-                            val mediaSource = buildMediaSourceForStream(context, currentList[nextIndex])
-                            setMediaSource(mediaSource)
-                            prepare()
-                            play()
                         } else {
-                            android.util.Log.e("PLAYER_DEBUG", "All streaming links exhausted")
-                            if (currentList.isNotEmpty()) {
-                                Toast.makeText(context, "Playback error. Try selecting another source from Settings.", Toast.LENGTH_LONG).show()
-                            }
+                            android.util.Log.w("PLAYER_DEBUG", "Streaming links exhausted for now — awaiting background streams or user selection.")
                         }
                     }
                 }
-
                 addListener(listener)
-
-                val initialStreams = allStreamsState.value
-                if (initialStreams.isNotEmpty()) {
-                    val mediaSource = buildMediaSourceForStream(context, initialStreams[0])
-                    setMediaSource(mediaSource)
-                    prepare()
-                    playWhenReady = true
-                }
             }
     }
 
-    // Handle stream switching when user selects a different source in Settings or fallback triggers
-    LaunchedEffect(currentStreamIndex) {
-        if (allStreams.isNotEmpty() && currentStreamIndex in allStreams.indices) {
-            val targetStream = allStreams[currentStreamIndex]
-            val currentMedia = exoPlayer.currentMediaItem
-            if (currentMedia?.localConfiguration?.uri?.toString() != targetStream.url) {
-                val position = exoPlayer.currentPosition
+    // Unified stream loader: handles initial playback, stream switching, and background stream arrivals/recovery
+    LaunchedEffect(currentStreamIndex, allStreams) {
+        if (allStreams.isNotEmpty()) {
+            val safeIndex = currentStreamIndex.coerceIn(0, allStreams.lastIndex)
+            val targetStream = allStreams[safeIndex]
+            val currentUri = exoPlayer.currentMediaItem?.localConfiguration?.uri?.toString()
+            val hasError = exoPlayer.playerError != null
+
+            if (currentUri != targetStream.url || hasError) {
+                android.util.Log.d("PLAYER_DEBUG", "Loading stream [$safeIndex/${allStreams.size}]: ${targetStream.url}")
+                val position = if (exoPlayer.playbackState != Player.STATE_IDLE && !hasError) exoPlayer.currentPosition else 0L
                 val mediaSource = buildMediaSourceForStream(context, targetStream)
                 exoPlayer.setMediaSource(mediaSource)
                 exoPlayer.prepare()
                 if (position > 0) {
                     exoPlayer.seekTo(position)
                 }
-                exoPlayer.play()
+                exoPlayer.playWhenReady = true
             }
-        }
-    }
-
-    // Auto-start playback when background extraction delivers the first stream into an idle player
-    LaunchedEffect(allStreams) {
-        if (allStreams.isNotEmpty() &&
-            exoPlayer.currentMediaItem == null &&
-            exoPlayer.playbackState == Player.STATE_IDLE) {
-            val firstStream = allStreams[0]
-            android.util.Log.d("PLAYER_DEBUG", "Background stream arrived — auto-starting: ${firstStream.url}")
-            val mediaSource = buildMediaSourceForStream(context, firstStream)
-            exoPlayer.setMediaSource(mediaSource)
-            exoPlayer.prepare()
-            exoPlayer.playWhenReady = true
         }
     }
 

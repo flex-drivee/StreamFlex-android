@@ -45,10 +45,16 @@ object HostDetector {
             host.contains("hblinks") ->
                 return HostType.HBLINKS
 
+            host.contains("hdstream4u") ||
+                    host.contains("hdstream") ||
+                    host.contains("vidhide") ||
+                    host.contains("filelions") ->
+                return HostType.HDSTREAM4U
+
             host.contains("hubstream") ->
                 return HostType.HUBSTREAM
 
-            host.contains("pixeldrain") ->
+            host.contains("pixeldrain") || host.contains("pixeldra") ->
                 return HostType.PIXELDRAIN
 
             host.contains("streamtape") ->

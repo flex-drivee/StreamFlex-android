@@ -42,10 +42,11 @@ class MovieBoxExtractor : BaseExtractor() {
                 val data = JsonParser.objectOf(root, "data") ?: return emptyResult()
                 
                 val streams = mutableListOf<StreamLink>()
+                val globalSignCookie = JsonParser.string(data, "signCookie") ?: JsonParser.string(data, "signCookieRaw")
                 
-                val list = JsonParser.array(data, "streams") // "streams" in actual API
+                val list = JsonParser.array(data, "streams")
                 for (item in list) {
-                    val path = JsonParser.string(item, "url") ?: continue // "url" in actual API
+                    val path = JsonParser.string(item, "url") ?: continue
                     val qualityStr = JsonParser.string(item, "resolutions") ?: ""
                     
                     val quality = when {
@@ -56,11 +57,25 @@ class MovieBoxExtractor : BaseExtractor() {
                         else -> Quality.UNKNOWN
                     }
 
-                    val signCookie = JsonParser.string(item, "signCookie")
-                    val streamHeaders = if (!signCookie.isNullOrBlank()) {
-                        mapOf("Cookie" to signCookie)
-                    } else {
-                        emptyMap()
+                    val signCookie = JsonParser.string(item, "signCookie") 
+                        ?: JsonParser.string(item, "signCookieRaw") 
+                        ?: globalSignCookie
+
+                    val baseOrigin = "https://api3.aoneroom.com"
+                    val streamHeaders = mutableMapOf<String, String>()
+                    streamHeaders["Referer"] = "$baseOrigin/"
+                    streamHeaders["Origin"] = baseOrigin
+                    streamHeaders["User-Agent"] = com.streamflex.core.constants.Constants.DEFAULT_USER_AGENT
+                    
+                    val cookiesMap = mutableMapOf<String, String>()
+                    if (!signCookie.isNullOrBlank()) {
+                        streamHeaders["Cookie"] = signCookie
+                        signCookie.split(";").forEach { cookiePart ->
+                            val parts = cookiePart.trim().split("=", limit = 2)
+                            if (parts.size == 2) {
+                                cookiesMap[parts[0].trim()] = parts[1].trim()
+                            }
+                        }
                     }
                     
                     streams.add(
@@ -69,6 +84,8 @@ class MovieBoxExtractor : BaseExtractor() {
                             url = path,
                             quality = quality,
                             host = HostType.MOVIEBOX,
+                            referer = "$baseOrigin/",
+                            cookies = cookiesMap,
                             headers = streamHeaders,
                             contentType = when {
                                 path.contains(".m3u8") -> com.streamflex.core.network.detector.ContentType.M3U8

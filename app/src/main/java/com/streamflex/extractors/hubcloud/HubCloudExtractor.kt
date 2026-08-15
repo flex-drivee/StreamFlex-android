@@ -59,8 +59,11 @@ class HubCloudExtractor
         // Intermediate step handling (HubCloud timer / gateway page):
         // If the page has a #download button or `var url = '...'` script, follow to the actual download page
         if (!currentUrl.contains("hubcloud.php")) {
-            val downloadBtnHref = document.selectFirst("#download")?.attr("href")?.takeIf { it.isNotBlank() }
-            val scriptUrlMatch = Regex("""var url = '([^']*)'""").find(document.html())?.groups?.get(1)?.value
+            val downloadBtnHref = document.selectFirst("#download, a.btn, a[class*=btn]")?.attr("href")?.takeIf { 
+                it.isNotBlank() && !it.startsWith("javascript:") && it != "#" 
+            }
+            val scriptUrlMatch = Regex("""(?:var\s+url\s*=\s*|location(?:\.href)?\s*=\s*)['"]([^'"]+)['"]""", RegexOption.IGNORE_CASE)
+                .find(document.html())?.groups?.get(1)?.value
             val nextHref = downloadBtnHref ?: scriptUrlMatch
 
             if (!nextHref.isNullOrBlank()) {
@@ -73,7 +76,10 @@ class HubCloudExtractor
                     "$base/${nextHref.trimStart('/')}"
                 }
                 StreamLogger.info("HubCloudExtractor", "Following intermediate HubCloud step: $absoluteNext")
-                val nextHeaders = source.headers.toMutableMap().apply { put("Referer", currentUrl) }
+                val nextHeaders = source.headers.toMutableMap().apply { 
+                    put("Referer", currentUrl)
+                    put("User-Agent", com.streamflex.core.constants.Constants.DEFAULT_USER_AGENT)
+                }
                 document = ExtractorHelper.fetchDocument(absoluteNext, nextHeaders)
                 currentUrl = absoluteNext
             }
@@ -91,32 +97,54 @@ class HubCloudExtractor
         val candidates = linkedSetOf<String>()
         StreamLogger.debug("HubCloudExtractor", "Scanning page for candidate URLs...")
 
+        val currentUrl = source.url
+        val baseHost = try {
+            val u = java.net.URL(currentUrl)
+            "${u.protocol}://${u.host}"
+        } catch (_: Exception) { currentUrl }
+
+        fun toAbsolute(urlStr: String): String {
+            val trimmed = urlStr.trim()
+            if (trimmed.startsWith("http")) return trimmed
+            if (trimmed.startsWith("//")) return "https:$trimmed"
+            if (trimmed.startsWith("/") || (!trimmed.startsWith("javascript:") && trimmed != "#")) {
+                return "$baseHost/${trimmed.trimStart('/')}"
+            }
+            return ""
+        }
+
         // 1. <video> tags
         document.select("video source[src]")
-            .map { it.absUrl("src") }
+            .map { it.absUrl("src").ifBlank { it.attr("src") } }
+            .map { toAbsolute(it) }
             .filter { it.isNotBlank() }
             .forEach(candidates::add)
 
         // 2. <a href> download links and button tags
         document.select("a[href], a.btn, a[class*=btn], button.btn").forEach { el ->
-            val href = el.absUrl("href").takeIf { it.isNotBlank() } ?: el.attr("href")
-            if (href.isNotBlank() && href.startsWith("http")) {
-                candidates.add(href)
+            var href = el.absUrl("href").takeIf { it.isNotBlank() } ?: el.attr("href")
+            val abs = toAbsolute(href)
+            if (abs.isNotBlank()) {
+                candidates.add(abs)
             }
             // Check onclick attribute (location.href = '...' or window.open('...'))
             val onclick = el.attr("onclick")
             if (onclick.isNotBlank()) {
                 val onclickMatch = Regex("""(?:location(?:\.href)?|window\.open)\s*=\s*['"]([^'"]+)['"]|window\.open\s*\(\s*['"]([^'"]+)['"]""", RegexOption.IGNORE_CASE).find(onclick)
                 val onclickUrl = onclickMatch?.groups?.get(1)?.value ?: onclickMatch?.groups?.get(2)?.value
-                if (!onclickUrl.isNullOrBlank() && onclickUrl.startsWith("http")) {
-                    candidates.add(onclickUrl)
+                if (!onclickUrl.isNullOrBlank()) {
+                    val absOnclick = toAbsolute(onclickUrl)
+                    if (absOnclick.isNotBlank()) {
+                        candidates.add(absOnclick)
+                    }
                 }
             }
         }
 
         // 3. <iframe src>
         document.select("iframe[src]")
-            .map { it.absUrl("src") }
+            .map { it.absUrl("src").ifBlank { it.attr("src") } }
+            .map { toAbsolute(it) }
             .filter { it.isNotBlank() }
             .forEach(candidates::add)
 

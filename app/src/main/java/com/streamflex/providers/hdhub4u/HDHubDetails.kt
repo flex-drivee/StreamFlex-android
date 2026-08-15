@@ -1,6 +1,7 @@
 package com.streamflex.providers.hdhub4u
 
 import com.streamflex.core.network.detector.HostDetector
+import com.streamflex.core.network.detector.QualityDetector
 import com.streamflex.core.network.HttpClient
 import com.streamflex.core.network.NetworkResult
 import com.streamflex.core.network.RequestBuilder
@@ -141,8 +142,6 @@ class HDHubDetails : DetailParser {
             val seasons = parseSeasons(document, detailUrl)
             StreamLogger.info(TAG, "Found ${seasons.size} season(s) with TV episodes")
 
-            // If parsing returned nothing, fall back to treating links as movie-style
-            // but wrapped in a single "all episodes" episode for the detected season
             val finalSeasons = if (seasons.isEmpty()) {
                 StreamLogger.warn(TAG, "parseSeasons returned empty — falling back to batch mode")
                 val allSources = sourceParser.parseDocument(document, detailUrl)
@@ -179,43 +178,83 @@ class HDHubDetails : DetailParser {
         }
     }
 
+    // ─── Classification Helper ────────────────────────────────────────────────
+
+    private fun isTvSeries(url: String, title: String, document: Document): Boolean {
+        val tvRegex = Regex("""(?:season[.\s_-]*\d+|s\d{1,2}\b|all\s+episodes|complete\s+series)""", RegexOption.IGNORE_CASE)
+        if (tvRegex.containsMatchIn(url) || tvRegex.containsMatchIn(title)) return true
+
+        val headings = document.select("h1, h2, h3, h4")
+        for (h in headings) {
+            val text = h.text()
+            if (tvRegex.containsMatchIn(text) || text.contains("Single Episode", ignoreCase = true)) {
+                return true
+            }
+        }
+        return false
+    }
+
     // ─── TV Season / Episode Parsing ─────────────────────────────────────────
 
-    /**
-     * Parse TV episodes from an HDHub4u page.
-     *
-     * Strategy:
-     * 1. Collect all valid download links (same logic as movie mode).
-     * 2. For each link, try to find an episode number in the link's text,
-     *    its parent heading, or sibling text nearby.
-     * 3. If episode numbers are found, group links by episode.
-     * 4. If no episode numbers found, return empty → caller falls back to batch mode.
-     */
     private fun parseSeasons(document: Document, detailUrl: String): List<ProviderSeason> {
-        // All usable download links on the page
-        val allSources = sourceParser.parseDocument(document, detailUrl)
-        if (allSources.isEmpty()) return emptyList()
-
         val seasonNum = extractSeasonNumber(detailUrl)
-
-        // Try to map each source link to an episode number
         val epLinksMap = mutableMapOf<Int, MutableList<ProviderSource>>()
 
-        // Build a reverse map: url → element so we can look at surrounding text
-        val linkElements = document.select("a[href]")
-            .associateBy { it.attr("href").trim() }
+        var currentEpisode: Int? = null
+        val elements = document.select("h1, h2, h3, h4, h5, h6, p, div, a[href]")
 
-        for (source in allSources) {
-            val epNum = findEpisodeNumber(source, linkElements)
-            if (epNum != null) {
-                epLinksMap.getOrPut(epNum) { mutableListOf() }.add(source)
+        for (el in elements) {
+            val text = el.ownText().trim()
+            val fullText = el.text().trim()
+
+            if (el.tagName().startsWith("h") || el.tagName() in listOf("p", "strong", "b") || el.children().isEmpty()) {
+                val checkText = text.ifBlank { fullText }
+                if (!checkText.contains("Single Episode", ignoreCase = true) && !checkText.contains("All Episodes", ignoreCase = true)) {
+                    val epMatch = EPISODE_NUM_REGEX.find(checkText)
+                    if (epMatch != null) {
+                        val num = epMatch.groupValues[1].toIntOrNull()
+                        if (num != null && num in 1..999) {
+                            currentEpisode = num
+                        }
+                    }
+                }
+            }
+
+            if (el.tagName() == "a" && currentEpisode != null) {
+                val url = el.attr("abs:href").ifBlank { el.attr("href") }
+                if (url.isNotBlank() && !sourceParser.shouldSkipUrl(url)) {
+                    var hostType = HostDetector.detect(url)
+                    if (hostType == HostType.UNKNOWN && url.contains("?id=")) hostType = HostType.REDIRECT
+                    
+                    if (hostType != HostType.UNKNOWN) {
+                        val quality = QualityDetector.detect(el.text() + " " + (el.parent()?.text() ?: ""))
+                        val source = HDHubMapper.toProviderSource(
+                            provider = PROVIDER_NAME,
+                            host = hostType.name,
+                            hostType = hostType,
+                            url = url,
+                            quality = quality,
+                            referer = detailUrl,
+                            headers = mapOf("Referer" to detailUrl, "Cookie" to HDHubConfig.COOKIE)
+                        )
+                        epLinksMap.getOrPut(currentEpisode) { mutableListOf() }.add(source)
+                    }
+                }
             }
         }
 
         if (epLinksMap.isEmpty()) {
-            // No episode numbers found — caller will use batch fallback
-            return emptyList()
+            val allSources = sourceParser.parseDocument(document, detailUrl)
+            val linkElements = document.select("a[href]").associateBy { it.attr("href").trim() }
+            for (source in allSources) {
+                val epNum = findEpisodeNumber(source, linkElements)
+                if (epNum != null) {
+                    epLinksMap.getOrPut(epNum) { mutableListOf() }.add(source)
+                }
+            }
         }
+
+        if (epLinksMap.isEmpty()) return emptyList()
 
         val episodes = epLinksMap.toSortedMap().map { (epNum, sources) ->
             ProviderEpisode(
@@ -225,56 +264,30 @@ class HDHubDetails : DetailParser {
             )
         }
 
-        StreamLogger.info(TAG, "Parsed ${episodes.size} episode(s) for Season $seasonNum")
-
-        return listOf(
-            ProviderSeason(
-                number = seasonNum,
-                title = "Season $seasonNum",
-                episodes = episodes
-            )
-        )
+        return listOf(ProviderSeason(number = seasonNum, title = "Season $seasonNum", episodes = episodes))
     }
 
-    /**
-     * Try to determine the episode number for a given source by inspecting:
-     * 1. The link text itself
-     * 2. The parent element's text
-     * 3. Preceding sibling heading text (h2, h3, h4, p, strong)
-     */
-    private fun findEpisodeNumber(
-        source: ProviderSource,
-        linkElements: Map<String, Element>
-    ): Int? {
+    private fun findEpisodeNumber(source: ProviderSource, linkElements: Map<String, Element>): Int? {
         val element = linkElements[source.url] ?: return null
-
-        // Check link text
-        EPISODE_NUM_REGEX.find(element.text())?.groupValues?.get(1)?.toIntOrNull()
-            ?.let { return it }
-
-        // Check parent text
+        EPISODE_NUM_REGEX.find(element.text())?.groupValues?.get(1)?.toIntOrNull()?.let { return it }
         element.parent()?.let { parent ->
-            EPISODE_NUM_REGEX.find(parent.text())?.groupValues?.get(1)?.toIntOrNull()
-                ?.let { return it }
+            EPISODE_NUM_REGEX.find(parent.text())?.groupValues?.get(1)?.toIntOrNull()?.let { return it }
         }
 
-        // Walk backwards through siblings to find a heading with episode number
         var sibling: Element? = element.parent()?.previousElementSibling()
         var hops = 0
-        while (sibling != null && hops < 5) {
+        while (sibling != null && hops < 8) {
             val tag = sibling.tagName()
             if (tag in listOf("h2", "h3", "h4", "p", "strong", "b")) {
-                EPISODE_NUM_REGEX.find(sibling.text())?.groupValues?.get(1)
-                    ?.toIntOrNull()?.let { return it }
+                val text = sibling.text()
+                if (!text.contains("Single Episode", ignoreCase = true) && !text.contains("All Episodes", ignoreCase = true)) {
+                    EPISODE_NUM_REGEX.find(text)?.groupValues?.get(1)?.toIntOrNull()?.let { return it }
+                }
             }
             sibling = sibling.previousElementSibling()
             hops++
         }
-
-        // Check href itself for episode number pattern
-        EPISODE_NUM_REGEX.find(source.url)?.groupValues?.get(1)?.toIntOrNull()
-            ?.let { return it }
-
+        EPISODE_NUM_REGEX.find(source.url)?.groupValues?.get(1)?.toIntOrNull()?.let { return it }
         return null
     }
 
