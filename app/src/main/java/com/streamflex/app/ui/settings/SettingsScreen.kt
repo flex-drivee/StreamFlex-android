@@ -38,6 +38,14 @@ fun SettingsScreen(
 
     val scrollState = rememberLazyListState()
     var showThemeDialog by remember { mutableStateOf(false) }
+    var showProviderDialog by remember { mutableStateOf(false) }
+    var showMovieBoxSettings by remember { mutableStateOf(false) }
+    
+    val providerRepository = com.streamflex.app.di.ProviderModule.repository
+    var selectedProviderName by remember { 
+        mutableStateOf(providerRepository.provider(providerRepository.selectedProviderId ?: "")?.name ?: "None") 
+    }
+    val context = androidx.compose.ui.platform.LocalContext.current
 
     Scaffold(
         topBar = {
@@ -177,9 +185,9 @@ fun SettingsScreen(
                     SettingsTile(
                         icon = Icons.Outlined.Extension,
                         title = "Manage Extensions",
-                        subtitle = "Install and remove providers",
+                        subtitle = "Current: $selectedProviderName",
                         isLast = true,
-                        onTap = { /* TODO */ }
+                        onTap = { showProviderDialog = true }
                     )
                 }
             }
@@ -300,6 +308,66 @@ fun SettingsScreen(
                         Text("Cancel", color = MaterialTheme.colorScheme.primary)
                     }
                 }
+            )
+        }
+
+        if (showProviderDialog) {
+            androidx.compose.material3.AlertDialog(
+                onDismissRequest = { showProviderDialog = false },
+                title = { androidx.compose.material3.Text("Select Provider") },
+                text = {
+                    Column {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    providerRepository.selectedProviderId = null
+                                    selectedProviderName = "None"
+                                    showProviderDialog = false
+                                }
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            androidx.compose.material3.Text("None", modifier = Modifier.weight(1f))
+                        }
+                        
+                        providerRepository.enabledProviders().forEach { provider ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        providerRepository.selectedProviderId = provider.id
+                                        selectedProviderName = provider.name
+                                        showProviderDialog = false
+                                    }
+                                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                androidx.compose.material3.Text(provider.name, modifier = Modifier.weight(1f))
+                                if (provider.id == "moviebox") {
+                                    androidx.compose.material3.IconButton(onClick = {
+                                        showProviderDialog = false
+                                        showMovieBoxSettings = true
+                                    }) {
+                                        Icon(Icons.Default.Settings, contentDescription = "Settings")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    androidx.compose.material3.TextButton(onClick = { showProviderDialog = false }) {
+                        androidx.compose.material3.Text("Close")
+                    }
+                }
+            )
+        }
+
+        if (showMovieBoxSettings) {
+            com.streamflex.app.ui.home.MovieBoxSettingsDialog(
+                onDismiss = { showMovieBoxSettings = false },
+                context = context
             )
         }
     }

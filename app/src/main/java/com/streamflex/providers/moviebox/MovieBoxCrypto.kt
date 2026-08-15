@@ -36,6 +36,7 @@ object MovieBoxCrypto {
     }
 
     fun generateXClientToken(hardcodedTimestamp: Long? = null): String {
+        // timestamp = System.currentTimeMillis() (ms), hash = md5(reversed_timestamp_string)
         val timestamp = (hardcodedTimestamp ?: System.currentTimeMillis()).toString()
         val reversed = timestamp.reversed()
         val bytes = reversed.toByteArray(Charsets.UTF_8)
@@ -51,33 +52,30 @@ object MovieBoxCrypto {
         body: String?,
         timestamp: Long
     ): String {
-        val uri = try { java.net.URI(url) } catch (_: Exception) { null }
-        val path = uri?.path ?: try { java.net.URL(url).path } catch (_: Exception) { "" }
-        val rawQuery = uri?.rawQuery ?: try { java.net.URL(url).query } catch (_: Exception) { "" }
-
-        val query = if (!rawQuery.isNullOrBlank()) {
-            rawQuery.split("&")
-                .filter { it.isNotBlank() }
-                .sorted()
-                .joinToString("&")
-        } else {
-            ""
-        }
+        // Use Android Uri for query param extraction (same as reference Java)
+        val androidUri = try { android.net.Uri.parse(url) } catch (_: Exception) { null }
+        val path = androidUri?.path ?: ""
+        val queryNames = androidUri?.queryParameterNames ?: emptySet()
+        val query = if (queryNames.isNotEmpty()) {
+            queryNames.sorted().joinToString("&") { key ->
+                (androidUri?.getQueryParameters(key) ?: emptyList()).joinToString("&") { v -> "$key=$v" }
+            }
+        } else ""
 
         val canonicalUrl = if (query.isNotEmpty()) "$path?$query" else path
 
         val bodyBytes = body?.toByteArray(Charsets.UTF_8)
         val bodyHash = if (bodyBytes != null) {
-            val trimmed =
-                if (bodyBytes.size > 102400) bodyBytes.copyOfRange(0, 102400) else bodyBytes
+            val trimmed = if (bodyBytes.size > 102400) bodyBytes.copyOfRange(0, 102400) else bodyBytes
             md5(trimmed)
         } else ""
-
         val bodyLength = bodyBytes?.size?.toString() ?: ""
 
+        // CRITICAL: accept MUST be "application/json" (not null/empty) in canonical[1]
+        // This was discovered by testing — the server validates this field.
         return buildString {
             append(method.uppercase(Locale.ROOT)).append('\n')
-            append(accept ?: "").append('\n')
+            append(accept ?: "").append('\n')   // must be "application/json"
             append(contentType ?: "").append('\n')
             append(bodyLength).append('\n')
             append(timestamp).append('\n')
@@ -129,25 +127,33 @@ object MovieBoxCrypto {
 
     var xUserToken: String? = null
 
+    /**
+     * IMPORTANT: accept MUST always be "application/json" to pass signature validation.
+     * The server validates the Accept header in the canonical string at position [1].
+     */
+    private const val ACCEPT_JSON = "application/json"
+
     fun getHeaders(
         method: String,
-        accept: String? = null,
         contentType: String? = "application/json",
         url: String,
         body: String? = null,
         useAltKey: Boolean = false
     ): Map<String, String> {
+        // For GET requests, Content-Type is null (not sent); for POST it's application/json
         val actualContentType = if (method.uppercase(Locale.ROOT) == "GET") null else contentType
         val clientInfo = "{\"package_name\":\"com.community.mbox.in\",\"version_name\":\"3.0.03.0529.03\",\"version_code\":50020042,\"os\":\"android\",\"os_version\":\"16\",\"device_id\":\"$deviceId\",\"install_store\":\"ps\",\"gaid\":\"d7578036d13336cc\",\"brand\":\"${currentBrandModel.first}\",\"model\":\"${currentBrandModel.second}\",\"system_language\":\"en\",\"net\":\"NETWORK_WIFI\",\"region\":\"IN\",\"timezone\":\"Asia/Calcutta\",\"sp_code\":\"\"}"
         val xClientToken = generateXClientToken()
-        val xTrSignature = generateXTrSignature(method, accept, actualContentType, url, body, useAltKey)
+        // Always pass ACCEPT_JSON as accept parameter — required for valid signature
+        val xTrSignature = generateXTrSignature(method, ACCEPT_JSON, actualContentType, url, body, useAltKey)
 
         val map = mutableMapOf(
-            "X-Client-Info" to clientInfo,
+            "X-Client-Info"   to clientInfo,
             "X-Client-Status" to "0",
-            "X-Client-Token" to xClientToken,
-            "X-Tr-Signature" to xTrSignature,
-            "User-Agent" to "com.community.mbox.in/50020042 (Linux; U; Android 16; en_IN; sdk_gphone64_x86_64; Build/BP22.250325.006; Cronet/133.0.6876.3)"
+            "X-Client-Token"  to xClientToken,
+            "X-Tr-Signature"  to xTrSignature,
+            "User-Agent"      to "com.community.mbox.in/50020042 (Linux; U; Android 16; en_IN; sdk_gphone64_x86_64; Build/BP22.250325.006; Cronet/133.0.6876.3)",
+            "Accept"          to ACCEPT_JSON
         )
         if (actualContentType != null) {
             map["Content-Type"] = actualContentType

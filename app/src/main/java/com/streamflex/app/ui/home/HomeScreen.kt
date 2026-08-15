@@ -247,7 +247,16 @@ private fun SFTopBar(
                     // Provider Selector Chip
                     var showProviderDropdown by remember { mutableStateOf(false) }
                     var selectedProviderName by remember { 
-                        mutableStateOf(providerRepository.provider(providerRepository.selectedProviderId ?: "")?.name ?: "All Providers") 
+                        mutableStateOf(providerRepository.provider(providerRepository.selectedProviderId ?: "")?.name ?: "None") 
+                    }
+                    var showMovieBoxSettings by remember { mutableStateOf(false) }
+                    val context = androidx.compose.ui.platform.LocalContext.current
+                    
+                    if (showMovieBoxSettings) {
+                        MovieBoxSettingsDialog(
+                            onDismiss = { showMovieBoxSettings = false },
+                            context = context
+                        )
                     }
 
                     Box {
@@ -281,10 +290,10 @@ private fun SFTopBar(
                             modifier = Modifier.background(MaterialTheme.colorScheme.surface)
                         ) {
                             DropdownMenuItem(
-                                text = { Text("All Providers", color = MaterialTheme.colorScheme.onSurface) },
+                                text = { Text("None", color = MaterialTheme.colorScheme.onSurface) },
                                 onClick = {
                                     providerRepository.selectedProviderId = null
-                                    selectedProviderName = "All Providers"
+                                    selectedProviderName = "None"
                                     showProviderDropdown = false
                                 }
                             )
@@ -295,6 +304,20 @@ private fun SFTopBar(
                                         providerRepository.selectedProviderId = provider.id
                                         selectedProviderName = provider.name
                                         showProviderDropdown = false
+                                    },
+                                    trailingIcon = {
+                                        if (provider.id == "moviebox") {
+                                            IconButton(onClick = {
+                                                showProviderDropdown = false
+                                                showMovieBoxSettings = true
+                                            }) {
+                                                Icon(
+                                                    Icons.Default.Settings,
+                                                    contentDescription = "Settings",
+                                                    tint = MaterialTheme.colorScheme.onSurface
+                                                )
+                                            }
+                                        }
                                     }
                                 )
                             }
@@ -829,5 +852,83 @@ private fun SFErrorBanner(message: String, onRetry: () -> Unit) {
         TextButton(onClick = onRetry) {
             Text("Retry", color = MaterialTheme.colorScheme.primary)
         }
+    }
+}
+
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+fun MovieBoxSettingsDialog(
+    onDismiss: () -> Unit,
+    context: android.content.Context
+) {
+    val prefs = context.getSharedPreferences("streamflex_settings", android.content.Context.MODE_PRIVATE)
+    val defaultDomain = com.streamflex.providers.moviebox.MovieBoxConfig.DEFAULT_DOMAIN
+    val hosts = com.streamflex.providers.moviebox.MovieBoxConfig.HOST_POOL
+
+    var selectedApi by remember { mutableStateOf(prefs.getString("moviebox_api", defaultDomain) ?: defaultDomain) }
+    var showReloadPrompt by remember { mutableStateOf(false) }
+
+    if (showReloadPrompt) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { androidx.compose.material3.Text("Restart Required") },
+            text = { androidx.compose.material3.Text("App needs to restart to apply the new API settings.") },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = {
+                    val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+                    val componentName = intent?.component
+                    val mainIntent = android.content.Intent.makeRestartActivityTask(componentName)
+                    context.startActivity(mainIntent)
+                    Runtime.getRuntime().exit(0)
+                }) {
+                    androidx.compose.material3.Text("Reload")
+                }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = onDismiss) {
+                    androidx.compose.material3.Text("Cancel")
+                }
+            }
+        )
+    } else {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { androidx.compose.material3.Text("MovieBox Settings") },
+            text = {
+                Column {
+                    androidx.compose.material3.Text("Select API Host:", fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 8.dp))
+                    hosts.forEach { host ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { selectedApi = host }
+                                .padding(vertical = 4.dp)
+                        ) {
+                            androidx.compose.material3.RadioButton(
+                                selected = (selectedApi == host),
+                                onClick = { selectedApi = host }
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            androidx.compose.material3.Text(host)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                androidx.compose.material3.IconButton(onClick = {
+                    prefs.edit().putString("moviebox_api", selectedApi).apply()
+                    com.streamflex.providers.moviebox.MovieBoxConfig.savedDomain = selectedApi
+                    showReloadPrompt = true
+                }) {
+                    Icon(Icons.Default.Save, contentDescription = "Save")
+                }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = onDismiss) {
+                    androidx.compose.material3.Text("Cancel")
+                }
+            }
+        )
     }
 }

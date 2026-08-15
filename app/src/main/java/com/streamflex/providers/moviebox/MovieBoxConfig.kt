@@ -6,6 +6,8 @@ object MovieBoxConfig {
     const val PROVIDER_NAME = "MovieBox"
     val HOST_TYPE = HostType.MOVIEBOX
     
+    var savedDomain: String? = null
+    
     val HOST_POOL = listOf(
         "https://api6.aoneroom.com",
         "https://api5.aoneroom.com",

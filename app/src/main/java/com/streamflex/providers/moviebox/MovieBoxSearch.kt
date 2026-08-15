@@ -97,9 +97,7 @@ class MovieBoxSearch {
         val url = "$baseUrl/wefeed-mobile-bff/tab/ranking-list?tabId=0&categoryType=4516404531735022304&page=1&perPage=1"
         val headers = MovieBoxCrypto.getHeaders(
             method = "GET",
-            url = url,
-            body = null,
-            contentType = null
+            url = url
         )
 
         val request = RequestBuilder()

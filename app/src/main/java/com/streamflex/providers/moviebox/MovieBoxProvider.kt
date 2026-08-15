@@ -26,7 +26,7 @@ class MovieBoxProvider(
     private var resolvedDomain: String? = null
 
     override val baseUrl: String
-        get() = resolvedDomain ?: MovieBoxConfig.DEFAULT_DOMAIN
+        get() = resolvedDomain ?: MovieBoxConfig.savedDomain ?: MovieBoxConfig.DEFAULT_DOMAIN
 
     private val searchImpl  = MovieBoxSearch()
     private val detailsImpl = MovieBoxDetails()
@@ -38,7 +38,7 @@ class MovieBoxProvider(
     suspend fun ensureDomain(): String {
         resolvedDomain?.let { return it }
 
-        val domain = MovieBoxConfig.DEFAULT_DOMAIN
+        val domain = MovieBoxConfig.savedDomain ?: MovieBoxConfig.DEFAULT_DOMAIN
         resolvedDomain = domain
         return domain
     }

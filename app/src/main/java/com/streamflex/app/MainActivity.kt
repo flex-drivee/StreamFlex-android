@@ -29,6 +29,9 @@ class MainActivity : ComponentActivity() {
             val context = androidx.compose.ui.platform.LocalContext.current
             val prefs = context.getSharedPreferences("streamflex_settings", android.content.Context.MODE_PRIVATE)
             
+            // Initialize Provider configurations from SharedPreferences
+            com.streamflex.providers.moviebox.MovieBoxConfig.savedDomain = prefs.getString("moviebox_api", null)
+            
             // Re-read preference explicitly on recomposition if needed, or use a state
             var appTheme by androidx.compose.runtime.remember {
                 androidx.compose.runtime.mutableStateOf(prefs.getString("app_theme", "SKY_DARK") ?: "SKY_DARK")
