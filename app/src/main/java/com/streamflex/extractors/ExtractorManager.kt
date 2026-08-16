@@ -66,7 +66,8 @@ object ExtractorManager {
         MovieBoxExtractor(),
         
         // Phase 3+ providers
-        com.streamflex.extractors.streamtape.StreamTapeExtractor()
+        com.streamflex.extractors.streamtape.StreamTapeExtractor(),
+        com.streamflex.extractors.mixdrop.MixDropExtractor()
         // VidStackExtractor()    ← VegaMovies
     )
 
