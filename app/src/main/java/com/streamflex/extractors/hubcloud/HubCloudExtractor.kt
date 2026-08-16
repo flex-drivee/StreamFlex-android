@@ -30,7 +30,7 @@ class HubCloudExtractor
     // login pages, and same-domain roots back into the queue.
     private val SKIP_PATTERNS = listOf(
         "facebook", "twitter", "telegram", "discord", "imdb", "instagram",
-        "youtube.com", "google.com/search",
+        "youtube.com", "google.com/search", "/tg/", "tg://",
         "/category/", "/tag/", "/page/", "/sign", "/login", "/register",
         "/contact", "/about", "/privacy", "/terms",
         "javascript:", "#"
@@ -75,13 +75,20 @@ class HubCloudExtractor
                     } catch (_: Exception) { currentUrl }
                     "$base/${nextHref.trimStart('/')}"
                 }
-                StreamLogger.info("HubCloudExtractor", "Following intermediate HubCloud step: $absoluteNext")
-                val nextHeaders = source.headers.toMutableMap().apply { 
-                    put("Referer", currentUrl)
-                    put("User-Agent", com.streamflex.core.constants.Constants.DEFAULT_USER_AGENT)
+                
+                // Ensure we don't accidentally fetch a telegram link or other skipped patterns
+                val lowerNext = absoluteNext.lowercase()
+                if (SKIP_PATTERNS.none { lowerNext.contains(it) }) {
+                    StreamLogger.info("HubCloudExtractor", "Following intermediate HubCloud step: $absoluteNext")
+                    val nextHeaders = source.headers.toMutableMap().apply { 
+                        put("Referer", currentUrl)
+                        put("User-Agent", com.streamflex.core.constants.Constants.DEFAULT_USER_AGENT)
+                    }
+                    document = ExtractorHelper.fetchDocument(absoluteNext, nextHeaders)
+                    currentUrl = absoluteNext
+                } else {
+                    StreamLogger.info("HubCloudExtractor", "Skipped intermediate HubCloud step (matches SKIP_PATTERNS): $absoluteNext")
                 }
-                document = ExtractorHelper.fetchDocument(absoluteNext, nextHeaders)
-                currentUrl = absoluteNext
             }
         }
 

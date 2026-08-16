@@ -247,7 +247,7 @@ private fun SFTopBar(
                     // Provider Selector Chip
                     var showProviderDropdown by remember { mutableStateOf(false) }
                     var selectedProviderName by remember { 
-                        mutableStateOf(providerRepository.provider(providerRepository.selectedProviderId ?: "")?.name ?: "None") 
+                        mutableStateOf(providerRepository.provider(providerRepository.selectedProviderId ?: "")?.name ?: "All in One") 
                     }
                     var showMovieBoxSettings by remember { mutableStateOf(false) }
                     val context = androidx.compose.ui.platform.LocalContext.current
@@ -290,10 +290,10 @@ private fun SFTopBar(
                             modifier = Modifier.background(MaterialTheme.colorScheme.surface)
                         ) {
                             DropdownMenuItem(
-                                text = { Text("None", color = MaterialTheme.colorScheme.onSurface) },
+                                text = { Text("All in One", color = MaterialTheme.colorScheme.onSurface) },
                                 onClick = {
                                     providerRepository.selectedProviderId = null
-                                    selectedProviderName = "None"
+                                    selectedProviderName = "All in One"
                                     showProviderDropdown = false
                                 }
                             )

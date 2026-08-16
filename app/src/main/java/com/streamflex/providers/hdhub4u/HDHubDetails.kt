@@ -56,13 +56,13 @@ class HDHubDetails : DetailParser {
 
     // ─── Public API ───────────────────────────────────────────────────────────
 
-    suspend fun load(result: SearchResult): ProviderResult {
-        val pageUrl = normalizeUrl(result.url)
+    suspend fun load(result: SearchResult, baseUrl: String): ProviderResult {
+        val pageUrl = normalizeUrl(result.url, baseUrl)
         StreamLogger.info(TAG, "Loading detail page: $pageUrl (${result.mediaType})")
 
         val request = RequestBuilder()
             .url(pageUrl)
-            .header("Referer", HDHubConfig.DEFAULT_DOMAIN)
+            .header("Referer", baseUrl)
             .header("Cookie", HDHubConfig.COOKIE)
             .build()
 
@@ -351,8 +351,8 @@ class HDHubDetails : DetailParser {
         return false
     }
 
-    private fun normalizeUrl(url: String): String {
+    private fun normalizeUrl(url: String, baseUrl: String): String {
         return if (url.startsWith("http")) url
-        else HDHubConfig.DEFAULT_DOMAIN.trimEnd('/') + "/" + url.trimStart('/')
+        else baseUrl.trimEnd('/') + "/" + url.trimStart('/')
     }
 }

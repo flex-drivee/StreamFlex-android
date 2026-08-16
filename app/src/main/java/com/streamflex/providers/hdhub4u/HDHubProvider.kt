@@ -163,7 +163,8 @@ class HDHubProvider(
         ensureDomain()
         return runCatching {
             detailsImpl.load(
-                result = searchResult
+                result = searchResult,
+                baseUrl = baseUrl
             )
         }.onFailure {
             Logger.e("[$id] Load failed for '${searchResult.title}': ${it.message}", TAG)

@@ -96,11 +96,13 @@ class HDHubSearch : SearchResultParser {
                 val poster = JsonParser.string(document, "post_thumbnail")
                     ?.takeIf { it.isNotBlank() }
 
-                val detailUrl = if (permalink.startsWith("http")) {
-                    permalink
+                val path = if (permalink.startsWith("http")) {
+                    permalink.substringAfter("://").substringAfter('/')
                 } else {
-                    baseUrl.trimEnd('/') + "/" + permalink.trimStart('/')
+                    permalink
                 }
+
+                val detailUrl = baseUrl.trimEnd('/') + "/" + path.trimStart('/')
 
                 val category = (JsonParser.string(document, "category") ?: "").lowercase()
                 val mediaType = if (

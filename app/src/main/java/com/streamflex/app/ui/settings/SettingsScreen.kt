@@ -43,7 +43,7 @@ fun SettingsScreen(
     
     val providerRepository = com.streamflex.app.di.ProviderModule.repository
     var selectedProviderName by remember { 
-        mutableStateOf(providerRepository.provider(providerRepository.selectedProviderId ?: "")?.name ?: "None") 
+        mutableStateOf(providerRepository.provider(providerRepository.selectedProviderId ?: "")?.name ?: "All in One") 
     }
     val context = androidx.compose.ui.platform.LocalContext.current
 
@@ -322,13 +322,13 @@ fun SettingsScreen(
                                 .fillMaxWidth()
                                 .clickable {
                                     providerRepository.selectedProviderId = null
-                                    selectedProviderName = "None"
+                                    selectedProviderName = "All in One"
                                     showProviderDialog = false
                                 }
                                 .padding(16.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            androidx.compose.material3.Text("None", modifier = Modifier.weight(1f))
+                            androidx.compose.material3.Text("All in One", modifier = Modifier.weight(1f))
                         }
                         
                         providerRepository.enabledProviders().forEach { provider ->
