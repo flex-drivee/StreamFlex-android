@@ -90,8 +90,21 @@ class RedirectExtractor : BaseExtractor() {
                     .forEach(candidates::add)
             }
 
-        // ---------- HDHub4u / WP Encoded Redirects ----------
         val html = document.html()
+
+        // ---------- JavaScript / Meta Refresh Redirects ----------
+        val jsMatch = Regex("""window\.location\.href\s*=\s*['"]([^'"]+)['"]""").find(html)
+            ?: Regex("""location(?:\.href)?\s*=\s*['"]([^'"]+)['"]""").find(html)
+        jsMatch?.groups?.get(1)?.value?.let { jsUrl ->
+            if (jsUrl.startsWith("http")) candidates += jsUrl
+        }
+
+        val metaMatch = Regex("""<meta[^>]*?url=['"]?([^'"\s>]+)""", RegexOption.IGNORE_CASE).find(html)
+        metaMatch?.groups?.get(1)?.value?.let { metaUrl ->
+            if (metaUrl.startsWith("http")) candidates += metaUrl
+        }
+
+        // ---------- HDHub4u / WP Encoded Redirects ----------
         val wpRegex = """s\('o','([A-Za-z0-9+/=]+)'|ck\('_wp_http_\d+','([^']+)'""".toRegex()
         val combinedEncoded = buildString {
             wpRegex.findAll(html).forEach { matchResult ->
@@ -99,10 +112,21 @@ class RedirectExtractor : BaseExtractor() {
                 if (!extractedValue.isNullOrEmpty()) append(extractedValue)
             }
         }
+
         if (combinedEncoded.isNotEmpty()) {
             decodeWpRedirect(combinedEncoded)?.let { decodedUrl ->
                 if (decodedUrl.isNotBlank() && decodedUrl.startsWith("http")) {
                     candidates += decodedUrl
+                }
+            }
+        } else {
+            // Fallback: search for single base64 tokens of length >= 50
+            val allTokens = Regex("""[A-Za-z0-9+/=]{50,}""").findAll(html)
+            for (tokenMatch in allTokens) {
+                val decoded = decodeWpRedirect(tokenMatch.value)
+                if (!decoded.isNullOrBlank() && decoded.startsWith("http")) {
+                    candidates += decoded
+                    break
                 }
             }
         }
@@ -118,7 +142,6 @@ class RedirectExtractor : BaseExtractor() {
             val lower = url.lowercase()
 
             // Skip garbage
-
             if (
                 lower.startsWith("javascript:") ||
                 lower == "#" ||
@@ -131,7 +154,9 @@ class RedirectExtractor : BaseExtractor() {
                 lower.contains("facebook") ||
                 lower.contains("twitter") ||
                 lower.contains("telegram") ||
-                lower.contains("discord")
+                lower.contains("discord") ||
+                lower.contains("instagram") ||
+                lower.contains("whatsapp")
             ) {
                 return@forEach
             }
@@ -176,7 +201,7 @@ class RedirectExtractor : BaseExtractor() {
      * Decodes WordPress / HDHub4u base64 + rot13 script redirects.
      * Inspired by CloudStream HDhub4u reference Utils.kt (getRedirectLinks).
      */
-    private fun decodeWpRedirect(combined: String): String? {
+    fun decodeWpRedirect(combined: String): String? {
         return try {
             val b1 = decodeBase64Safe(combined)
             val b2 = decodeBase64Safe(String(b1))
@@ -190,12 +215,38 @@ class RedirectExtractor : BaseExtractor() {
             val b3 = decodeBase64Safe(rot13)
             val jsonStr = String(b3, Charsets.UTF_8)
             val root = com.streamflex.core.parser.JsonParser.parse(jsonStr)
+
+            // Method 1: "o" parameter directly holds the base64-encoded URL
             val encodedUrl = com.streamflex.core.parser.JsonParser.string(root, "o")?.trim() ?: ""
             if (encodedUrl.isNotEmpty()) {
-                String(decodeBase64Safe(encodedUrl), Charsets.UTF_8).trim()
-            } else {
-                null
+                val direct = String(decodeBase64Safe(encodedUrl), Charsets.UTF_8).trim()
+                if (direct.startsWith("http")) return direct
             }
+
+            // Method 2: "data" + "blog_url" requires fetching ${blog_url}?re=${data}
+            val data = com.streamflex.core.parser.JsonParser.string(root, "data")?.trim() ?: ""
+            val blogUrl = com.streamflex.core.parser.JsonParser.string(root, "blog_url")?.trim() ?: ""
+            if (data.isNotEmpty() && blogUrl.isNotEmpty()) {
+                val decodedData = String(decodeBase64Safe(data), Charsets.UTF_8).trim()
+                val req = com.streamflex.core.network.RequestBuilder()
+                    .url("$blogUrl?re=$decodedData")
+                    .build()
+                return kotlinx.coroutines.runBlocking {
+                    when (val resp = com.streamflex.core.network.HttpClient.execute(req)) {
+                        is com.streamflex.core.network.NetworkResult.Success -> {
+                            val body = resp.data.bodyAsString().trim()
+                            if (body.startsWith("http")) {
+                                body
+                            } else {
+                                Regex("""https?:\/\/[^\s"'<>\\]+""").find(body)?.value
+                            }
+                        }
+                        else -> null
+                    }
+                }
+            }
+
+            null
         } catch (_: Exception) {
             null
         }

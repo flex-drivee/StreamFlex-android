@@ -20,6 +20,8 @@ enum class HostType {
     REDIRECT,
     DOOD,
     NETMIRROR,
+    MOVIEBOX,
+    HDSTREAM4U,
 
     UNKNOWN,
 }

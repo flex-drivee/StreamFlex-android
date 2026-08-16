@@ -72,25 +72,7 @@ class PixelDrainExtractor : BaseExtractor() {
         StreamLogger.debug(TAG, "PixelDrain file ID: $fileId")
 
         // ── Step 2: Build the direct download API URL ─────────────────────────
-        // The /api/file/<id>?download endpoint streams the raw file directly.
-        // No redirect, no token, no JS — pure REST.
-        val streamUrl = "$BASE_URL/api/file/$fileId?download"
-
-        // ── Step 3: Quick HEAD check — verify the file is accessible ──────────
-        // PixelDrain returns 200 for valid files, 404 for missing, 403 for
-        // files that have been removed due to abuse reports.
-        val exists = ExtractorHelper.exists(
-            url = streamUrl,
-            headers = mapOf(
-                "Referer" to "$BASE_URL/",
-                "User-Agent" to PIXEL_UA
-            )
-        )
-
-        if (!exists) {
-            StreamLogger.warn(TAG, "PixelDrain file not accessible (404/403): $fileId")
-            return emptyResult()
-        }
+        val streamUrl = if (source.url.contains("?download")) source.url else "$BASE_URL/api/file/$fileId?download"
 
         StreamLogger.info(TAG, "PixelDrain resolved: $streamUrl")
 

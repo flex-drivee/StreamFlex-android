@@ -13,6 +13,7 @@ import com.streamflex.extractors.redirect.RedirectExtractor
 import com.streamflex.extractors.dood.DoodExtractor
 import com.streamflex.extractors.pixeldrain.PixelDrainExtractor
 import com.streamflex.extractors.netmirror.NetMirrorExtractor
+import com.streamflex.extractors.moviebox.MovieBoxExtractor
 import com.streamflex.core.utils.StreamLogger
 import java.util.ArrayDeque
 
@@ -57,11 +58,15 @@ object ExtractorManager {
 
         PixelDrainExtractor(),
 
-        // Phase 3 — NetMirror complete extractors
-        NetMirrorExtractor()
+        com.streamflex.extractors.hdstream4u.HdStream4uExtractor(),
 
-        // Future (Phase 3+ providers):
-        // StreamTapeExtractor()  ← OTTMirror
+        // Phase 3 — NetMirror complete extractors
+        NetMirrorExtractor(),
+        
+        MovieBoxExtractor(),
+        
+        // Phase 3+ providers
+        com.streamflex.extractors.streamtape.StreamTapeExtractor()
         // VidStackExtractor()    ← VegaMovies
     )
 
@@ -75,7 +80,8 @@ object ExtractorManager {
      * Resolve a ProviderSource into playable streams.
      */
     suspend fun extract(
-        source: ProviderSource
+        source: ProviderSource,
+        onStreamFound: suspend (StreamLink) -> Unit = {}
     ): List<StreamLink> {
 
         StreamLogger.info(
@@ -90,6 +96,7 @@ object ExtractorManager {
         val visited = mutableSetOf<String>()
 
         val streams = mutableListOf<StreamLink>()
+        val emittedUrls = mutableSetOf<String>()
 
         queue.add(source)
         queued.add(source.url)
@@ -98,6 +105,8 @@ object ExtractorManager {
             queue.isNotEmpty() &&
             visited.size < MAX_SOURCES
         ) {
+            // Check for cancellation if user exited the player
+            kotlinx.coroutines.yield()
 
             val current = queue.removeFirst()
 
@@ -113,6 +122,24 @@ object ExtractorManager {
                     "Already visited. Skipping."
                 )
 
+                continue
+            }
+
+            if (com.streamflex.core.network.detector.HostDetector.isDirect(current.hostType)) {
+                StreamLogger.debug("ExtractorManager", "Direct stream queued: ${current.url}")
+                val stream = com.streamflex.domain.models.StreamLink(
+                    name = "${current.provider} • Direct",
+                    url = current.url,
+                    quality = current.quality,
+                    host = current.hostType,
+                    headers = current.headers,
+                    cookies = current.cookies,
+                    referer = current.referer
+                )
+                if (emittedUrls.add(stream.url)) {
+                    onStreamFound(stream)
+                }
+                streams.add(stream)
                 continue
             }
 
@@ -143,6 +170,11 @@ object ExtractorManager {
                     "Streams: ${result.streams.size}, Next Sources: ${result.sources.size}"
                 )
 
+                result.streams.forEach { stream ->
+                    if (emittedUrls.add(stream.url)) {
+                        onStreamFound(stream)
+                    }
+                }
                 streams += result.streams
 
                 result.sources

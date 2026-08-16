@@ -5,6 +5,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.streamflex.app.di.RepositoryModule
 import com.streamflex.app.ui.navigation.AppNavigation
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.fillMaxSize
 
 
 /**
@@ -17,25 +20,47 @@ import com.streamflex.app.ui.navigation.AppNavigation
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
-
         super.onCreate(savedInstanceState)
 
-        val contentRepository =
-            RepositoryModule.contentRepository
-
-        val streamRepository =
-            RepositoryModule.streamRepository
+        val contentRepository = RepositoryModule.contentRepository
+        val streamRepository = RepositoryModule.streamRepository
 
         setContent {
+            val context = androidx.compose.ui.platform.LocalContext.current
+            val prefs = context.getSharedPreferences("streamflex_settings", android.content.Context.MODE_PRIVATE)
+            
+            // Initialize Provider configurations from SharedPreferences
+            com.streamflex.providers.moviebox.MovieBoxConfig.savedDomain = prefs.getString("moviebox_api", null)
+            
+            // Re-read preference explicitly on recomposition if needed, or use a state
+            var appTheme by androidx.compose.runtime.remember {
+                androidx.compose.runtime.mutableStateOf(prefs.getString("app_theme", "SKY_DARK") ?: "SKY_DARK")
+            }
+            
+            // Listen for changes
+            androidx.compose.runtime.DisposableEffect(prefs) {
+                val listener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
+                    if (key == "app_theme") {
+                        appTheme = sharedPreferences.getString("app_theme", "SKY_DARK") ?: "SKY_DARK"
+                    }
+                }
+                prefs.registerOnSharedPreferenceChangeListener(listener)
+                onDispose {
+                    prefs.unregisterOnSharedPreferenceChangeListener(listener)
+                }
+            }
 
-            AppNavigation(
-
-                repository = contentRepository,
-
-                streamRepository = streamRepository
-
-            )
-
+            com.streamflex.app.ui.theme.StreamFlexTheme(appTheme = appTheme) {
+                androidx.compose.material3.Surface(
+                    modifier = androidx.compose.ui.Modifier.fillMaxSize(),
+                    color = androidx.compose.material3.MaterialTheme.colorScheme.background
+                ) {
+                    AppNavigation(
+                        repository = contentRepository,
+                        streamRepository = streamRepository
+                    )
+                }
+            }
         }
     }
 }

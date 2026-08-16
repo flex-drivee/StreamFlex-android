@@ -47,6 +47,15 @@ object StreamFilter {
             return false
         }
 
+        if (
+            stream.host == com.streamflex.domain.models.HostType.GOOGLE_VIDEO ||
+            stream.host == com.streamflex.domain.models.HostType.M3U8 ||
+            stream.host == com.streamflex.domain.models.HostType.DASH ||
+            stream.host == com.streamflex.domain.models.HostType.DIRECT
+        ) {
+            return true
+        }
+
         return ContentDetector.isVideo(
             stream.contentType
         )

@@ -34,7 +34,8 @@ object StreamEngine {
      * player-ready streams.
      */
     suspend fun resolve(
-        sources: List<ProviderSource>
+        sources: List<ProviderSource>,
+        onStreamFound: suspend (FinalStreams) -> Unit = {}
     ): FinalStreams {
 
         StreamLogger.info(
@@ -65,8 +66,14 @@ object StreamEngine {
             )
         }
 
+        val tempCollected = mutableListOf<com.streamflex.domain.models.StreamLink>()
+
         val collectedStreams =
-            StreamCollector.collect(sources)
+            StreamCollector.collect(sources) { stream ->
+                tempCollected.add(stream)
+                val currentStreams = FinalStreamBuilder.build(tempCollected)
+                onStreamFound(currentStreams)
+            }
 
         StreamLogger.debug(
             "StreamEngine",

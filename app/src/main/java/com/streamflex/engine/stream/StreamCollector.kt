@@ -40,7 +40,8 @@ object StreamCollector {
      * Resolve multiple ProviderSources concurrently.
      */
     suspend fun collect(
-        sources: List<ProviderSource>
+        sources: List<ProviderSource>,
+        onStreamFound: suspend (StreamLink) -> Unit = {}
     ): List<StreamLink> {
 
         StreamLogger.info(
@@ -48,7 +49,7 @@ object StreamCollector {
             "Resolving ${sources.size} provider source(s) via ResolverEngine"
         )
 
-        val streams = ResolverEngine.resolveAll(sources)
+        val streams = ResolverEngine.resolveAll(sources, onStreamFound)
 
         StreamLogger.info(
             "StreamCollector",

@@ -38,6 +38,8 @@ object HttpClient {
             .build()
     }
 
+    fun getOkHttpClient(): OkHttpClient = baseClient
+
     private fun buildClient(request: NetworkRequest): OkHttpClient {
 
         val builder = baseClient.newBuilder()
@@ -72,23 +74,23 @@ object HttpClient {
                 builder.addHeader(key, value)
             }
 
+            val contentTypeHeader = request.headers.entries.firstOrNull { it.key.equals("Content-Type", ignoreCase = true) }?.value
+            val mediaTypeStr = contentTypeHeader ?: "application/octet-stream"
+            val mediaType = mediaTypeStr.toMediaTypeOrNull()
+
             when (request.method) {
 
                 HttpMethod.GET -> builder.get()
 
                 HttpMethod.POST -> {
                     builder.post(
-                        request.body?.toRequestBody(
-                            "application/octet-stream".toMediaTypeOrNull()
-                        ) ?: ByteArray(0).toRequestBody()
+                        request.body?.toRequestBody(mediaType) ?: ByteArray(0).toRequestBody()
                     )
                 }
 
                 HttpMethod.PUT -> {
                     builder.put(
-                        request.body?.toRequestBody(
-                            "application/octet-stream".toMediaTypeOrNull()
-                        ) ?: ByteArray(0).toRequestBody()
+                        request.body?.toRequestBody(mediaType) ?: ByteArray(0).toRequestBody()
                     )
                 }
 
@@ -98,9 +100,7 @@ object HttpClient {
 
                 HttpMethod.PATCH -> {
                     builder.patch(
-                        request.body?.toRequestBody(
-                            "application/octet-stream".toMediaTypeOrNull()
-                        ) ?: ByteArray(0).toRequestBody()
+                        request.body?.toRequestBody(mediaType) ?: ByteArray(0).toRequestBody()
                     )
                 }
 

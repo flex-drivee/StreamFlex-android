@@ -84,7 +84,7 @@ class MovieDetailViewModel(
     }
 
     fun fetchMovieStreams(
-        onResult: (List<String>) -> Unit
+        onResult: (List<com.streamflex.domain.models.StreamLink>) -> Unit
     ) {
 
         viewModelScope.launch {
@@ -105,13 +105,24 @@ class MovieDetailViewModel(
                     "Resolving movie: ${movie.title} (${movie.year})"
                 )
 
+                var firstStreamFired = false
+
+                com.streamflex.player.StreamStateHolder.clear()
+
                 val streams = streamRepository.resolveMovie(
 
                     title = movie.title,
 
                     year = movie.year
 
-                )
+                ) { currentStreams ->
+                    com.streamflex.player.StreamStateHolder.streams.value = currentStreams.streams
+                    if (currentStreams.isPlayable && !firstStreamFired) {
+                        firstStreamFired = true
+                        onResult(currentStreams.streams)
+                    }
+                }
+                
                 android.util.Log.d(
                     "MOVIE_DEBUG",
                     "Playable = ${streams.isPlayable}"
@@ -134,15 +145,13 @@ class MovieDetailViewModel(
                     "MOVIE_DEBUG",
                     "Returning ${streams.streams.size} URL(s) to UI"
                 )
-                onResult(
-
-                    streams.streams.map {
-
-                        it.url
-
-                    }
-
-                )
+                
+                // If it finished but never fired (e.g. only 1 stream total, or no streams)
+                if (!firstStreamFired) {
+                    onResult(
+                        streams.streams
+                    )
+                }
 
             } catch (e: Exception) {
 
@@ -157,7 +166,7 @@ class MovieDetailViewModel(
 
     fun fetchEpisodeStreams(
         episode: Episode,
-        onResult: (List<String>) -> Unit
+        onResult: (List<com.streamflex.domain.models.StreamLink>) -> Unit
     ) {
 
         viewModelScope.launch {
@@ -174,6 +183,10 @@ class MovieDetailViewModel(
 
                 }
 
+                var firstStreamFired = false
+
+                com.streamflex.player.StreamStateHolder.clear()
+
                 val streams = streamRepository.resolveEpisode(
 
                     title = show.title,
@@ -184,17 +197,19 @@ class MovieDetailViewModel(
 
                     year = show.year
 
-                )
-
-                onResult(
-
-                    streams.streams.map {
-
-                        it.url
-
+                ) { currentStreams ->
+                    com.streamflex.player.StreamStateHolder.streams.value = currentStreams.streams
+                    if (currentStreams.isPlayable && !firstStreamFired) {
+                        firstStreamFired = true
+                        onResult(currentStreams.streams)
                     }
+                }
 
-                )
+                if (!firstStreamFired) {
+                    onResult(
+                        streams.streams
+                    )
+                }
 
             } catch (e: Exception) {
 

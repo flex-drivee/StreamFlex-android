@@ -47,9 +47,13 @@ object ResolverEngine {
      * Uses coroutines to resolve independent sources concurrently.
      *
      * @param sources The list of initial embed sources discovered by a provider.
+     * @param onStreamFound Callback fired immediately when a new stream is found.
      * @return List of unique, header-validated [StreamLink]s ready for StreamEngine.
      */
-    suspend fun resolveAll(sources: List<ProviderSource>): List<StreamLink> = coroutineScope {
+    suspend fun resolveAll(
+        sources: List<ProviderSource>,
+        onStreamFound: suspend (StreamLink) -> Unit = {}
+    ): List<StreamLink> = coroutineScope {
         if (sources.isEmpty()) {
             StreamLogger.warn(TAG, "No provider sources to resolve")
             return@coroutineScope emptyList()
@@ -59,10 +63,16 @@ object ResolverEngine {
 
         // Track visited URLs across concurrent resolutions to avoid duplicate work
         val visitedUrls = ConcurrentHashMap.newKeySet<String>()
+        val emittedUrls = ConcurrentHashMap.newKeySet<String>()
 
         val jobs = sources.map { source ->
             async {
-                resolveInternal(source, depth = 0, visitedUrls = visitedUrls)
+                resolveInternal(source, depth = 0, visitedUrls = visitedUrls) { stream ->
+                    val finalStream = injectRegistryHeaders(stream)
+                    if (emittedUrls.add(finalStream.url)) {
+                        onStreamFound(finalStream)
+                    }
+                }
             }
         }
 
@@ -99,7 +109,8 @@ object ResolverEngine {
     private suspend fun resolveInternal(
         source: ProviderSource,
         depth: Int,
-        visitedUrls: MutableSet<String>
+        visitedUrls: MutableSet<String>,
+        onStreamFound: suspend (StreamLink) -> Unit = {}
     ): List<StreamLink> {
         // 1. Redirect loop & depth protection
         if (depth >= Constants.MAX_REDIRECT_HOPS) {
@@ -129,12 +140,15 @@ object ResolverEngine {
                 cookies = source.cookies,
                 referer = source.referer
             )
+            onStreamFound(directLink)
             return listOf(directLink)
         }
 
         // 3. Extractor Dispatch via ExtractorManager & ExtractorRegistry
         return try {
-            val extractedStreams = ExtractorManager.extract(source)
+            val extractedStreams = ExtractorManager.extract(source) { stream ->
+                onStreamFound(stream)
+            }
             if (extractedStreams.isNotEmpty()) {
                 StreamLogger.debug(
                     TAG,

@@ -72,44 +72,46 @@ class StreamRepository(
      * Resolve streams from a SearchResult.
      */
     suspend fun getStreams(
-        item: SearchResult
+        item: SearchResult,
+        onStreamFound: suspend (FinalStreams) -> Unit = {}
     ): FinalStreams {
 
         val providerResult =
             loadContent(item)
                 ?: return FinalStreams.EMPTY
 
-        return getStreams(providerResult)
+        return getStreams(providerResult, onStreamFound)
     }
 
     /**
      * Resolve streams from ProviderResult.
      */
     suspend fun getStreams(
-        providerResult: ProviderResult
+        providerResult: ProviderResult,
+        onStreamFound: suspend (FinalStreams) -> Unit = {}
     ): FinalStreams {
+        val sources = if (providerResult.sources.isNotEmpty()) {
+            providerResult.sources
+        } else {
+            providerResult.seasons.firstOrNull()?.episodes?.firstOrNull()?.sources ?: emptyList()
+        }
 
         return streamEngine.resolve(
-            providerResult.sources
+            sources,
+            onStreamFound
         )
     }
 
     /**
      * Resolve a movie by title.
-     *
-     * Version 1:
-     * - search
-     * - first result
-     * - load
-     * - extract
      */
     suspend fun resolveMovie(
         title: String,
-        year: Int? = null
+        year: Int? = null,
+        onStreamFound: suspend (FinalStreams) -> Unit = {}
     ): FinalStreams {
 
-        val results =
-            search(title)
+        val results = search(title)
 
         if (results.isEmpty()) {
             return FinalStreams.EMPTY
@@ -120,14 +122,18 @@ class StreamRepository(
             year = year,
             results = results
         ) ?: return FinalStreams.EMPTY
-        return getStreams(selected)
+
+        val providerResult = loadContent(selected) ?: return FinalStreams.EMPTY
+
+        val sources = if (providerResult.sources.isNotEmpty()) {
+            providerResult.sources
+        } else {
+            providerResult.seasons.firstOrNull()?.episodes?.firstOrNull()?.sources ?: emptyList()
+        }
+
+        return streamEngine.resolve(sources, onStreamFound)
     }
 
-    /**
-     * Resolve a TV episode.
-     *
-     * Matching logic will be improved later.
-     */
     /**
      * Resolve a TV episode.
      */
@@ -135,10 +141,17 @@ class StreamRepository(
         title: String,
         season: Int,
         episode: Int,
-        year: Int? = null
+        year: Int? = null,
+        onStreamFound: suspend (FinalStreams) -> Unit = {}
     ): FinalStreams {
 
-        val results = search(title)
+        // First search by base title
+        var results = search(title)
+
+        // If no results, try searching with season keyword
+        if (results.isEmpty()) {
+            results = search("$title Season $season")
+        }
 
         if (results.isEmpty()) {
             return FinalStreams.EMPTY
@@ -149,8 +162,26 @@ class StreamRepository(
             season = season,
             episode = episode,
             results = results
-        ) ?: return FinalStreams.EMPTY
+        ) ?: results.firstOrNull() ?: return FinalStreams.EMPTY
 
-        return getStreams(selected)
+        val providerResult = loadContent(selected) ?: return FinalStreams.EMPTY
+
+        // Find the matching season
+        val targetSeason = providerResult.seasons.find { it.number == season }
+            ?: providerResult.seasons.firstOrNull()
+
+        // Find the matching episode in that season
+        val targetEpisode = targetSeason?.episodes?.find { it.number == episode }
+            ?: targetSeason?.episodes?.firstOrNull()
+
+        val sources = if (targetEpisode != null && targetEpisode.sources.isNotEmpty()) {
+            targetEpisode.sources
+        } else if (providerResult.sources.isNotEmpty()) {
+            providerResult.sources
+        } else {
+            providerResult.seasons.flatMap { s -> s.episodes.flatMap { it.sources } }
+        }
+
+        return streamEngine.resolve(sources, onStreamFound)
     }
 }

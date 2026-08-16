@@ -16,26 +16,6 @@ object HostDetector {
 
         val lowerUrl = url.lowercase()
 
-        // ----------------------------------------------------
-        // Stage 1 : Direct media (highest priority)
-        // ----------------------------------------------------
-
-        when {
-
-            lowerUrl.contains(".m3u8") ->
-                return HostType.M3U8
-
-            lowerUrl.contains(".mpd") ->
-                return HostType.DASH
-
-            lowerUrl.endsWith(".mp4") ||
-                    lowerUrl.endsWith(".mkv") ||
-                    lowerUrl.endsWith(".avi") ||
-                    lowerUrl.endsWith(".mov") ||
-                    lowerUrl.endsWith(".webm") ->
-                return HostType.DIRECT
-        }
-
         val host = try {
             URL(url).host.lowercase()
         } catch (_: Exception) {
@@ -43,13 +23,14 @@ object HostDetector {
         }
 
         // ----------------------------------------------------
-        // Stage 2 : Known hosts
+        // Stage 1 : Known hosts (Check this first to catch things like Streamtape .mkv links)
         // ----------------------------------------------------
 
         when {
 
             host.contains("googlevideo") ||
-                    host.contains("googleusercontent") ->
+                    host.contains("googleusercontent") ||
+                    host.contains("drive.google.com") ->
                 return HostType.GOOGLE_VIDEO
 
             host.contains("hubcloud") ->
@@ -64,10 +45,16 @@ object HostDetector {
             host.contains("hblinks") ->
                 return HostType.HBLINKS
 
+            host.contains("hdstream4u") ||
+                    host.contains("hdstream") ||
+                    host.contains("vidhide") ||
+                    host.contains("filelions") ->
+                return HostType.HDSTREAM4U
+
             host.contains("hubstream") ->
                 return HostType.HUBSTREAM
 
-            host.contains("pixeldrain") ->
+            host.contains("pixeldrain") || host.contains("pixeldra") ->
                 return HostType.PIXELDRAIN
 
             host.contains("streamtape") ->
@@ -84,12 +71,35 @@ object HostDetector {
 
             host.contains("vidstack") ->
                 return HostType.VIDSTACK
+                
+            host.contains("megaup") ->
+                return HostType.UNKNOWN
         }
 
         // Check dynamic domains in ExtractorRegistry (from remote registry.json / defaults)
         val registryType = ExtractorRegistry.getHostTypeForUrl(url)
         if (registryType != HostType.UNKNOWN) {
             return registryType
+        }
+
+        // ----------------------------------------------------
+        // Stage 2 : Direct media
+        // ----------------------------------------------------
+
+        when {
+
+            lowerUrl.contains(".m3u8") ->
+                return HostType.M3U8
+
+            lowerUrl.contains(".mpd") ->
+                return HostType.DASH
+
+            lowerUrl.endsWith(".mp4") ||
+                    lowerUrl.endsWith(".mkv") ||
+                    lowerUrl.endsWith(".avi") ||
+                    lowerUrl.endsWith(".mov") ||
+                    lowerUrl.endsWith(".webm") ->
+                return HostType.DIRECT
         }
 
         // ----------------------------------------------------

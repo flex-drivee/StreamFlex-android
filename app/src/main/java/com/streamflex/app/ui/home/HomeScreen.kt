@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.*
 import coil.compose.AsyncImage
 import coil.compose.SubcomposeAsyncImage
 import com.streamflex.app.domain.models.SearchResult
+import com.streamflex.domain.repositories.ProviderRepository
 import com.streamflex.app.ui.theme.*
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -39,9 +40,11 @@ import com.streamflex.app.ui.theme.*
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
+    providerRepository: ProviderRepository,
     onNavigateToDetail: (String) -> Unit,
     onSearchClick: () -> Unit = {},
-    onSettingsClick: () -> Unit = {}
+    onSettingsClick: () -> Unit = {},
+    onDownloadsClick: () -> Unit = {}
 ) {
     val state by viewModel.uiState.collectAsState()
     val scrollState = rememberLazyListState()
@@ -69,7 +72,7 @@ fun HomeScreen(
 
     Box(modifier = Modifier
         .fillMaxSize()
-        .background(SFBgPrimary)
+        .background(MaterialTheme.colorScheme.background)
     ) {
         // ── Main Content ─────────────────────────────────────────────────────
         LazyColumn(
@@ -163,9 +166,11 @@ fun HomeScreen(
                 alpha         = topBarAlpha,
                 selectedTab   = selectedTab,
                 tabs          = tabs,
+                providerRepository = providerRepository,
                 onTabSelected = { selectedTab = it },
                 onSearchClick = onSearchClick,
-                onProfileClick = onSettingsClick
+                onProfileClick = onSettingsClick,
+                onDownloadsClick = onDownloadsClick
             )
         }
     }
@@ -180,9 +185,11 @@ private fun SFTopBar(
     alpha: Float,
     selectedTab: Int,
     tabs: List<String>,
+    providerRepository: ProviderRepository,
     onTabSelected: (Int) -> Unit,
     onSearchClick: () -> Unit,
-    onProfileClick: () -> Unit
+    onProfileClick: () -> Unit,
+    onDownloadsClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -217,31 +224,104 @@ private fun SFTopBar(
                         fontWeight = FontWeight.ExtraBold,
                         fontSize   = 22.sp,
                         brush      = Brush.linearGradient(
-                            colors = listOf(SFAccent, Color(0xFF7B8FFF))
+                            colors = listOf(MaterialTheme.colorScheme.primary, Color(0xFF7B8FFF))
                         )
                     )
                 )
 
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Search
-                    IconButton(onClick = onSearchClick) {
-                        Icon(Icons.Outlined.Search, "Search",
-                            tint = SFTextPrimary, modifier = Modifier.size(24.dp))
-                    }
-                    // Profile avatar placeholder
-                    Box(
+                    // Search (as per reference image top bar)
+                    IconButton(
+                        onClick = onSearchClick,
                         modifier = Modifier
-                            .size(32.dp)
-                            .clip(RoundedCornerShape(6.dp))
-                            .background(SFAccent)
-                            .clickable { onProfileClick() },
-                        contentAlignment = Alignment.Center
+                            .size(36.dp)
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), CircleShape)
                     ) {
-                        Text("S", color = Color.White,
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold))
+                        Icon(Icons.Outlined.Search, "Search",
+                            tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(20.dp))
+                    }
+                    
+                    // Provider Selector Chip
+                    var showProviderDropdown by remember { mutableStateOf(false) }
+                    var selectedProviderName by remember { 
+                        mutableStateOf(providerRepository.provider(providerRepository.selectedProviderId ?: "")?.name ?: "All in One") 
+                    }
+                    var showMovieBoxSettings by remember { mutableStateOf(false) }
+                    val context = androidx.compose.ui.platform.LocalContext.current
+                    
+                    if (showMovieBoxSettings) {
+                        MovieBoxSettingsDialog(
+                            onDismiss = { showMovieBoxSettings = false },
+                            context = context
+                        )
+                    }
+
+                    Box {
+                        Row(
+                            modifier = Modifier
+                                .height(36.dp)
+                                .clip(RoundedCornerShape(18.dp))
+                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f))
+                                .clickable { showProviderDropdown = true }
+                                .padding(horizontal = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Extension,
+                                contentDescription = "Provider",
+                                tint = MaterialTheme.colorScheme.onBackground,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Text(
+                                text = selectedProviderName,
+                                color = MaterialTheme.colorScheme.onBackground,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+
+                        DropdownMenu(
+                            expanded = showProviderDropdown,
+                            onDismissRequest = { showProviderDropdown = false },
+                            modifier = Modifier.background(MaterialTheme.colorScheme.surface)
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("All in One", color = MaterialTheme.colorScheme.onSurface) },
+                                onClick = {
+                                    providerRepository.selectedProviderId = null
+                                    selectedProviderName = "All in One"
+                                    showProviderDropdown = false
+                                }
+                            )
+                            providerRepository.enabledProviders().forEach { provider ->
+                                DropdownMenuItem(
+                                    text = { Text(provider.name, color = MaterialTheme.colorScheme.onSurface) },
+                                    onClick = {
+                                        providerRepository.selectedProviderId = provider.id
+                                        selectedProviderName = provider.name
+                                        showProviderDropdown = false
+                                    },
+                                    trailingIcon = {
+                                        if (provider.id == "moviebox") {
+                                            IconButton(onClick = {
+                                                showProviderDropdown = false
+                                                showMovieBoxSettings = true
+                                            }) {
+                                                Icon(
+                                                    Icons.Default.Settings,
+                                                    contentDescription = "Settings",
+                                                    tint = MaterialTheme.colorScheme.onSurface
+                                                )
+                                            }
+                                        }
+                                    }
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -250,7 +330,7 @@ private fun SFTopBar(
             ScrollableTabRow(
                 selectedTabIndex = selectedTab,
                 containerColor   = Color.Transparent,
-                contentColor     = SFTextPrimary,
+                contentColor     = MaterialTheme.colorScheme.onBackground,
                 edgePadding      = 16.dp,
                 divider          = {},
                 indicator        = { tabPositions ->
@@ -263,7 +343,7 @@ private fun SFTopBar(
                                 .offset(x = pos.left + 8.dp)
                                 .width(pos.width - 16.dp)
                                 .height(2.dp)
-                                .background(SFAccent, CircleShape)
+                                .background(MaterialTheme.colorScheme.primary, CircleShape)
                         )
                     }
                 }
@@ -279,7 +359,7 @@ private fun SFTopBar(
                             style = MaterialTheme.typography.bodyMedium.copy(
                                 fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Normal
                             ),
-                            color = if (selectedTab == index) SFTextPrimary else SFTextSecondary,
+                            color = if (selectedTab == index) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(vertical = 10.dp, horizontal = 4.dp)
                         )
                     }
@@ -327,8 +407,8 @@ fun SFHeroSection(
                         colorStops = arrayOf(
                             0.0f to Color.Black.copy(alpha = 0.55f), // nav bar area
                             0.3f to Color.Transparent,               // clear in middle
-                            0.7f to SFBgPrimary.copy(alpha = 0.4f),
-                            1.0f to SFBgPrimary                     // full bg at bottom
+                            0.7f to MaterialTheme.colorScheme.background.copy(alpha = 0.4f),
+                            1.0f to MaterialTheme.colorScheme.background                     // full bg at bottom
                         )
                     )
                 )
@@ -341,7 +421,7 @@ fun SFHeroSection(
                 .background(
                     Brush.horizontalGradient(
                         colorStops = arrayOf(
-                            0.0f to SFBgPrimary.copy(alpha = 0.2f),
+                            0.0f to MaterialTheme.colorScheme.background.copy(alpha = 0.2f),
                             0.5f to Color.Transparent
                         )
                     )
@@ -360,7 +440,7 @@ fun SFHeroSection(
             Text(
                 text  = "Action  •  Thriller  •  Sci-Fi",
                 style = MaterialTheme.typography.labelMedium,
-                color = SFTextSecondary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(bottom = 10.dp)
             )
 
@@ -368,7 +448,7 @@ fun SFHeroSection(
             Text(
                 text     = movie.title,
                 style    = MaterialTheme.typography.displayLarge.copy(fontSize = 28.sp),
-                color    = SFTextPrimary,
+                color    = MaterialTheme.colorScheme.onBackground,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.padding(bottom = 6.dp)
@@ -381,7 +461,7 @@ fun SFHeroSection(
                 modifier = Modifier.padding(bottom = 20.dp)
             ) {
                 movie.year?.let {
-                    Text(it.toString(), style = MaterialTheme.typography.bodyMedium, color = SFTextSecondary)
+                    Text(it.toString(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     SFDot()
                 }
                 SFBadge("HD", SFHDTag, Color.Black)
@@ -415,12 +495,12 @@ fun SFHeroSection(
                     onClick = { /* TODO: Add to list */ },
                     modifier = Modifier.height(46.dp),
                     shape    = RoundedCornerShape(6.dp),
-                    border   = BorderStroke(1.dp, SFOutline),
-                    colors   = ButtonDefaults.outlinedButtonColors(containerColor = SFBgElevated.copy(alpha = 0.7f))
+                    border   = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                    colors   = ButtonDefaults.outlinedButtonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f))
                 ) {
-                    Icon(Icons.Outlined.Add, null, tint = SFTextPrimary, modifier = Modifier.size(20.dp))
+                    Icon(Icons.Outlined.Add, null, tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(20.dp))
                     Spacer(Modifier.width(4.dp))
-                    Text("List", color = SFTextPrimary, style = MaterialTheme.typography.bodyMedium)
+                    Text("List", color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.bodyMedium)
                 }
 
                 // Info button
@@ -429,10 +509,10 @@ fun SFHeroSection(
                     modifier = Modifier
                         .size(46.dp)
                         .clip(RoundedCornerShape(6.dp))
-                        .background(SFBgElevated.copy(alpha = 0.7f))
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f))
                 ) {
                     Icon(Icons.Outlined.Info, "Info",
-                        tint = SFTextPrimary, modifier = Modifier.size(22.dp))
+                        tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(22.dp))
                 }
             }
 
@@ -451,7 +531,7 @@ fun SFHeroSection(
                                 .height(4.dp)
                                 .width(width)
                                 .clip(CircleShape)
-                                .background(if (i == heroIndex) SFAccent else SFTextSecondary.copy(alpha = 0.4f))
+                                .background(if (i == heroIndex) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f))
                                 .clickable { onDotClick(i) }
                         )
                     }
@@ -485,13 +565,13 @@ fun SFSectionRow(
             Text(
                 text     = title,
                 style    = MaterialTheme.typography.headlineMedium.copy(fontSize = 17.sp),
-                color    = SFTextPrimary,
+                color    = MaterialTheme.colorScheme.onBackground,
                 maxLines = 1
             )
             Text(
                 text     = "See All",
                 style    = MaterialTheme.typography.labelMedium,
-                color    = SFAccent,
+                color    = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.clickable { }
             )
         }
@@ -528,7 +608,7 @@ private fun SFContinueWatchingRow(
         Text(
             text     = "▶ Continue Watching",
             style    = MaterialTheme.typography.headlineMedium.copy(fontSize = 17.sp),
-            color    = SFTextPrimary,
+            color    = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 0.dp)
         )
         Spacer(Modifier.height(12.dp))
@@ -561,7 +641,7 @@ fun SFVideoCard(
             .width(110.dp)
             .height(165.dp)
             .clip(RoundedCornerShape(8.dp))
-            .background(SFBgCard)
+            .background(MaterialTheme.colorScheme.surface)
             .clickable { onClick() }
     ) {
         // Poster
@@ -580,7 +660,7 @@ fun SFVideoCard(
                 .align(Alignment.BottomCenter)
                 .background(
                     Brush.verticalGradient(
-                        listOf(Color.Transparent, SFBgPrimary.copy(alpha = 0.95f))
+                        listOf(Color.Transparent, MaterialTheme.colorScheme.background.copy(alpha = 0.95f))
                     )
                 )
         )
@@ -592,13 +672,13 @@ fun SFVideoCard(
                     .align(Alignment.TopStart)
                     .padding(6.dp)
                     .clip(RoundedCornerShape(3.dp))
-                    .background(SFBgPrimary.copy(alpha = 0.7f))
+                    .background(MaterialTheme.colorScheme.background.copy(alpha = 0.7f))
                     .padding(horizontal = 4.dp, vertical = 2.dp)
             ) {
                 Text(
                     text  = yr.toString(),
                     style = MaterialTheme.typography.labelSmall,
-                    color = SFTextSecondary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -607,7 +687,7 @@ fun SFVideoCard(
         Text(
             text     = item.title,
             style    = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-            color    = SFTextPrimary,
+            color    = MaterialTheme.colorScheme.onBackground,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier
@@ -627,7 +707,7 @@ private fun SFContinueCard(
             .width(170.dp)
             .height(100.dp)
             .clip(RoundedCornerShape(8.dp))
-            .background(SFBgCard)
+            .background(MaterialTheme.colorScheme.surface)
             .clickable { onClick() }
     ) {
         AsyncImage(
@@ -673,7 +753,7 @@ private fun SFContinueCard(
                 modifier = Modifier
                     .fillMaxWidth(0.4f)
                     .fillMaxHeight()
-                    .background(SFAccent)
+                    .background(MaterialTheme.colorScheme.primary)
             )
         }
 
@@ -681,7 +761,7 @@ private fun SFContinueCard(
         Text(
             text     = item.title,
             style    = MaterialTheme.typography.labelMedium,
-            color    = SFTextPrimary,
+            color    = MaterialTheme.colorScheme.onBackground,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier
@@ -713,7 +793,7 @@ private fun SFDot() {
         modifier = Modifier
             .size(3.dp)
             .clip(CircleShape)
-            .background(SFTextSecondary)
+            .background(MaterialTheme.colorScheme.onSurfaceVariant)
     )
 }
 
@@ -732,7 +812,7 @@ private fun SFHeroShimmer() {
             .height(500.dp)
             .background(
                 Brush.linearGradient(
-                    colors  = listOf(SFBgCard, SFBgElevated, SFBgCard),
+                    colors  = listOf(MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.colorScheme.surface),
                     start   = Offset(shimmerX, 0f),
                     end     = Offset(shimmerX + 500f, 200f)
                 )
@@ -752,7 +832,7 @@ private fun SFLoadingRow() {
                     .width(110.dp)
                     .height(165.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .background(SFBgElevated)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
             )
         }
     }
@@ -768,9 +848,87 @@ private fun SFErrorBanner(message: String, onRetry: () -> Unit) {
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Icon(Icons.Outlined.Info, null, tint = SFError, modifier = Modifier.size(40.dp))
-        Text(message, style = MaterialTheme.typography.bodyMedium, color = SFTextSecondary)
+        Text(message, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         TextButton(onClick = onRetry) {
-            Text("Retry", color = SFAccent)
+            Text("Retry", color = MaterialTheme.colorScheme.primary)
         }
+    }
+}
+
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+fun MovieBoxSettingsDialog(
+    onDismiss: () -> Unit,
+    context: android.content.Context
+) {
+    val prefs = context.getSharedPreferences("streamflex_settings", android.content.Context.MODE_PRIVATE)
+    val defaultDomain = com.streamflex.providers.moviebox.MovieBoxConfig.DEFAULT_DOMAIN
+    val hosts = com.streamflex.providers.moviebox.MovieBoxConfig.HOST_POOL
+
+    var selectedApi by remember { mutableStateOf(prefs.getString("moviebox_api", defaultDomain) ?: defaultDomain) }
+    var showReloadPrompt by remember { mutableStateOf(false) }
+
+    if (showReloadPrompt) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { androidx.compose.material3.Text("Restart Required") },
+            text = { androidx.compose.material3.Text("App needs to restart to apply the new API settings.") },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = {
+                    val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+                    val componentName = intent?.component
+                    val mainIntent = android.content.Intent.makeRestartActivityTask(componentName)
+                    context.startActivity(mainIntent)
+                    Runtime.getRuntime().exit(0)
+                }) {
+                    androidx.compose.material3.Text("Reload")
+                }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = onDismiss) {
+                    androidx.compose.material3.Text("Cancel")
+                }
+            }
+        )
+    } else {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { androidx.compose.material3.Text("MovieBox Settings") },
+            text = {
+                Column {
+                    androidx.compose.material3.Text("Select API Host:", fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 8.dp))
+                    hosts.forEach { host ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { selectedApi = host }
+                                .padding(vertical = 4.dp)
+                        ) {
+                            androidx.compose.material3.RadioButton(
+                                selected = (selectedApi == host),
+                                onClick = { selectedApi = host }
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            androidx.compose.material3.Text(host)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                androidx.compose.material3.IconButton(onClick = {
+                    prefs.edit().putString("moviebox_api", selectedApi).apply()
+                    com.streamflex.providers.moviebox.MovieBoxConfig.savedDomain = selectedApi
+                    showReloadPrompt = true
+                }) {
+                    Icon(Icons.Default.Save, contentDescription = "Save")
+                }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = onDismiss) {
+                    androidx.compose.material3.Text("Cancel")
+                }
+            }
+        )
     }
 }
