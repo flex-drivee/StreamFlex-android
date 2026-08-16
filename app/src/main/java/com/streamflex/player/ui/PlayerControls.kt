@@ -9,7 +9,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
@@ -17,13 +16,14 @@ import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.ClosedCaption
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.streamflex.player.core.PlayerState
@@ -33,11 +33,14 @@ import kotlinx.coroutines.delay
 fun PlayerControls(
     state: PlayerState,
     title: String,
+    subtitle: String?,
+    showEpisodesButton: Boolean = false,
     onPlayPauseToggle: () -> Unit,
     onSeekTo: (Long) -> Unit,
     onSeekForward: () -> Unit,
     onSeekBackward: () -> Unit,
     onSettingsClick: (tab: Int) -> Unit,
+    onEpisodesClick: () -> Unit,
     onBack: () -> Unit
 ) {
     var isVisible by remember { mutableStateOf(true) }
@@ -68,28 +71,24 @@ fun PlayerControls(
                     .fillMaxSize()
                     .background(Color.Black.copy(alpha = 0.5f))
             ) {
-                // Top bar (Back button)
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(24.dp)
-                        .align(Alignment.TopStart),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
-                    }
-                }
+                // Top bar (Close button + Multi-line Title)
+                PlayerTopBar(
+                    title = title,
+                    subtitle = subtitle,
+                    onBack = onBack,
+                    modifier = Modifier.align(Alignment.TopStart)
+                )
 
                 // Bottom bar
                 PlayerBottomBar(
                     state = state,
-                    title = title,
+                    showEpisodesButton = showEpisodesButton,
                     onPlayPauseToggle = onPlayPauseToggle,
                     onSeekTo = onSeekTo,
                     onSeekForward = onSeekForward,
                     onSeekBackward = onSeekBackward,
                     onSettingsClick = onSettingsClick,
+                    onEpisodesClick = onEpisodesClick,
                     modifier = Modifier.align(Alignment.BottomCenter)
                 )
             }
@@ -105,14 +104,48 @@ fun PlayerControls(
 }
 
 @Composable
+private fun PlayerTopBar(title: String, subtitle: String?, onBack: () -> Unit, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(24.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(onClick = onBack) {
+            Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.White, modifier = Modifier.size(32.dp))
+        }
+        Spacer(modifier = Modifier.width(16.dp))
+        Column {
+            Text(
+                text = title,
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1
+            )
+            if (!subtitle.isNullOrBlank()) {
+                Text(
+                    text = subtitle,
+                    color = Color.LightGray,
+                    fontSize = 14.sp,
+                    maxLines = 1,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun PlayerBottomBar(
     state: PlayerState,
-    title: String,
+    showEpisodesButton: Boolean,
     onPlayPauseToggle: () -> Unit,
     onSeekTo: (Long) -> Unit,
     onSeekForward: () -> Unit,
     onSeekBackward: () -> Unit,
     onSettingsClick: (Int) -> Unit,
+    onEpisodesClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -120,96 +153,68 @@ private fun PlayerBottomBar(
             .fillMaxWidth()
             .padding(horizontal = 24.dp, vertical = 16.dp)
     ) {
-        // Timeline Row
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(24.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            val positionFraction = if (state.durationMs > 0) state.positionMs.toFloat() / state.durationMs else 0f
-            val bufferedFraction = if (state.durationMs > 0) state.bufferedPositionMs.toFloat() / state.durationMs else 0f
-            
-            LinearProgressIndicator(
-                progress = { bufferedFraction },
-                color = Color.LightGray.copy(alpha = 0.5f),
-                trackColor = Color.DarkGray.copy(alpha = 0.5f),
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)
-            )
-            
-            Slider(
-                value = positionFraction,
-                onValueChange = { onSeekTo((it * state.durationMs).toLong()) },
-                colors = SliderDefaults.colors(
-                    thumbColor = Color.Red,
-                    activeTrackColor = Color.Red,
-                    inactiveTrackColor = Color.Transparent
-                ),
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
+        // Custom Timeline Progress Bar
+        PlayerProgressBar(
+            positionMs = state.positionMs,
+            durationMs = state.durationMs,
+            bufferedPositionMs = state.bufferedPositionMs,
+            onSeekTo = onSeekTo,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)
+        )
         
         // Controls Row
         Row(
-            modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+            modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Left Side: Play, -10, +10, Time
+            // Left Side: -10, Play, +10, Time
             Row(verticalAlignment = Alignment.CenterVertically) {
-                if (!state.isBuffering) {
-                    IconButton(onClick = onPlayPauseToggle) {
-                        val icon = if (state.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow
-                        Icon(icon, contentDescription = "Play/Pause", tint = Color.White)
-                    }
-                } else {
-                    Spacer(modifier = Modifier.size(48.dp))
-                }
-                
                 IconButton(onClick = onSeekBackward) {
                     Box(contentAlignment = Alignment.Center) {
-                        Icon(Icons.Default.Replay, contentDescription = "Rewind", tint = Color.White)
-                        Text("10", color = Color.White, fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                        Icon(Icons.Default.Replay, contentDescription = "Rewind", tint = Color.White, modifier = Modifier.size(32.dp))
+                        Text("10", color = Color.White, fontSize = 9.sp, fontWeight = FontWeight.Bold)
                     }
+                }
+                
+                // Play button is centered between Rewind and Forward and is slightly larger
+                IconButton(onClick = onPlayPauseToggle) {
+                    val icon = if (state.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow
+                    Icon(icon, contentDescription = "Play/Pause", tint = Color.White, modifier = Modifier.size(42.dp))
                 }
                 
                 IconButton(onClick = onSeekForward) {
                     Box(contentAlignment = Alignment.Center) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Forward", tint = Color.White)
-                        Text("10", color = Color.White, fontSize = 8.sp, fontWeight = FontWeight.Bold)
+                        Icon(Icons.Default.Refresh, contentDescription = "Forward", tint = Color.White, modifier = Modifier.size(32.dp))
+                        Text("10", color = Color.White, fontSize = 9.sp, fontWeight = FontWeight.Bold)
                     }
                 }
                 
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(16.dp))
                 
                 Text(
                     text = "${formatTime(state.positionMs)} / ${formatTime(state.durationMs)}", 
                     color = Color.White, 
-                    fontSize = 12.sp
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Medium
                 )
             }
             
-            // Center: Title
-            Text(
-                text = title, 
-                color = Color.White, 
-                fontSize = 14.sp, 
-                fontWeight = FontWeight.Bold, 
-                maxLines = 1,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.weight(1f).padding(horizontal = 16.dp)
-            )
-            
-            // Right Side: CC, Settings, Fullscreen
+            // Right Side: Episodes, CC, Settings, Fullscreen
             Row(verticalAlignment = Alignment.CenterVertically) {
+                if (showEpisodesButton) {
+                    IconButton(onClick = onEpisodesClick) {
+                        Icon(Icons.Default.Menu, contentDescription = "Episodes", tint = Color.White, modifier = Modifier.size(28.dp))
+                    }
+                }
                 IconButton(onClick = { onSettingsClick(2) }) { // 2 = Subtitles Tab
-                    Icon(Icons.Default.ClosedCaption, contentDescription = "CC", tint = Color.White)
+                    Icon(Icons.Default.ClosedCaption, contentDescription = "CC", tint = Color.White, modifier = Modifier.size(28.dp))
                 }
                 IconButton(onClick = { onSettingsClick(0) }) { // 0 = Video Quality Tab
-                    Icon(Icons.Default.Settings, contentDescription = "Settings", tint = Color.White)
+                    Icon(Icons.Default.Settings, contentDescription = "Settings", tint = Color.White, modifier = Modifier.size(28.dp))
                 }
                 IconButton(onClick = { /* TODO Fullscreen */ }) {
-                    Icon(Icons.Default.Fullscreen, contentDescription = "Fullscreen", tint = Color.White)
+                    Icon(Icons.Default.Fullscreen, contentDescription = "Fullscreen", tint = Color.White, modifier = Modifier.size(28.dp))
                 }
             }
         }

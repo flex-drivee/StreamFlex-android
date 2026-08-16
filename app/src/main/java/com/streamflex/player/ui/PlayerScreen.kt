@@ -30,6 +30,7 @@ import androidx.media3.ui.PlayerView
 import com.streamflex.domain.models.StreamLink
 import com.streamflex.player.media3.Media3Player
 import com.streamflex.player.core.PlayerState
+import com.streamflex.player.StreamStateHolder
 import com.streamflex.player.quality.QualityOption
 import com.streamflex.player.tracks.AudioTrack
 import com.streamflex.player.tracks.SubtitleTrack
@@ -38,6 +39,7 @@ import com.streamflex.player.tracks.SubtitleTrack
 fun PlayerScreen(
     controller: PlayerController,
     videoTitle: String,
+    videoSubtitle: String?,
     onBack: () -> Unit
 ) {
     val state by controller.state.collectAsState()
@@ -50,6 +52,23 @@ fun PlayerScreen(
 
     var showSettingsDialog by remember { mutableStateOf(false) }
     var initialSettingsTab by remember { mutableStateOf(0) }
+    
+    val episodes by StreamStateHolder.episodes.collectAsState()
+    val currentEpisode by StreamStateHolder.currentEpisode.collectAsState()
+    var showEpisodeDrawer by remember { mutableStateOf(false) }
+    
+    val showNextEpCard by controller.nextEpisodeManager.showNextEpisodeCard.collectAsState()
+    val countdownSeconds by controller.nextEpisodeManager.countdownSeconds.collectAsState()
+
+    var showBuffering by remember { mutableStateOf(false) }
+    LaunchedEffect(state.isBuffering) {
+        if (state.isBuffering) {
+            kotlinx.coroutines.delay(400L) // 400ms debounce
+            showBuffering = true
+        } else {
+            showBuffering = false
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
         AndroidView(
@@ -62,9 +81,18 @@ fun PlayerScreen(
             modifier = Modifier.fillMaxSize()
         )
         
+        if (showBuffering) {
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.Center),
+                color = Color.Red
+            )
+        }
+        
         PlayerControls(
             state = state,
             title = videoTitle,
+            subtitle = videoSubtitle,
+            showEpisodesButton = episodes.isNotEmpty(),
             onPlayPauseToggle = { controller.togglePlayPause() },
             onSeekTo = { controller.seekTo(it) },
             onSeekForward = { controller.seekForward() },
@@ -73,6 +101,7 @@ fun PlayerScreen(
                 initialSettingsTab = tab
                 showSettingsDialog = true 
             },
+            onEpisodesClick = { showEpisodeDrawer = true },
             onBack = onBack
         )
 
@@ -88,6 +117,50 @@ fun PlayerScreen(
                 Text(segment.label, fontWeight = FontWeight.Bold)
             }
         }
+
+        // Next Episode Card overlay
+        if (showNextEpCard) {
+            val nextEp = StreamStateHolder.getNextEpisode()
+            if (nextEp != null) {
+                NextEpisodeCard(
+                    episode = nextEp,
+                    countdown = countdownSeconds,
+                    onPlayNext = {
+                        controller.nextEpisodeManager.cancelCountdown()
+                        StreamStateHolder.onEpisodeSelected?.invoke(nextEp)
+                    },
+                    onCancel = {
+                        controller.nextEpisodeManager.cancelCountdown()
+                    },
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(bottom = 96.dp, end = 24.dp)
+                )
+            }
+        }
+        
+        // Error Overlay
+        if (state.error != null) {
+            PlayerErrorOverlay(
+                error = state.error,
+                hasNextServer = controller.hasNextServer(),
+                onRetry = { controller.retry() },
+                onTryAnotherServer = { controller.tryNextServer() },
+                onBack = onBack
+            )
+        }
+    }
+
+    if (showEpisodeDrawer) {
+        EpisodeDrawer(
+            episodes = episodes,
+            currentEpisode = currentEpisode,
+            onEpisodeClick = { ep ->
+                showEpisodeDrawer = false
+                StreamStateHolder.onEpisodeSelected?.invoke(ep)
+            },
+            onDismiss = { showEpisodeDrawer = false }
+        )
     }
 
     if (showSettingsDialog) {

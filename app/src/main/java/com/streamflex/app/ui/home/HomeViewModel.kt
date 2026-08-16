@@ -18,6 +18,15 @@ data class HomeUiState(
     val isLoading: Boolean = true,
     val popularMovies: List<SearchResult> = emptyList(),
     val popularShows: List<SearchResult> = emptyList(),
+    val koreanDramas: List<SearchResult> = emptyList(),
+    val bollywoodMovies: List<SearchResult> = emptyList(),
+    val indianWebSeries: List<SearchResult> = emptyList(),
+    val netflixOriginals: List<SearchResult> = emptyList(),
+    val primeOriginals: List<SearchResult> = emptyList(),
+    val animeMovies: List<SearchResult> = emptyList(),
+    val animeShows: List<SearchResult> = emptyList(),
+    val topAnimeMovies: List<SearchResult> = emptyList(),
+    val topAnimeShows: List<SearchResult> = emptyList(),
     val errorMessage: String? = null
 )
 
@@ -38,14 +47,31 @@ class HomeViewModel(
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
             try {
-                // Fetch both lists in parallel (optimization)
                 val movies = repository.getPopularMovies()
                 val shows = repository.getPopularShows()
+                val kDramas = repository.getKoreanDramas()
+                val bMovies = repository.getBollywoodMovies()
+                val iSeries = repository.getIndianWebSeries()
+                val netflix = repository.getNetflixOriginals()
+                val prime = repository.getPrimeOriginals()
+                val aMovies = repository.getAnimeMovies()
+                val aShows = repository.getAnimeShows()
+                val topAMovies = repository.getTopAnimeMovies()
+                val topAShows = repository.getTopAnimeShows()
 
                 _uiState.value = HomeUiState(
                     isLoading = false,
                     popularMovies = movies,
-                    popularShows = shows
+                    popularShows = shows,
+                    koreanDramas = kDramas,
+                    bollywoodMovies = bMovies,
+                    indianWebSeries = iSeries,
+                    netflixOriginals = netflix,
+                    primeOriginals = prime,
+                    animeMovies = aMovies,
+                    animeShows = aShows,
+                    topAnimeMovies = topAMovies,
+                    topAnimeShows = topAShows
                 )
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(

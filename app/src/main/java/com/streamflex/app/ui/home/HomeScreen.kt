@@ -41,10 +41,11 @@ import com.streamflex.app.ui.theme.*
 fun HomeScreen(
     viewModel: HomeViewModel,
     providerRepository: ProviderRepository,
-    onNavigateToDetail: (String) -> Unit,
+    onNavigateToDetail: (String, String) -> Unit,
     onSearchClick: () -> Unit = {},
     onSettingsClick: () -> Unit = {},
-    onDownloadsClick: () -> Unit = {}
+    onDownloadsClick: () -> Unit = {},
+    onExploreClick: () -> Unit = {}
 ) {
     val state by viewModel.uiState.collectAsState()
     val scrollState = rememberLazyListState()
@@ -94,8 +95,8 @@ fun HomeScreen(
                             movie        = hero,
                             heroIndex    = heroIndex,
                             heroCount    = featuredItems.size,
-                            onPlayClick  = { onNavigateToDetail(hero.id) },
-                            onInfoClick  = { onNavigateToDetail(hero.id) },
+                            onPlayClick  = { onNavigateToDetail(hero.type.name, hero.id) },
+                            onInfoClick  = { onNavigateToDetail(hero.type.name, hero.id) },
                             onDotClick   = { heroIndex = it }
                         )
                     } else {
@@ -110,7 +111,8 @@ fun HomeScreen(
                 SFSectionRow(
                     title    = "🔥 Trending Now",
                     items    = state.popularMovies,
-                    onItemClick = onNavigateToDetail
+                    onItemClick = onNavigateToDetail,
+                    onSeeAllClick = onExploreClick
                 )
             }
 
@@ -119,7 +121,8 @@ fun HomeScreen(
                 SFSectionRow(
                     title    = "📺 Popular Web Series",
                     items    = state.popularShows,
-                    onItemClick = onNavigateToDetail
+                    onItemClick = onNavigateToDetail,
+                    onSeeAllClick = onExploreClick
                 )
             }
 
@@ -138,7 +141,8 @@ fun HomeScreen(
                 SFSectionRow(
                     title    = "💥 Action & Adventure",
                     items    = state.popularMovies.takeLast(10),
-                    onItemClick = onNavigateToDetail
+                    onItemClick = onNavigateToDetail,
+                    onSeeAllClick = onExploreClick
                 )
             }
 
@@ -147,7 +151,84 @@ fun HomeScreen(
                 SFSectionRow(
                     title    = "⭐ Top Rated",
                     items    = state.popularMovies.shuffled().take(10),
-                    onItemClick = onNavigateToDetail
+                    onItemClick = onNavigateToDetail,
+                    onSeeAllClick = onExploreClick
+                )
+            }
+            
+            // ── ASIAN & OTT CONTENT ───────────────────────────────────────────
+            item {
+                SFSectionRow(
+                    title    = "🇰🇷 Top K-Dramas",
+                    items    = state.koreanDramas,
+                    onItemClick = onNavigateToDetail,
+                    onSeeAllClick = onExploreClick
+                )
+            }
+            item {
+                SFSectionRow(
+                    title    = "💃 Bollywood Blockbusters",
+                    items    = state.bollywoodMovies,
+                    onItemClick = onNavigateToDetail,
+                    onSeeAllClick = onExploreClick
+                )
+            }
+            item {
+                SFSectionRow(
+                    title    = "🇮🇳 Indian Web Series",
+                    items    = state.indianWebSeries,
+                    onItemClick = onNavigateToDetail,
+                    onSeeAllClick = onExploreClick
+                )
+            }
+            item {
+                SFSectionRow(
+                    title    = "🍿 Netflix Originals",
+                    items    = state.netflixOriginals,
+                    onItemClick = onNavigateToDetail,
+                    onSeeAllClick = onExploreClick
+                )
+            }
+            item {
+                SFSectionRow(
+                    title    = "📦 Amazon Prime TV",
+                    items    = state.primeOriginals,
+                    onItemClick = onNavigateToDetail,
+                    onSeeAllClick = onExploreClick
+                )
+            }
+            
+            // ── ANIME CONTENT ────────────────────────────────────────────────
+            item {
+                SFSectionRow(
+                    title    = "🌸 Anime Shows",
+                    items    = state.animeShows,
+                    onItemClick = onNavigateToDetail,
+                    onSeeAllClick = onExploreClick
+                )
+            }
+            item {
+                SFSectionRow(
+                    title    = "🎬 Anime Movies",
+                    items    = state.animeMovies,
+                    onItemClick = onNavigateToDetail,
+                    onSeeAllClick = onExploreClick
+                )
+            }
+            item {
+                SFSectionRow(
+                    title    = "🏆 Top Anime Shows",
+                    items    = state.topAnimeShows,
+                    onItemClick = onNavigateToDetail,
+                    onSeeAllClick = onExploreClick
+                )
+            }
+            item {
+                SFSectionRow(
+                    title    = "🏅 Top Anime Movies",
+                    items    = state.topAnimeMovies,
+                    onItemClick = onNavigateToDetail,
+                    onSeeAllClick = onExploreClick
                 )
             }
 
@@ -549,7 +630,8 @@ fun SFHeroSection(
 fun SFSectionRow(
     title: String,
     items: List<SearchResult>,
-    onItemClick: (String) -> Unit
+    onItemClick: (String, String) -> Unit,
+    onSeeAllClick: () -> Unit = {}
 ) {
     if (items.isEmpty()) return
 
@@ -572,7 +654,7 @@ fun SFSectionRow(
                 text     = "See All",
                 style    = MaterialTheme.typography.labelMedium,
                 color    = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.clickable { }
+                modifier = Modifier.clickable { onSeeAllClick() }.padding(4.dp)
             )
         }
 
@@ -586,7 +668,7 @@ fun SFSectionRow(
             items(items) { item ->
                 SFVideoCard(
                     item    = item,
-                    onClick = { onItemClick(item.id) }
+                    onClick = { onItemClick(item.type.name, item.id) }
                 )
             }
         }
@@ -600,7 +682,7 @@ fun SFSectionRow(
 @Composable
 private fun SFContinueWatchingRow(
     items: List<SearchResult>,
-    onItemClick: (String) -> Unit
+    onItemClick: (String, String) -> Unit
 ) {
     if (items.isEmpty()) return
 
@@ -618,7 +700,7 @@ private fun SFContinueWatchingRow(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(items) { item ->
-                SFContinueCard(item = item, onClick = { onItemClick(item.id) })
+                SFContinueCard(item = item, onClick = { onItemClick(item.type.name, item.id) })
             }
         }
     }

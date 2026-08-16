@@ -104,9 +104,21 @@ class PlayerActivity : ComponentActivity() {
                 combined
             }
 
+            val currentEpisode by StreamStateHolder.currentEpisode.collectAsState()
+            
+            val baseTitle = intent.getStringExtra("VIDEO_TITLE") ?: "Unknown Media"
+            val baseSubtitle = intent.getStringExtra("VIDEO_SUBTITLE")
+            
+            val videoSubtitle = currentEpisode?.let { ep ->
+                val s = ep.seasonNumber.toString().padStart(2, '0')
+                val e = ep.episodeNumber.toString().padStart(2, '0')
+                "S$s E$e - ${ep.title}"
+            } ?: baseSubtitle
+            
             PlayerScreen(
                 controller = controller,
-                videoTitle = videoTitle,
+                videoTitle = baseTitle,
+                videoSubtitle = videoSubtitle,
                 onBack = { finish() }
             )
         }

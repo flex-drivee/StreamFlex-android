@@ -4,23 +4,25 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.streamflex.app.ui.home.SFVideoCard
+import com.streamflex.app.ui.theme.SFProgressBg
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExploreScreen(
-    onItemClick: (String) -> Unit
+    viewModel: ExploreViewModel,
+    onItemClick: (String, String) -> Unit
 ) {
     var selectedCategory by remember { mutableIntStateOf(0) }
     val categories = listOf("Movies", "Shows", "Anime")
+    val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
         topBar = {
@@ -48,7 +50,10 @@ fun ExploreScreen(
                 categories.forEachIndexed { index, title ->
                     Tab(
                         selected = selectedCategory == index,
-                        onClick = { selectedCategory = index },
+                        onClick = { 
+                            selectedCategory = index
+                            viewModel.loadCategory(index)
+                        },
                         text = {
                             Text(
                                 title, 
@@ -62,27 +67,27 @@ fun ExploreScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Grid Content (Mock)
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(3),
-                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 110.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.fillMaxSize()
-            ) {
-                items(21) { index ->
-                    Box(
-                        modifier = Modifier
-                            .aspectRatio(2f / 3f)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(MaterialTheme.colorScheme.surfaceVariant),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "${categories[selectedCategory]}\n${index + 1}",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontSize = 12.sp,
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            if (uiState.isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                }
+            } else if (uiState.errorMessage != null) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(text = uiState.errorMessage!!, color = MaterialTheme.colorScheme.error)
+                }
+            } else {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(3),
+                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 110.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(uiState.items) { item ->
+                        SFVideoCard(
+                            item = item,
+                            onClick = { onItemClick(item.type.name, item.id) },
+                            modifier = Modifier.fillMaxWidth().aspectRatio(2f/3f)
                         )
                     }
                 }

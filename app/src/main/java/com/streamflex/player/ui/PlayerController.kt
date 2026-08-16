@@ -2,10 +2,12 @@ package com.streamflex.player.ui
 
 import android.util.Log
 import com.streamflex.domain.models.StreamLink
+import com.streamflex.player.StreamStateHolder
 import com.streamflex.player.core.PlayerEvent
 import com.streamflex.player.core.PlayerState
 import com.streamflex.player.core.StreamPlayer
 import com.streamflex.player.episodes.IntroSegment
+import com.streamflex.player.episodes.NextEpisodeManager
 import com.streamflex.player.resume.PlaybackProgressManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +22,8 @@ class PlayerController(
     private val scope: CoroutineScope
 ) {
     val state: StateFlow<PlayerState> = player.state
+    
+    val nextEpisodeManager = NextEpisodeManager(scope)
     
     private val _allStreams = MutableStateFlow<List<StreamLink>>(emptyList())
     val allStreams: StateFlow<List<StreamLink>> = _allStreams.asStateFlow()
@@ -37,7 +41,14 @@ class PlayerController(
     init {
         scope.launch {
             player.events.collect { event ->
-                if (event is PlayerEvent.Error) {
+                if (event is PlayerEvent.PlaybackEnded) {
+                    val nextEp = StreamStateHolder.getNextEpisode()
+                    if (nextEp != null) {
+                        nextEpisodeManager.triggerNextEpisodeCountdown {
+                            StreamStateHolder.onEpisodeSelected?.invoke(nextEp)
+                        }
+                    }
+                } else if (event is PlayerEvent.Error) {
                     Log.e("PlayerController", "Stream failed, trying fallback.")
                     val nextIndex = _currentStreamIndex.value + 1
                     if (nextIndex < _allStreams.value.size) {
@@ -117,6 +128,22 @@ class PlayerController(
     fun seekBackward() = player.seekBackward()
     fun togglePlayPause() {
         if (state.value.isPlaying) pause() else play()
+    }
+    
+    fun retry() {
+        loadCurrentStream()
+    }
+    
+    fun tryNextServer() {
+        val nextIndex = _currentStreamIndex.value + 1
+        if (nextIndex < _allStreams.value.size) {
+            _currentStreamIndex.value = nextIndex
+            loadCurrentStream()
+        }
+    }
+    
+    fun hasNextServer(): Boolean {
+        return _currentStreamIndex.value + 1 < _allStreams.value.size
     }
     
     fun release() {
