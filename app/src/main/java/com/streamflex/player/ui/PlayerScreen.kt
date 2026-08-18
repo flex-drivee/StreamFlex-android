@@ -138,17 +138,16 @@ fun PlayerScreen(
         }
     }
 
-    if (showEpisodeDrawer) {
-        EpisodeDrawer(
-            episodes = episodes,
-            currentEpisode = currentEpisode,
-            onEpisodeClick = { ep ->
-                showEpisodeDrawer = false
-                controller.viewModel.playEpisode(ep)
-            },
-            onDismiss = { showEpisodeDrawer = false }
-        )
-    }
+    EpisodeDrawer(
+        isVisible = showEpisodeDrawer,
+        episodes = episodes,
+        currentEpisode = currentEpisode,
+        onEpisodeClick = { ep ->
+            showEpisodeDrawer = false
+            controller.viewModel.playEpisode(ep)
+        },
+        onDismiss = { showEpisodeDrawer = false }
+    )
 
     if (showSettingsDialog) {
         SettingsDialog(

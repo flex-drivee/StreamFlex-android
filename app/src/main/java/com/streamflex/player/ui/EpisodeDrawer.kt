@@ -1,87 +1,138 @@
 package com.streamflex.player.ui
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.streamflex.player.episodes.PlayerEpisode
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EpisodeDrawer(
+    isVisible: Boolean,
     episodes: List<PlayerEpisode>,
     currentEpisode: PlayerEpisode?,
     onEpisodeClick: (PlayerEpisode) -> Unit,
     onDismiss: () -> Unit
 ) {
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        containerColor = Color(0xFF1E1E1E),
-        contentColor = Color.White
+    AnimatedVisibility(
+        visible = isVisible,
+        enter = fadeIn(tween(300)) + slideInHorizontally(
+            initialOffsetX = { -it }, 
+            animationSpec = tween(300)
+        ),
+        exit = slideOutHorizontally(
+            targetOffsetX = { -it }, 
+            animationSpec = tween(300)
+        ) + fadeOut(tween(300)),
+        modifier = Modifier.fillMaxSize()
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 24.dp)
-        ) {
-            Text(
-                text = "Episodes",
-                color = Color.White,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)
+        Box(modifier = Modifier.fillMaxSize()) {
+            // Dismiss background area
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clickable(
+                        interactionSource = androidx.compose.foundation.interaction.MutableInteractionSource(),
+                        indication = null,
+                        onClick = onDismiss
+                    )
+                    .background(Color.Black.copy(alpha = 0.6f))
             )
             
-            Divider(color = Color.DarkGray)
-
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth().heightIn(max = 400.dp)
+            // Drawer Panel on the Left
+            Column(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(360.dp)
+                    .background(Color(0xFF161616))
             ) {
-                items(episodes) { episode ->
-                    val isCurrent = episode.id == currentEpisode?.id
-                    
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { 
-                                if (!isCurrent) onEpisodeClick(episode) 
+                Text(
+                    text = "Episodes",
+                    color = Color.White,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 24.dp)
+                )
+                
+                HorizontalDivider(color = Color.DarkGray.copy(alpha = 0.5f))
+
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(episodes) { episode ->
+                        val isCurrent = episode.id == currentEpisode?.id
+                        
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { 
+                                    if (!isCurrent) onEpisodeClick(episode) 
+                                }
+                                .background(if (isCurrent) Color.White.copy(alpha = 0.1f) else Color.Transparent)
+                                .padding(horizontal = 24.dp, vertical = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Bigger Thumbnail
+                            Box(
+                                modifier = Modifier
+                                    .size(width = 130.dp, height = 74.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(Color.Black.copy(alpha = 0.4f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (!episode.stillPath.isNullOrEmpty()) {
+                                    coil.compose.AsyncImage(
+                                        model = episode.stillPath,
+                                        contentDescription = episode.title,
+                                        contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                } else {
+                                    Text(
+                                        text = "Ep ${episode.episodeNumber}",
+                                        color = Color.Gray,
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                }
+                                
+                                if (isCurrent) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .background(Color.Black.copy(alpha = 0.6f)), 
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text("Playing", color = Color.Red, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                                    }
+                                }
                             }
-                            .background(if (isCurrent) Color.DarkGray.copy(alpha = 0.5f) else Color.Transparent)
-                            .padding(horizontal = 24.dp, vertical = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "${episode.episodeNumber}.",
-                            color = if (isCurrent) Color.White else Color.Gray,
-                            fontSize = 16.sp,
-                            fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Normal,
-                            modifier = Modifier.width(32.dp)
-                        )
-                        
-                        Text(
-                            text = episode.title,
-                            color = if (isCurrent) Color.White else Color.LightGray,
-                            fontSize = 16.sp,
-                            fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Normal,
-                            modifier = Modifier.weight(1f)
-                        )
-                        
-                        if (isCurrent) {
-                            Text(
-                                text = "Playing",
-                                color = Color.Red,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold
-                            )
+                            
+                            Spacer(modifier = Modifier.width(16.dp))
+                            
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "${episode.episodeNumber}. ${episode.title}",
+                                    color = if (isCurrent) Color.White else Color.LightGray,
+                                    fontSize = 16.sp,
+                                    fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Medium,
+                                    maxLines = 2,
+                                    lineHeight = 22.sp
+                                )
+                            }
                         }
                     }
                 }

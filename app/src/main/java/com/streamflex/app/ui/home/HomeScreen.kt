@@ -71,6 +71,10 @@ fun HomeScreen(
     val tabs = listOf("Home", "Movies", "Series", "Anime")
     var selectedTab by remember { mutableIntStateOf(0) }
 
+    LaunchedEffect(Unit) {
+        viewModel.reloadHistory()
+    }
+
     Box(modifier = Modifier
         .fillMaxSize()
         .background(MaterialTheme.colorScheme.background)
@@ -126,11 +130,11 @@ fun HomeScreen(
                 )
             }
 
-            // ── CONTENT ROW — Continue Watching (mock, real in Phase 3) ──────
-            if (state.popularMovies.size > 5) {
+            // ── CONTENT ROW — Continue Watching ──────
+            if (state.continueWatching.isNotEmpty()) {
                 item {
                     SFContinueWatchingRow(
-                        items    = state.popularMovies.drop(5).take(6),
+                        items    = state.continueWatching,
                         onItemClick = onNavigateToDetail
                     )
                 }
@@ -681,7 +685,7 @@ fun SFSectionRow(
 
 @Composable
 private fun SFContinueWatchingRow(
-    items: List<SearchResult>,
+    items: List<com.streamflex.player.resume.HistoryItem>,
     onItemClick: (String, String) -> Unit
 ) {
     if (items.isEmpty()) return
@@ -700,7 +704,7 @@ private fun SFContinueWatchingRow(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(items) { item ->
-                SFContinueCard(item = item, onClick = { onItemClick(item.type.name, item.id) })
+                SFContinueCard(item = item, onClick = { onItemClick(item.type, item.id) })
             }
         }
     }
@@ -781,9 +785,15 @@ fun SFVideoCard(
 
 @Composable
 private fun SFContinueCard(
-    item: SearchResult,
+    item: com.streamflex.player.resume.HistoryItem,
     onClick: () -> Unit
 ) {
+    val progress = if (item.durationMs > 0) {
+        (item.positionMs.toFloat() / item.durationMs.toFloat()).coerceIn(0f, 1f)
+    } else {
+        0f
+    }
+
     Box(
         modifier = Modifier
             .width(170.dp)
@@ -793,7 +803,7 @@ private fun SFContinueCard(
             .clickable { onClick() }
     ) {
         AsyncImage(
-            model              = item.poster,
+            model              = item.posterPath,
             contentDescription = item.title,
             contentScale       = ContentScale.Crop,
             modifier           = Modifier.fillMaxSize()
@@ -823,7 +833,7 @@ private fun SFContinueCard(
             )
         }
 
-        // Progress bar at bottom (mock 40%)
+        // Real Progress bar at bottom
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -833,7 +843,7 @@ private fun SFContinueCard(
         ) {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(0.4f)
+                    .fillMaxWidth(fraction = progress)
                     .fillMaxHeight()
                     .background(MaterialTheme.colorScheme.primary)
             )

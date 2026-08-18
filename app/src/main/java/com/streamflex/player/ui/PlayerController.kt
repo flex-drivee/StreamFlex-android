@@ -21,7 +21,10 @@ class PlayerController(
     private val progressManager: PlaybackProgressManager,
     private val mediaId: String,
     private val scope: CoroutineScope,
-    val viewModel: PlayerViewModel
+    val viewModel: PlayerViewModel,
+    private val title: String = "",
+    private val type: String = "MOVIE",
+    private val posterPath: String? = null
 ) {
     val state: StateFlow<PlayerState> = player.state
     
@@ -93,7 +96,7 @@ class PlayerController(
 
                 // Periodically save progress every ~10 seconds of playback
                 if (st.isPlaying && (st.positionMs - lastSavedPosition > 10000L || st.positionMs < lastSavedPosition)) {
-                    progressManager.saveProgress(mediaId, st.positionMs, st.durationMs)
+                    progressManager.saveProgress(mediaId, title, type, posterPath, st.positionMs, st.durationMs)
                     lastSavedPosition = st.positionMs
                 }
             }
@@ -122,7 +125,7 @@ class PlayerController(
     fun selectStream(index: Int) {
         if (index in _allStreams.value.indices && index != _currentStreamIndex.value) {
             // Save progress of current stream before switching
-            progressManager.saveProgress(mediaId, state.value.positionMs, state.value.durationMs)
+            progressManager.saveProgress(mediaId, title, type, posterPath, state.value.positionMs, state.value.durationMs)
             _currentStreamIndex.value = index
             loadCurrentStream()
         }
@@ -173,7 +176,7 @@ class PlayerController(
     
     fun release() {
         // Save one final time
-        progressManager.saveProgress(mediaId, state.value.positionMs, state.value.durationMs)
+        progressManager.saveProgress(mediaId, title, type, posterPath, state.value.positionMs, state.value.durationMs)
         player.release()
     }
 }

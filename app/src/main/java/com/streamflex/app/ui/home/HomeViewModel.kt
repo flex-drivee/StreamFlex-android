@@ -16,6 +16,7 @@ import com.streamflex.app.data.providers.hdhub4u.Hdhub4uProvider
 
 data class HomeUiState(
     val isLoading: Boolean = true,
+    val continueWatching: List<com.streamflex.player.resume.HistoryItem> = emptyList(),
     val popularMovies: List<SearchResult> = emptyList(),
     val popularShows: List<SearchResult> = emptyList(),
     val koreanDramas: List<SearchResult> = emptyList(),
@@ -31,7 +32,8 @@ data class HomeUiState(
 )
 
 class HomeViewModel(
-    private val repository: ContentRepository
+    private val repository: ContentRepository,
+    private val progressManager: com.streamflex.player.resume.PlaybackProgressManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -41,12 +43,15 @@ class HomeViewModel(
         loadHomeData()
     }
 
-
+    fun reloadHistory() {
+        _uiState.value = _uiState.value.copy(continueWatching = progressManager.getHistory())
+    }
 
     fun loadHomeData() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
             try {
+                val history = progressManager.getHistory()
                 val movies = repository.getPopularMovies()
                 val shows = repository.getPopularShows()
                 val kDramas = repository.getKoreanDramas()
@@ -61,6 +66,7 @@ class HomeViewModel(
 
                 _uiState.value = HomeUiState(
                     isLoading = false,
+                    continueWatching = history,
                     popularMovies = movies,
                     popularShows = shows,
                     koreanDramas = kDramas,
@@ -84,11 +90,14 @@ class HomeViewModel(
 }
 
 // Factory to pass the Repository to the ViewModel
-class HomeViewModelFactory(private val repository: ContentRepository) : ViewModelProvider.Factory {
+class HomeViewModelFactory(
+    private val repository: ContentRepository,
+    private val progressManager: com.streamflex.player.resume.PlaybackProgressManager
+) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(HomeViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return HomeViewModel(repository) as T
+            return HomeViewModel(repository, progressManager) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

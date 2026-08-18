@@ -42,11 +42,13 @@ class PlayerActivity : ComponentActivity() {
         val videoTitle = intent.getStringExtra("VIDEO_TITLE") ?: "Unknown Media"
         val videoYear = intent.getIntExtra("VIDEO_YEAR", 0)
         val isShow = intent.getBooleanExtra("IS_SHOW", false)
+        val posterPath = intent.getStringExtra("POSTER_PATH")
         
         val epIds = intent.getStringArrayListExtra("EPISODE_IDS") ?: arrayListOf()
         val epTitles = intent.getStringArrayListExtra("EPISODE_TITLES") ?: arrayListOf()
         val epSeasons = intent.getIntegerArrayListExtra("EPISODE_SEASONS") ?: arrayListOf()
         val epNumbers = intent.getIntegerArrayListExtra("EPISODE_NUMBERS") ?: arrayListOf()
+        val epStills = intent.getStringArrayListExtra("EPISODE_STILLS") ?: arrayListOf()
         
         val currentEpisodeId = intent.getStringExtra("CURRENT_EPISODE_ID")
         
@@ -55,7 +57,8 @@ class PlayerActivity : ComponentActivity() {
                 id = id,
                 title = epTitles.getOrNull(index) ?: "Episode ${epNumbers.getOrNull(index)}",
                 seasonNumber = epSeasons.getOrNull(index) ?: 1,
-                episodeNumber = epNumbers.getOrNull(index) ?: (index + 1)
+                episodeNumber = epNumbers.getOrNull(index) ?: (index + 1),
+                stillPath = epStills.getOrNull(index)
             )
         }
         
@@ -81,7 +84,16 @@ class PlayerActivity : ComponentActivity() {
             val controller = remember { 
                 val player = Media3PlayerFactory.create(context)
                 val progressManager = PlaybackProgressManager(context)
-                PlayerController(player, progressManager, mediaId, scope, viewModel).also { playerController = it }
+                PlayerController(
+                    player = player, 
+                    progressManager = progressManager, 
+                    mediaId = mediaId, 
+                    scope = scope, 
+                    viewModel = viewModel,
+                    title = videoTitle,
+                    type = if (isShow) "TV" else "MOVIE",
+                    posterPath = posterPath
+                ).also { playerController = it }
             }
 
             // Sync streams to controller

@@ -67,7 +67,8 @@ class ContentRepositoryImpl(
                 episodeNumber = tmdbEp.episodeNumber,
                 overview = tmdbEp.overview,
                 airDate = tmdbEp.airDate,
-                runtime = tmdbEp.runtime
+                runtime = tmdbEp.runtime,
+                stillPath = tmdbEp.stillPath?.let { "https://image.tmdb.org/t/p/w500$it" }
             )
         } ?: emptyList()
     }

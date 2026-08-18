@@ -149,10 +149,16 @@ class Media3Player(
                     for (i in 0 until group.length) {
                         val format = group.getTrackFormat(i)
                         if (group.isTrackSupported(i)) {
+                            val lang = format.language?.takeIf { it != "und" }
+                            val readableName = lang?.let { java.util.Locale(it).displayLanguage }
+                            val cleanLabel = format.label?.takeIf { !it.contains(".tv", true) && !it.contains(".com", true) && !it.contains("hdhub4u", true) }
+                            
+                            val finalLabel = readableName ?: cleanLabel ?: lang?.uppercase() ?: "Audio ${i + 1}"
+                            
                             val option = AudioTrack(
                                 id = "${group.mediaTrackGroup.hashCode()}_$i",
                                 language = format.language,
-                                label = format.label ?: format.language?.uppercase() ?: "Audio ${i + 1}"
+                                label = finalLabel
                             )
                             audios.add(option)
                             if (group.isTrackSelected(i)) currentAudio = option
@@ -163,10 +169,16 @@ class Media3Player(
                     for (i in 0 until group.length) {
                         val format = group.getTrackFormat(i)
                         if (group.isTrackSupported(i)) {
+                            val lang = format.language?.takeIf { it != "und" }
+                            val readableName = lang?.let { java.util.Locale(it).displayLanguage }
+                            val cleanLabel = format.label?.takeIf { !it.contains(".tv", true) && !it.contains(".com", true) && !it.contains("hdhub4u", true) }
+                            
+                            val finalLabel = readableName ?: cleanLabel ?: lang?.uppercase() ?: "Subtitle ${i + 1}"
+                            
                             val option = SubtitleTrack(
                                 id = "${group.mediaTrackGroup.hashCode()}_$i",
                                 language = format.language,
-                                label = format.label ?: format.language?.uppercase() ?: "Subtitle ${i + 1}",
+                                label = finalLabel,
                                 mimeType = format.sampleMimeType,
                                 isEmbedded = true
                             )

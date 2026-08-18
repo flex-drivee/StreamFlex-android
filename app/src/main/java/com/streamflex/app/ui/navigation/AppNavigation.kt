@@ -76,7 +76,8 @@ fun AppNavigation(
         ) {
             // --- HOME ---
             composable(route = Screen.Home.route) {
-                val viewModelFactory = HomeViewModelFactory(repository)
+                val progressManager = remember { com.streamflex.player.resume.PlaybackProgressManager(context) }
+                val viewModelFactory = HomeViewModelFactory(repository, progressManager)
                 val viewModel: HomeViewModel = viewModel(factory = viewModelFactory)
 
                 HomeScreen(
@@ -163,6 +164,7 @@ fun AppNavigation(
                             putExtra("VIDEO_TITLE", uiState.movie?.title ?: "Unknown Media")
                             putExtra("VIDEO_YEAR", uiState.movie?.year ?: 0)
                             putExtra("IS_SHOW", false)
+                            putExtra("POSTER_PATH", uiState.movie?.poster)
                         }
                         context.startActivity(intent)
                     },
@@ -172,16 +174,19 @@ fun AppNavigation(
                             val epTitles = ArrayList(uiState.episodes.map { it.title })
                             val epSeasons = ArrayList(uiState.episodes.map { uiState.selectedSeason })
                             val epNumbers = ArrayList(uiState.episodes.map { it.episodeNumber })
+                            val epStills = ArrayList(uiState.episodes.map { it.stillPath ?: "" })
                             
                             putStringArrayListExtra("EPISODE_IDS", epIds)
                             putStringArrayListExtra("EPISODE_TITLES", epTitles)
                             putIntegerArrayListExtra("EPISODE_SEASONS", epSeasons)
                             putIntegerArrayListExtra("EPISODE_NUMBERS", epNumbers)
+                            putStringArrayListExtra("EPISODE_STILLS", epStills)
                             
                             putExtra("MEDIA_ID", movieId)
                             putExtra("VIDEO_TITLE", uiState.show?.title ?: "Unknown Media")
                             putExtra("VIDEO_YEAR", uiState.show?.year ?: 0)
                             putExtra("IS_SHOW", true)
+                            putExtra("POSTER_PATH", uiState.show?.poster)
                             
                             putExtra("CURRENT_EPISODE_ID", episode.id)
                         }

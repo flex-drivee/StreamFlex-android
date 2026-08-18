@@ -485,13 +485,22 @@ fun SFEpisodeItem(episode: Episode, onClick: () -> Unit) {
                 .background(MaterialTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.Center
         ) {
-            // Placeholder — no stillPath in Episode model yet
-            Icon(
-                Icons.Default.PlayArrow,
-                contentDescription = null,
-                tint     = SFTextDisabled,
-                modifier = Modifier.size(28.dp)
-            )
+            if (episode.stillPath != null) {
+                AsyncImage(
+                    model = episode.stillPath,
+                    contentDescription = episode.title,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                Icon(
+                    Icons.Default.PlayArrow,
+                    contentDescription = null,
+                    tint = SFTextDisabled,
+                    modifier = Modifier.size(28.dp)
+                )
+            }
+            
             // Runtime badge
             episode.runtime?.let { rt ->
                 if (rt > 0) {

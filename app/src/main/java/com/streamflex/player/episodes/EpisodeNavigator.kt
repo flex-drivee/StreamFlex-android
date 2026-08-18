@@ -8,7 +8,8 @@ data class PlayerEpisode(
     val id: String,
     val title: String,
     val seasonNumber: Int,
-    val episodeNumber: Int
+    val episodeNumber: Int,
+    val stillPath: String? = null
 )
 
 class EpisodeNavigator {
