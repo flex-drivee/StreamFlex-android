@@ -38,7 +38,7 @@ import com.streamflex.app.ui.theme.*
 fun MovieDetailScreen(
     viewModel: MovieDetailViewModel,
     onBackClick: () -> Unit,
-    onMoviePlayClick: (List<com.streamflex.domain.models.StreamLink>) -> Unit,
+    onMoviePlayClick: () -> Unit,
     onEpisodePlayClick: (Episode) -> Unit
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -98,32 +98,17 @@ fun MovieDetailScreen(
                         // PLAY button
                         Button(
                             onClick = {
-                                isStreamLoading = true
-                                viewModel.fetchMovieStreams { links ->
-                                    isStreamLoading = false
-                                    if (links.isNotEmpty()) {
-                                        onMoviePlayClick(links)
-                                    }
-                                }
+                                onMoviePlayClick()
                             },
                             modifier = Modifier.fillMaxWidth().height(50.dp),
                             shape    = RoundedCornerShape(6.dp),
-                            colors   = ButtonDefaults.buttonColors(containerColor = Color.White),
-                            enabled  = !isStreamLoading
+                            colors   = ButtonDefaults.buttonColors(containerColor = Color.White)
                         ) {
-                            if (isStreamLoading) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(20.dp),
-                                    color    = Color.Black,
-                                    strokeWidth = 2.dp
-                                )
-                            } else {
-                                Icon(Icons.Default.PlayArrow, null,
-                                    tint = Color.Black, modifier = Modifier.size(24.dp))
-                            }
+                            Icon(Icons.Default.PlayArrow, null,
+                                tint = Color.Black, modifier = Modifier.size(24.dp))
                             Spacer(Modifier.width(8.dp))
                             Text(
-                                if (isStreamLoading) "Finding streams…" else "Play",
+                                "Play",
                                 color      = Color.Black,
                                 fontWeight = FontWeight.Bold,
                                 style      = MaterialTheme.typography.titleMedium

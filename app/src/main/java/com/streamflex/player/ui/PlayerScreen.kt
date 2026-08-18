@@ -24,13 +24,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
-import androidx.media3.ui.PlayerView
 import com.streamflex.domain.models.StreamLink
-import com.streamflex.player.media3.Media3Player
 import com.streamflex.player.core.PlayerState
-import com.streamflex.player.StreamStateHolder
 import com.streamflex.player.quality.QualityOption
 import com.streamflex.player.tracks.AudioTrack
 import com.streamflex.player.tracks.SubtitleTrack
@@ -48,13 +44,12 @@ fun PlayerScreen(
     val activeSkipSegment by controller.activeSkipSegment.collectAsState()
     val context = LocalContext.current
     
-    val exoPlayer = remember { (controller.player as Media3Player).exoPlayer }
-
     var showSettingsDialog by remember { mutableStateOf(false) }
     var initialSettingsTab by remember { mutableStateOf(0) }
     
-    val episodes by StreamStateHolder.episodes.collectAsState()
-    val currentEpisode by StreamStateHolder.currentEpisode.collectAsState()
+    val uiState by controller.viewModel.uiState.collectAsState()
+    val episodes = uiState.session?.episodes ?: emptyList()
+    val currentEpisode = uiState.session?.currentEpisode
     var showEpisodeDrawer by remember { mutableStateOf(false) }
     
     val showNextEpCard by controller.nextEpisodeManager.showNextEpisodeCard.collectAsState()
@@ -71,15 +66,7 @@ fun PlayerScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
-        AndroidView(
-            factory = { ctx ->
-                PlayerView(ctx).apply {
-                    player = exoPlayer
-                    useController = false
-                }
-            },
-            modifier = Modifier.fillMaxSize()
-        )
+        controller.player.Surface(modifier = Modifier.fillMaxSize())
         
         if (showBuffering) {
             CircularProgressIndicator(
@@ -120,14 +107,14 @@ fun PlayerScreen(
 
         // Next Episode Card overlay
         if (showNextEpCard) {
-            val nextEp = StreamStateHolder.getNextEpisode()
+            val nextEp = controller.viewModel.getNextEpisode()
             if (nextEp != null) {
                 NextEpisodeCard(
                     episode = nextEp,
                     countdown = countdownSeconds,
                     onPlayNext = {
                         controller.nextEpisodeManager.cancelCountdown()
-                        StreamStateHolder.onEpisodeSelected?.invoke(nextEp)
+                        controller.viewModel.playEpisode(nextEp)
                     },
                     onCancel = {
                         controller.nextEpisodeManager.cancelCountdown()
@@ -157,7 +144,7 @@ fun PlayerScreen(
             currentEpisode = currentEpisode,
             onEpisodeClick = { ep ->
                 showEpisodeDrawer = false
-                StreamStateHolder.onEpisodeSelected?.invoke(ep)
+                controller.viewModel.playEpisode(ep)
             },
             onDismiss = { showEpisodeDrawer = false }
         )

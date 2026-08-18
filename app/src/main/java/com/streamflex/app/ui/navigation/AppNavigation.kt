@@ -157,49 +157,35 @@ fun AppNavigation(
                 MovieDetailScreen(
                     viewModel = viewModel,
                     onBackClick = { navController.popBackStack() },
-                    onMoviePlayClick = { links ->
-                        com.streamflex.player.StreamStateHolder.streams.value = links
+                    onMoviePlayClick = {
                         val intent = Intent(context, com.streamflex.player.PlayerActivity::class.java).apply {
-                            val urls = ArrayList(links.map { it.url })
-                            val referers = ArrayList(links.map { it.headers["Referer"] ?: it.referer ?: "" })
-                            val userAgents = ArrayList(links.map { it.headers["User-Agent"] ?: "" })
-                            putStringArrayListExtra("VIDEO_URLS", urls)
-                            putStringArrayListExtra("VIDEO_REFERERS", referers)
-                            putStringArrayListExtra("VIDEO_USER_AGENTS", userAgents)
-                            putExtra("VIDEO_TITLE", uiState.movie?.title ?: uiState.show?.title ?: "Unknown Media")
+                            putExtra("MEDIA_ID", movieId)
+                            putExtra("VIDEO_TITLE", uiState.movie?.title ?: "Unknown Media")
+                            putExtra("VIDEO_YEAR", uiState.movie?.year ?: 0)
+                            putExtra("IS_SHOW", false)
                         }
                         context.startActivity(intent)
                     },
                     onEpisodePlayClick = { episode ->
-                        val playerEps = uiState.episodes.map { 
-                            com.streamflex.player.episodes.PlayerEpisode(it.id, it.title, uiState.selectedSeason, it.episodeNumber) 
+                        val intent = Intent(context, com.streamflex.player.PlayerActivity::class.java).apply {
+                            val epIds = ArrayList(uiState.episodes.map { it.id })
+                            val epTitles = ArrayList(uiState.episodes.map { it.title })
+                            val epSeasons = ArrayList(uiState.episodes.map { uiState.selectedSeason })
+                            val epNumbers = ArrayList(uiState.episodes.map { it.episodeNumber })
+                            
+                            putStringArrayListExtra("EPISODE_IDS", epIds)
+                            putStringArrayListExtra("EPISODE_TITLES", epTitles)
+                            putIntegerArrayListExtra("EPISODE_SEASONS", epSeasons)
+                            putIntegerArrayListExtra("EPISODE_NUMBERS", epNumbers)
+                            
+                            putExtra("MEDIA_ID", movieId)
+                            putExtra("VIDEO_TITLE", uiState.show?.title ?: "Unknown Media")
+                            putExtra("VIDEO_YEAR", uiState.show?.year ?: 0)
+                            putExtra("IS_SHOW", true)
+                            
+                            putExtra("CURRENT_EPISODE_ID", episode.id)
                         }
-                        com.streamflex.player.StreamStateHolder.episodes.value = playerEps
-                        com.streamflex.player.StreamStateHolder.currentEpisode.value = playerEps.find { it.id == episode.id }
-                        
-                        com.streamflex.player.StreamStateHolder.onEpisodeSelected = { newEp ->
-                            val targetEp = uiState.episodes.find { it.id == newEp.id }
-                            if (targetEp != null) {
-                                viewModel.fetchEpisodeStreams(targetEp) { newLinks ->
-                                    com.streamflex.player.StreamStateHolder.streams.value = newLinks
-                                    com.streamflex.player.StreamStateHolder.currentEpisode.value = newEp
-                                }
-                            }
-                        }
-
-                        viewModel.fetchEpisodeStreams(episode) { links ->
-                            com.streamflex.player.StreamStateHolder.streams.value = links
-                            val intent = Intent(context, com.streamflex.player.PlayerActivity::class.java).apply {
-                                val urls = ArrayList(links.map { it.url })
-                                val referers = ArrayList(links.map { it.headers["Referer"] ?: it.referer ?: "" })
-                                val userAgents = ArrayList(links.map { it.headers["User-Agent"] ?: "" })
-                                putStringArrayListExtra("VIDEO_URLS", urls)
-                                putStringArrayListExtra("VIDEO_REFERERS", referers)
-                                putStringArrayListExtra("VIDEO_USER_AGENTS", userAgents)
-                                putExtra("VIDEO_TITLE", uiState.show?.title ?: "Unknown Media")
-                            }
-                            context.startActivity(intent)
-                        }
+                        context.startActivity(intent)
                     }
                 )
             }

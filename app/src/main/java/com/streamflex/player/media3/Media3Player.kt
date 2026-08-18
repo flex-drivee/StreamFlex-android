@@ -77,7 +77,27 @@ class Media3Player(
 
             override fun onPlayerError(error: PlaybackException) {
                 stopProgressTracking()
-                val playerError = PlayerError(error.errorCode, error.message ?: "Unknown error", error)
+                
+                val playerError = when (error.errorCode) {
+                    PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_TIMEOUT -> PlayerError.Timeout()
+                    PlaybackException.ERROR_CODE_DECODER_INIT_FAILED,
+                    PlaybackException.ERROR_CODE_DECODER_QUERY_FAILED,
+                    PlaybackException.ERROR_CODE_DECODING_FAILED -> PlayerError.Decoder()
+                    PlaybackException.ERROR_CODE_DECODING_FORMAT_UNSUPPORTED -> PlayerError.UnsupportedCodec()
+                    PlaybackException.ERROR_CODE_IO_FILE_NOT_FOUND,
+                    PlaybackException.ERROR_CODE_IO_INVALID_HTTP_CONTENT_TYPE,
+                    PlaybackException.ERROR_CODE_PARSING_CONTAINER_MALFORMED,
+                    PlaybackException.ERROR_CODE_PARSING_MANIFEST_MALFORMED -> PlayerError.InvalidSource()
+                    else -> {
+                        val httpException = error.cause as? androidx.media3.datasource.HttpDataSource.InvalidResponseCodeException
+                        if (httpException != null) {
+                            PlayerError.Http(httpException.responseCode)
+                        } else {
+                            PlayerError.Unknown(error.message ?: "Unknown error", error)
+                        }
+                    }
+                }
+                
                 _state.value = _state.value.copy(error = playerError)
                 emitEvent(PlayerEvent.Error(playerError))
             }
@@ -114,7 +134,9 @@ class Media3Player(
                                 id = "${group.mediaTrackGroup.hashCode()}_$i",
                                 name = "${format.height}p",
                                 resolution = format.height,
-                                bitrate = format.bitrate
+                                bitrate = format.bitrate,
+                                mimeType = format.sampleMimeType,
+                                codecs = format.codecs
                             )
                             qualities.add(option)
                             if (group.isTrackSelected(i) && !trackSelector.parameters.overrides.isEmpty()) {
@@ -286,5 +308,18 @@ class Media3Player(
                 }
             }
         }
+    }
+
+    @androidx.compose.runtime.Composable
+    override fun Surface(modifier: androidx.compose.ui.Modifier) {
+        androidx.compose.ui.viewinterop.AndroidView(
+            factory = { ctx ->
+                androidx.media3.ui.PlayerView(ctx).apply {
+                    player = exoPlayer
+                    useController = false
+                }
+            },
+            modifier = modifier
+        )
     }
 }

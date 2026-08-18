@@ -2,7 +2,6 @@ package com.streamflex.player.ui
 
 import android.util.Log
 import com.streamflex.domain.models.StreamLink
-import com.streamflex.player.StreamStateHolder
 import com.streamflex.player.core.PlayerEvent
 import com.streamflex.player.core.PlayerState
 import com.streamflex.player.core.StreamPlayer
@@ -15,11 +14,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+import com.streamflex.player.PlayerViewModel
+
 class PlayerController(
     val player: StreamPlayer,
     private val progressManager: PlaybackProgressManager,
     private val mediaId: String,
-    private val scope: CoroutineScope
+    private val scope: CoroutineScope,
+    val viewModel: PlayerViewModel
 ) {
     val state: StateFlow<PlayerState> = player.state
     
@@ -42,18 +44,41 @@ class PlayerController(
         scope.launch {
             player.events.collect { event ->
                 if (event is PlayerEvent.PlaybackEnded) {
-                    val nextEp = StreamStateHolder.getNextEpisode()
+                    val nextEp = viewModel.getNextEpisode()
                     if (nextEp != null) {
                         nextEpisodeManager.triggerNextEpisodeCountdown {
-                            StreamStateHolder.onEpisodeSelected?.invoke(nextEp)
+                            viewModel.playEpisode(nextEp)
                         }
                     }
                 } else if (event is PlayerEvent.Error) {
-                    Log.e("PlayerController", "Stream failed, trying fallback.")
-                    val nextIndex = _currentStreamIndex.value + 1
-                    if (nextIndex < _allStreams.value.size) {
-                        _currentStreamIndex.value = nextIndex
-                        loadCurrentStream()
+                    val error = event.error
+                    Log.e("PlayerController", "Stream failed with error: ${error.message}")
+                    
+                    val shouldFallback = when (error) {
+                        is com.streamflex.player.core.PlayerError.UnsupportedCodec -> {
+                            Log.e("PlayerController", "Codec unsupported on this device, immediately skipping to fallback stream.")
+                            true
+                        }
+                        is com.streamflex.player.core.PlayerError.InvalidSource -> {
+                            Log.e("PlayerController", "Source is dead or invalid, skipping to fallback stream.")
+                            true
+                        }
+                        is com.streamflex.player.core.PlayerError.Http -> {
+                            Log.e("PlayerController", "HTTP Error ${error.code}, trying fallback.")
+                            true
+                        }
+                        else -> {
+                            Log.e("PlayerController", "Unknown/Timeout error, trying fallback as safety measure.")
+                            true
+                        }
+                    }
+                    
+                    if (shouldFallback) {
+                        val nextIndex = _currentStreamIndex.value + 1
+                        if (nextIndex < _allStreams.value.size) {
+                            _currentStreamIndex.value = nextIndex
+                            loadCurrentStream()
+                        }
                     }
                 }
             }

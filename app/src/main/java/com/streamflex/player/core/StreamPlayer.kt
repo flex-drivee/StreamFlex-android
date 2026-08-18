@@ -24,4 +24,8 @@ interface StreamPlayer {
     fun setQuality(quality: QualityOption)
     fun setAudioTrack(track: AudioTrack)
     fun setSubtitleTrack(track: SubtitleTrack?) // null for off
+    
+    // UI
+    @androidx.compose.runtime.Composable
+    fun Surface(modifier: androidx.compose.ui.Modifier)
 }
