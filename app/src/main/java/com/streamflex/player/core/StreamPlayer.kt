@@ -27,5 +27,5 @@ interface StreamPlayer {
     
     // UI
     @androidx.compose.runtime.Composable
-    fun Surface(modifier: androidx.compose.ui.Modifier)
+    fun Surface(modifier: androidx.compose.ui.Modifier, isFullScreen: Boolean)
 }

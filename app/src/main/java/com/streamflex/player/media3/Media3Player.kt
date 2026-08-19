@@ -323,13 +323,17 @@ class Media3Player(
     }
 
     @androidx.compose.runtime.Composable
-    override fun Surface(modifier: androidx.compose.ui.Modifier) {
+    override fun Surface(modifier: androidx.compose.ui.Modifier, isFullScreen: Boolean) {
         androidx.compose.ui.viewinterop.AndroidView(
             factory = { ctx ->
                 androidx.media3.ui.PlayerView(ctx).apply {
                     player = exoPlayer
                     useController = false
+                    resizeMode = if (isFullScreen) androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_ZOOM else androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FIT
                 }
+            },
+            update = { view ->
+                view.resizeMode = if (isFullScreen) androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_ZOOM else androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FIT
             },
             modifier = modifier
         )

@@ -56,6 +56,8 @@ fun PlayerScreen(
     val countdownSeconds by controller.nextEpisodeManager.countdownSeconds.collectAsState()
 
     var showBuffering by remember { mutableStateOf(false) }
+    var isFullScreen by remember { mutableStateOf(false) }
+
     LaunchedEffect(state.isBuffering) {
         if (state.isBuffering) {
             kotlinx.coroutines.delay(400L) // 400ms debounce
@@ -66,7 +68,7 @@ fun PlayerScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
-        controller.player.Surface(modifier = Modifier.fillMaxSize())
+        controller.player.Surface(modifier = Modifier.fillMaxSize(), isFullScreen = isFullScreen)
         
         if (showBuffering) {
             CircularProgressIndicator(
@@ -89,6 +91,7 @@ fun PlayerScreen(
                 showSettingsDialog = true 
             },
             onEpisodesClick = { showEpisodeDrawer = true },
+            onFullscreenToggle = { isFullScreen = !isFullScreen },
             onBack = onBack
         )
 

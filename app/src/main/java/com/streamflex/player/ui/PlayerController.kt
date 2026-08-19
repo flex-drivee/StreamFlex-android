@@ -43,6 +43,13 @@ class PlayerController(
 
     private var lastSavedPosition = 0L
 
+    private val progressKey: String
+        get() = if (type == "TV" && viewModel.uiState.value.session?.currentEpisode != null) {
+            "${mediaId}_${viewModel.uiState.value.session?.currentEpisode?.id}"
+        } else {
+            mediaId
+        }
+
     init {
         scope.launch {
             player.events.collect { event ->
@@ -96,7 +103,7 @@ class PlayerController(
 
                 // Periodically save progress every ~10 seconds of playback
                 if (st.isPlaying && (st.positionMs - lastSavedPosition > 10000L || st.positionMs < lastSavedPosition)) {
-                    progressManager.saveProgress(mediaId, title, type, posterPath, st.positionMs, st.durationMs)
+                    progressManager.saveProgress(mediaId, progressKey, title, type, posterPath, st.positionMs, st.durationMs, viewModel.uiState.value.session?.currentEpisode?.id)
                     lastSavedPosition = st.positionMs
                 }
             }
@@ -104,8 +111,11 @@ class PlayerController(
     }
 
     fun setStreams(streams: List<StreamLink>) {
-        if (streams.isEmpty()) return
-        val isNew = _allStreams.value.isEmpty()
+        if (streams.isEmpty()) {
+            _allStreams.value = emptyList()
+            return
+        }
+        val isNew = _allStreams.value != streams
         _allStreams.value = streams
         if (isNew) {
             _currentStreamIndex.value = 0
@@ -125,7 +135,7 @@ class PlayerController(
     fun selectStream(index: Int) {
         if (index in _allStreams.value.indices && index != _currentStreamIndex.value) {
             // Save progress of current stream before switching
-            progressManager.saveProgress(mediaId, title, type, posterPath, state.value.positionMs, state.value.durationMs)
+            progressManager.saveProgress(mediaId, progressKey, title, type, posterPath, state.value.positionMs, state.value.durationMs, viewModel.uiState.value.session?.currentEpisode?.id)
             _currentStreamIndex.value = index
             loadCurrentStream()
         }
@@ -139,7 +149,7 @@ class PlayerController(
             player.load(streams[index])
             
             // Restore progress
-            val savedPos = progressManager.getProgress(mediaId)
+            val savedPos = progressManager.getProgress(progressKey)
             if (savedPos > 0) {
                 player.seekTo(savedPos)
                 lastSavedPosition = savedPos
@@ -176,7 +186,7 @@ class PlayerController(
     
     fun release() {
         // Save one final time
-        progressManager.saveProgress(mediaId, title, type, posterPath, state.value.positionMs, state.value.durationMs)
+        progressManager.saveProgress(mediaId, progressKey, title, type, posterPath, state.value.positionMs, state.value.durationMs, viewModel.uiState.value.session?.currentEpisode?.id)
         player.release()
     }
 }

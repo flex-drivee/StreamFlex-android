@@ -18,29 +18,32 @@ data class HistoryItem(
     val posterPath: String? = null,
     val positionMs: Long = 0,
     val durationMs: Long = 0,
-    val timestamp: Long = 0
+    val timestamp: Long = 0,
+    val episodeId: String? = null
 )
 
 class PlaybackProgressManager(context: Context) {
     private val prefs: SharedPreferences = context.getSharedPreferences("streamflex_playback_progress", Context.MODE_PRIVATE)
 
     fun saveProgress(
-        mediaId: String, 
+        mediaId: String,
+        progressKey: String,
         title: String, 
         type: String, 
         posterPath: String?, 
         positionMs: Long, 
-        durationMs: Long
+        durationMs: Long,
+        episodeId: String? = null
     ) {
         if (durationMs <= 0 || mediaId.isBlank()) return
         
         val percentage = positionMs.toFloat() / durationMs.toFloat()
         
-        // Raw progress for quick lookup
+        // Raw progress for quick lookup (keyed by progressKey)
         if (percentage >= 0.95f) {
-            prefs.edit().remove(mediaId).apply()
+            prefs.edit().remove(progressKey).apply()
         } else if (positionMs > 10000L) {
-            prefs.edit().putLong(mediaId, positionMs).apply()
+            prefs.edit().putLong(progressKey, positionMs).apply()
         }
 
         // Keep History for Continue Watching if watched > 10s and not completely finished
@@ -52,7 +55,8 @@ class PlaybackProgressManager(context: Context) {
                 posterPath = posterPath,
                 positionMs = positionMs,
                 durationMs = durationMs,
-                timestamp = System.currentTimeMillis()
+                timestamp = System.currentTimeMillis(),
+                episodeId = episodeId
             )
             saveToHistoryList(historyItem)
         } else if (percentage >= 0.95f) {

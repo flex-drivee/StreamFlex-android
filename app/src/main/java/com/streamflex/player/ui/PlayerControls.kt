@@ -41,6 +41,7 @@ fun PlayerControls(
     onSeekBackward: () -> Unit,
     onSettingsClick: (tab: Int) -> Unit,
     onEpisodesClick: () -> Unit,
+    onFullscreenToggle: () -> Unit,
     onBack: () -> Unit
 ) {
     var isVisible by remember { mutableStateOf(true) }
@@ -89,6 +90,7 @@ fun PlayerControls(
                     onSeekBackward = onSeekBackward,
                     onSettingsClick = onSettingsClick,
                     onEpisodesClick = onEpisodesClick,
+                    onFullscreenToggle = onFullscreenToggle,
                     modifier = Modifier.align(Alignment.BottomCenter)
                 )
             }
@@ -146,6 +148,7 @@ private fun PlayerBottomBar(
     onSeekBackward: () -> Unit,
     onSettingsClick: (Int) -> Unit,
     onEpisodesClick: () -> Unit,
+    onFullscreenToggle: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -170,23 +173,23 @@ private fun PlayerBottomBar(
         ) {
             // Left Side: -10, Play, +10, Time
             Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onSeekBackward) {
+                IconButton(onClick = onSeekBackward, modifier = Modifier.size(56.dp)) {
                     Box(contentAlignment = Alignment.Center) {
-                        Icon(Icons.Default.Replay, contentDescription = "Rewind", tint = Color.White, modifier = Modifier.size(32.dp))
-                        Text("10", color = Color.White, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                        Icon(Icons.Default.Replay, contentDescription = "Rewind", tint = Color.White, modifier = Modifier.size(44.dp))
+                        Text("10", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                     }
                 }
                 
                 // Play button is centered between Rewind and Forward and is slightly larger
-                IconButton(onClick = onPlayPauseToggle) {
+                IconButton(onClick = onPlayPauseToggle, modifier = Modifier.size(68.dp)) {
                     val icon = if (state.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow
-                    Icon(icon, contentDescription = "Play/Pause", tint = Color.White, modifier = Modifier.size(42.dp))
+                    Icon(icon, contentDescription = "Play/Pause", tint = Color.White, modifier = Modifier.size(56.dp))
                 }
                 
-                IconButton(onClick = onSeekForward) {
+                IconButton(onClick = onSeekForward, modifier = Modifier.size(56.dp)) {
                     Box(contentAlignment = Alignment.Center) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Forward", tint = Color.White, modifier = Modifier.size(32.dp))
-                        Text("10", color = Color.White, fontSize = 9.sp, fontWeight = FontWeight.Bold)
+                        Icon(Icons.Default.Refresh, contentDescription = "Forward", tint = Color.White, modifier = Modifier.size(44.dp))
+                        Text("10", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                     }
                 }
                 
@@ -195,7 +198,7 @@ private fun PlayerBottomBar(
                 Text(
                     text = "${formatTime(state.positionMs)} / ${formatTime(state.durationMs)}", 
                     color = Color.White, 
-                    fontSize = 13.sp,
+                    fontSize = 14.sp,
                     fontWeight = FontWeight.Medium
                 )
             }
@@ -203,18 +206,18 @@ private fun PlayerBottomBar(
             // Right Side: Episodes, CC, Settings, Fullscreen
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (showEpisodesButton) {
-                    IconButton(onClick = onEpisodesClick) {
-                        Icon(Icons.Default.Menu, contentDescription = "Episodes", tint = Color.White, modifier = Modifier.size(28.dp))
+                    IconButton(onClick = onEpisodesClick, modifier = Modifier.size(48.dp)) {
+                        Icon(Icons.Default.Menu, contentDescription = "Episodes", tint = Color.White, modifier = Modifier.size(32.dp))
                     }
                 }
-                IconButton(onClick = { onSettingsClick(2) }) { // 2 = Subtitles Tab
-                    Icon(Icons.Default.ClosedCaption, contentDescription = "CC", tint = Color.White, modifier = Modifier.size(28.dp))
+                IconButton(onClick = { onSettingsClick(2) }, modifier = Modifier.size(48.dp)) { // 2 = Subtitles Tab
+                    Icon(Icons.Default.ClosedCaption, contentDescription = "CC", tint = Color.White, modifier = Modifier.size(32.dp))
                 }
-                IconButton(onClick = { onSettingsClick(0) }) { // 0 = Video Quality Tab
-                    Icon(Icons.Default.Settings, contentDescription = "Settings", tint = Color.White, modifier = Modifier.size(28.dp))
+                IconButton(onClick = { onSettingsClick(0) }, modifier = Modifier.size(48.dp)) { // 0 = Video Quality Tab
+                    Icon(Icons.Default.Settings, contentDescription = "Settings", tint = Color.White, modifier = Modifier.size(32.dp))
                 }
-                IconButton(onClick = { /* TODO Fullscreen */ }) {
-                    Icon(Icons.Default.Fullscreen, contentDescription = "Fullscreen", tint = Color.White, modifier = Modifier.size(28.dp))
+                IconButton(onClick = onFullscreenToggle, modifier = Modifier.size(48.dp)) {
+                    Icon(Icons.Default.Fullscreen, contentDescription = "Fullscreen", tint = Color.White, modifier = Modifier.size(32.dp))
                 }
             }
         }
