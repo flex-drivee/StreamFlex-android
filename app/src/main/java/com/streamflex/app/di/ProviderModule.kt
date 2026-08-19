@@ -30,6 +30,7 @@ object ProviderModule {
             MovieBoxProvider(),
 
             HDHubProvider(),
+            com.streamflex.providers.fourkhdhub.FourKHDHubProvider(),
 
             NetflixMirrorProvider(),
             PrimeVideoMirrorProvider(),

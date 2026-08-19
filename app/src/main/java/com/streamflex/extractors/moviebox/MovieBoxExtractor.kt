@@ -48,6 +48,7 @@ class MovieBoxExtractor : BaseExtractor() {
                 for (item in list) {
                     val path = JsonParser.string(item, "url") ?: continue
                     val qualityStr = JsonParser.string(item, "resolutions") ?: ""
+                    val language = JsonParser.string(item, "language") ?: ""
                     
                     val quality = when {
                         qualityStr.contains("1080") -> Quality.P1080
@@ -78,9 +79,15 @@ class MovieBoxExtractor : BaseExtractor() {
                         }
                     }
                     
+                    val streamName = buildString {
+                        append("MovieBox")
+                        if (qualityStr.isNotBlank()) append(" $qualityStr")
+                        if (language.isNotBlank()) append(" [$language]")
+                    }
+                    
                     streams.add(
                         StreamLink(
-                            name = "MovieBox $qualityStr",
+                            name = streamName,
                             url = path,
                             quality = quality,
                             host = HostType.MOVIEBOX,

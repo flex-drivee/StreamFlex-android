@@ -142,7 +142,7 @@ object MovieBoxCrypto {
     ): Map<String, String> {
         // For GET requests, Content-Type is null (not sent); for POST it's application/json
         val actualContentType = if (method.uppercase(Locale.ROOT) == "GET") null else contentType
-        val clientInfo = "{\"package_name\":\"com.community.mbox.in\",\"version_name\":\"3.0.03.0529.03\",\"version_code\":50020042,\"os\":\"android\",\"os_version\":\"16\",\"device_id\":\"$deviceId\",\"install_store\":\"ps\",\"gaid\":\"d7578036d13336cc\",\"brand\":\"${currentBrandModel.first}\",\"model\":\"${currentBrandModel.second}\",\"system_language\":\"en\",\"net\":\"NETWORK_WIFI\",\"region\":\"IN\",\"timezone\":\"Asia/Calcutta\",\"sp_code\":\"\"}"
+        val clientInfo = "{\"package_name\":\"com.community.oneroom\",\"version_name\":\"3.0.13.0325.03\",\"version_code\":50020088,\"os\":\"android\",\"os_version\":\"16\",\"device_id\":\"$deviceId\",\"install_store\":\"ps\",\"gaid\":\"d7578036d13336cc\",\"brand\":\"${currentBrandModel.first}\",\"model\":\"${currentBrandModel.second}\",\"system_language\":\"en\",\"net\":\"NETWORK_WIFI\",\"region\":\"US\",\"timezone\":\"America/New_York\",\"sp_code\":\"\"}"
         val xClientToken = generateXClientToken()
         // Always pass ACCEPT_JSON as accept parameter — required for valid signature
         val xTrSignature = generateXTrSignature(method, ACCEPT_JSON, actualContentType, url, body, useAltKey)
@@ -152,7 +152,7 @@ object MovieBoxCrypto {
             "X-Client-Status" to "0",
             "X-Client-Token"  to xClientToken,
             "X-Tr-Signature"  to xTrSignature,
-            "User-Agent"      to "com.community.mbox.in/50020042 (Linux; U; Android 16; en_IN; sdk_gphone64_x86_64; Build/BP22.250325.006; Cronet/133.0.6876.3)",
+            "User-Agent"      to "com.community.oneroom/50020088 (Linux; U; Android 16; en_US; sdk_gphone64_x86_64; Build/BP22.250325.006; Cronet/133.0.6876.3)",
             "Accept"          to ACCEPT_JSON
         )
         if (actualContentType != null) {
