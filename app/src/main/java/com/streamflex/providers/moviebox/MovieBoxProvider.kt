@@ -38,7 +38,19 @@ class MovieBoxProvider(
     suspend fun ensureDomain(): String {
         resolvedDomain?.let { return it }
 
-        val domain = MovieBoxConfig.savedDomain ?: MovieBoxConfig.DEFAULT_DOMAIN
+        val result = resolver.resolve(
+            providerId   = MovieBoxConfig.PROVIDER_ID,
+            hardcoded    = MovieBoxConfig.DEFAULT_DOMAIN,
+            manifestPath = MovieBoxConfig.MANIFEST_PATH
+        )
+
+        val domain = when (result) {
+            is DomainResult.Resolved  -> result.domain
+            is DomainResult.Mirror    -> result.domain
+            is DomainResult.Hardcoded -> result.domain
+            is DomainResult.Offline   -> MovieBoxConfig.DEFAULT_DOMAIN
+        }
+
         resolvedDomain = domain
         return domain
     }
