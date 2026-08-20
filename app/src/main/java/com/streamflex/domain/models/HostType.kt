@@ -24,6 +24,7 @@ enum class HostType {
     HDSTREAM4U,
 
     // AnimeDekho extractors
+    ANIMEDEKHO,
     ABYSS,
     VIDMOLY,
     STREAMRUBY,

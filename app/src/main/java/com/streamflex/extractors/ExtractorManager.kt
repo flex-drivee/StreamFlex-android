@@ -70,6 +70,7 @@ object ExtractorManager {
         com.streamflex.extractors.mixdrop.MixDropExtractor(),
         
         // AnimeDekho extractors
+        com.streamflex.extractors.animedekho.AnimeDekhoExtractor(),
         com.streamflex.extractors.abyss.AbyssPlayerExtractor(),
         com.streamflex.extractors.turbovid.TurboVidExtractor(),
         com.streamflex.extractors.vidmoly.VidmolyExtractor(),
