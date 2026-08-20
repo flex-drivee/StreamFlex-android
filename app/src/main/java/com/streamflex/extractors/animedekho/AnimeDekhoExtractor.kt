@@ -103,7 +103,9 @@ class AnimeDekhoExtractor : BaseExtractor() {
             "cloudy.upns" in lower                                   -> HostType.CLOUDY
             "turbovidhls" in lower || "emturbovid" in lower         -> HostType.TURBOVID
             "strmup.to" in lower                                     -> HostType.STREAMUP
-            "xerver.xyz" in lower                                    -> HostType.REDIRECT
+            "xerver.xyz" in lower                                    -> HostType.XERVER
+            "goblin" in lower                                        -> HostType.REDIRECT
+            "pixel" in lower                                         -> HostType.REDIRECT
             "vidcloud.upns" in lower                                 -> HostType.CLOUDY
             lower.endsWith(".mp4") || lower.endsWith(".mkv")        -> HostType.DIRECT
             ".m3u8" in lower                                         -> HostType.M3U8
