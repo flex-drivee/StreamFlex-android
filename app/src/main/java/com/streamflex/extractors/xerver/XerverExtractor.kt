@@ -27,13 +27,18 @@ class XerverExtractor : BaseExtractor() {
             .url(fetchUrl)
             .header("Referer", source.url)
             .header("Accept", "application/json")
+            .header("X-Requested-With", "XMLHttpRequest")
             .build()
 
         return when (val res = HttpClient.execute(req)) {
             is NetworkResult.Success -> {
-                val jsonStr = res.data.body?.toString(Charsets.UTF_8) ?: return emptyResult()
-                val streams = mutableListOf<StreamLink>()
+                val jsonStr = res.data.body?.toString(Charsets.UTF_8)
+                if (jsonStr.isNullOrEmpty()) {
+                    Logger.w("[Xerver] Empty response body")
+                    return emptyResult()
+                }
                 
+                val streams = mutableListOf<StreamLink>()
                 try {
                     val root = JSONObject(jsonStr)
                     if (root.has("results")) {
@@ -63,11 +68,26 @@ class XerverExtractor : BaseExtractor() {
                     Logger.d("[Xerver] Found ${streams.size} streams")
                     result(streams)
                 } else {
-                    Logger.w("[Xerver] No streams found in JSON")
+                    Logger.w("[Xerver] No streams found in JSON: $jsonStr")
                     emptyResult()
                 }
             }
-            else -> emptyResult()
+            is NetworkResult.Error -> {
+                Logger.e("[Xerver] Network Error: ${res.code} - ${res.message}")
+                emptyResult()
+            }
+            is NetworkResult.Timeout -> {
+                Logger.e("[Xerver] Network Timeout")
+                emptyResult()
+            }
+            is NetworkResult.Exception -> {
+                Logger.e("[Xerver] Network Exception: ${res.throwable.message}")
+                emptyResult()
+            }
+            else -> {
+                Logger.e("[Xerver] Unknown Network Error")
+                emptyResult()
+            }
         }
     }
 }
