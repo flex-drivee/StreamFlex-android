@@ -64,7 +64,8 @@ class AnimeDekhoDetails {
             val seasonEpRegex = Regex("""(\d+)x(\d+)""")
 
             for (link in episodeLinks) {
-                val match = seasonEpRegex.find(link.substringAfterLast("/"))
+                val slug = link.trimEnd('/').substringAfterLast("/")
+                val match = seasonEpRegex.find(slug)
                 val season = match?.groupValues?.get(1)?.toIntOrNull() ?: 1
                 val ep     = match?.groupValues?.get(2)?.toIntOrNull() ?: 1
                 seasonMap.getOrPut(season) { mutableListOf() }.add(ep to link)
