@@ -187,6 +187,83 @@ object ExtractorRegistry {
                 requiresReferer = false,
                 headers = emptyMap(),
                 androidClass = "com.streamflex.extractors.netmirror.NetMirrorExtractor"
+            ),
+            ExtractorDefinition(
+                id = "abyss",
+                name = "AbyssPlayer",
+                priority = 88,
+                status = "active",
+                domains = listOf("abyssplayer.com", "playhydrax.com"),
+                outputFormats = listOf("mp4"),
+                requiresReferer = true,
+                headers = mapOf("Referer" to "https://animedekho.app/"),
+                androidClass = "com.streamflex.extractors.abyss.AbyssPlayerExtractor"
+            ),
+            ExtractorDefinition(
+                id = "vidmoly",
+                name = "Vidmoly",
+                priority = 75,
+                status = "active",
+                domains = listOf("vidmoly.me", "vidmoly.to", "vidmoly.biz"),
+                outputFormats = listOf("m3u8"),
+                requiresReferer = true,
+                headers = mapOf("Referer" to "https://vidmoly.me/"),
+                androidClass = "com.streamflex.extractors.vidmoly.VidmolyExtractor"
+            ),
+            ExtractorDefinition(
+                id = "streamruby",
+                name = "StreamRuby",
+                priority = 73,
+                status = "active",
+                domains = listOf("rubystm.com", "streamruby.com"),
+                outputFormats = listOf("m3u8", "mp4"),
+                requiresReferer = true,
+                headers = mapOf("Referer" to "https://rubystm.com/"),
+                androidClass = "com.streamflex.extractors.streamruby.StreamRubyExtractor"
+            ),
+            ExtractorDefinition(
+                id = "gdmirrorbot",
+                name = "GDMirrorBot",
+                priority = 72,
+                status = "active",
+                domains = listOf("gdmirrorbot.nl", "gdmirrorbot.com"),
+                outputFormats = listOf("mp4", "m3u8"),
+                requiresReferer = true,
+                headers = mapOf("Referer" to "https://gdmirrorbot.nl/"),
+                androidClass = "com.streamflex.extractors.gdmirrorbot.GDMirrorBotExtractor"
+            ),
+            ExtractorDefinition(
+                id = "cloudy",
+                name = "Cloudy",
+                priority = 70,
+                status = "active",
+                domains = listOf("cloudy.upns.one", "vidcloud.upns.ink"),
+                outputFormats = listOf("m3u8", "mp4"),
+                requiresReferer = true,
+                headers = mapOf("Referer" to "https://cloudy.upns.one/"),
+                androidClass = "com.streamflex.extractors.cloudy.CloudyExtractor"
+            ),
+            ExtractorDefinition(
+                id = "turbovid",
+                name = "TurboVid",
+                priority = 68,
+                status = "active",
+                domains = listOf("turbovidhls.com", "emturbovid.com"),
+                outputFormats = listOf("m3u8"),
+                requiresReferer = true,
+                headers = mapOf("Referer" to "https://turbovidhls.com/"),
+                androidClass = "com.streamflex.extractors.turbovid.TurboVidExtractor"
+            ),
+            ExtractorDefinition(
+                id = "streamup",
+                name = "StreamUp",
+                priority = 66,
+                status = "active",
+                domains = listOf("strmup.to"),
+                outputFormats = listOf("m3u8", "mp4"),
+                requiresReferer = true,
+                headers = mapOf("Referer" to "https://strmup.to/"),
+                androidClass = "com.streamflex.extractors.streamup.StreamUpExtractor"
             )
         ),
         qualityPatterns = mapOf(
@@ -304,20 +381,28 @@ object ExtractorRegistry {
      */
     fun getHostType(id: String): HostType {
         return when (id.lowercase()) {
-            "googlevideo" -> HostType.GOOGLE_VIDEO
-            "hubcloud"    -> HostType.HUBCLOUD
-            "pixeldrain"  -> HostType.PIXELDRAIN
-            "filemoon"    -> HostType.FILEMOON
-            "hubdrive"    -> HostType.HUBDRIVE
-            "hubcdn"      -> HostType.HUBCDN
-            "dood"        -> HostType.DOOD
-            "hblinks"     -> HostType.HBLINKS
-            "streamtape"  -> HostType.STREAMTAPE
-            "mixdrop"     -> HostType.MIXDROP
-            "redirect"    -> HostType.REDIRECT
-            "vidstack"    -> HostType.VIDSTACK
-            "netmirror"   -> HostType.NETMIRROR
-            else          -> HostType.UNKNOWN
+            "googlevideo"  -> HostType.GOOGLE_VIDEO
+            "hubcloud"     -> HostType.HUBCLOUD
+            "pixeldrain"   -> HostType.PIXELDRAIN
+            "filemoon"     -> HostType.FILEMOON
+            "hubdrive"     -> HostType.HUBDRIVE
+            "hubcdn"       -> HostType.HUBCDN
+            "dood"         -> HostType.DOOD
+            "hblinks"      -> HostType.HBLINKS
+            "streamtape"   -> HostType.STREAMTAPE
+            "mixdrop"      -> HostType.MIXDROP
+            "redirect"     -> HostType.REDIRECT
+            "vidstack"     -> HostType.VIDSTACK
+            "netmirror"    -> HostType.NETMIRROR
+            // AnimeDekho extractors
+            "abyss"        -> HostType.ABYSS
+            "vidmoly"      -> HostType.VIDMOLY
+            "streamruby"   -> HostType.STREAMRUBY
+            "gdmirrorbot"  -> HostType.GDMIRRORBOT
+            "cloudy"       -> HostType.CLOUDY
+            "turbovid"     -> HostType.TURBOVID
+            "streamup"     -> HostType.STREAMUP
+            else           -> HostType.UNKNOWN
         }
     }
 
@@ -368,6 +453,14 @@ object ExtractorRegistry {
             HostType.REDIRECT     -> "redirect"
             HostType.VIDSTACK     -> "vidstack"
             HostType.NETMIRROR    -> "netmirror"
+            // AnimeDekho extractors
+            HostType.ABYSS        -> "abyss"
+            HostType.VIDMOLY      -> "vidmoly"
+            HostType.STREAMRUBY   -> "streamruby"
+            HostType.GDMIRRORBOT  -> "gdmirrorbot"
+            HostType.CLOUDY       -> "cloudy"
+            HostType.TURBOVID     -> "turbovid"
+            HostType.STREAMUP     -> "streamup"
             else                  -> return 50
         }
         return getPriority(id)
