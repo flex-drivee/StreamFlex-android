@@ -125,6 +125,7 @@ object ContentDetector {
     fun isVideo(type: ContentType): Boolean {
         return type == ContentType.VIDEO ||
                 type == ContentType.M3U8 ||
+                type == ContentType.HLS ||
                 type == ContentType.DASH
     }
 
