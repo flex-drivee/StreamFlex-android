@@ -55,6 +55,7 @@ class FourKHDHubDetails {
                         )
                     } else {
                         val sources = sourceParser.parseDocument(document, result.url)
+                            .sortedBy { it.metadata["codec"] == "HEVC" }
                         ProviderResult(
                             id = result.id,
                             providerId = FourKHDHubConfig.PROVIDER_ID,
@@ -73,6 +74,7 @@ class FourKHDHubDetails {
 
     private fun parseSeasons(document: Document, detailUrl: String): List<ProviderSeason> {
         val sources = sourceParser.parseDocument(document, detailUrl)
+            .sortedBy { it.metadata["codec"] == "HEVC" }
         
         if (sources.isEmpty()) return emptyList()
         

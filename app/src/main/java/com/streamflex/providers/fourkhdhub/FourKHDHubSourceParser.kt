@@ -62,7 +62,7 @@ class FourKHDHubSourceParser : SourceParser {
                     }
                     if (hostType == HostType.UNKNOWN) continue
                     
-                    val metadata = if (isHevc) mapOf("hevc" to "true") else emptyMap()
+                    val metadata = mapOf("codec" to if (isHevc) "HEVC" else "H.264")
 
                     results += FourKHDHubMapper.toProviderSource(
                         provider = PROVIDER_NAME,

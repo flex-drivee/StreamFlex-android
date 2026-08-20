@@ -33,14 +33,10 @@ object HostDetector {
                     host.contains("drive.google.com") ->
                 return HostType.GOOGLE_VIDEO
 
-            host.contains("hubcloud") ->
+            host.contains("hubcloud") ||
+                    host.contains("hubdrive") ||
+                    host.contains("hubcdn") ->
                 return HostType.HUBCLOUD
-
-            host.contains("hubdrive") ->
-                return HostType.HUBDRIVE
-
-            host.contains("hubcdn") ->
-                return HostType.HUBCDN
 
             host.contains("hblinks") ->
                 return HostType.HBLINKS

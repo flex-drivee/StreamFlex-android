@@ -167,6 +167,12 @@ abstract class BaseExtractor {
                 append(quality.label)
             }
 
+            val codec = source.metadata["codec"]
+            if (codec != null) {
+                append(" • ")
+                append(codec)
+            }
+
             append(" • ")
             append(source.hostType.name)
 
