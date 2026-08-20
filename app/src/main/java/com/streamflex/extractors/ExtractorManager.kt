@@ -67,8 +67,16 @@ object ExtractorManager {
         
         // Phase 3+ providers
         com.streamflex.extractors.streamtape.StreamTapeExtractor(),
-        com.streamflex.extractors.mixdrop.MixDropExtractor()
-        // VidStackExtractor()    ← VegaMovies
+        com.streamflex.extractors.mixdrop.MixDropExtractor(),
+        
+        // AnimeDekho extractors
+        com.streamflex.extractors.abyss.AbyssPlayerExtractor(),
+        com.streamflex.extractors.turbovid.TurboVidExtractor(),
+        com.streamflex.extractors.vidmoly.VidmolyExtractor(),
+        com.streamflex.extractors.streamruby.StreamRubyExtractor(),
+        com.streamflex.extractors.gdmirrorbot.GDMirrorBotExtractor(),
+        com.streamflex.extractors.cloudy.CloudyExtractor(),
+        com.streamflex.extractors.streamup.StreamUpExtractor()
     )
 
     /**
