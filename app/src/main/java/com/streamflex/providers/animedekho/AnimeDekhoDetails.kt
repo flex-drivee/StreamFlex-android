@@ -142,7 +142,7 @@ class AnimeDekhoDetails {
         // Probe all server slots concurrently
         val jobs = (1..AnimeDekhoConfig.MAX_SERVERS).map { serverIdx ->
             async(Dispatchers.IO) {
-                fetchIframeSource(termId, serverIdx, trtype)
+                fetchIframeSource(AnimeDekhoConfig.DEFAULT_DOMAIN, termId, serverIdx, trtype)
             }
         }
 
@@ -161,18 +161,19 @@ class AnimeDekhoDetails {
     }
 
     /**
-     * Calls /?trdekho={idx}&trid={termId}&trtype={type} on the mirror domain,
+     * Calls /?trdekho={idx}&trid={termId}&trtype={type} on the base domain,
      * parses the iframe src and returns it paired with the server index.
      */
     private suspend fun fetchIframeSource(
+        baseUrl   : String,
         termId    : String,
         serverIdx : Int,
         trtype    : Int
     ): Pair<String, Int>? {
-        val url = "${AnimeDekhoConfig.MIRROR_DOMAIN}/?trdekho=$serverIdx&trid=$termId&trtype=$trtype"
+        val url = "$baseUrl/?trdekho=$serverIdx&trid=$termId&trtype=$trtype"
         val req = RequestBuilder()
             .url(url)
-            .header("Referer", AnimeDekhoConfig.MIRROR_DOMAIN)
+            .header("Referer", baseUrl)
             .build()
 
         return when (val res = HttpClient.execute(req)) {
