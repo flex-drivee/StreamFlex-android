@@ -77,7 +77,8 @@ object ExtractorManager {
         com.streamflex.extractors.streamruby.StreamRubyExtractor(),
         com.streamflex.extractors.gdmirrorbot.GDMirrorBotExtractor(),
         com.streamflex.extractors.cloudy.CloudyExtractor(),
-        com.streamflex.extractors.streamup.StreamUpExtractor()
+        com.streamflex.extractors.streamup.StreamUpExtractor(),
+        com.streamflex.extractors.xerver.XerverExtractor()
     )
 
     /**

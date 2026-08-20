@@ -32,6 +32,7 @@ enum class HostType {
     CLOUDY,
     TURBOVID,
     STREAMUP,
+    XERVER,
 
     UNKNOWN,
 }

@@ -75,6 +75,9 @@ object HostDetector {
             host.contains("abyssplayer") || host.contains("playhydrax") ->
                 return HostType.ABYSS
 
+            host.contains("xerver") ->
+                return HostType.XERVER
+
             host.contains("vidmoly") ->
                 return HostType.VIDMOLY
 
