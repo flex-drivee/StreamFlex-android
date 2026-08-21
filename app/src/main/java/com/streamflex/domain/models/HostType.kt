@@ -23,5 +23,16 @@ enum class HostType {
     MOVIEBOX,
     HDSTREAM4U,
 
+    // AnimeDekho extractors
+    ANIMEDEKHO,
+    ABYSS,
+    VIDMOLY,
+    STREAMRUBY,
+    GDMIRRORBOT,
+    CLOUDY,
+    TURBOVID,
+    STREAMUP,
+    XERVER,
+
     UNKNOWN,
-}
+}

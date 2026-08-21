@@ -253,7 +253,7 @@ fun SettingsScreen(
                     SettingsTile(
                         icon = Icons.Outlined.PersonOutline,
                         title = "Developer",
-                        subtitle = "Developed by StreamFlex",
+                        subtitle = "Developed by Mani-Balouch.",
                         onTap = { /* TODO */ }
                     )
                     SettingsDivider()

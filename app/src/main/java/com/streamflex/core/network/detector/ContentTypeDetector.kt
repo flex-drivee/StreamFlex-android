@@ -17,7 +17,7 @@ object ContentTypeDetector {
             return ContentType.UNKNOWN
         }
 
-        val value = url.lowercase()
+        val value = url.substringBefore('?').lowercase()
 
         return when {
 

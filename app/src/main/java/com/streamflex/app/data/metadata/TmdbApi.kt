@@ -65,4 +65,27 @@ interface TmdbApi {
         @Path("season_number") seasonNumber: Int,
         @Query("api_key") apiKey: String
     ): TmdbSeasonDetails
+
+    // --- Discover ---
+    @GET("discover/movie")
+    suspend fun discoverMovies(
+        @Query("api_key") apiKey: String,
+        @Query("with_origin_country") originCountry: String? = null,
+        @Query("with_original_language") originalLanguage: String? = null,
+        @Query("with_networks") networks: String? = null,
+        @Query("with_genres") genres: String? = null,
+        @Query("sort_by") sortBy: String? = "popularity.desc",
+        @Query("vote_count.gte") voteCountGte: Int? = null
+    ): TmdbSearchResponse
+
+    @GET("discover/tv")
+    suspend fun discoverTvShows(
+        @Query("api_key") apiKey: String,
+        @Query("with_origin_country") originCountry: String? = null,
+        @Query("with_original_language") originalLanguage: String? = null,
+        @Query("with_networks") networks: String? = null,
+        @Query("with_genres") genres: String? = null,
+        @Query("sort_by") sortBy: String? = "popularity.desc",
+        @Query("vote_count.gte") voteCountGte: Int? = null
+    ): TmdbSearchResponse
 }

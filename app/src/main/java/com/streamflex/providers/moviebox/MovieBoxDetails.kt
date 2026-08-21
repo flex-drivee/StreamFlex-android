@@ -1,14 +1,15 @@
 package com.streamflex.providers.moviebox
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import com.streamflex.core.network.HttpClient
 import com.streamflex.core.network.NetworkResult
 import com.streamflex.core.network.RequestBuilder
 import com.streamflex.core.parser.JsonParser
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import com.streamflex.domain.models.MediaType
 import com.streamflex.domain.models.ProviderResult
 import com.streamflex.domain.models.ProviderSeason
+import com.streamflex.domain.models.ProviderSource
 import com.streamflex.domain.models.ProviderEpisode
 import com.streamflex.domain.models.SearchResult
 import com.streamflex.core.logger.Logger
@@ -19,7 +20,7 @@ class MovieBoxDetails {
 
     /**
      * Load full details for a [SearchResult], returning a [ProviderResult].
-     * - Movies: single play-info URL
+     * - Movies: single play-info URL (now fetches all related subjectIds for multi-audio)
      * - TV Shows: calls season-info to enumerate seasons/episodes, then constructs
      *   per-episode play-info URLs using `&se=<season>&ep=<episode>` params.
      */
@@ -60,20 +61,27 @@ class MovieBoxDetails {
                     val isTV = subjectType == 2 || result.mediaType == MediaType.TV
 
                     if (!isTV) {
-                        // ── Movie ──────────────────────────────────────────────────────────
-                        val playUrl = "$baseUrl/wefeed-mobile-bff/subject-api/play-info?subjectId=${result.id}"
-                        val source  = MovieBoxMapper.toProviderSource(url = playUrl)
+                        // For movies, fetch alternative subjectIds to get all languages
+                        val baseTitle = title.replace(Regex("\\[.*\\]"), "").trim()
+                        val currentLang = JsonParser.string(data, "language") ?: ""
+                        val relatedIds = fetchRelatedMovieIds(baseTitle, result.id, currentLang, baseUrl)
+                        
+                        val sources = relatedIds.map { (id, lang) ->
+                            val source = MovieBoxMapper.toProviderSource(url = "$baseUrl/wefeed-mobile-bff/subject-api/play-info?subjectId=$id")
+                            source.copy(metadata = mapOf("language" to lang))
+                        }
+                        
                         MovieBoxMapper.toProviderResult(
                             providerId = MovieBoxConfig.PROVIDER_NAME.lowercase(),
                             title      = title,
                             detailUrl  = result.url,
                             mediaType  = MediaType.MOVIE,
-                            sources    = listOf(source),
+                            sources    = sources,
                             overview   = overview,
                             poster     = poster
                         )
                     } else {
-                        // ── TV Show ────────────────────────────────────────────────────────
+                        // TV Show logic remains unchanged
                         val seasons = fetchSeasons(
                             subjectId   = result.id,
                             baseUrl     = baseUrl,
@@ -96,6 +104,58 @@ class MovieBoxDetails {
                 }
             }
         }
+    }
+    
+    private suspend fun fetchRelatedMovieIds(title: String, currentId: String, currentLang: String, baseUrl: String): List<Pair<String, String>> {
+        val searchUrl = "$baseUrl/wefeed-mobile-bff/subject-api/search/v2"
+        val payload = """{"keyword":"$title","page":1,"perPage":20}"""
+        
+        val headers = MovieBoxCrypto.getHeaders(
+            method = "POST",
+            url = searchUrl,
+            body = payload
+        ).toMutableMap()
+        headers["Content-Type"] = "application/json"
+        
+        val request = RequestBuilder()
+            .url(searchUrl)
+            .post(payload.toByteArray())
+            .headers(headers)
+            .build()
+            
+        val ids = mutableListOf(Pair(currentId, currentLang))
+        
+        try {
+            when (val resp = HttpClient.execute(request)) {
+                is NetworkResult.Success -> {
+                    val json = resp.data.bodyAsString()
+                    val root = JsonParser.parse(json)
+                    val data = root?.let { JsonParser.objectOf(it, "data") }
+                    val results = data?.let { JsonParser.array(it, "results") }
+                    
+                    if (results != null) {
+                        for (resultItem in results) {
+                            val subjects = JsonParser.array(resultItem, "subjects") ?: continue
+                            for (subject in subjects) {
+                                val subjectId = JsonParser.string(subject, "subjectId") ?: continue
+                                val subjectTitle = JsonParser.string(subject, "title") ?: ""
+                                
+                                // Only add if it's the exact same base movie (e.g. "Spider-Man: No Way Home [Hindi]")
+                                val baseSubjectTitle = subjectTitle.replace(Regex("\\[.*\\]"), "").trim()
+                                val lang = JsonParser.string(subject, "language") ?: ""
+                                if (baseSubjectTitle.equals(title, ignoreCase = true) && !ids.any { it.first == subjectId }) {
+                                    ids.add(Pair(subjectId, lang))
+                                }
+                            }
+                        }
+                    }
+                }
+                else -> {}
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return ids
     }
 
     /**
@@ -167,7 +227,7 @@ class MovieBoxDetails {
         }
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
+    // "?"? Helpers "?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?
 
     private fun parseToken(xUserHeader: String): String? {
         if (xUserHeader.isBlank()) return null

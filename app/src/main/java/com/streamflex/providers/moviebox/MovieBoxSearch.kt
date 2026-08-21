@@ -14,15 +14,12 @@ class MovieBoxSearch {
 
     suspend fun search(query: String, baseUrl: String): List<SearchResult> {
         val searchUrl = "$baseUrl/wefeed-mobile-bff/subject-api/search/v2"
-        val jsonBody = JSONObject().apply {
-            put("keyword", query)
-            put("page", 1)
-            put("perPage", 20)
-        }.toString()
+        val jsonBody = "{\"keyword\":\"$query\",\"page\":1,\"perPage\":20}"
 
         if (MovieBoxCrypto.xUserToken == null) {
             fetchXUserToken(baseUrl)
         }
+        println("Token after fetch: ${MovieBoxCrypto.xUserToken}")
 
         val headers = MovieBoxCrypto.getHeaders(
             method = "POST",
@@ -44,6 +41,7 @@ class MovieBoxSearch {
                         MovieBoxCrypto.xUserToken = parseToken(it)
                     }
                     val json = response.data.bodyAsString()
+                    println("Search JSON response: $json")
                     val root = JsonParser.parse(json) ?: return@withContext emptyList()
                     val data = JsonParser.objectOf(root, "data") ?: return@withContext emptyList()
                     val resultsArray = JsonParser.array(data, "results")

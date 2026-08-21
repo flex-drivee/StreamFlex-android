@@ -33,14 +33,10 @@ object HostDetector {
                     host.contains("drive.google.com") ->
                 return HostType.GOOGLE_VIDEO
 
-            host.contains("hubcloud") ->
+            host.contains("hubcloud") ||
+                    host.contains("hubdrive") ||
+                    host.contains("hubcdn") ->
                 return HostType.HUBCLOUD
-
-            host.contains("hubdrive") ->
-                return HostType.HUBDRIVE
-
-            host.contains("hubcdn") ->
-                return HostType.HUBCDN
 
             host.contains("hblinks") ->
                 return HostType.HBLINKS
@@ -71,9 +67,34 @@ object HostDetector {
 
             host.contains("vidstack") ->
                 return HostType.VIDSTACK
-                
+
             host.contains("megaup") ->
                 return HostType.UNKNOWN
+
+            // AnimeDekho extractors
+            host.contains("abyssplayer") || host.contains("playhydrax") ->
+                return HostType.ABYSS
+
+            host.contains("xerver") ->
+                return HostType.XERVER
+
+            host.contains("vidmoly") ->
+                return HostType.VIDMOLY
+
+            host.contains("rubystm") || host.contains("streamruby") ->
+                return HostType.STREAMRUBY
+
+            host.contains("gdmirrorbot") ->
+                return HostType.GDMIRRORBOT
+
+            host.contains("cloudy.upns") || host.contains("vidcloud.upns") ->
+                return HostType.CLOUDY
+
+            host.contains("turbovidhls") || host.contains("emturbovid") ->
+                return HostType.TURBOVID
+
+            host.contains("strmup.to") ->
+                return HostType.STREAMUP
         }
 
         // Check dynamic domains in ExtractorRegistry (from remote registry.json / defaults)

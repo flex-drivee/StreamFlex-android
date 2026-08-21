@@ -67,8 +67,49 @@ class ContentRepositoryImpl(
                 episodeNumber = tmdbEp.episodeNumber,
                 overview = tmdbEp.overview,
                 airDate = tmdbEp.airDate,
-                runtime = tmdbEp.runtime
+                runtime = tmdbEp.runtime,
+                stillPath = tmdbEp.stillPath?.let { "https://image.tmdb.org/t/p/w500$it" }
             )
         } ?: emptyList()
+    }
+
+    override suspend fun getKoreanDramas(): List<SearchResult> = withContext(Dispatchers.IO) {
+        tmdbApi.discoverTvShows(apiKey, originCountry = "KR").results.map { TmdbMapper.toDomain(it) }
+    }
+
+    override suspend fun getKoreanMovies(): List<SearchResult> = withContext(Dispatchers.IO) {
+        tmdbApi.discoverMovies(apiKey, originCountry = "KR", originalLanguage = "ko").results.map { TmdbMapper.toDomain(it) }
+    }
+
+    override suspend fun getBollywoodMovies(): List<SearchResult> = withContext(Dispatchers.IO) {
+        tmdbApi.discoverMovies(apiKey, originCountry = "IN", originalLanguage = "hi").results.map { TmdbMapper.toDomain(it) }
+    }
+
+    override suspend fun getIndianWebSeries(): List<SearchResult> = withContext(Dispatchers.IO) {
+        tmdbApi.discoverTvShows(apiKey, originCountry = "IN", originalLanguage = "hi").results.map { TmdbMapper.toDomain(it) }
+    }
+
+    override suspend fun getNetflixOriginals(): List<SearchResult> = withContext(Dispatchers.IO) {
+        tmdbApi.discoverTvShows(apiKey, networks = "213").results.map { TmdbMapper.toDomain(it) }
+    }
+
+    override suspend fun getPrimeOriginals(): List<SearchResult> = withContext(Dispatchers.IO) {
+        tmdbApi.discoverTvShows(apiKey, networks = "1024").results.map { TmdbMapper.toDomain(it) }
+    }
+
+    override suspend fun getAnimeMovies(): List<SearchResult> = withContext(Dispatchers.IO) {
+        tmdbApi.discoverMovies(apiKey, genres = "16", originalLanguage = "ja").results.map { TmdbMapper.toDomain(it) }
+    }
+
+    override suspend fun getAnimeShows(): List<SearchResult> = withContext(Dispatchers.IO) {
+        tmdbApi.discoverTvShows(apiKey, genres = "16", originalLanguage = "ja").results.map { TmdbMapper.toDomain(it) }
+    }
+
+    override suspend fun getTopAnimeMovies(): List<SearchResult> = withContext(Dispatchers.IO) {
+        tmdbApi.discoverMovies(apiKey, genres = "16", originalLanguage = "ja", sortBy = "vote_average.desc", voteCountGte = 200).results.map { TmdbMapper.toDomain(it) }
+    }
+
+    override suspend fun getTopAnimeShows(): List<SearchResult> = withContext(Dispatchers.IO) {
+        tmdbApi.discoverTvShows(apiKey, genres = "16", originalLanguage = "ja", sortBy = "vote_average.desc", voteCountGte = 200).results.map { TmdbMapper.toDomain(it) }
     }
 }

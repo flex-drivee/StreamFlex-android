@@ -7,8 +7,8 @@ sealed class Screen(val route: String) {
     object Settings : Screen("settings")
     object Downloads : Screen("downloads")
 
-    object Detail : Screen("detail/{movieId}") {
-        fun createRoute(movieId: String) = "detail/$movieId"
+    object Detail : Screen("detail/{type}/{movieId}") {
+        fun createRoute(type: String, movieId: String) = "detail/$type/$movieId"
     }
 
     // We don't need a route for Player if we use a separate Activity,

@@ -4,6 +4,8 @@ import com.streamflex.domain.models.HostType
 import com.streamflex.domain.models.ProviderSource
 import com.streamflex.domain.models.StreamLink
 import com.streamflex.extractors.common.BaseExtractor
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import com.streamflex.extractors.googlevideo.GoogleVideoExtractor
 import com.streamflex.extractors.hblinks.HBLinksExtractor
 import com.streamflex.extractors.hubcdn.HubCDNExtractor
@@ -66,8 +68,19 @@ object ExtractorManager {
         MovieBoxExtractor(),
         
         // Phase 3+ providers
-        com.streamflex.extractors.streamtape.StreamTapeExtractor()
-        // VidStackExtractor()    ← VegaMovies
+        com.streamflex.extractors.streamtape.StreamTapeExtractor(),
+        com.streamflex.extractors.mixdrop.MixDropExtractor(),
+        
+        // AnimeDekho extractors
+        com.streamflex.extractors.animedekho.AnimeDekhoExtractor(),
+        com.streamflex.extractors.abyss.AbyssPlayerExtractor(),
+        com.streamflex.extractors.turbovid.TurboVidExtractor(),
+        com.streamflex.extractors.vidmoly.VidmolyExtractor(),
+        com.streamflex.extractors.streamruby.StreamRubyExtractor(),
+        com.streamflex.extractors.gdmirrorbot.GDMirrorBotExtractor(),
+        com.streamflex.extractors.cloudy.CloudyExtractor(),
+        com.streamflex.extractors.streamup.StreamUpExtractor(),
+        com.streamflex.extractors.xerver.XerverExtractor()
     )
 
     /**
@@ -89,121 +102,92 @@ object ExtractorManager {
             "Starting extraction pipeline"
         )
 
-        val queue = ArrayDeque<ProviderSource>()
+        val queued = java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
+        val visited = java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
+        val streams = java.util.concurrent.CopyOnWriteArrayList<StreamLink>()
+        val emittedUrls = java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
 
-        val queued = mutableSetOf<String>()
-
-        val visited = mutableSetOf<String>()
-
-        val streams = mutableListOf<StreamLink>()
-        val emittedUrls = mutableSetOf<String>()
-
-        queue.add(source)
+        var currentBatch = listOf(source)
         queued.add(source.url)
 
-        while (
-            queue.isNotEmpty() &&
-            visited.size < MAX_SOURCES
-        ) {
-            // Check for cancellation if user exited the player
+        while (currentBatch.isNotEmpty() && visited.size < MAX_SOURCES) {
             kotlinx.coroutines.yield()
+            
+            val nextBatch = java.util.concurrent.ConcurrentLinkedQueue<ProviderSource>()
 
-            val current = queue.removeFirst()
-
-            StreamLogger.debug(
-                "ExtractorManager",
-                "Processing ${current.hostType} -> ${current.url}"
-            )
-
-            if (!visited.add(current.url)) {
-
-                StreamLogger.debug(
-                    "ExtractorManager",
-                    "Already visited. Skipping."
-                )
-
-                continue
-            }
-
-            if (com.streamflex.core.network.detector.HostDetector.isDirect(current.hostType)) {
-                StreamLogger.debug("ExtractorManager", "Direct stream queued: ${current.url}")
-                val stream = com.streamflex.domain.models.StreamLink(
-                    name = "${current.provider} • Direct",
-                    url = current.url,
-                    quality = current.quality,
-                    host = current.hostType,
-                    headers = current.headers,
-                    cookies = current.cookies,
-                    referer = current.referer
-                )
-                if (emittedUrls.add(stream.url)) {
-                    onStreamFound(stream)
-                }
-                streams.add(stream)
-                continue
-            }
-
-            val extractor =
-                extractorMap[current.hostType]
-
-            if (extractor == null) {
-
-                StreamLogger.warn(
-                    "ExtractorManager",
-                    "No extractor registered for ${current.hostType}"
-                )
-
-                continue
-            }
-
-            StreamLogger.debug(
-                "ExtractorManager",
-                "Using ${extractor.javaClass.simpleName}"
-            )
-
-            try {
-
-                val result = extractor.extract(current)
-
-                StreamLogger.debug(
-                    "ExtractorManager",
-                    "Streams: ${result.streams.size}, Next Sources: ${result.sources.size}"
-                )
-
-                result.streams.forEach { stream ->
-                    if (emittedUrls.add(stream.url)) {
-                        onStreamFound(stream)
-                    }
-                }
-                streams += result.streams
-
-                result.sources
-                    .filter {
-
-                        it.url.isNotBlank() &&
-                                it.hostType != HostType.UNKNOWN &&
-                                it.url !in visited &&
-                                queued.add(it.url)
-
-                    }
-                    .forEach {
-
+            kotlinx.coroutines.coroutineScope {
+                val jobs = currentBatch.map { current ->
+                    async(kotlinx.coroutines.Dispatchers.IO) {
                         StreamLogger.debug(
                             "ExtractorManager",
-                            "Queued next source: ${it.hostType}"
+                            "Processing ${current.hostType} -> ${current.url}"
                         )
 
-                        queue.addLast(it)
+                        if (!visited.add(current.url)) {
+                            StreamLogger.debug("ExtractorManager", "Already visited. Skipping.")
+                            return@async
+                        }
+
+                        if (com.streamflex.core.network.detector.HostDetector.isDirect(current.hostType)) {
+                            StreamLogger.debug("ExtractorManager", "Direct stream queued: ${current.url}")
+                            val stream = com.streamflex.domain.models.StreamLink(
+                                name = "${current.provider} \u2022 Direct",
+                                url = current.url,
+                                quality = current.quality,
+                                host = current.hostType,
+                                headers = current.headers,
+                                cookies = current.cookies,
+                                referer = current.referer
+                            )
+                            if (emittedUrls.add(stream.url)) {
+                                onStreamFound(stream)
+                            }
+                            streams.add(stream)
+                            return@async
+                        }
+
+                        val extractor = extractorMap[current.hostType]
+                        if (extractor == null) {
+                            StreamLogger.warn("ExtractorManager", "No extractor registered for ${current.hostType}")
+                            return@async
+                        }
+
+                        StreamLogger.debug("ExtractorManager", "Using ${extractor.javaClass.simpleName}")
+
+                        try {
+                            val result = extractor.extract(current)
+
+                            StreamLogger.debug(
+                                "ExtractorManager",
+                                "Streams: ${result.streams.size}, Next Sources: ${result.sources.size}"
+                            )
+
+                            result.streams.forEach { stream ->
+                                if (emittedUrls.add(stream.url)) {
+                                    onStreamFound(stream)
+                                }
+                            }
+                            streams.addAll(result.streams)
+
+                            result.sources.filter {
+                                it.url.isNotBlank() && it.hostType != HostType.UNKNOWN
+                            }.forEach {
+                                nextBatch.add(it)
+                            }
+
+                        } catch (e: Exception) {
+                            StreamLogger.error(
+                                "ExtractorManager",
+                                "Extractor ${extractor.javaClass.simpleName} failed",
+                                e
+                            )
+                        }
                     }
-
-            } catch (e: Exception) {
-
-                StreamLogger.error(
-                    "ExtractorManager",
-                    "Extractor ${extractor.javaClass.simpleName} failed",
-                    e
-                )
+                }
+                jobs.awaitAll()
             }
+
+            currentBatch = nextBatch.filter { it.url !in visited && queued.add(it.url) }.take(MAX_SOURCES - visited.size)
         }
 
         StreamLogger.info(
@@ -213,7 +197,6 @@ object ExtractorManager {
 
         return streams.distinctBy { it.url }
     }
-
     /**
      * Returns true if an extractor exists.
      */

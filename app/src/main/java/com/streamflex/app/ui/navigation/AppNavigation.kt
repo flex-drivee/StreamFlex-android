@@ -36,7 +36,6 @@ import com.streamflex.app.ui.home.HomeViewModelFactory
 import com.streamflex.app.ui.movies.MovieDetailScreen
 import com.streamflex.app.ui.movies.MovieDetailViewModel
 import com.streamflex.app.ui.movies.MovieDetailViewModelFactory
-import com.streamflex.app.ui.mylist.MyListScreen
 import com.streamflex.player.PlayerActivity
 import com.streamflex.app.ui.search.SearchScreen
 import com.streamflex.app.ui.search.SearchViewModel
@@ -61,7 +60,6 @@ fun AppNavigation(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
-    // Define which routes should show the floating bottom bar
     val showBottomBar = currentDestination?.route in listOf(
         Screen.Home.route,
         Screen.Search.route,
@@ -78,16 +76,18 @@ fun AppNavigation(
         ) {
             // --- HOME ---
             composable(route = Screen.Home.route) {
-                val viewModelFactory = HomeViewModelFactory(repository)
+                val progressManager = remember { com.streamflex.player.resume.PlaybackProgressManager(context) }
+                val viewModelFactory = HomeViewModelFactory(repository, progressManager)
                 val viewModel: HomeViewModel = viewModel(factory = viewModelFactory)
 
                 HomeScreen(
                     viewModel = viewModel,
                     providerRepository = com.streamflex.app.di.ProviderModule.repository,
-                    onNavigateToDetail = { id -> navController.navigate(Screen.Detail.createRoute(id)) },
+                    onNavigateToDetail = { type, id -> navController.navigate(Screen.Detail.createRoute(type, id)) },
                     onSearchClick = { navController.navigate(Screen.Search.route) },
                     onSettingsClick = { navController.navigate(Screen.Settings.route) },
-                    onDownloadsClick = { navController.navigate(Screen.Downloads.route) }
+                    onDownloadsClick = { navController.navigate(Screen.Downloads.route) },
+                    onExploreClick = { navController.navigate("explore") }
                 )
             }
             
@@ -113,70 +113,84 @@ fun AppNavigation(
                 SearchScreen(
                     viewModel = viewModel,
                     onBackClick = { navController.popBackStack() },
-                    onItemClick = { id -> navController.navigate(Screen.Detail.createRoute(id)) }
+                    onItemClick = { type, id -> navController.navigate(Screen.Detail.createRoute(type, id)) }
                 )
             }
 
-                // --- EXPLORE ---
+            // --- EXPLORE ---
             composable(route = "explore") {
+                val viewModelFactory = com.streamflex.app.ui.explore.ExploreViewModelFactory(repository)
+                val viewModel: com.streamflex.app.ui.explore.ExploreViewModel = viewModel(factory = viewModelFactory)
+
                 com.streamflex.app.ui.explore.ExploreScreen(
-                    onItemClick = { id -> navController.navigate(Screen.Detail.createRoute(id)) }
+                    viewModel = viewModel,
+                    onItemClick = { type, id -> navController.navigate(Screen.Detail.createRoute(type, id)) }
                 )
             }
 
-            // --- LIBRARY (Downloads & Bookmarks) ---
+            // --- LIBRARY ---
             composable(route = "library") {
                 com.streamflex.app.ui.library.LibraryScreen(
                     onBackClick = { navController.popBackStack() },
-                    onItemClick = { id -> navController.navigate(Screen.Detail.createRoute(id)) }
+                    onItemClick = { id -> navController.navigate(Screen.Detail.createRoute("MOVIE", id)) }
                 )
             }
 
             // --- DETAIL ---
             composable(
                 route = Screen.Detail.route,
-                arguments = listOf(navArgument("movieId") { type = NavType.StringType })
+                arguments = listOf(
+                    navArgument("type") { type = NavType.StringType },
+                    navArgument("movieId") { type = NavType.StringType }
+                )
             ) { backStackEntry ->
+                val contentType = backStackEntry.arguments?.getString("type") ?: return@composable
                 val movieId = backStackEntry.arguments?.getString("movieId") ?: return@composable
                 val viewModelFactory = MovieDetailViewModelFactory(
                     contentRepository = repository,
                     streamRepository = streamRepository,
-                    contentId = movieId
+                    contentId = movieId,
+                    contentType = contentType
                 )
                 val viewModel: MovieDetailViewModel = viewModel(factory = viewModelFactory)
+                val uiState by viewModel.uiState.collectAsState()
 
                 MovieDetailScreen(
                     viewModel = viewModel,
                     onBackClick = { navController.popBackStack() },
-                    onMoviePlayClick = { links ->
-                        com.streamflex.player.StreamStateHolder.streams.value = links
-                        val intent = Intent(context, PlayerActivity::class.java).apply {
-                            val urls = ArrayList(links.map { it.url })
-                            val referers = ArrayList(links.map { it.headers["Referer"] ?: it.referer ?: "" })
-                            val cookies = ArrayList(links.map { it.headers["Cookie"] ?: it.cookies.entries.joinToString("; ") { c -> "${c.key}=${c.value}" } })
-                            val userAgents = ArrayList(links.map { it.headers["User-Agent"] ?: "" })
-                            putStringArrayListExtra("VIDEO_URLS", urls)
-                            putStringArrayListExtra("VIDEO_REFERERS", referers)
-                            putStringArrayListExtra("VIDEO_COOKIES", cookies)
-                            putStringArrayListExtra("VIDEO_USER_AGENTS", userAgents)
+                    onMoviePlayClick = {
+                        val intent = Intent(context, com.streamflex.player.PlayerActivity::class.java).apply {
+                            putExtra("MEDIA_ID", movieId)
+                            putExtra("VIDEO_TITLE", uiState.movie?.title ?: "Unknown Media")
+                            putExtra("VIDEO_YEAR", uiState.movie?.year ?: 0)
+                            putExtra("IS_SHOW", false)
+                            putExtra("POSTER_PATH", uiState.movie?.poster)
                         }
                         context.startActivity(intent)
                     },
                     onEpisodePlayClick = { episode ->
-                        viewModel.fetchEpisodeStreams(episode) { links ->
-                            com.streamflex.player.StreamStateHolder.streams.value = links
-                            val intent = Intent(context, PlayerActivity::class.java).apply {
-                                val urls = ArrayList(links.map { it.url })
-                                val referers = ArrayList(links.map { it.headers["Referer"] ?: it.referer ?: "" })
-                                val cookies = ArrayList(links.map { it.headers["Cookie"] ?: it.cookies.entries.joinToString("; ") { c -> "${c.key}=${c.value}" } })
-                                val userAgents = ArrayList(links.map { it.headers["User-Agent"] ?: "" })
-                                putStringArrayListExtra("VIDEO_URLS", urls)
-                                putStringArrayListExtra("VIDEO_REFERERS", referers)
-                                putStringArrayListExtra("VIDEO_COOKIES", cookies)
-                                putStringArrayListExtra("VIDEO_USER_AGENTS", userAgents)
-                            }
-                            context.startActivity(intent)
+                        val intent = Intent(context, com.streamflex.player.PlayerActivity::class.java).apply {
+                            val epIds = ArrayList(uiState.episodes.map { it.id })
+                            val epTitles = ArrayList(uiState.episodes.map { it.title })
+                            val epSeasons = ArrayList(uiState.episodes.map { uiState.selectedSeason })
+                            val epNumbers = ArrayList(uiState.episodes.map { it.episodeNumber })
+                            val epStills = ArrayList(uiState.episodes.map { it.stillPath ?: "" })
+                            
+                            putStringArrayListExtra("EPISODE_IDS", epIds)
+                            putStringArrayListExtra("EPISODE_TITLES", epTitles)
+                            putIntegerArrayListExtra("EPISODE_SEASONS", epSeasons)
+                            putIntegerArrayListExtra("EPISODE_NUMBERS", epNumbers)
+                            putStringArrayListExtra("EPISODE_STILLS", epStills)
+                            
+                            putExtra("MEDIA_ID", movieId)
+                            putExtra("VIDEO_TITLE", uiState.show?.title ?: "Unknown Media")
+                            putExtra("VIDEO_YEAR", uiState.show?.year ?: 0)
+                            putExtra("IS_SHOW", true)
+                            putExtra("POSTER_PATH", uiState.show?.poster)
+                            
+                            putExtra("CURRENT_EPISODE_ID", episode.id)
                         }
+                        context.startActivity(intent)
                     }
                 )
             }
@@ -195,9 +209,9 @@ fun AppNavigation(
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = 12.dp) // Lowered from 24.dp
+                    .padding(bottom = 12.dp)
                     .fillMaxWidth()
-                    .padding(horizontal = 40.dp) // Thinner width (increased horizontal padding from 24.dp)
+                    .padding(horizontal = 40.dp)
             ) {
                 Row(
                     modifier = Modifier
@@ -205,7 +219,7 @@ fun AppNavigation(
                         .shadow(8.dp, RoundedCornerShape(32.dp))
                         .clip(RoundedCornerShape(32.dp))
                         .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.95f))
-                        .padding(vertical = 8.dp, horizontal = 12.dp), // Thinner height
+                        .padding(vertical = 8.dp, horizontal = 12.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -213,7 +227,7 @@ fun AppNavigation(
                         val isSelected = currentDestination?.hierarchy?.any { it.route == item.route } == true
                         Box(
                             modifier = Modifier
-                                .size(44.dp) // Slightly smaller touch target to fit in thinner bar
+                                .size(44.dp)
                                 .clip(CircleShape)
                                 .background(if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else Color.Transparent)
                                 .clickable {
