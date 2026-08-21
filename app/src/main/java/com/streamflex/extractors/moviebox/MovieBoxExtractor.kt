@@ -22,6 +22,8 @@ class MovieBoxExtractor : BaseExtractor() {
         // url passed from MovieBoxDetails is already fully qualified:
         // "$baseUrl/wefeed-mobile-bff/subject-api/play-info?subjectId=$id&episode=$ep"
         val playUrl = source.url
+        val uri = Uri.parse(playUrl)
+        val injectedLang = uri.getQueryParameter("lang") ?: ""
         val streams = mutableListOf<StreamLink>()
         val nextSources = mutableListOf<ProviderSource>()
         
@@ -51,11 +53,11 @@ class MovieBoxExtractor : BaseExtractor() {
                         
                         // Parse streams
                         val list = JsonParser.array(data, "streams")
-                        parseStreamList(list, globalSignCookie, streams, nextSources, baseOrigin)
+                        parseStreamList(list, globalSignCookie, streams, nextSources, baseOrigin, injectedLang)
                         
                         // Parse detectors
                         val detectors = JsonParser.array(data, "detectors")
-                        parseStreamList(detectors, globalSignCookie, streams, nextSources, baseOrigin)
+                        parseStreamList(detectors, globalSignCookie, streams, nextSources, baseOrigin, injectedLang)
                     }
                 }
             }
@@ -93,7 +95,7 @@ class MovieBoxExtractor : BaseExtractor() {
                                 val globalSignCookie = JsonParser.string(getData, "signCookie") ?: JsonParser.string(getData, "signCookieRaw")
                                 
                                 val resourceDetectors = JsonParser.array(getData, "resourceDetectors")
-                                parseStreamList(resourceDetectors, globalSignCookie, streams, nextSources, baseOrigin)
+                                parseStreamList(resourceDetectors, globalSignCookie, streams, nextSources, baseOrigin, injectedLang)
                             }
                         }
                     }
@@ -110,12 +112,12 @@ class MovieBoxExtractor : BaseExtractor() {
         )
     }
     
-    private fun parseStreamList(list: List<JsonElement>?, globalSignCookie: String?, streams: MutableList<StreamLink>, nextSources: MutableList<ProviderSource>, baseOrigin: String) {
+    private fun parseStreamList(list: List<JsonElement>?, globalSignCookie: String?, streams: MutableList<StreamLink>, nextSources: MutableList<ProviderSource>, baseOrigin: String, injectedLang: String) {
         if (list == null) return
         for (item in list) {
             val path = JsonParser.string(item, "url") ?: JsonParser.string(item, "resourceLink") ?: continue
             val qualityStr = JsonParser.string(item, "resolutions") ?: ""
-            val language = JsonParser.string(item, "language") ?: ""
+            val language = JsonParser.string(item, "language") ?: injectedLang
             val name = JsonParser.string(item, "name") ?: ""
             
             val streamName = buildString {

@@ -63,10 +63,12 @@ class MovieBoxDetails {
                     if (!isTV) {
                         // For movies, fetch alternative subjectIds to get all languages
                         val baseTitle = title.replace(Regex("\\[.*\\]"), "").trim()
-                        val relatedIds = fetchRelatedMovieIds(baseTitle, result.id, baseUrl)
+                        val currentLang = JsonParser.string(data, "language") ?: ""
+                        val relatedIds = fetchRelatedMovieIds(baseTitle, result.id, currentLang, baseUrl)
                         
-                        val sources = relatedIds.map { id ->
-                            MovieBoxMapper.toProviderSource(url = "$baseUrl/wefeed-mobile-bff/subject-api/play-info?subjectId=$id")
+                        val sources = relatedIds.map { (id, lang) ->
+                            val langEncoded = java.net.URLEncoder.encode(lang, "UTF-8")
+                            MovieBoxMapper.toProviderSource(url = "$baseUrl/wefeed-mobile-bff/subject-api/play-info?subjectId=$id&lang=$langEncoded")
                         }
                         
                         MovieBoxMapper.toProviderResult(
@@ -104,9 +106,9 @@ class MovieBoxDetails {
         }
     }
     
-    private suspend fun fetchRelatedMovieIds(title: String, currentId: String, baseUrl: String): List<String> {
+    private suspend fun fetchRelatedMovieIds(title: String, currentId: String, currentLang: String, baseUrl: String): List<Pair<String, String>> {
         val searchUrl = "$baseUrl/wefeed-mobile-bff/subject-api/search/v2"
-        val payload = """{"q":"$title","search_abt":"2075"}"""
+        val payload = """{"keyword":"$title","page":1,"perPage":20}"""
         
         val headers = MovieBoxCrypto.getHeaders(
             method = "POST",
@@ -121,7 +123,7 @@ class MovieBoxDetails {
             .headers(headers)
             .build()
             
-        val ids = mutableListOf(currentId)
+        val ids = mutableListOf(Pair(currentId, currentLang))
         
         try {
             when (val resp = HttpClient.execute(request)) {
@@ -140,8 +142,9 @@ class MovieBoxDetails {
                                 
                                 // Only add if it's the exact same base movie (e.g. "Spider-Man: No Way Home [Hindi]")
                                 val baseSubjectTitle = subjectTitle.replace(Regex("\\[.*\\]"), "").trim()
-                                if (baseSubjectTitle.equals(title, ignoreCase = true) && !ids.contains(subjectId)) {
-                                    ids.add(subjectId)
+                                val lang = JsonParser.string(subject, "language") ?: ""
+                                if (baseSubjectTitle.equals(title, ignoreCase = true) && !ids.any { it.first == subjectId }) {
+                                    ids.add(Pair(subjectId, lang))
                                 }
                             }
                         }
