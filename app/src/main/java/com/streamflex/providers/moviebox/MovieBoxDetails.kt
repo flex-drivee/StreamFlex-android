@@ -62,7 +62,7 @@ class MovieBoxDetails {
 
                     if (!isTV) {
                         // For movies, fetch alternative subjectIds to get all languages
-                        val baseTitle = title.replace(Regex("\\[.*\\]"), "").trim()
+                        val baseTitle = cleanTitle(title)
                         val currentLang = JsonParser.string(data, "language") ?: ""
                         val relatedIds = fetchRelatedMovieIds(baseTitle, result.id, currentLang, baseUrl)
                         
@@ -81,7 +81,7 @@ class MovieBoxDetails {
                             poster     = poster
                         )
                     } else {
-                        val baseTitle = title.replace(Regex("\\[.*\\]"), "").trim()
+                        val baseTitle = cleanTitle(title)
                         val currentLang = JsonParser.string(data, "language") ?: ""
                         val relatedIds = fetchRelatedMovieIds(baseTitle, result.id, currentLang, baseUrl)
 
@@ -134,6 +134,15 @@ class MovieBoxDetails {
         }
     }
     
+    
+    private fun cleanTitle(title: String): String {
+        var clean = title.replace(Regex("\\[.*?\\]"), "")
+        clean = clean.replace(Regex("\\(.*?\\)"), "")
+        clean = clean.replace(Regex("(?i)\\bS\\d+(?:-S\\d+)?\\b"), "")
+        clean = clean.replace(Regex("(?i)\\bSeason\\s*\\d+\\b"), "")
+        return clean.replace(Regex("\\s+"), " ").trim()
+    }
+
     private suspend fun fetchRelatedMovieIds(title: String, currentId: String, currentLang: String, baseUrl: String): List<Pair<String, String>> {
         val searchUrl = "$baseUrl/wefeed-mobile-bff/subject-api/search/v2"
         val payload = """{"keyword":"$title","page":1,"perPage":20}"""
@@ -168,8 +177,7 @@ class MovieBoxDetails {
                                 val subjectId = JsonParser.string(subject, "subjectId") ?: continue
                                 val subjectTitle = JsonParser.string(subject, "title") ?: ""
                                 
-                                // Only add if it's the exact same base movie (e.g. "Spider-Man: No Way Home [Hindi]")
-                                val baseSubjectTitle = subjectTitle.replace(Regex("\\[.*\\]"), "").trim()
+                                val baseSubjectTitle = cleanTitle(subjectTitle)
                                 val lang = JsonParser.string(subject, "language") ?: ""
                                 if (baseSubjectTitle.equals(title, ignoreCase = true) && !ids.any { it.first == subjectId }) {
                                     ids.add(Pair(subjectId, lang))
