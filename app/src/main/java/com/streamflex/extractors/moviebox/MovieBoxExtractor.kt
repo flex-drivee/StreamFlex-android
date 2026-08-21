@@ -22,8 +22,7 @@ class MovieBoxExtractor : BaseExtractor() {
         // url passed from MovieBoxDetails is already fully qualified:
         // "$baseUrl/wefeed-mobile-bff/subject-api/play-info?subjectId=$id&episode=$ep"
         val playUrl = source.url
-        val uri = Uri.parse(playUrl)
-        val injectedLang = uri.getQueryParameter("lang") ?: ""
+        val injectedLang = source.metadata["language"] ?: ""
         val streams = mutableListOf<StreamLink>()
         val nextSources = mutableListOf<ProviderSource>()
         

@@ -67,8 +67,8 @@ class MovieBoxDetails {
                         val relatedIds = fetchRelatedMovieIds(baseTitle, result.id, currentLang, baseUrl)
                         
                         val sources = relatedIds.map { (id, lang) ->
-                            val langEncoded = java.net.URLEncoder.encode(lang, "UTF-8")
-                            MovieBoxMapper.toProviderSource(url = "$baseUrl/wefeed-mobile-bff/subject-api/play-info?subjectId=$id&lang=$langEncoded")
+                            val source = MovieBoxMapper.toProviderSource(url = "$baseUrl/wefeed-mobile-bff/subject-api/play-info?subjectId=$id")
+                            source.copy(metadata = mapOf("language" to lang))
                         }
                         
                         MovieBoxMapper.toProviderResult(
