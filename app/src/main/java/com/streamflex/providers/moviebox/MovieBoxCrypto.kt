@@ -142,7 +142,7 @@ object MovieBoxCrypto {
     ): Map<String, String> {
         // For GET requests, Content-Type is null (not sent); for POST it's application/json
         val actualContentType = if (method.uppercase(Locale.ROOT) == "GET") null else contentType
-        val clientInfo = "{\"package_name\":\"com.community.oneroom\",\"version_name\":\"3.0.13.0325.03\",\"version_code\":50020088,\"os\":\"android\",\"os_version\":\"16\",\"device_id\":\"$deviceId\",\"install_store\":\"ps\",\"gaid\":\"d7578036d13336cc\",\"brand\":\"${currentBrandModel.first}\",\"model\":\"${currentBrandModel.second}\",\"system_language\":\"en\",\"net\":\"NETWORK_WIFI\",\"region\":\"US\",\"timezone\":\"America/New_York\",\"sp_code\":\"\"}"
+        val clientInfo = "{\"package_name\":\"com.community.oneroom\",\"version_name\":\"3.0.13.0325.03\",\"version_code\":50020088,\"os\":\"android\",\"os_version\":\"13\",\"install_ch\":\"ps\",\"device_id\":\"$deviceId\",\"install_store\":\"ps\",\"gaid\":\"1b2212c1-dadf-43c3-a0c8-bd6ce48ae22d\",\"brand\":\"${currentBrandModel.first}\",\"model\":\"${currentBrandModel.second}\",\"system_language\":\"en\",\"net\":\"NETWORK_WIFI\",\"region\":\"US\",\"timezone\":\"Asia/Calcutta\",\"sp_code\":\"\",\"X-Play-Mode\":\"1\",\"X-Idle-Data\":\"1\",\"X-Family-Mode\":\"0\",\"X-Content-Mode\":\"0\"}"
         val xClientToken = generateXClientToken()
         // Always pass ACCEPT_JSON as accept parameter — required for valid signature
         val xTrSignature = generateXTrSignature(method, ACCEPT_JSON, actualContentType, url, body, useAltKey)
@@ -152,7 +152,7 @@ object MovieBoxCrypto {
             "X-Client-Status" to "0",
             "X-Client-Token"  to xClientToken,
             "X-Tr-Signature"  to xTrSignature,
-            "User-Agent"      to "com.community.oneroom/50020088 (Linux; U; Android 16; en_US; sdk_gphone64_x86_64; Build/BP22.250325.006; Cronet/133.0.6876.3)",
+            "User-Agent"      to "com.community.oneroom/50020088 (Linux; U; Android 13; en_US; ${currentBrandModel.first}; Build/TQ3A.230901.001; Cronet/145.0.7582.0)",
             "Accept"          to ACCEPT_JSON
         )
         if (actualContentType != null) {
