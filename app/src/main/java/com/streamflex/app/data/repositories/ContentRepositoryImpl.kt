@@ -118,7 +118,7 @@ class ContentRepositoryImpl(
                     val genreId = categoryId.removePrefix("genre_")
                     tmdbApi.discoverMovies(apiKey, genres = genreId, page = page)
                 } else {
-                    tmdbApi.getPopularMovies(apiKey, page)
+                    tmdbApi.getPopularMovies(apiKey)
                 }
             }
         }

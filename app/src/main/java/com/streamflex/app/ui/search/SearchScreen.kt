@@ -34,7 +34,8 @@ import com.streamflex.app.ui.theme.*
 fun SearchScreen(
     viewModel:   SearchViewModel,
     onBackClick: () -> Unit,
-    onItemClick: (String, String) -> Unit
+    onItemClick: (String, String) -> Unit,
+    onGenreClick: (String, String) -> Unit = { _, _ -> }
 ) {
     val state        by viewModel.uiState.collectAsState()
     val focusManager  = LocalFocusManager.current
