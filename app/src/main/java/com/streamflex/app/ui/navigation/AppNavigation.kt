@@ -113,7 +113,8 @@ fun AppNavigation(
                 SearchScreen(
                     viewModel = viewModel,
                     onBackClick = { navController.popBackStack() },
-                    onItemClick = { type, id -> navController.navigate(Screen.Detail.createRoute(type, id)) }
+                    onItemClick = { type, id -> navController.navigate(Screen.Detail.createRoute(type, id)) },
+                    onGenreClick = { id, title -> navController.navigate("see_all/$id/$title") }
                 )
             }
 

@@ -113,7 +113,14 @@ class ContentRepositoryImpl(
             "top_anime_movies" -> tmdbApi.discoverMovies(apiKey, genres = "16", originalLanguage = "ja", sortBy = "vote_average.desc", voteCountGte = 200, page = page)
             "top_anime_shows" -> tmdbApi.discoverTvShows(apiKey, genres = "16", originalLanguage = "ja", sortBy = "vote_average.desc", voteCountGte = 200, page = page)
             
-            else -> throw IllegalArgumentException("Unknown category: $categoryId")
+            else -> {
+                if (categoryId.startsWith("genre_")) {
+                    val genreId = categoryId.removePrefix("genre_")
+                    tmdbApi.discoverMovies(apiKey, genres = genreId, page = page)
+                } else {
+                    tmdbApi.getPopularMovies(apiKey, page)
+                }
+            }
         }
         return@withContext response.results.map { TmdbMapper.toDomain(it) }
     }

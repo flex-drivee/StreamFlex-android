@@ -168,7 +168,7 @@ fun SearchScreen(
 
                     // No query → show genre browse categories
                     state.query.isEmpty() -> {
-                        SFBrowseCategories()
+                        SFBrowseCategories(onGenreClick)
                     }
 
                     // No results
@@ -292,20 +292,20 @@ private fun SFSearchCard(
 // ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
-private fun SFBrowseCategories() {
+private fun SFBrowseCategories(onGenreClick: (String, String) -> Unit) {
     val genres = listOf(
-        "Action"    to MaterialTheme.colorScheme.primary,
-        "Drama"     to Color(0xFF9B59B6),
-        "Comedy"    to Color(0xFFE67E22),
-        "Thriller"  to MaterialTheme.colorScheme.secondary,
-        "Romance"   to Color(0xFFE91E63),
-        "Sci-Fi"    to Color(0xFF00BCD4),
-        "Horror"    to Color(0xFF795548),
-        "Anime"     to Color(0xFFFF5722),
-        "Crime"     to Color(0xFF607D8B),
-        "Family"    to Color(0xFF4CAF50),
-        "Fantasy"   to Color(0xFF673AB7),
-        "History"   to Color(0xFF8D6E63)
+        Triple("Action", "genre_28", MaterialTheme.colorScheme.primary),
+        Triple("Drama", "genre_18", Color(0xFF9B59B6)),
+        Triple("Comedy", "genre_35", Color(0xFFE67E22)),
+        Triple("Thriller", "genre_53", MaterialTheme.colorScheme.secondary),
+        Triple("Romance", "genre_10749", Color(0xFFE91E63)),
+        Triple("Sci-Fi", "genre_878", Color(0xFF00BCD4)),
+        Triple("Horror", "genre_27", Color(0xFF795548)),
+        Triple("Anime", "genre_16", Color(0xFFFF5722)),
+        Triple("Crime", "genre_80", Color(0xFF607D8B)),
+        Triple("Family", "genre_10751", Color(0xFF4CAF50)),
+        Triple("Fantasy", "genre_14", Color(0xFF673AB7)),
+        Triple("History", "genre_36", Color(0xFF8D6E63))
     )
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -323,7 +323,7 @@ private fun SFBrowseCategories() {
             verticalArrangement   = Arrangement.spacedBy(10.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            items(genres) { (genre, color) ->
+            items(genres) { (genre, id, color) ->
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -334,7 +334,7 @@ private fun SFBrowseCategories() {
                                 listOf(color.copy(0.85f), color.copy(0.5f))
                             )
                         )
-                        .clickable { },
+                        .clickable { onGenreClick(id, genre) },
                     contentAlignment = Alignment.CenterStart
                 ) {
                     Text(
