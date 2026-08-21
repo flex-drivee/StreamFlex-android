@@ -14,15 +14,6 @@ interface ContentRepository {
     suspend fun getSimilarContent(id: String, type: com.streamflex.app.domain.models.ContentType): List<SearchResult>
     suspend fun getSeasonEpisodes(showId: String, seasonNumber: Int): List<com.streamflex.app.domain.models.Episode>
     
-    // Custom Categories
-    suspend fun getKoreanDramas(): List<SearchResult>
-    suspend fun getKoreanMovies(): List<SearchResult>
-    suspend fun getBollywoodMovies(): List<SearchResult>
-    suspend fun getIndianWebSeries(): List<SearchResult>
-    suspend fun getNetflixOriginals(): List<SearchResult>
-    suspend fun getPrimeOriginals(): List<SearchResult>
-    suspend fun getAnimeMovies(): List<SearchResult>
-    suspend fun getAnimeShows(): List<SearchResult>
-    suspend fun getTopAnimeMovies(): List<SearchResult>
-    suspend fun getTopAnimeShows(): List<SearchResult>
+    // Generic Category Fetch
+    suspend fun getCategory(categoryId: String, page: Int = 1): List<SearchResult>
 }

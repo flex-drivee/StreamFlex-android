@@ -14,20 +14,17 @@ import kotlinx.coroutines.Dispatchers
 import com.streamflex.app.data.providers.hdhub4u.Hdhub4uProvider
 
 
+data class HomeSection(
+    val id: String,
+    val title: String,
+    val items: List<SearchResult>
+)
+
 data class HomeUiState(
     val isLoading: Boolean = true,
     val continueWatching: List<com.streamflex.player.resume.HistoryItem> = emptyList(),
-    val popularMovies: List<SearchResult> = emptyList(),
-    val popularShows: List<SearchResult> = emptyList(),
-    val koreanDramas: List<SearchResult> = emptyList(),
-    val bollywoodMovies: List<SearchResult> = emptyList(),
-    val indianWebSeries: List<SearchResult> = emptyList(),
-    val netflixOriginals: List<SearchResult> = emptyList(),
-    val primeOriginals: List<SearchResult> = emptyList(),
-    val animeMovies: List<SearchResult> = emptyList(),
-    val animeShows: List<SearchResult> = emptyList(),
-    val topAnimeMovies: List<SearchResult> = emptyList(),
-    val topAnimeShows: List<SearchResult> = emptyList(),
+    val popularMovies: List<SearchResult> = emptyList(), // For hero section
+    val sections: List<HomeSection> = emptyList(),
     val errorMessage: String? = null
 )
 
@@ -52,32 +49,49 @@ class HomeViewModel(
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
             try {
                 val history = progressManager.getHistory()
-                val movies = repository.getPopularMovies()
-                val shows = repository.getPopularShows()
-                val kDramas = repository.getKoreanDramas()
-                val bMovies = repository.getBollywoodMovies()
-                val iSeries = repository.getIndianWebSeries()
-                val netflix = repository.getNetflixOriginals()
-                val prime = repository.getPrimeOriginals()
-                val aMovies = repository.getAnimeMovies()
-                val aShows = repository.getAnimeShows()
-                val topAMovies = repository.getTopAnimeMovies()
-                val topAShows = repository.getTopAnimeShows()
+                val popMovies = repository.getPopularMovies()
+                
+                // Define the categories to fetch
+                val categoriesToFetch = listOf(
+                    "trending_cinema" to "Trending in Cinema",
+                    "top_series" to "Top Series This Week",
+                    "netflix_originals" to "Netflix Originals",
+                    "prime_originals" to "Prime Originals",
+                    "korean_dramas" to "Top K-Dramas",
+                    "bollywood_movies" to "Bollywood Blockbusters",
+                    "indian_web_series" to "Indian Web Series",
+                    "south_indian" to "South Indian Hits",
+                    "anime_shows" to "Anime Shows",
+                    "anime_movies" to "Anime Movies",
+                    "action_movies" to "Action & Adventure",
+                    "comedy_movies" to "Comedy Movies",
+                    "romance_movies" to "Romance Movies",
+                    "crime_movies" to "Crime Movies",
+                    "turkish_drama" to "Turkish Dramas",
+                    "chinese_series" to "Chinese Series",
+                    "japan_series" to "Japanese Series",
+                    "thai_series" to "Thai Series",
+                    "ph_movies" to "Philippines Movies",
+                    "usa_movies" to "USA Movies"
+                )
+
+                val loadedSections = mutableListOf<HomeSection>()
+                for ((catId, catTitle) in categoriesToFetch) {
+                    try {
+                        val items = repository.getCategory(catId)
+                        if (items.isNotEmpty()) {
+                            loadedSections.add(HomeSection(catId, catTitle, items))
+                        }
+                    } catch (e: Exception) {
+                        Log.e("HomeViewModel", "Failed to load category $catId", e)
+                    }
+                }
 
                 _uiState.value = HomeUiState(
                     isLoading = false,
                     continueWatching = history,
-                    popularMovies = movies,
-                    popularShows = shows,
-                    koreanDramas = kDramas,
-                    bollywoodMovies = bMovies,
-                    indianWebSeries = iSeries,
-                    netflixOriginals = netflix,
-                    primeOriginals = prime,
-                    animeMovies = aMovies,
-                    animeShows = aShows,
-                    topAnimeMovies = topAMovies,
-                    topAnimeShows = topAShows
+                    popularMovies = popMovies,
+                    sections = loadedSections
                 )
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(

@@ -66,6 +66,18 @@ interface TmdbApi {
         @Query("api_key") apiKey: String
     ): TmdbSeasonDetails
 
+    @GET("movie/now_playing")
+    suspend fun getNowPlayingMovies(
+        @Query("api_key") apiKey: String,
+        @Query("page") page: Int = 1
+    ): TmdbSearchResponse
+
+    @GET("trending/tv/week")
+    suspend fun getTrendingTv(
+        @Query("api_key") apiKey: String,
+        @Query("page") page: Int = 1
+    ): TmdbSearchResponse
+
     // --- Discover ---
     @GET("discover/movie")
     suspend fun discoverMovies(
@@ -75,7 +87,8 @@ interface TmdbApi {
         @Query("with_networks") networks: String? = null,
         @Query("with_genres") genres: String? = null,
         @Query("sort_by") sortBy: String? = "popularity.desc",
-        @Query("vote_count.gte") voteCountGte: Int? = null
+        @Query("vote_count.gte") voteCountGte: Int? = null,
+        @Query("page") page: Int = 1
     ): TmdbSearchResponse
 
     @GET("discover/tv")
@@ -86,6 +99,7 @@ interface TmdbApi {
         @Query("with_networks") networks: String? = null,
         @Query("with_genres") genres: String? = null,
         @Query("sort_by") sortBy: String? = "popularity.desc",
-        @Query("vote_count.gte") voteCountGte: Int? = null
+        @Query("vote_count.gte") voteCountGte: Int? = null,
+        @Query("page") page: Int = 1
     ): TmdbSearchResponse
 }

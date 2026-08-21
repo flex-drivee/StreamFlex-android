@@ -45,7 +45,7 @@ fun HomeScreen(
     onSearchClick: () -> Unit = {},
     onSettingsClick: () -> Unit = {},
     onDownloadsClick: () -> Unit = {},
-    onExploreClick: () -> Unit = {}
+    onExploreClick: (String, String) -> Unit = { _, _ -> }
 ) {
     val state by viewModel.uiState.collectAsState()
     val scrollState = rememberLazyListState()
@@ -110,26 +110,6 @@ fun HomeScreen(
                 }
             }
 
-            // ── CONTENT ROW — Popular Movies ─────────────────────────────────
-            item {
-                SFSectionRow(
-                    title    = "🔥 Trending Now",
-                    items    = state.popularMovies,
-                    onItemClick = onNavigateToDetail,
-                    onSeeAllClick = onExploreClick
-                )
-            }
-
-            // ── CONTENT ROW — Popular Shows ───────────────────────────────────
-            item {
-                SFSectionRow(
-                    title    = "📺 Popular Web Series",
-                    items    = state.popularShows,
-                    onItemClick = onNavigateToDetail,
-                    onSeeAllClick = onExploreClick
-                )
-            }
-
             // ── CONTENT ROW — Continue Watching ──────
             if (state.continueWatching.isNotEmpty()) {
                 item {
@@ -140,99 +120,13 @@ fun HomeScreen(
                 }
             }
 
-            // ── CONTENT ROW — Action ──────────────────────────────────────────
-            item {
+            // ── DYNAMIC CONTENT ROWS ──────────────────────────────────────────
+            items(state.sections) { section ->
                 SFSectionRow(
-                    title    = "💥 Action & Adventure",
-                    items    = state.popularMovies.takeLast(10),
+                    title    = section.title,
+                    items    = section.items,
                     onItemClick = onNavigateToDetail,
-                    onSeeAllClick = onExploreClick
-                )
-            }
-
-            // ── CONTENT ROW — Top Rated ───────────────────────────────────────
-            item {
-                SFSectionRow(
-                    title    = "⭐ Top Rated",
-                    items    = state.popularMovies.shuffled().take(10),
-                    onItemClick = onNavigateToDetail,
-                    onSeeAllClick = onExploreClick
-                )
-            }
-            
-            // ── ASIAN & OTT CONTENT ───────────────────────────────────────────
-            item {
-                SFSectionRow(
-                    title    = "🇰🇷 Top K-Dramas",
-                    items    = state.koreanDramas,
-                    onItemClick = onNavigateToDetail,
-                    onSeeAllClick = onExploreClick
-                )
-            }
-            item {
-                SFSectionRow(
-                    title    = "💃 Bollywood Blockbusters",
-                    items    = state.bollywoodMovies,
-                    onItemClick = onNavigateToDetail,
-                    onSeeAllClick = onExploreClick
-                )
-            }
-            item {
-                SFSectionRow(
-                    title    = "🇮🇳 Indian Web Series",
-                    items    = state.indianWebSeries,
-                    onItemClick = onNavigateToDetail,
-                    onSeeAllClick = onExploreClick
-                )
-            }
-            item {
-                SFSectionRow(
-                    title    = "🍿 Netflix Originals",
-                    items    = state.netflixOriginals,
-                    onItemClick = onNavigateToDetail,
-                    onSeeAllClick = onExploreClick
-                )
-            }
-            item {
-                SFSectionRow(
-                    title    = "📦 Amazon Prime TV",
-                    items    = state.primeOriginals,
-                    onItemClick = onNavigateToDetail,
-                    onSeeAllClick = onExploreClick
-                )
-            }
-            
-            // ── ANIME CONTENT ────────────────────────────────────────────────
-            item {
-                SFSectionRow(
-                    title    = "🌸 Anime Shows",
-                    items    = state.animeShows,
-                    onItemClick = onNavigateToDetail,
-                    onSeeAllClick = onExploreClick
-                )
-            }
-            item {
-                SFSectionRow(
-                    title    = "🎬 Anime Movies",
-                    items    = state.animeMovies,
-                    onItemClick = onNavigateToDetail,
-                    onSeeAllClick = onExploreClick
-                )
-            }
-            item {
-                SFSectionRow(
-                    title    = "🏆 Top Anime Shows",
-                    items    = state.topAnimeShows,
-                    onItemClick = onNavigateToDetail,
-                    onSeeAllClick = onExploreClick
-                )
-            }
-            item {
-                SFSectionRow(
-                    title    = "🏅 Top Anime Movies",
-                    items    = state.topAnimeMovies,
-                    onItemClick = onNavigateToDetail,
-                    onSeeAllClick = onExploreClick
+                    onSeeAllClick = { onExploreClick(section.id, section.title) }
                 )
             }
 
@@ -913,7 +807,7 @@ private fun SFHeroShimmer() {
 }
 
 @Composable
-private fun SFLoadingRow() {
+fun SFLoadingRow() {
     Row(
         modifier              = Modifier.padding(horizontal = 16.dp, vertical = 24.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -931,7 +825,7 @@ private fun SFLoadingRow() {
 }
 
 @Composable
-private fun SFErrorBanner(message: String, onRetry: () -> Unit) {
+fun SFErrorBanner(message: String, onRetry: () -> Unit) {
     Column(
         modifier            = Modifier
             .fillMaxWidth()
