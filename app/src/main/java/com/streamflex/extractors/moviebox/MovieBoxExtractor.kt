@@ -23,6 +23,7 @@ class MovieBoxExtractor : BaseExtractor() {
         // "$baseUrl/wefeed-mobile-bff/subject-api/play-info?subjectId=$id&episode=$ep"
         val playUrl = source.url
         val streams = mutableListOf<StreamLink>()
+        val nextSources = mutableListOf<ProviderSource>()
         
         val baseOrigin = "https://api6.aoneroom.com" // Changed from api3 to api6 for stability
         
@@ -50,11 +51,11 @@ class MovieBoxExtractor : BaseExtractor() {
                         
                         // Parse streams
                         val list = JsonParser.array(data, "streams")
-                        parseStreamList(list, globalSignCookie, streams, baseOrigin)
+                        parseStreamList(list, globalSignCookie, streams, nextSources, baseOrigin)
                         
                         // Parse detectors
                         val detectors = JsonParser.array(data, "detectors")
-                        parseStreamList(detectors, globalSignCookie, streams, baseOrigin)
+                        parseStreamList(detectors, globalSignCookie, streams, nextSources, baseOrigin)
                     }
                 }
             }
@@ -92,7 +93,7 @@ class MovieBoxExtractor : BaseExtractor() {
                                 val globalSignCookie = JsonParser.string(getData, "signCookie") ?: JsonParser.string(getData, "signCookieRaw")
                                 
                                 val resourceDetectors = JsonParser.array(getData, "resourceDetectors")
-                                parseStreamList(resourceDetectors, globalSignCookie, streams, baseOrigin)
+                                parseStreamList(resourceDetectors, globalSignCookie, streams, nextSources, baseOrigin)
                             }
                         }
                     }
@@ -103,20 +104,57 @@ class MovieBoxExtractor : BaseExtractor() {
             e.printStackTrace()
         }
 
-        return if (streams.isNotEmpty()) {
-            result(streams.distinctBy { it.url }) // Remove duplicates
-        } else {
-            emptyResult()
-        }
+        return ExtractionResult(
+            streams = streams.distinctBy { it.url },
+            sources = nextSources.distinctBy { it.url }
+        )
     }
     
-    private fun parseStreamList(list: List<JsonElement>?, globalSignCookie: String?, streams: MutableList<StreamLink>, baseOrigin: String) {
+    private fun parseStreamList(list: List<JsonElement>?, globalSignCookie: String?, streams: MutableList<StreamLink>, nextSources: MutableList<ProviderSource>, baseOrigin: String) {
         if (list == null) return
         for (item in list) {
             val path = JsonParser.string(item, "url") ?: JsonParser.string(item, "resourceLink") ?: continue
             val qualityStr = JsonParser.string(item, "resolutions") ?: ""
             val language = JsonParser.string(item, "language") ?: ""
             val name = JsonParser.string(item, "name") ?: ""
+            
+            val streamName = buildString {
+                if (name.isNotBlank()) {
+                    append(name)
+                } else {
+                    append("MovieBox")
+                    if (qualityStr.isNotBlank()) append(" $qualityStr")
+                    if (language.isNotBlank()) append(" [$language]")
+                }
+            }
+            
+            val pathLower = path.lowercase()
+            val isDirectVideo = pathLower.contains(".m3u8") || pathLower.contains(".mpd") || pathLower.contains(".mp4") || pathLower.contains(".mkv") || pathLower.contains("sacdn.hakunaymatata.com")
+            
+            if (!isDirectVideo) {
+                // If it's an external link (like mlwbd, streamable, vidmoly), delegate to ExtractorManager
+                val extHost = when {
+                    pathLower.contains("vidmoly") -> HostType.VIDMOLY
+                    pathLower.contains("turbovid") -> HostType.TURBOVID
+                    pathLower.contains("streamable") -> HostType.UNKNOWN
+                    pathLower.contains("xerver") -> HostType.XERVER
+                    pathLower.contains("streamruby") -> HostType.STREAMRUBY
+                    pathLower.contains("dood") -> HostType.DOOD
+                    pathLower.contains("mixdrop") -> HostType.MIXDROP
+                    pathLower.contains("streamtape") -> HostType.STREAMTAPE
+                    else -> HostType.UNKNOWN
+                }
+                
+                nextSources.add(
+                    ProviderSource(
+                        url = path,
+                        provider = "MovieBox",
+                        host = extHost.name,
+                        hostType = extHost
+                    )
+                )
+                continue
+            }
             
             val quality = when {
                 qualityStr.contains("1080") -> Quality.P1080
@@ -148,16 +186,6 @@ class MovieBoxExtractor : BaseExtractor() {
                 }
             }
             
-            val streamName = buildString {
-                if (name.isNotBlank()) {
-                    append(name)
-                } else {
-                    append("MovieBox")
-                    if (qualityStr.isNotBlank()) append(" $qualityStr")
-                    if (language.isNotBlank()) append(" [$language]")
-                }
-            }
-            
             streams.add(
                 StreamLink(
                     name = streamName,
@@ -168,11 +196,11 @@ class MovieBoxExtractor : BaseExtractor() {
                     cookies = cookiesMap,
                     headers = streamHeaders,
                     contentType = when {
-                        path.contains(".m3u8") -> com.streamflex.core.network.detector.ContentType.M3U8
-                        path.contains(".mpd") -> com.streamflex.core.network.detector.ContentType.DASH
+                        pathLower.contains(".m3u8") -> com.streamflex.core.network.detector.ContentType.M3U8
+                        pathLower.contains(".mpd") -> com.streamflex.core.network.detector.ContentType.DASH
                         else -> com.streamflex.core.network.detector.ContentType.VIDEO
                     },
-                    adaptive = path.contains(".m3u8") || path.contains(".mpd")
+                    adaptive = pathLower.contains(".m3u8") || pathLower.contains(".mpd")
                 )
             )
         }
