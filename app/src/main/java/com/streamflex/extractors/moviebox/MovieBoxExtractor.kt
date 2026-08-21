@@ -123,6 +123,7 @@ class MovieBoxExtractor : BaseExtractor() {
             val streamName = buildString {
                 if (name.isNotBlank()) {
                     append(name)
+                    if (language.isNotBlank()) append(" [$language]")
                 } else {
                     append("MovieBox")
                     if (qualityStr.isNotBlank()) append(" $qualityStr")

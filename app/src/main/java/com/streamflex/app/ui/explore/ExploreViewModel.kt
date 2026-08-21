@@ -33,7 +33,7 @@ class ExploreViewModel(
                 val results = when(index) {
                     0 -> repository.getPopularMovies()
                     1 -> repository.getPopularShows()
-                    2 -> repository.getAnimeShows()
+                    2 -> repository.getCategory("anime_shows")
                     else -> emptyList()
                 }
                 _uiState.value = ExploreUiState(isLoading = false, items = results)

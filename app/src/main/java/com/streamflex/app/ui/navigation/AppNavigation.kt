@@ -87,7 +87,7 @@ fun AppNavigation(
                     onSearchClick = { navController.navigate(Screen.Search.route) },
                     onSettingsClick = { navController.navigate(Screen.Settings.route) },
                     onDownloadsClick = { navController.navigate(Screen.Downloads.route) },
-                    onExploreClick = { navController.navigate("explore") }
+                    onExploreClick = { categoryId, title -> navController.navigate("see_all/$categoryId/$title") }
                 )
             }
             
@@ -113,7 +113,8 @@ fun AppNavigation(
                 SearchScreen(
                     viewModel = viewModel,
                     onBackClick = { navController.popBackStack() },
-                    onItemClick = { type, id -> navController.navigate(Screen.Detail.createRoute(type, id)) }
+                    onItemClick = { type, id -> navController.navigate(Screen.Detail.createRoute(type, id)) },
+                    onGenreClick = { id, title -> navController.navigate("see_all/$id/$title") }
                 )
             }
 
@@ -133,6 +134,27 @@ fun AppNavigation(
                 com.streamflex.app.ui.library.LibraryScreen(
                     onBackClick = { navController.popBackStack() },
                     onItemClick = { id -> navController.navigate(Screen.Detail.createRoute("MOVIE", id)) }
+                )
+            }
+
+            // --- SEE ALL ---
+            composable(
+                route = "see_all/{categoryId}/{title}",
+                arguments = listOf(
+                    navArgument("categoryId") { type = NavType.StringType },
+                    navArgument("title") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                val categoryId = backStackEntry.arguments?.getString("categoryId") ?: return@composable
+                val title = backStackEntry.arguments?.getString("title") ?: return@composable
+                
+                val viewModelFactory = com.streamflex.app.ui.seeall.SeeAllViewModelFactory(repository, categoryId, title)
+                val viewModel: com.streamflex.app.ui.seeall.SeeAllViewModel = viewModel(factory = viewModelFactory)
+
+                com.streamflex.app.ui.seeall.SeeAllScreen(
+                    viewModel = viewModel,
+                    onBackClick = { navController.popBackStack() },
+                    onItemClick = { type, id -> navController.navigate(Screen.Detail.createRoute(type, id)) }
                 )
             }
 
