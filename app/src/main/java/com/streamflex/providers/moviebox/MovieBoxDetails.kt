@@ -81,18 +81,46 @@ class MovieBoxDetails {
                             poster     = poster
                         )
                     } else {
-                        // TV Show logic remains unchanged
-                        val seasons = fetchSeasons(
-                            subjectId   = result.id,
-                            baseUrl     = baseUrl,
-                            basePlayUrl = "$baseUrl/wefeed-mobile-bff/subject-api/play-info"
-                        )
+                        val baseTitle = title.replace(Regex("\\[.*\\]"), "").trim()
+                        val currentLang = JsonParser.string(data, "language") ?: ""
+                        val relatedIds = fetchRelatedMovieIds(baseTitle, result.id, currentLang, baseUrl)
+
+                        val allSeasons = mutableListOf<ProviderSeason>()
+                        for ((id, lang) in relatedIds) {
+                            val seasonsForLang = fetchSeasons(
+                                subjectId   = id,
+                                baseUrl     = baseUrl,
+                                basePlayUrl = "$baseUrl/wefeed-mobile-bff/subject-api/play-info",
+                                lang        = lang
+                            )
+                            allSeasons.addAll(seasonsForLang)
+                        }
+
+                        // Merge seasons and episodes
+                        val mergedSeasons = allSeasons.groupBy { it.number }.map { (seasonNumber, seasons) ->
+                            val mergedEpisodes = seasons.flatMap { it.episodes }
+                                .groupBy { it.number }
+                                .map { (episodeNumber, episodes) ->
+                                    ProviderEpisode(
+                                        number = episodeNumber,
+                                        title = episodes.first().title,
+                                        sources = episodes.flatMap { it.sources }
+                                    )
+                                }
+                            
+                            ProviderSeason(
+                                number = seasonNumber,
+                                title = seasons.first().title,
+                                episodes = mergedEpisodes
+                            )
+                        }
+
                         MovieBoxMapper.toProviderResult(
                             providerId = MovieBoxConfig.PROVIDER_NAME.lowercase(),
                             title      = title,
                             detailUrl  = result.url,
                             mediaType  = MediaType.TV,
-                            seasons    = seasons,
+                            seasons    = mergedSeasons,
                             overview   = overview,
                             poster     = poster
                         )
@@ -165,7 +193,8 @@ class MovieBoxDetails {
     private suspend fun fetchSeasons(
         subjectId:   String,
         baseUrl:     String,
-        basePlayUrl: String
+        basePlayUrl: String,
+        lang:        String
     ): List<ProviderSeason> {
         val seasonUrl = "$baseUrl/wefeed-mobile-bff/subject-api/season-info?subjectId=$subjectId"
 
@@ -205,10 +234,12 @@ class MovieBoxDetails {
 
                         val episodes = (1..maxEp).map { ep ->
                             val episodePlayUrl = "$basePlayUrl?subjectId=$subjectId&se=$se&ep=$ep"
+                            val source = MovieBoxMapper.toProviderSource(url = episodePlayUrl)
+                            val finalSource = source.copy(metadata = mapOf("language" to lang))
                             ProviderEpisode(
                                 number  = ep,
                                 title   = "Episode $ep",
-                                sources = listOf(MovieBoxMapper.toProviderSource(url = episodePlayUrl))
+                                sources = listOf(finalSource)
                             )
                         }
 
