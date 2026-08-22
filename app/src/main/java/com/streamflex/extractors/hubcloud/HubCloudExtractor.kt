@@ -225,7 +225,15 @@ class HubCloudExtractor
                 HostType.GOOGLE_VIDEO,
                 HostType.DASH -> {
                     StreamLogger.info("HubCloudExtractor", "Playable stream detected: $type → $url")
-                    streams += createStream(source = source, url = url)
+                    val updatedHeaders = source.headers.toMutableMap()
+                    updatedHeaders["Referer"] = source.url
+                    
+                    // ExoPlayer fails if URL has unescaped spaces or brackets
+                    val safeUrl = url.replace(" ", "%20")
+                                     .replace("[", "%5B")
+                                     .replace("]", "%5D")
+                    
+                    streams += createStream(source = source.copy(headers = updatedHeaders), url = safeUrl)
                 }
 
                 HostType.UNKNOWN -> {
@@ -234,7 +242,15 @@ class HubCloudExtractor
                     if (lower.contains("drive.google.com/uc") ||
                         lower.contains("docs.google.com/uc")) {
                         StreamLogger.info("HubCloudExtractor", "Google Drive direct link: $url")
-                        streams += createStream(source = source, url = url)
+                        val updatedHeaders = source.headers.toMutableMap()
+                    updatedHeaders["Referer"] = source.url
+                    
+                    // ExoPlayer fails if URL has unescaped spaces or brackets
+                    val safeUrl = url.replace(" ", "%20")
+                                     .replace("[", "%5B")
+                                     .replace("]", "%5D")
+                    
+                    streams += createStream(source = source.copy(headers = updatedHeaders), url = safeUrl)
                     }
                     // else: silently discard
                 }

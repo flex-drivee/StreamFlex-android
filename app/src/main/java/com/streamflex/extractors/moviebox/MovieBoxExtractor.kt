@@ -116,8 +116,8 @@ class MovieBoxExtractor : BaseExtractor() {
         for (item in list) {
             val path = JsonParser.string(item, "url") ?: JsonParser.string(item, "resourceLink") ?: continue
             val qualityStr = JsonParser.string(item, "resolutions") ?: ""
-            val rawLang = JsonParser.string(item, "language")
-            val language = if (!rawLang.isNullOrBlank()) rawLang else injectedLang
+            val rawLang = JsonParser.string(item, "language") ?: ""
+            val language = if (injectedLang.isNotBlank()) injectedLang else rawLang
             val name = JsonParser.string(item, "name") ?: ""
             
             val streamName = buildString {
