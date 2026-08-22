@@ -17,7 +17,7 @@ class JsUnpacker(private val packedJS: String?) {
         val js = packedJS ?: return null
         return try {
             val match = Regex(
-                """(?s)\}\s*\('(.*?)',\s*(.*?),\s*(\d+),\s*'(.*?)'\.split\('\|'\)"""
+                """(?s)\}\s*\('(.*)',\s*(.*?),\s*(\d+),\s*'(.*?)'\.split\('\|'\)"""
             ).find(js) ?: return null
 
             if (match.groupValues.size < 5) return null
