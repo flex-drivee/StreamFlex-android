@@ -150,7 +150,6 @@ class AbyssPlayerExtractor : BaseExtractor() {
                 )
 
                 streams += createStream(
-                    name     = "Abyss",
                     source   = sourceWithMeta.copy(hostType = HostType.DIRECT),
                     url      = url,
                     quality  = quality,
