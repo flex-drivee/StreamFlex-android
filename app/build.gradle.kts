@@ -19,7 +19,7 @@ if (localPropertiesFile.exists()) {
 
 android {
     namespace = "com.streamflex.app"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.streamflex.app"
@@ -98,11 +98,14 @@ dependencies {
     implementation("org.jsoup:jsoup:1.17.2")
 
     // --- Media (ExoPlayer) ---
-    implementation("androidx.media3:media3-exoplayer:1.3.1")
-    implementation("androidx.media3:media3-ui:1.3.1")
-    implementation("androidx.media3:media3-exoplayer-hls:1.3.1")
-    implementation("androidx.media3:media3-exoplayer-dash:1.3.1")
-    implementation("androidx.media3:media3-common:1.3.1")
+    implementation("androidx.media3:media3-exoplayer:1.10.1")
+    implementation("androidx.media3:media3-ui:1.10.1")
+    implementation("androidx.media3:media3-exoplayer-hls:1.10.1")
+    implementation("androidx.media3:media3-exoplayer-dash:1.10.1")
+    implementation("androidx.media3:media3-common:1.10.1")
+    
+    // --- Nextlib FFmpeg Software Decoder ---
+    implementation("io.github.anilbeesetti:nextlib-media3ext:1.10.1-0.13.0")
 
     // --- Compose ---
     implementation(platform("androidx.compose:compose-bom:2024.02.00"))
