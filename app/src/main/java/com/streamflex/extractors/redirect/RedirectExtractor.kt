@@ -132,7 +132,7 @@ class RedirectExtractor : BaseExtractor() {
         }
 
         // ---------- PHP Proxy Error Leaks ----------
-        val phpErrorMatch = Regex("""\?url=(https?%3A%2F%2F[^"'\s<>]+)""").find(html)
+        val phpErrorMatch = Regex("""\?url=(https?%3A%2F%2F[^"'\s<>)]+)""").find(html)
         if (phpErrorMatch != null) {
             val leakedUrl = java.net.URLDecoder.decode(phpErrorMatch.groups[1]!!.value, "UTF-8")
             candidates += leakedUrl
