@@ -227,7 +227,13 @@ class HubCloudExtractor
                     StreamLogger.info("HubCloudExtractor", "Playable stream detected: $type → $url")
                     val updatedHeaders = source.headers.toMutableMap()
                     updatedHeaders["Referer"] = source.url
-                    streams += createStream(source = source.copy(headers = updatedHeaders), url = url)
+                    
+                    // ExoPlayer fails if URL has unescaped spaces or brackets
+                    val safeUrl = url.replace(" ", "%20")
+                                     .replace("[", "%5B")
+                                     .replace("]", "%5D")
+                    
+                    streams += createStream(source = source.copy(headers = updatedHeaders), url = safeUrl)
                 }
 
                 HostType.UNKNOWN -> {
@@ -238,7 +244,13 @@ class HubCloudExtractor
                         StreamLogger.info("HubCloudExtractor", "Google Drive direct link: $url")
                         val updatedHeaders = source.headers.toMutableMap()
                     updatedHeaders["Referer"] = source.url
-                    streams += createStream(source = source.copy(headers = updatedHeaders), url = url)
+                    
+                    // ExoPlayer fails if URL has unescaped spaces or brackets
+                    val safeUrl = url.replace(" ", "%20")
+                                     .replace("[", "%5B")
+                                     .replace("]", "%5D")
+                    
+                    streams += createStream(source = source.copy(headers = updatedHeaders), url = safeUrl)
                     }
                     // else: silently discard
                 }
