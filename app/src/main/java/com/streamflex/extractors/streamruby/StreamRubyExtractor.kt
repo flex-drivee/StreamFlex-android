@@ -30,7 +30,7 @@ class StreamRubyExtractor : BaseExtractor() {
         
         val request = RequestBuilder()
             .url(dlUrl)
-            .post(payload)
+            .post(payload.toByteArray())
             .header("Content-Type", "application/x-www-form-urlencoded")
             .header("Referer", url)
             .build()
@@ -54,11 +54,11 @@ class StreamRubyExtractor : BaseExtractor() {
                             val streamUrl = fileMatch.groupValues[1]
                             val stream = StreamLink(
                                 name = "StreamRuby",
-                                provider = "STREAMRUBY",
                                 url = streamUrl,
-                                isDash = false,
-                                isHls = streamUrl.contains(".m3u8"),
-                                headers = mapOf("Referer" to "https://rubystm.com/")
+                                host = HostType.STREAMRUBY,
+                                adaptive = streamUrl.contains(".m3u8"),
+                                headers = mapOf("Referer" to "https://rubystm.com/"),
+                                referer = "https://rubystm.com/"
                             )
                             return@withContext ExtractionResult(listOf(stream))
                         } else {
@@ -73,8 +73,8 @@ class StreamRubyExtractor : BaseExtractor() {
                 
                 emptyResult()
             }
-            is NetworkResult.Error -> {
-                Logger.e("[StreamRuby] Request failed: ${response.exception.message}")
+            else -> {
+                Logger.e("[StreamRuby] Request failed or timed out.")
                 emptyResult()
             }
         }
