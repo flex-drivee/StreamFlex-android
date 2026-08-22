@@ -144,13 +144,18 @@ class AbyssPlayerExtractor : BaseExtractor() {
                 val quality  = parseQuality(typeStr)
                 val codecMeta = mapCodecLabel(codec)
 
-                // Build a provider source with the codec metadata so buildName() picks it up
+                // Extract the base domain from the player URL (e.g. https://abyssplayer.com/)
+                val playerBaseUrl = source.url.substringBeforeLast("/") + "/"
+                // Build a provider source with the codec metadata and correct Referer
                 val sourceWithMeta = source.copy(
-                    metadata = source.metadata + mapOf("codec" to codecMeta)
+                    metadata = source.metadata + mapOf("codec" to codecMeta),
+                    hostType = HostType.DIRECT,
+                    headers = mapOf("Referer" to playerBaseUrl),
+                    referer = playerBaseUrl
                 )
 
                 streams += createStream(
-                    source   = sourceWithMeta.copy(hostType = HostType.DIRECT),
+                    source   = sourceWithMeta,
                     url      = url,
                     quality  = quality,
                     fileSize = size
