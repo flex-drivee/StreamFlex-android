@@ -39,12 +39,12 @@ class StreamRubyExtractor : BaseExtractor() {
             is NetworkResult.Success -> {
                 val html = response.data.bodyAsString()
                 
-                // Find packed JS
-                val packedRegex = Regex("""eval\(function\(p,a,c,k,e,[rd].*?\)\)""", RegexOption.DOT_MATCHES_ALL)
-                val match = packedRegex.find(html)
+                // Find the eval block first to prevent regex catastrophic backtracking/overflow
+                val evalRegex = Regex("""eval\(function.*?\.split\('\|'\).*?\)\)""", RegexOption.DOT_MATCHES_ALL)
+                val evalBlock = evalRegex.find(html)?.value ?: html
                 
-                if (match != null) {
-                    val unpacked = JsUnpacker.unpack(match.value)
+                if (evalBlock.isNotBlank()) {
+                    val unpacked = JsUnpacker.unpack(evalBlock)
                     if (unpacked != null) {
                         // Extract file:"..." or file:'...'
                         val fileRegex = Regex("""file\s*:\s*["']([^"']+)["']""")
@@ -55,7 +55,7 @@ class StreamRubyExtractor : BaseExtractor() {
                             val stream = StreamLink(
                                 name = "StreamRuby",
                                 url = streamUrl,
-                                host = HostType.STREAMRUBY,
+                                host = HostType.DIRECT,
                                 adaptive = streamUrl.contains(".m3u8"),
                                 headers = mapOf("Referer" to "https://rubystm.com/"),
                                 referer = "https://rubystm.com/"

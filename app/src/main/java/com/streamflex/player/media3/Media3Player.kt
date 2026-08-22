@@ -39,7 +39,13 @@ class Media3Player(
     
     private val trackSelector = DefaultTrackSelector(context)
     
+    private val renderersFactory = io.github.anilbeesetti.nextlib.media3ext.ffdecoder.NextRenderersFactory(context).apply {
+        setEnableDecoderFallback(true)
+        setExtensionRendererMode(androidx.media3.exoplayer.DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
+    }
+
     internal val exoPlayer: ExoPlayer = ExoPlayer.Builder(context)
+        .setRenderersFactory(renderersFactory)
         .setTrackSelector(trackSelector)
         .build()
 
