@@ -225,7 +225,9 @@ class HubCloudExtractor
                 HostType.GOOGLE_VIDEO,
                 HostType.DASH -> {
                     StreamLogger.info("HubCloudExtractor", "Playable stream detected: $type → $url")
-                    streams += createStream(source = source, url = url)
+                    val updatedHeaders = source.headers.toMutableMap()
+                    updatedHeaders["Referer"] = source.url
+                    streams += createStream(source = source.copy(headers = updatedHeaders), url = url)
                 }
 
                 HostType.UNKNOWN -> {
@@ -234,7 +236,9 @@ class HubCloudExtractor
                     if (lower.contains("drive.google.com/uc") ||
                         lower.contains("docs.google.com/uc")) {
                         StreamLogger.info("HubCloudExtractor", "Google Drive direct link: $url")
-                        streams += createStream(source = source, url = url)
+                        val updatedHeaders = source.headers.toMutableMap()
+                    updatedHeaders["Referer"] = source.url
+                    streams += createStream(source = source.copy(headers = updatedHeaders), url = url)
                     }
                     // else: silently discard
                 }
