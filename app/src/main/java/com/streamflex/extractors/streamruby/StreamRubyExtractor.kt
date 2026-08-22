@@ -55,7 +55,7 @@ class StreamRubyExtractor : BaseExtractor() {
                             val stream = StreamLink(
                                 name = "StreamRuby",
                                 url = streamUrl,
-                                host = HostType.STREAMRUBY,
+                                host = HostType.DIRECT,
                                 adaptive = streamUrl.contains(".m3u8"),
                                 headers = mapOf("Referer" to "https://rubystm.com/"),
                                 referer = "https://rubystm.com/"
