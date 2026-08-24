@@ -191,7 +191,17 @@ fun SettingsDialog(
     onSubtitleSelected: (SubtitleTrack?) -> Unit,
     onServerSelected: (Int) -> Unit
 ) {
-    var currentTab by remember { mutableStateOf(initialTab) } // 0=Video, 1=Audio, 2=Subtitle, 3=Server
+    var currentTab by remember { mutableStateOf(initialTab) } // 0=Video, 1=Audio, 2=Subtitle, 3=Server, 4=Decoder
+    val context = LocalContext.current
+    val prefs = remember { context.getSharedPreferences("streamflex_settings", android.content.Context.MODE_PRIVATE) }
+    var currentDecoderMode by remember {
+        mutableStateOf(
+            prefs.getString(
+                com.streamflex.player.core.DecoderMode.PREF_KEY,
+                com.streamflex.player.core.DecoderMode.AUTO.key
+            ) ?: com.streamflex.player.core.DecoderMode.AUTO.key
+        )
+    }
     
     Dialog(onDismissRequest = onDismiss) {
         Surface(
@@ -225,6 +235,11 @@ fun SettingsDialog(
                         icon = Icons.Default.Dns, // Servers Tab
                         isSelected = currentTab == 3, 
                         onClick = { currentTab = 3 }
+                    )
+                    TabButton(
+                        icon = Icons.Default.Memory, // Decoder Mode Tab
+                        isSelected = currentTab == 4, 
+                        onClick = { currentTab = 4 }
                     )
                     // Close button
                     IconButton(onClick = onDismiss) {
@@ -294,6 +309,20 @@ fun SettingsDialog(
                                         onClick = { onServerSelected(index) }
                                     )
                                 }
+                            }
+                        }
+                        4 -> { // Decoder Mode
+                            items(com.streamflex.player.core.DecoderMode.entries) { mode ->
+                                val isSelected = currentDecoderMode == mode.key
+                                SettingsRow(
+                                    label = mode.title,
+                                    isSelected = isSelected,
+                                    onClick = {
+                                        prefs.edit().putString(com.streamflex.player.core.DecoderMode.PREF_KEY, mode.key).apply()
+                                        currentDecoderMode = mode.key
+                                        onDismiss()
+                                    }
+                                )
                             }
                         }
                     }

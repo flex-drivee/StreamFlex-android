@@ -20,9 +20,6 @@ if (localPropertiesFile.exists()) {
 android {
     namespace = "com.streamflex.app"
     compileSdk = 36
-    
-        // ⬇️ ADD THIS LINE HERE TO LINK YOUR DOWNLOADED NDK ⬇️
-    ndkVersion = "29.0.14033849" 
 
     defaultConfig {
         applicationId = "com.streamflex.app"
@@ -39,13 +36,6 @@ android {
         // IMPORTANT: We must add escaped quotes "\"$tmdbKey\"" 
         // otherwise the app tries to compile it as code variable, not a string.
         buildConfigField("String", "TMDB_API_KEY", "\"$tmdbKey\"")
-    }
-    
-        // ⬇️ ADD THIS BLOCK HERE TO LINK YOUR DOWNLOADED CMAKE ⬇️
-    externalNativeBuild {
-        cmake {
-            version = "4.1.2"
-        }
     }
     
 
