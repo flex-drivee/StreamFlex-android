@@ -25,7 +25,8 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
 class Media3Player(
-    private val context: Context
+    private val context: Context,
+    private val decoderMode: com.streamflex.player.core.DecoderMode = com.streamflex.player.core.DecoderMode.AUTO
 ) : StreamPlayer {
 
     private val _state = MutableStateFlow(PlayerState())
@@ -39,10 +40,7 @@ class Media3Player(
     
     private val trackSelector = DefaultTrackSelector(context)
     
-    private val renderersFactory = io.github.anilbeesetti.nextlib.media3ext.ffdecoder.NextRenderersFactory(context).apply {
-        setEnableDecoderFallback(true)
-        setExtensionRendererMode(androidx.media3.exoplayer.DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
-    }
+    private val renderersFactory = decoderMode.createRenderersFactory(context)
 
     internal val exoPlayer: ExoPlayer = ExoPlayer.Builder(context)
         .setRenderersFactory(renderersFactory)

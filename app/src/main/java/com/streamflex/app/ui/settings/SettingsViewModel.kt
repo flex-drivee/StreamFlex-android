@@ -25,6 +25,14 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     private val _developerMode = MutableStateFlow(prefs.getBoolean("developer_mode", false))
     val developerMode: StateFlow<Boolean> = _developerMode.asStateFlow()
 
+    private val _decoderMode = MutableStateFlow(
+        prefs.getString(
+            com.streamflex.player.core.DecoderMode.PREF_KEY,
+            com.streamflex.player.core.DecoderMode.AUTO.key
+        ) ?: com.streamflex.player.core.DecoderMode.AUTO.key
+    )
+    val decoderMode: StateFlow<String> = _decoderMode.asStateFlow()
+
     fun setAppTheme(theme: String) {
         prefs.edit().putString("app_theme", theme).apply()
         _appTheme.value = theme
@@ -48,5 +56,10 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun setDeveloperMode(enabled: Boolean) {
         prefs.edit().putBoolean("developer_mode", enabled).apply()
         _developerMode.value = enabled
+    }
+
+    fun setDecoderMode(mode: String) {
+        prefs.edit().putString(com.streamflex.player.core.DecoderMode.PREF_KEY, mode).apply()
+        _decoderMode.value = mode
     }
 }

@@ -35,9 +35,11 @@ fun SettingsScreen(
     val enableSubtitles by viewModel.enableSubtitles.collectAsState()
     val cellularData by viewModel.cellularData.collectAsState()
     val developerMode by viewModel.developerMode.collectAsState()
+    val decoderMode by viewModel.decoderMode.collectAsState()
 
     val scrollState = rememberLazyListState()
     var showThemeDialog by remember { mutableStateOf(false) }
+    var showDecoderDialog by remember { mutableStateOf(false) }
     var showProviderDialog by remember { mutableStateOf(false) }
     var showMovieBoxSettings by remember { mutableStateOf(false) }
     
@@ -135,8 +137,15 @@ fun SettingsScreen(
                             onCheckedChange = { viewModel.setEnableSubtitles(it) },
                             colors = appSwitchColors()
                         ) },
-                        isLast = true,
                         onTap = { viewModel.setEnableSubtitles(!enableSubtitles) }
+                    )
+                    SettingsDivider()
+                    SettingsTile(
+                        icon = Icons.Outlined.Memory,
+                        title = "Decoder Mode",
+                        subtitle = com.streamflex.player.core.DecoderMode.fromKey(decoderMode).title,
+                        isLast = true,
+                        onTap = { showDecoderDialog = true }
                     )
                 }
             }
@@ -311,6 +320,33 @@ fun SettingsScreen(
             )
         }
 
+        if (showDecoderDialog) {
+            AlertDialog(
+                onDismissRequest = { showDecoderDialog = false },
+                title = { Text("Select Decoder Mode", color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold) },
+                containerColor = MaterialTheme.colorScheme.surface,
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        com.streamflex.player.core.DecoderMode.entries.forEach { mode ->
+                            DecoderOptionRow(
+                                mode = mode,
+                                isSelected = decoderMode == mode.key,
+                                onClick = {
+                                    viewModel.setDecoderMode(mode.key)
+                                    showDecoderDialog = false
+                                }
+                            )
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showDecoderDialog = false }) {
+                        Text("Cancel", color = MaterialTheme.colorScheme.primary)
+                    }
+                }
+            )
+        }
+
         if (showProviderDialog) {
             androidx.compose.material3.AlertDialog(
                 onDismissRequest = { showProviderDialog = false },
@@ -404,6 +440,47 @@ fun ThemeOptionRow(title: String, isSelected: Boolean, onClick: () -> Unit) {
         )
         Spacer(modifier = Modifier.width(16.dp))
         Text(title, color = MaterialTheme.colorScheme.onBackground, fontSize = 16.sp)
+    }
+}
+
+@Composable
+fun DecoderOptionRow(
+    mode: com.streamflex.player.core.DecoderMode,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(8.dp))
+            .clickable(onClick = onClick)
+            .padding(vertical = 8.dp, horizontal = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        RadioButton(
+            selected = isSelected,
+            onClick = null,
+            colors = RadioButtonDefaults.colors(
+                selectedColor = MaterialTheme.colorScheme.primary,
+                unselectedColor = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = mode.title,
+                color = MaterialTheme.colorScheme.onBackground,
+                fontSize = 15.sp,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = mode.description,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 12.sp,
+                lineHeight = 15.sp
+            )
+        }
     }
 }
 
