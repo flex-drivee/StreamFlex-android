@@ -154,7 +154,7 @@ class Media3Player(
                         val format = group.getTrackFormat(i)
                         if (group.isTrackSupported(i)) {
                             val lang = format.language?.takeIf { it != "und" }
-                            val readableName = lang?.let { java.util.Locale(it).displayLanguage }
+                            val readableName = lang?.let { java.util.Locale.forLanguageTag(it).displayLanguage }
                             val cleanLabel = format.label?.takeIf { !it.contains(".tv", true) && !it.contains(".com", true) && !it.contains("hdhub4u", true) }
                             
                             val finalLabel = readableName ?: cleanLabel ?: lang?.uppercase() ?: "Audio ${i + 1}"
@@ -174,7 +174,7 @@ class Media3Player(
                         val format = group.getTrackFormat(i)
                         if (group.isTrackSupported(i)) {
                             val lang = format.language?.takeIf { it != "und" }
-                            val readableName = lang?.let { java.util.Locale(it).displayLanguage }
+                            val readableName = lang?.let { java.util.Locale.forLanguageTag(it).displayLanguage }
                             val cleanLabel = format.label?.takeIf { !it.contains(".tv", true) && !it.contains(".com", true) && !it.contains("hdhub4u", true) }
                             
                             val finalLabel = readableName ?: cleanLabel ?: lang?.uppercase() ?: "Subtitle ${i + 1}"
