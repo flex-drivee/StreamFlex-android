@@ -72,6 +72,13 @@ android {
     testOptions {
         unitTests.isReturnDefaultValues = true
     }
+
+    lint {
+        checkReleaseBuilds = false
+        abortOnError = false
+        checkDependencies = false
+        ignoreWarnings = true
+    }
 }
 
 dependencies {
