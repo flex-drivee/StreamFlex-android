@@ -200,10 +200,48 @@ class HDHubDetails : DetailParser {
         val seasonNum = extractSeasonNumber(detailUrl)
         val epLinksMap = mutableMapOf<Int, MutableList<ProviderSource>>()
 
-        var currentEpisode: Int? = null
-        val elements = document.select("h1, h2, h3, h4, h5, h6, p, div, a[href]")
+        // 1. Check modern grid layout (div.episodes-list div.season-item)
+        val seasonElements = document.select("div.episodes-list div.season-item")
+        if (seasonElements.isNotEmpty()) {
+            for (seasonEl in seasonElements) {
+                val episodeItems = seasonEl.select("div.episode-download-item")
+                for (epItem in episodeItems) {
+                    val epBadgeText = epItem.select("div.episode-file-info span.badge-psa, span.badge").text()
+                    val epNum = EPISODE_NUM_REGEX.find(epBadgeText)?.groupValues?.get(1)?.toIntOrNull()
+                        ?: Regex("""Episode-0*([1-9][0-9]*)""").find(epBadgeText)?.groupValues?.get(1)?.toIntOrNull()
+                        ?: 1
 
-        for (el in elements) {
+                    val links = epItem.select("a[href]")
+                    for (link in links) {
+                        var href = link.absUrl("href").takeIf { it.isNotBlank() } ?: link.attr("href")
+                        if (href.isBlank() || sourceParser.shouldSkipUrl(href)) continue
+
+                        var hostType = HostDetector.detect(href)
+                        if (hostType == HostType.UNKNOWN && href.contains("?id=")) hostType = HostType.REDIRECT
+                        if (hostType != HostType.UNKNOWN) {
+                            val quality = QualityDetector.detect(link.text() + " " + epItem.text())
+                            val source = HDHubMapper.toProviderSource(
+                                provider = PROVIDER_NAME,
+                                host = hostType.name,
+                                hostType = hostType,
+                                url = href,
+                                quality = quality,
+                                referer = detailUrl,
+                                headers = mapOf("Referer" to detailUrl, "Cookie" to HDHubConfig.COOKIE)
+                            )
+                            epLinksMap.getOrPut(epNum) { mutableListOf() }.add(source)
+                        }
+                    }
+                }
+            }
+        }
+
+        // 2. Sequential scanning over headings & paragraphs (classic HDHub4u layout)
+        if (epLinksMap.isEmpty()) {
+            var currentEpisode: Int? = null
+            val elements = document.select("h1, h2, h3, h4, h5, h6, p, div, a[href]")
+
+            for (el in elements) {
             val text = el.ownText().trim()
             val fullText = el.text().trim()
 
