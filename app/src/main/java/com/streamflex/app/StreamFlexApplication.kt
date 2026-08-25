@@ -11,8 +11,14 @@ import com.streamflex.app.di.AppModule
  */
 class StreamFlexApplication : Application() {
 
+    companion object {
+        lateinit var instance: StreamFlexApplication
+            private set
+    }
+
     override fun onCreate() {
         super.onCreate()
+        instance = this
 
         initializeModules()
     }
