@@ -123,7 +123,7 @@ class HDHubDetails : DetailParser {
         val title = extractTitle(document, detailUrl)
         val poster = extractPoster(document)
         val plot = extractOverview(document)
-        val isSeries = isTvSeries(document, detailUrl)
+        val isSeries = isTvSeries(document, detailUrl, title)
         val mediaType = if (isSeries) MediaType.TV else MediaType.MOVIE
 
         if (mediaType == MediaType.MOVIE) {
@@ -180,9 +180,11 @@ class HDHubDetails : DetailParser {
 
     // ─── Classification Helper ────────────────────────────────────────────────
 
-    private fun isTvSeries(url: String, title: String, document: Document): Boolean {
+    private fun isTvSeries(document: Document, url: String, title: String = ""): Boolean {
         val tvRegex = Regex("""(?:season[.\s_-]*\d+|s\d{1,2}\b|all\s+episodes|complete\s+series)""", RegexOption.IGNORE_CASE)
         if (tvRegex.containsMatchIn(url) || tvRegex.containsMatchIn(title)) return true
+
+        if (document.select("div.episodes-list, div.season-item, div.episode-download-item").isNotEmpty()) return true
 
         val headings = document.select("h1, h2, h3, h4")
         for (h in headings) {
