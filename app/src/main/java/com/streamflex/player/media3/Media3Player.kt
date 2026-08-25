@@ -297,10 +297,19 @@ class Media3Player(
 
         // 5. Detect container / MIME type for links without standard file extensions (e.g. Pixeldrain, BuzzServer)
         val mimeType = when (stream.contentType) {
-            com.streamflex.core.network.detector.ContentType.M3U8 -> androidx.media3.common.MimeTypes.APPLICATION_M3U8
-            com.streamflex.core.network.detector.ContentType.MPD -> androidx.media3.common.MimeTypes.APPLICATION_MPD
-            com.streamflex.core.network.detector.ContentType.MP4 -> androidx.media3.common.MimeTypes.APPLICATION_MP4
-            com.streamflex.core.network.detector.ContentType.MKV -> androidx.media3.common.MimeTypes.APPLICATION_MATROSKA
+            com.streamflex.core.network.detector.ContentType.M3U8,
+            com.streamflex.core.network.detector.ContentType.HLS -> androidx.media3.common.MimeTypes.APPLICATION_M3U8
+            com.streamflex.core.network.detector.ContentType.DASH -> androidx.media3.common.MimeTypes.APPLICATION_MPD
+            com.streamflex.core.network.detector.ContentType.VIDEO -> {
+                val lower = stream.url.lowercase()
+                when {
+                    lower.contains(".m3u8") -> androidx.media3.common.MimeTypes.APPLICATION_M3U8
+                    lower.contains(".mpd") -> androidx.media3.common.MimeTypes.APPLICATION_MPD
+                    lower.contains(".mp4") -> androidx.media3.common.MimeTypes.APPLICATION_MP4
+                    lower.contains(".mkv") -> androidx.media3.common.MimeTypes.APPLICATION_MATROSKA
+                    else -> null
+                }
+            }
             else -> {
                 val lower = stream.url.lowercase()
                 when {
