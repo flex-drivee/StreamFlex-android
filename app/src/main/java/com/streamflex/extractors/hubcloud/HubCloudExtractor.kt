@@ -350,6 +350,8 @@ class HubCloudExtractor : BaseExtractor() {
             val request = RequestBuilder()
                 .url(downloadUrl)
                 .referer(buzzUrl)
+                .header("HX-Request", "true")
+                .header("User-Agent", com.streamflex.core.constants.Constants.DEFAULT_USER_AGENT)
                 .followRedirects(false)
                 .build()
 
