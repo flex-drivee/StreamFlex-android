@@ -36,12 +36,18 @@ fun SettingsScreen(
     val cellularData by viewModel.cellularData.collectAsState()
     val developerMode by viewModel.developerMode.collectAsState()
     val decoderMode by viewModel.decoderMode.collectAsState()
+    val wifiOnlyDownloads by viewModel.wifiOnlyDownloads.collectAsState()
+    val downloadQuality by viewModel.downloadQuality.collectAsState()
+    val smartDownloads by viewModel.smartDownloads.collectAsState()
+    val storageStats by viewModel.storageStats.collectAsState()
 
     val scrollState = rememberLazyListState()
     var showThemeDialog by remember { mutableStateOf(false) }
     var showDecoderDialog by remember { mutableStateOf(false) }
     var showProviderDialog by remember { mutableStateOf(false) }
     var showMovieBoxSettings by remember { mutableStateOf(false) }
+    var showQualityDialog by remember { mutableStateOf(false) }
+    var showDeleteAllDialog by remember { mutableStateOf(false) }
     
     val providerRepository = com.streamflex.app.di.ProviderModule.repository
     var selectedProviderName by remember { 
@@ -146,6 +152,57 @@ fun SettingsScreen(
                         subtitle = com.streamflex.player.core.DecoderMode.fromKey(decoderMode).title,
                         isLast = true,
                         onTap = { showDecoderDialog = true }
+                    )
+                }
+            }
+
+            // --- Downloads ---
+            item {
+                SettingsGroup("Downloads") {
+                    SettingsTile(
+                        icon = Icons.Outlined.AutoAwesome,
+                        title = "Smart Downloads",
+                        subtitle = if (smartDownloads) "Auto-download next episode" else "Disabled",
+                        trailing = { Switch(
+                            checked = smartDownloads,
+                            onCheckedChange = { viewModel.setSmartDownloads(it) },
+                            colors = appSwitchColors()
+                        ) },
+                        onTap = { viewModel.setSmartDownloads(!smartDownloads) }
+                    )
+                    SettingsDivider()
+                    SettingsTile(
+                        icon = Icons.Outlined.Wifi,
+                        title = "Download on Wi-Fi Only",
+                        subtitle = if (wifiOnlyDownloads) "Save mobile data" else "Download on any network",
+                        trailing = { Switch(
+                            checked = wifiOnlyDownloads,
+                            onCheckedChange = { viewModel.setWifiOnlyDownloads(it) },
+                            colors = appSwitchColors()
+                        ) },
+                        onTap = { viewModel.setWifiOnlyDownloads(!wifiOnlyDownloads) }
+                    )
+                    SettingsDivider()
+                    SettingsTile(
+                        icon = Icons.Outlined.HighQuality,
+                        title = "Video Quality",
+                        subtitle = "Current: $downloadQuality",
+                        onTap = { showQualityDialog = true }
+                    )
+                    SettingsDivider()
+                    SettingsTile(
+                        icon = Icons.Outlined.SdStorage,
+                        title = "Storage Usage",
+                        subtitle = "StreamFlex: ${storageStats.formattedStreamFlexUsed} • Free: ${storageStats.formattedFree}",
+                        onTap = { viewModel.refreshStorageStats() }
+                    )
+                    SettingsDivider()
+                    SettingsTile(
+                        icon = Icons.Outlined.DeleteSweep,
+                        title = "Delete All Downloads",
+                        subtitle = "Remove all offline movies and episodes",
+                        isLast = true,
+                        onTap = { showDeleteAllDialog = true }
                     )
                 }
             }
@@ -342,6 +399,67 @@ fun SettingsScreen(
                 confirmButton = {
                     TextButton(onClick = { showDecoderDialog = false }) {
                         Text("Cancel", color = MaterialTheme.colorScheme.primary)
+                    }
+                }
+            )
+        }
+
+        if (showQualityDialog) {
+            val qualities = listOf("1080p", "720p", "480p")
+            AlertDialog(
+                onDismissRequest = { showQualityDialog = false },
+                title = { Text("Download Video Quality", color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold) },
+                containerColor = MaterialTheme.colorScheme.surface,
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        qualities.forEach { q ->
+                            ThemeOptionRow(
+                                title = when (q) {
+                                    "1080p" -> "High (1080p) • Best Quality"
+                                    "720p" -> "Standard (720p) • Balanced"
+                                    else -> "Data Saver (480p) • Small File"
+                                },
+                                isSelected = downloadQuality == q,
+                                onClick = {
+                                    viewModel.setDownloadQuality(q)
+                                    showQualityDialog = false
+                                }
+                            )
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showQualityDialog = false }) {
+                        Text("Cancel", color = MaterialTheme.colorScheme.primary)
+                    }
+                }
+            )
+        }
+
+        if (showDeleteAllDialog) {
+            AlertDialog(
+                onDismissRequest = { showDeleteAllDialog = false },
+                title = { Text("Delete All Downloads?", color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold) },
+                containerColor = MaterialTheme.colorScheme.surface,
+                text = {
+                    Text(
+                        "This will permanently delete all downloaded movies, episodes, and offline files from your device.",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            viewModel.deleteAllDownloads()
+                            showDeleteAllDialog = false
+                        }
+                    ) {
+                        Text("Delete All", color = Color.Red, fontWeight = FontWeight.Bold)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDeleteAllDialog = false }) {
+                        Text("Cancel", color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             )

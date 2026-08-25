@@ -47,4 +47,22 @@ object RepositoryModule {
         )
 
     }
+
+    /**
+     * Download storage manager.
+     */
+    val downloadStorageManager: com.streamflex.data.local.download.DownloadStorageManager by lazy {
+        com.streamflex.data.local.download.DownloadStorageManager(
+            com.streamflex.app.StreamFlexApplication.instance
+        )
+    }
+
+    /**
+     * Download repository.
+     */
+    val downloadRepository: com.streamflex.domain.repositories.DownloadRepository by lazy {
+        com.streamflex.data.local.download.JsonDownloadRepository(
+            com.streamflex.app.StreamFlexApplication.instance
+        )
+    }
 }
