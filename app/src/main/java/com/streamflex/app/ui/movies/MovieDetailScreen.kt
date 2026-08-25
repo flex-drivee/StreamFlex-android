@@ -42,6 +42,7 @@ fun MovieDetailScreen(
     onEpisodePlayClick: (Episode) -> Unit
 ) {
     val state by viewModel.uiState.collectAsState()
+    val allDownloads by viewModel.allDownloads.collectAsState()
 
     val isShow       = state.show != null
     val title        = state.movie?.title    ?: state.show?.title    ?: ""
@@ -119,19 +120,43 @@ fun MovieDetailScreen(
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            // Download
+                            val movieDownloadItem = allDownloads.firstOrNull { it.mediaId == (state.movie?.id ?: "") && !it.isShow }
+
+                            // Download Button (Netflix Style)
                             OutlinedButton(
-                                onClick  = {},
+                                onClick = {
+                                    if (movieDownloadItem == null || movieDownloadItem.status == com.streamflex.domain.models.download.DownloadStatus.FAILED) {
+                                        viewModel.downloadMovie()
+                                    }
+                                },
                                 modifier = Modifier.weight(1f).height(46.dp),
-                                shape    = RoundedCornerShape(6.dp),
-                                border   = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-                                colors   = ButtonDefaults.outlinedButtonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                                shape = RoundedCornerShape(6.dp),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                                colors = ButtonDefaults.outlinedButtonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                             ) {
-                                Icon(Icons.Default.ArrowDropDown, null,
-                                    tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(20.dp))
-                                Spacer(Modifier.width(4.dp))
-                                Text("Download", color = MaterialTheme.colorScheme.onBackground,
-                                    style = MaterialTheme.typography.bodyMedium)
+                                when {
+                                    movieDownloadItem?.status == com.streamflex.domain.models.download.DownloadStatus.COMPLETED -> {
+                                        Icon(Icons.Filled.CheckCircle, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                                        Spacer(Modifier.width(6.dp))
+                                        Text("Downloaded", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                                    }
+                                    movieDownloadItem?.status?.isActive == true || state.isResolvingDownload -> {
+                                        CircularProgressIndicator(
+                                            progress = { movieDownloadItem?.progress ?: 0f },
+                                            color = MaterialTheme.colorScheme.primary,
+                                            strokeWidth = 2.dp,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                        Spacer(Modifier.width(8.dp))
+                                        val percent = movieDownloadItem?.progressPercent ?: 0
+                                        Text(if (percent > 0) "Downloading ($percent%)" else "Resolving...", color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.bodyMedium)
+                                    }
+                                    else -> {
+                                        Icon(Icons.Outlined.DownloadForOffline, null, tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(20.dp))
+                                        Spacer(Modifier.width(6.dp))
+                                        Text("Download", color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.bodyMedium)
+                                    }
+                                }
                             }
 
                             // My List toggle
@@ -219,8 +244,17 @@ fun MovieDetailScreen(
                         state.episodes.take(10)
 
                     items(episodesToShow, key = { it.episodeNumber }) { ep ->
+                        val epDownloadItem = allDownloads.firstOrNull { 
+                            it.mediaId == (state.show?.id ?: "") && 
+                            it.seasonNumber == state.selectedSeason && 
+                            it.episodeNumber == ep.episodeNumber 
+                        }
                         SFEpisodeItem(
                             episode = ep,
+                            downloadItem = epDownloadItem,
+                            onDownloadClick = {
+                                viewModel.downloadEpisode(ep)
+                            },
                             onClick = { 
                                 onEpisodePlayClick(ep) 
                             }
@@ -468,7 +502,12 @@ private fun SFSeasonSelector(
 // ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
-fun SFEpisodeItem(episode: Episode, onClick: () -> Unit) {
+fun SFEpisodeItem(
+    episode: Episode,
+    downloadItem: com.streamflex.domain.models.download.DownloadItem? = null,
+    onDownloadClick: () -> Unit = {},
+    onClick: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -539,8 +578,46 @@ fun SFEpisodeItem(episode: Episode, onClick: () -> Unit) {
             )
         }
 
-        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null,
-            tint = SFTextDisabled, modifier = Modifier.size(20.dp))
+        Spacer(Modifier.width(8.dp))
+
+        // Download Button (Netflix Style)
+        Box(
+            modifier = Modifier.size(40.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            when {
+                downloadItem?.status == com.streamflex.domain.models.download.DownloadStatus.COMPLETED -> {
+                    Icon(
+                        Icons.Filled.CheckCircle,
+                        contentDescription = "Downloaded",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+                downloadItem?.status?.isActive == true -> {
+                    CircularProgressIndicator(
+                        progress = { downloadItem.progress },
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = Color.White.copy(alpha = 0.2f),
+                        strokeWidth = 2.5.dp,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+                else -> {
+                    IconButton(
+                        onClick = onDownloadClick,
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Icon(
+                            Icons.Outlined.DownloadForOffline,
+                            contentDescription = "Download Episode",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 

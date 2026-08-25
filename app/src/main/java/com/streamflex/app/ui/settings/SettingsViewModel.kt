@@ -3,12 +3,20 @@ package com.streamflex.app.ui.settings
 import android.app.Application
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import com.streamflex.app.di.EngineModule
+import com.streamflex.app.di.RepositoryModule
+import com.streamflex.data.local.download.DownloadStorageManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
     private val prefs = application.getSharedPreferences("streamflex_settings", Context.MODE_PRIVATE)
+    private val storageManager = RepositoryModule.downloadStorageManager
+    private val downloadRepository = RepositoryModule.downloadRepository
+    private val downloadQueueManager = EngineModule.downloadQueueManager
 
     private val _appTheme = MutableStateFlow(prefs.getString("app_theme", "SKY_DARK") ?: "SKY_DARK")
     val appTheme: StateFlow<String> = _appTheme.asStateFlow()
@@ -32,6 +40,27 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         ) ?: com.streamflex.player.core.DecoderMode.AUTO.key
     )
     val decoderMode: StateFlow<String> = _decoderMode.asStateFlow()
+
+    // --- Downloads Settings ---
+    private val _wifiOnlyDownloads = MutableStateFlow(prefs.getBoolean("wifi_only_downloads", false))
+    val wifiOnlyDownloads: StateFlow<Boolean> = _wifiOnlyDownloads.asStateFlow()
+
+    private val _downloadQuality = MutableStateFlow(prefs.getString("download_quality", "1080p") ?: "1080p")
+    val downloadQuality: StateFlow<String> = _downloadQuality.asStateFlow()
+
+    private val _smartDownloads = MutableStateFlow(prefs.getBoolean("smart_downloads", true))
+    val smartDownloads: StateFlow<Boolean> = _smartDownloads.asStateFlow()
+
+    private val _storageStats = MutableStateFlow(storageManager.getStorageStats())
+    val storageStats: StateFlow<DownloadStorageManager.StorageStats> = _storageStats.asStateFlow()
+
+    init {
+        refreshStorageStats()
+    }
+
+    fun refreshStorageStats() {
+        _storageStats.value = storageManager.getStorageStats()
+    }
 
     fun setAppTheme(theme: String) {
         prefs.edit().putString("app_theme", theme).apply()
@@ -61,5 +90,30 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun setDecoderMode(mode: String) {
         prefs.edit().putString(com.streamflex.player.core.DecoderMode.PREF_KEY, mode).apply()
         _decoderMode.value = mode
+    }
+
+    fun setWifiOnlyDownloads(enabled: Boolean) {
+        prefs.edit().putBoolean("wifi_only_downloads", enabled).apply()
+        _wifiOnlyDownloads.value = enabled
+    }
+
+    fun setDownloadQuality(quality: String) {
+        prefs.edit().putString("download_quality", quality).apply()
+        _downloadQuality.value = quality
+    }
+
+    fun setSmartDownloads(enabled: Boolean) {
+        prefs.edit().putBoolean("smart_downloads", enabled).apply()
+        _smartDownloads.value = enabled
+    }
+
+    fun deleteAllDownloads() {
+        viewModelScope.launch {
+            val all = downloadRepository.allDownloads.value
+            all.forEach { item ->
+                downloadQueueManager.cancelDownload(item.id)
+            }
+            refreshStorageStats()
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.streamflex.app.ui.downloads
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -18,61 +19,53 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-
-data class DownloadItem(
-    val id: String,
-    val title: String,
-    val subtitle: String,
-    val size: String,
-    val imageUrl: String,
-    val progress: Float = 1f, // 1f = downloaded, < 1f = downloading
-    val isDownloading: Boolean = false
-)
-
-val mockDownloads = listOf(
-    DownloadItem(
-        "1", 
-        "Inception", 
-        "2h 28m • 1080p", 
-        "1.2 GB", 
-        "https://image.tmdb.org/t/p/w500/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg"
-    ),
-    DownloadItem(
-        "2", 
-        "Stranger Things - S04 E01", 
-        "1h 16m • 1080p", 
-        "850 MB", 
-        "https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8RFCvdTW4.jpg"
-    ),
-    DownloadItem(
-        "3", 
-        "The Matrix", 
-        "Downloading... 45%", 
-        "1.5 GB", 
-        "https://image.tmdb.org/t/p/w500/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg",
-        progress = 0.45f,
-        isDownloading = true
-    )
-)
+import com.streamflex.data.local.download.DownloadStorageManager
+import com.streamflex.domain.models.download.DownloadItem
+import com.streamflex.domain.models.download.DownloadStatus
+import com.streamflex.player.PlayerActivity
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DownloadsScreen(
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    viewModel: DownloadsViewModel = viewModel(factory = DownloadsViewModelFactory())
 ) {
-    var isSmartDownloadsEnabled by remember { mutableStateOf(true) }
+    val downloads by viewModel.allDownloads.collectAsState()
+    val storageStats by viewModel.storageStats.collectAsState()
+    val isSmartDownloadsEnabled by viewModel.smartDownloadsEnabled.collectAsState()
+    val context = LocalContext.current
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize(),
-        contentPadding = PaddingValues(bottom = 110.dp)
-    ) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Downloads", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground) },
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onBackground)
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    scrolledContainerColor = MaterialTheme.colorScheme.background
+                )
+            )
+        },
+        containerColor = MaterialTheme.colorScheme.background
+    ) { paddingValues ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = paddingValues.calculateTopPadding()),
+            contentPadding = PaddingValues(bottom = 110.dp)
+        ) {
             // Smart Downloads Toggle
             item {
                 Row(
@@ -104,7 +97,7 @@ fun DownloadsScreen(
                     }
                     Switch(
                         checked = isSmartDownloadsEnabled,
-                        onCheckedChange = { isSmartDownloadsEnabled = it },
+                        onCheckedChange = { viewModel.toggleSmartDownloads(it) },
                         colors = SwitchDefaults.colors(
                             checkedThumbColor = Color.White,
                             checkedTrackColor = MaterialTheme.colorScheme.primary,
@@ -119,26 +112,54 @@ fun DownloadsScreen(
 
             // Storage Indicator
             item {
-                StorageIndicator()
+                StorageIndicator(storageStats)
                 Spacer(modifier = Modifier.height(16.dp))
                 HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), thickness = 1.dp)
             }
 
             // Downloads List
-            if (mockDownloads.isEmpty()) {
+            if (downloads.isEmpty()) {
                 item {
-                    EmptyDownloadsState()
+                    EmptyDownloadsState(onFindClick = onBackClick)
                 }
             } else {
-                items(mockDownloads) { download ->
-                    DownloadListItem(download)
+                items(downloads, key = { it.id }) { item ->
+                    DownloadListItem(
+                        item = item,
+                        onPlayClick = {
+                            if (item.status == DownloadStatus.COMPLETED) {
+                                val intent = Intent(context, PlayerActivity::class.java).apply {
+                                    putExtra("MEDIA_ID", item.mediaId)
+                                    putExtra("VIDEO_TITLE", item.title)
+                                    putExtra("VIDEO_YEAR", item.year ?: 0)
+                                    putExtra("IS_SHOW", item.isShow)
+                                    putExtra("POSTER_PATH", item.posterUrl)
+                                    if (item.isShow && item.episodeNumber != null) {
+                                        putExtra("CURRENT_EPISODE_ID", "${item.mediaId}_${item.seasonNumber}_${item.episodeNumber}")
+                                    }
+                                }
+                                context.startActivity(intent)
+                            } else if (item.status == DownloadStatus.PAUSED) {
+                                viewModel.resumeDownload(item.id)
+                            }
+                        },
+                        onPause = { viewModel.pauseDownload(item.id) },
+                        onResume = { viewModel.resumeDownload(item.id) },
+                        onRetry = { viewModel.retryDownload(item.id) },
+                        onDelete = { viewModel.deleteDownload(item.id) }
+                    )
                 }
             }
         }
+    }
 }
 
 @Composable
-fun StorageIndicator() {
+fun StorageIndicator(stats: DownloadStorageManager.StorageStats) {
+    val total = stats.totalBytes.toFloat().coerceAtLeast(1f)
+    val appUsedRatio = (stats.streamFlexUsedBytes.toFloat() / total).coerceIn(0f, 1f)
+    val otherUsedRatio = ((stats.usedBytes - stats.streamFlexUsedBytes).toFloat() / total).coerceIn(0f, 1f)
+
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -150,11 +171,11 @@ fun StorageIndicator() {
                 Spacer(modifier = Modifier.width(6.dp))
                 Text("Internal Storage", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp, fontWeight = FontWeight.Medium)
             }
-            Text("24.5 GB Free", color = MaterialTheme.colorScheme.onBackground, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+            Text("${stats.formattedFree} Free", color = MaterialTheme.colorScheme.onBackground, fontSize = 14.sp, fontWeight = FontWeight.Bold)
         }
         Spacer(modifier = Modifier.height(12.dp))
         
-        // Progress Bar (Total vs Used vs App)
+        // Progress Bar
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -163,64 +184,87 @@ fun StorageIndicator() {
                 .background(MaterialTheme.colorScheme.surfaceVariant)
         ) {
             // Other apps
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(0.6f) // 60% used by others
-                    .height(8.dp)
-                    .background(MaterialTheme.colorScheme.outline)
-            )
+            if (otherUsedRatio > 0f) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(otherUsedRatio)
+                        .height(8.dp)
+                        .background(MaterialTheme.colorScheme.outline)
+                )
+            }
             // StreamFlex used
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(0.2f) // 20% used by streamflex
-                    .height(8.dp)
-                    .background(MaterialTheme.colorScheme.primary)
-            )
+            if (appUsedRatio > 0f) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(appUsedRatio)
+                        .height(8.dp)
+                        .background(MaterialTheme.colorScheme.primary)
+                )
+            }
         }
         Spacer(modifier = Modifier.height(8.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary))
             Spacer(modifier = Modifier.width(6.dp))
-            Text("StreamFlex (3.5 GB)", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
+            Text("StreamFlex (${stats.formattedStreamFlexUsed})", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
         }
     }
 }
 
 @Composable
-fun DownloadListItem(item: DownloadItem) {
+fun DownloadListItem(
+    item: DownloadItem,
+    onPlayClick: () -> Unit,
+    onPause: () -> Unit,
+    onResume: () -> Unit,
+    onRetry: () -> Unit,
+    onDelete: () -> Unit
+) {
+    var showMenu by remember { mutableStateOf(false) }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { /* Play */ }
+            .clickable { onPlayClick() }
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Thumbnail
         Box(
             modifier = Modifier
-                .width(130.dp)
+                .width(120.dp)
                 .height(72.dp)
                 .clip(RoundedCornerShape(8.dp))
                 .background(MaterialTheme.colorScheme.surfaceVariant)
         ) {
-            AsyncImage(
-                model = item.imageUrl,
-                contentDescription = item.title,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
-            )
-            if (item.isDownloading) {
+            if (!item.posterUrl.isNullOrBlank()) {
+                AsyncImage(
+                    model = item.posterUrl,
+                    contentDescription = item.title,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+            
+            if (item.status.isActive) {
                 Box(
-                    modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.5f)),
+                    modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.55f)),
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator(
                         progress = { item.progress },
                         color = MaterialTheme.colorScheme.primary,
                         trackColor = Color.White.copy(alpha = 0.3f),
-                        strokeWidth = 2.dp,
-                        modifier = Modifier.size(24.dp)
+                        strokeWidth = 3.dp,
+                        modifier = Modifier.size(28.dp)
                     )
+                }
+            } else if (item.status.isPaused) {
+                Box(
+                    modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.55f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(Icons.Default.Pause, contentDescription = "Paused", tint = Color.White, modifier = Modifier.size(28.dp))
                 }
             } else {
                 Box(
@@ -228,17 +272,17 @@ fun DownloadListItem(item: DownloadItem) {
                         .align(Alignment.BottomEnd)
                         .padding(4.dp)
                         .clip(RoundedCornerShape(4.dp))
-                        .background(Color.Black.copy(alpha = 0.7f))
+                        .background(Color.Black.copy(alpha = 0.75f))
                         .padding(horizontal = 4.dp, vertical = 2.dp)
                 ) {
-                    Text(item.size, color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                    Text(item.formattedSize, color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }
 
         Spacer(modifier = Modifier.width(16.dp))
 
-        // Title and Subtitle
+        // Title, Subtitle, Progress
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = item.title,
@@ -249,16 +293,34 @@ fun DownloadListItem(item: DownloadItem) {
                 overflow = TextOverflow.Ellipsis
             )
             Spacer(modifier = Modifier.height(4.dp))
+
+            val subtext = when (item.status) {
+                DownloadStatus.COMPLETED -> "${item.formattedSize} • ${item.quality.label}"
+                DownloadStatus.DOWNLOADING -> {
+                    val speed = if (item.speedBytesPerSec > 0) {
+                        val mb = item.speedBytesPerSec.toDouble() / (1024 * 1024)
+                        String.format("%.1f MB/s", mb)
+                    } else "Downloading..."
+                    val eta = if (item.etaSeconds > 0) " (${item.etaSeconds / 60}m left)" else ""
+                    "${item.progressPercent}% • $speed$eta"
+                }
+                DownloadStatus.CONNECTING -> "Connecting to mirror..."
+                DownloadStatus.QUEUED -> "Queued..."
+                DownloadStatus.PAUSED -> "Paused (${item.progressPercent}%)"
+                DownloadStatus.FAILED -> "Failed • Tap to retry"
+                DownloadStatus.CANCELLED -> "Cancelled"
+            }
+
             Text(
-                text = item.subtitle,
-                color = if (item.isDownloading) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                text = subtext,
+                color = if (item.status.isActive) MaterialTheme.colorScheme.primary else if (item.status == DownloadStatus.FAILED) Color.Red else MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 13.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
             
-            if (item.isDownloading) {
-                Spacer(modifier = Modifier.height(8.dp))
+            if (item.status.isActive) {
+                Spacer(modifier = Modifier.height(6.dp))
                 LinearProgressIndicator(
                     progress = { item.progress },
                     modifier = Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)),
@@ -270,19 +332,64 @@ fun DownloadListItem(item: DownloadItem) {
 
         Spacer(modifier = Modifier.width(8.dp))
 
-        // Action icon
-        IconButton(onClick = { /* TODO: Open Bottom Sheet */ }) {
-            Icon(
-                imageVector = Icons.Default.MoreVert,
-                contentDescription = "Options",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+        // Options dropdown
+        Box {
+            IconButton(onClick = { showMenu = true }) {
+                Icon(
+                    imageVector = Icons.Default.MoreVert,
+                    contentDescription = "Options",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            DropdownMenu(
+                expanded = showMenu,
+                onDismissRequest = { showMenu = false }
+            ) {
+                if (item.status == DownloadStatus.DOWNLOADING) {
+                    DropdownMenuItem(
+                        text = { Text("Pause Download") },
+                        leadingIcon = { Icon(Icons.Default.Pause, null) },
+                        onClick = {
+                            showMenu = false
+                            onPause()
+                        }
+                    )
+                } else if (item.status == DownloadStatus.PAUSED) {
+                    DropdownMenuItem(
+                        text = { Text("Resume Download") },
+                        leadingIcon = { Icon(Icons.Default.PlayArrow, null) },
+                        onClick = {
+                            showMenu = false
+                            onResume()
+                        }
+                    )
+                } else if (item.status == DownloadStatus.FAILED) {
+                    DropdownMenuItem(
+                        text = { Text("Retry Download") },
+                        leadingIcon = { Icon(Icons.Default.Refresh, null) },
+                        onClick = {
+                            showMenu = false
+                            onRetry()
+                        }
+                    )
+                }
+
+                DropdownMenuItem(
+                    text = { Text("Delete Download", color = Color.Red) },
+                    leadingIcon = { Icon(Icons.Default.Delete, null, tint = Color.Red) },
+                    onClick = {
+                        showMenu = false
+                        onDelete()
+                    }
+                )
+            }
         }
     }
 }
 
 @Composable
-fun EmptyDownloadsState() {
+fun EmptyDownloadsState(onFindClick: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -313,7 +420,7 @@ fun EmptyDownloadsState() {
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Movies and TV shows you download\nwill appear here.",
+            text = "Movies and TV shows you download\nwill appear here for offline viewing.",
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 15.sp,
             textAlign = TextAlign.Center,
@@ -321,7 +428,7 @@ fun EmptyDownloadsState() {
         )
         Spacer(modifier = Modifier.height(32.dp))
         Button(
-            onClick = { /* Navigate to Search or Home */ },
+            onClick = onFindClick,
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.surface,
                 contentColor = MaterialTheme.colorScheme.primary
