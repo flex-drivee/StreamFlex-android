@@ -97,6 +97,7 @@ class StreamFlexDownloadService : Service() {
             }
 
             val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+            @Suppress("DEPRECATION")
             wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, "StreamFlex:DownloadWifiLock").apply {
                 acquire()
             }
