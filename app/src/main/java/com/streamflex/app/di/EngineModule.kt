@@ -23,4 +23,15 @@ object EngineModule {
             storageManager = RepositoryModule.downloadStorageManager
         )
     }
+
+    /**
+     * Shared DownloadQueueManager.
+     */
+    val downloadQueueManager: com.streamflex.engine.download.DownloadQueueManager by lazy {
+        com.streamflex.engine.download.DownloadQueueManager(
+            context = com.streamflex.app.StreamFlexApplication.instance,
+            repository = RepositoryModule.downloadRepository,
+            downloadEngine = downloadEngine
+        )
+    }
 }
