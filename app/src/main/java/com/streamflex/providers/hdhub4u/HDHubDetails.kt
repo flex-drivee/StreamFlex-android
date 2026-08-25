@@ -7,7 +7,6 @@ import com.streamflex.core.network.NetworkResult
 import com.streamflex.core.network.RequestBuilder
 import com.streamflex.core.parser.DetailParser
 import com.streamflex.core.parser.HtmlParser
-import com.streamflex.core.parser.SourceParser
 import com.streamflex.core.parser.TransportResult
 import com.streamflex.core.utils.StreamLogger
 import com.streamflex.domain.models.HostType
@@ -16,23 +15,10 @@ import com.streamflex.domain.models.ProviderEpisode
 import com.streamflex.domain.models.ProviderResult
 import com.streamflex.domain.models.ProviderSeason
 import com.streamflex.domain.models.ProviderSource
-import com.streamflex.domain.models.Quality
 import com.streamflex.domain.models.SearchResult
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 
-/**
- * HDHub4U Detail Parser (Phase 1.3 & Phase 1.7).
- *
- * Handles both:
- *  - Movie pages  → extract all download links as ProviderSources
- *  - TV pages     → two modes:
- *      A. "All episodes" page: extract links, group by episode number found
- *         in link text (Ep.01, EP01, Episode 1, etc.), or treat as batch
- *         if no episode numbers found.
- *      B. Season index page: each row is a separate episode with its own
- *         download links.
- */
 class HDHubDetails : DetailParser {
 
     companion object {
@@ -53,8 +39,6 @@ class HDHubDetails : DetailParser {
     }
 
     private val sourceParser = HDHubSourceParser()
-
-    // ─── Public API ───────────────────────────────────────────────────────────
 
     suspend fun load(result: SearchResult, baseUrl: String): ProviderResult {
         val pageUrl = normalizeUrl(result.url, baseUrl)
@@ -123,7 +107,7 @@ class HDHubDetails : DetailParser {
         val title = extractTitle(document, detailUrl)
         val poster = extractPoster(document)
         val plot = extractOverview(document)
-        val isSeries = isTvSeries(document, detailUrl, title)
+        val isSeries = isTvSeries(document, detailUrl)
         val mediaType = if (isSeries) MediaType.TV else MediaType.MOVIE
 
         if (mediaType == MediaType.MOVIE) {
@@ -178,26 +162,6 @@ class HDHubDetails : DetailParser {
         }
     }
 
-    // ─── Classification Helper ────────────────────────────────────────────────
-
-    private fun isTvSeries(document: Document, url: String, title: String = ""): Boolean {
-        val tvRegex = Regex("""(?:season[.\s_-]*\d+|s\d{1,2}\b|all\s+episodes|complete\s+series)""", RegexOption.IGNORE_CASE)
-        if (tvRegex.containsMatchIn(url) || tvRegex.containsMatchIn(title)) return true
-
-        if (document.select("div.episodes-list, div.season-item, div.episode-download-item").isNotEmpty()) return true
-
-        val headings = document.select("h1, h2, h3, h4")
-        for (h in headings) {
-            val text = h.text()
-            if (tvRegex.containsMatchIn(text) || text.contains("Single Episode", ignoreCase = true)) {
-                return true
-            }
-        }
-        return false
-    }
-
-    // ─── TV Season / Episode Parsing ─────────────────────────────────────────
-
     private fun parseSeasons(document: Document, detailUrl: String): List<ProviderSeason> {
         val seasonNum = extractSeasonNumber(detailUrl)
         val epLinksMap = mutableMapOf<Int, MutableList<ProviderSource>>()
@@ -215,7 +179,7 @@ class HDHubDetails : DetailParser {
 
                     val links = epItem.select("a[href]")
                     for (link in links) {
-                        var href = link.absUrl("href").takeIf { it.isNotBlank() } ?: link.attr("href")
+                        val href = link.absUrl("href").takeIf { it.isNotBlank() } ?: link.attr("href")
                         if (href.isBlank() || sourceParser.shouldSkipUrl(href)) continue
 
                         var hostType = HostDetector.detect(href)
@@ -244,40 +208,41 @@ class HDHubDetails : DetailParser {
             val elements = document.select("h1, h2, h3, h4, h5, h6, p, div, a[href]")
 
             for (el in elements) {
-            val text = el.ownText().trim()
-            val fullText = el.text().trim()
+                val text = el.ownText().trim()
+                val fullText = el.text().trim()
 
-            if (el.tagName().startsWith("h") || el.tagName() in listOf("p", "strong", "b") || el.children().isEmpty()) {
-                val checkText = text.ifBlank { fullText }
-                if (!checkText.contains("Single Episode", ignoreCase = true) && !checkText.contains("All Episodes", ignoreCase = true)) {
-                    val epMatch = EPISODE_NUM_REGEX.find(checkText)
-                    if (epMatch != null) {
-                        val num = epMatch.groupValues[1].toIntOrNull()
-                        if (num != null && num in 1..999) {
-                            currentEpisode = num
+                if (el.tagName().startsWith("h") || el.tagName() in listOf("p", "strong", "b") || el.children().isEmpty()) {
+                    val checkText = text.ifBlank { fullText }
+                    if (!checkText.contains("Single Episode", ignoreCase = true) && !checkText.contains("All Episodes", ignoreCase = true)) {
+                        val epMatch = EPISODE_NUM_REGEX.find(checkText)
+                        if (epMatch != null) {
+                            val num = epMatch.groupValues[1].toIntOrNull()
+                            if (num != null && num in 1..999) {
+                                currentEpisode = num
+                            }
                         }
                     }
                 }
-            }
 
-            if (el.tagName() == "a" && currentEpisode != null) {
-                val url = el.attr("abs:href").ifBlank { el.attr("href") }
-                if (url.isNotBlank() && !sourceParser.shouldSkipUrl(url)) {
-                    var hostType = HostDetector.detect(url)
-                    if (hostType == HostType.UNKNOWN && url.contains("?id=")) hostType = HostType.REDIRECT
-                    
-                    if (hostType != HostType.UNKNOWN) {
-                        val quality = QualityDetector.detect(el.text() + " " + (el.parent()?.text() ?: ""))
-                        val source = HDHubMapper.toProviderSource(
-                            provider = PROVIDER_NAME,
-                            host = hostType.name,
-                            hostType = hostType,
-                            url = url,
-                            quality = quality,
-                            referer = detailUrl,
-                            headers = mapOf("Referer" to detailUrl, "Cookie" to HDHubConfig.COOKIE)
-                        )
-                        epLinksMap.getOrPut(currentEpisode) { mutableListOf() }.add(source)
+                if (el.tagName() == "a" && currentEpisode != null) {
+                    val url = el.attr("abs:href").ifBlank { el.attr("href") }
+                    if (url.isNotBlank() && !sourceParser.shouldSkipUrl(url)) {
+                        var hostType = HostDetector.detect(url)
+                        if (hostType == HostType.UNKNOWN && url.contains("?id=")) hostType = HostType.REDIRECT
+                        
+                        if (hostType != HostType.UNKNOWN) {
+                            val quality = QualityDetector.detect(el.text() + " " + (el.parent()?.text() ?: ""))
+                            val source = HDHubMapper.toProviderSource(
+                                provider = PROVIDER_NAME,
+                                host = hostType.name,
+                                hostType = hostType,
+                                url = url,
+                                quality = quality,
+                                referer = detailUrl,
+                                headers = mapOf("Referer" to detailUrl, "Cookie" to HDHubConfig.COOKIE)
+                            )
+                            epLinksMap.getOrPut(currentEpisode) { mutableListOf() }.add(source)
+                        }
                     }
                 }
             }
@@ -331,17 +296,9 @@ class HDHubDetails : DetailParser {
         return null
     }
 
-    /**
-     * Extract season number from URL. E.g.
-     * "stranger-things-season-2-..." → 2
-     * "stranger-things-s03-..." → 3
-     * Defaults to 1 if not found.
-     */
     private fun extractSeasonNumber(url: String): Int {
         return SEASON_URL_REGEX.find(url)?.groupValues?.get(1)?.toIntOrNull() ?: 1
     }
-
-    // ─── Metadata Helpers ─────────────────────────────────────────────────────
 
     private fun extractTitle(document: Document, fallback: String): String {
         val titleEl = document.selectFirst(
@@ -365,14 +322,14 @@ class HDHubDetails : DetailParser {
         val titleText = document.selectFirst("h1.page-title span, h1.page-title, h1, .entry-title")?.text() ?: ""
         val combined = "$titleText $detailUrl".lowercase()
 
-        // 1. Explicit Movie check: If it contains "full movie" or "movie" and does NOT mention "season" / "series" / "all-episodes", it is a Movie
+        // 1. Explicit Movie check
         if ((combined.contains("full movie") || combined.contains("full-movie") || combined.contains("movie")) &&
             !combined.contains("season") && !combined.contains("series") && !combined.contains("all-episodes")
         ) {
             return false
         }
 
-        // 2. TV Series signals from URL and Title (matching SkyStream inferIsSeries regex)
+        // 2. TV Series signals from URL and Title
         if (combined.contains("all-episodes") ||
             combined.contains("web-series") ||
             combined.contains("tv-series") ||
@@ -383,7 +340,7 @@ class HDHubDetails : DetailParser {
             return true
         }
 
-        // 3. Title-only episode patterns (e.g. "Episode 1", "EP01")
+        // 3. Title-only episode patterns
         if (EPISODE_NUM_REGEX.containsMatchIn(titleText)) {
             return true
         }

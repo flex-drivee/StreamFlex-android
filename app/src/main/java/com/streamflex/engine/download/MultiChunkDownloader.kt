@@ -270,11 +270,11 @@ class MultiChunkDownloader(
 
             val realTotal = if (totalBytes > 0) totalBytes else body.contentLength()
             val inputStream = body.byteStream()
+            var downloaded = 0L
 
             FileOutputStream(partFile).use { outputStream ->
                 val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
                 var bytesRead: Int
-                var downloaded = 0L
 
                 var lastProgressTime = System.currentTimeMillis()
                 var lastDownloadedBytes = 0L
