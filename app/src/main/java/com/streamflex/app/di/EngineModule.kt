@@ -15,4 +15,12 @@ object EngineModule {
     val streamEngine: StreamEngine
         get() = StreamEngine
 
+    /**
+     * Shared DownloadEngine.
+     */
+    val downloadEngine: com.streamflex.engine.download.DownloadEngine by lazy {
+        com.streamflex.engine.download.DownloadEngine(
+            storageManager = RepositoryModule.downloadStorageManager
+        )
+    }
 }
