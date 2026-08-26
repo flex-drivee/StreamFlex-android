@@ -85,9 +85,8 @@ class StreamTapeExtractor : BaseExtractor() {
 
             StreamLogger.info("StreamTapeExtractor", "Found stream URL: $finalUrl")
             val stream = createStream(
-                source = source,
-                url = finalUrl,
-                referer = url
+                source = source.copy(referer = url),
+                url = finalUrl
             )
             return result(streams = listOf(stream))
         }
