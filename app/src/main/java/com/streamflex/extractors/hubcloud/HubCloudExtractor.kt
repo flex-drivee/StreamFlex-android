@@ -475,40 +475,36 @@ class HubCloudExtractor : BaseExtractor() {
                 .followRedirects(false)
                 .build()
 
-            when (val response = HttpClient.execute(request)) {
+            val targetUrl = when (val response = HttpClient.execute(request)) {
                 is NetworkResult.Success -> {
-                    val hxRedirect = response.data.headers["hx-redirect"]?.firstOrNull()
-                        ?: response.data.headers["HX-Redirect"]?.firstOrNull()
-                        ?: response.data.headers["location"]?.firstOrNull()
-                        ?: response.data.headers["Location"]?.firstOrNull()
-
-                    val targetUrl = hxRedirect ?: if (response.data.url != downloadUrl) response.data.url else null
-
-                    if (!targetUrl.isNullOrBlank()) {
-                        val safeTarget = targetUrl.replace(" ", "%20").replace("[", "%5B").replace("]", "%5D")
-                        buildStreamLink(
-                            source = source,
-                            url = safeTarget,
-                            quality = quality,
-                            serverLabel = "[BuzzServer]$sizeSuffix",
-                            headers = mapOf("Referer" to buzzUrl)
-                        )
-                    } else {
-                        // Fallback: use safe buzzUrl
-                        buildStreamLink(
-                            source = source,
-                            url = buzzUrl.replace(" ", "%20"),
-                            quality = quality,
-                            serverLabel = "[BuzzServer]$sizeSuffix",
-                            headers = mapOf("Referer" to referer)
-                        )
-                    }
+                    val hxRedirect = response.data.headers.entries.find { it.key.equals("hx-redirect", ignoreCase = true) }?.value?.firstOrNull()
+                        ?: response.data.headers.entries.find { it.key.equals("location", ignoreCase = true) }?.value?.firstOrNull()
+                    hxRedirect ?: if (response.data.url != downloadUrl) response.data.url else null
                 }
                 else -> null
             }
+
+            val finalTarget = targetUrl
+                ?: (if (buzzUrl.contains("/f/")) buzzUrl.replace("/f/", "/d/") else buzzUrl)
+
+            val safeTarget = finalTarget.replace(" ", "%20").replace("[", "%5B").replace("]", "%5D")
+            buildStreamLink(
+                source = source,
+                url = safeTarget,
+                quality = quality,
+                serverLabel = "[BuzzServer]$sizeSuffix",
+                headers = mapOf("Referer" to buzzUrl)
+            )
         } catch (e: Exception) {
             StreamLogger.error(TAG, "Failed to resolve BuzzServer redirect: ${e.message}")
-            null
+            val fallback = if (buzzUrl.contains("/f/")) buzzUrl.replace("/f/", "/d/") else buzzUrl
+            buildStreamLink(
+                source = source,
+                url = fallback.replace(" ", "%20"),
+                quality = quality,
+                serverLabel = "[BuzzServer]$sizeSuffix",
+                headers = mapOf("Referer" to referer)
+            )
         }
     }
 

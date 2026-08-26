@@ -115,9 +115,10 @@ class PlayerController(
             _allStreams.value = emptyList()
             return
         }
-        val isNew = _allStreams.value != streams
+        val isFirstTime = _allStreams.value.isEmpty()
+        val isDifferentFirstStream = _allStreams.value.firstOrNull()?.url != streams.firstOrNull()?.url
         _allStreams.value = streams
-        if (isNew) {
+        if (isFirstTime || isDifferentFirstStream) {
             _currentStreamIndex.value = 0
             loadCurrentStream()
         }

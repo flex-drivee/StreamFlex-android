@@ -295,12 +295,12 @@ class Media3Player(
             }
         }
 
-        // 2. High-performance HTTP Data Source with redirect, timeout, and custom headers
+        // 2. High-performance HTTP Data Source with redirect, fast failover timeout, and custom headers
         val httpDataSourceFactory = DefaultHttpDataSource.Factory()
             .setUserAgent(userAgent)
             .setAllowCrossProtocolRedirects(true)
-            .setConnectTimeoutMs(25_000)
-            .setReadTimeoutMs(30_000)
+            .setConnectTimeoutMs(8_000)
+            .setReadTimeoutMs(10_000)
             .setKeepPostFor302Redirects(true)
             .setDefaultRequestProperties(requestHeaders)
 
