@@ -351,6 +351,67 @@ class HubCloudExtractor : BaseExtractor() {
             }
         }
 
+        // Also check JavaScript for redirects / direct streams (e.g. HubCDN / InventoryIdea / Googleusercontent)
+        val scriptHtml = document.select("script").joinToString("\n") { it.data() }
+        if (scriptHtml.isNotBlank()) {
+            // 1. Script reurl / redirect variables
+            val reurlMatches = Regex("""(?:var\s+reurl|reurl|var\s+url|location(?:\.href)?)\s*=\s*['"]([^'"]+)['"]""", RegexOption.IGNORE_CASE)
+                .findAll(scriptHtml)
+            for (m in reurlMatches) {
+                val scriptUrl = m.groups[1]?.value?.trim() ?: continue
+                if (scriptUrl.contains("?r=")) {
+                    val b64Part = scriptUrl.substringAfter("?r=")
+                    val decoded = decodeBase64Safe(b64Part)
+                    if (!decoded.isNullOrBlank()) {
+                        if (decoded.contains("link=")) {
+                            val directLink = decoded.substringAfter("link=").trim()
+                            if (directLink.startsWith("http") && visitedUrls.add(directLink)) {
+                                StreamLogger.info(TAG, "Found decoded Google Video from script: $directLink")
+                                streams += buildStreamLink(
+                                    source = source,
+                                    url = directLink,
+                                    quality = detectedQuality,
+                                    serverLabel = "Google Video$sizeSuffix",
+                                    headers = emptyMap()
+                                )
+                            }
+                        } else if (decoded.startsWith("http") && visitedUrls.add(decoded)) {
+                            pendingSources += source.copy(url = decoded, hostType = HostDetector.detect(decoded), quality = detectedQuality)
+                        }
+                    }
+                } else if (scriptUrl.startsWith("http") && visitedUrls.add(scriptUrl)) {
+                    val type = HostDetector.detect(scriptUrl)
+                    if (HostDetector.isDirect(type)) {
+                        streams += buildStreamLink(
+                            source = source,
+                            url = scriptUrl,
+                            quality = detectedQuality,
+                            serverLabel = "Direct Video$sizeSuffix",
+                            headers = emptyMap()
+                        )
+                    } else if (type != HostType.UNKNOWN && type != HostType.HUBCLOUD) {
+                        pendingSources += source.copy(url = scriptUrl, hostType = type, quality = detectedQuality)
+                    }
+                }
+            }
+
+            // 2. Direct googleusercontent stream links in scripts
+            val gVideoRegex = Regex("""https://video-downloads\.googleusercontent\.com/[^\s"'<>\\]+""")
+            for (m in gVideoRegex.findAll(scriptHtml)) {
+                val gUrl = m.value.trim()
+                if (visitedUrls.add(gUrl)) {
+                    StreamLogger.info(TAG, "Found direct Google Video URL in script: $gUrl")
+                    streams += buildStreamLink(
+                        source = source,
+                        url = gUrl,
+                        quality = detectedQuality,
+                        serverLabel = "Google Video$sizeSuffix",
+                        headers = emptyMap()
+                    )
+                }
+            }
+        }
+
         // Also check video & iframe tags
         document.select("video source[src], iframe[src]").forEach { el ->
             val src = toAbsolute(el.absUrl("src").takeIf { it.isNotBlank() } ?: el.attr("src"))
@@ -380,6 +441,21 @@ class HubCloudExtractor : BaseExtractor() {
             streams = streams.distinctBy { it.url },
             sources = pendingSources.distinctBy { it.url }
         )
+    }
+
+    private fun decodeBase64Safe(input: String): String? {
+        return try {
+            val pad = (4 - (input.length % 4)) % 4
+            val padded = if (pad > 0) input + "=".repeat(pad) else input
+            val bytes = try {
+                android.util.Base64.decode(padded, android.util.Base64.DEFAULT)
+            } catch (_: Exception) {
+                java.util.Base64.getDecoder().decode(padded)
+            }
+            String(bytes, Charsets.UTF_8)
+        } catch (_: Exception) {
+            null
+        }
     }
 
     private suspend fun resolveBuzzServer(

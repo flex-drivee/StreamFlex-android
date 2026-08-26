@@ -256,10 +256,11 @@ class Media3Player(
         val requestHeaders = mutableMapOf<String, String>()
         requestHeaders["User-Agent"] = userAgent
         requestHeaders["Accept"] = "*/*"
-        requestHeaders["Connection"] = "keep-alive"
 
         val lowerUrl = stream.url.lowercase()
         val isDirectCdn = lowerUrl.contains("workers.dev") ||
+                          lowerUrl.contains("googleusercontent.com") ||
+                          lowerUrl.contains("googlevideo.com") ||
                           lowerUrl.contains("pixeldrain.com") ||
                           lowerUrl.contains("buzzheavier.com") ||
                           lowerUrl.contains("publit.io") ||
@@ -280,7 +281,7 @@ class Media3Player(
             if (v.isNotBlank()) {
                 if (isDirectCdn && k.equals("Referer", ignoreCase = true)) {
                     // omit referer
-                } else {
+                } else if (!k.equals("Connection", ignoreCase = true)) {
                     requestHeaders[k] = v
                 }
             }
