@@ -35,7 +35,8 @@ object HostDetector {
 
             host.contains("hubcloud") ||
                     host.contains("hubdrive") ||
-                    host.contains("hubcdn") ->
+                    host.contains("hubcdn") ||
+                    (host.contains("gamerxyt") && lowerUrl.contains("hubcloud.php")) ->
                 return HostType.HUBCLOUD
 
             host.contains("hblinks") ->
@@ -97,6 +98,24 @@ object HostDetector {
                 return HostType.STREAMUP
         }
 
+        // File locker hosting pages that should not be queued as direct raw video streams
+        val isFileLocker = host.contains("primeuploads") ||
+                host.contains("pandafiles") ||
+                host.contains("katfile") ||
+                host.contains("dropgalaxy") ||
+                host.contains("uploady") ||
+                host.contains("clicknupload") ||
+                host.contains("rapidgator") ||
+                host.contains("turbobit") ||
+                host.contains("nitroflare") ||
+                host.contains("ddownload") ||
+                host.contains("filehost") ||
+                host.contains("usersdrive")
+
+        if (isFileLocker) {
+            return HostType.UNKNOWN
+        }
+
         // Check dynamic domains in ExtractorRegistry (from remote registry.json / defaults)
         val registryType = ExtractorRegistry.getHostTypeForUrl(url)
         if (registryType != HostType.UNKNOWN) {
@@ -129,11 +148,7 @@ object HostDetector {
 
         when {
 
-            host.contains("gamerxyt") ->
-
-                return HostType.REDIRECT
-
-            lowerUrl.endsWith(".php") ->
+            lowerUrl.endsWith(".php") && !lowerUrl.contains("gamerxyt.com") ->
 
                 return HostType.REDIRECT
 
@@ -141,7 +156,7 @@ object HostDetector {
 
                 return HostType.REDIRECT
 
-            lowerUrl.contains("/download") ->
+            lowerUrl.contains("/download") && !lowerUrl.contains("workers.dev") ->
 
                 return HostType.REDIRECT
 

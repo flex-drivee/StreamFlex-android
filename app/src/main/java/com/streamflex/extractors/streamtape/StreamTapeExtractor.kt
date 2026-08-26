@@ -44,11 +44,15 @@ class StreamTapeExtractor : BaseExtractor() {
         
         val html = document.html()
         
-        // Find script line with innerHTML assignment to any link container (robotlink, botlink, ideoolink, etc.)
+        // Find script line with innerHTML assignment to StreamTape video link container
         val targetLine = html.lines().firstOrNull { line ->
-            (line.contains("botlink", ignoreCase = true) || line.contains("link", ignoreCase = true)) &&
+            (line.contains("botlink", ignoreCase = true) || 
+             line.contains("robotlink", ignoreCase = true) || 
+             line.contains("norobotlink", ignoreCase = true) || 
+             line.contains("ideoolink", ignoreCase = true) ||
+             line.contains("crypted", ignoreCase = true)) &&
             line.contains("innerHTML", ignoreCase = true) &&
-            (line.contains("get_video") || line.contains("token=") || line.contains("+"))
+            line.contains("get_video")
         }
 
         var streamUrl: String? = null
@@ -69,8 +73,8 @@ class StreamTapeExtractor : BaseExtractor() {
 
         // Fallback regex patterns
         if (streamUrl == null) {
-            val regexSingle = Regex("""getElementById\(['"][^'"]+['"]\)\.innerHTML\s*=\s*'([^']+)'\s*\+\s*'([^']+)'""")
-            val regexDouble = Regex("""getElementById\(['"][^'"]+['"]\)\.innerHTML\s*=\s*"([^"]+)"\s*\+\s*"([^"]+)""")
+            val regexSingle = Regex("""getElementById\(['"][^'"]*(?:botlink|ideoolink)[^'"]*['"]\)\.innerHTML\s*=\s*'([^']+)'\s*\+\s*'([^']+)'""")
+            val regexDouble = Regex("""getElementById\(['"][^'"]*(?:botlink|ideoolink)[^'"]*['"]\)\.innerHTML\s*=\s*"([^"]+)"\s*\+\s*"([^"]+)""")
             val match = regexSingle.find(html) ?: regexDouble.find(html)
             if (match != null) {
                 val combined = match.groupValues[1] + match.groupValues[2]
@@ -78,7 +82,7 @@ class StreamTapeExtractor : BaseExtractor() {
             }
         }
 
-        if (!streamUrl.isNullOrBlank()) {
+        if (!streamUrl.isNullOrBlank() && (streamUrl.contains("get_video") || streamUrl.contains("streamtape"))) {
             val finalUrl = if (!streamUrl.contains("stream=1")) {
                 if (streamUrl.contains("?")) "$streamUrl&stream=1" else "$streamUrl?stream=1"
             } else streamUrl

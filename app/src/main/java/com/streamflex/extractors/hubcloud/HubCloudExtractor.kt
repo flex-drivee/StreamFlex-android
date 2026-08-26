@@ -41,12 +41,9 @@ class HubCloudExtractor : BaseExtractor() {
             "facebook", "twitter", "telegram", "discord", "imdb", "instagram",
             "youtube.com", "google.com/search", "/tg/", "tg://",
             "/category/", "/tag/", "/page/", "/sign", "/login", "/register",
-            "/contact", "/about", "/privacy", "/terms",
+            "/contact", "/about", "/privacy", "/terms", "/admin", "/drive/admin",
+            "hubcloud.fans", "hubcloud.foo", "sample-page",
             "javascript:", "#"
-        )
-
-        private val SKIP_BARE_DOMAINS = listOf(
-            ".tips", ".fans", ".cx", ".co", ".ist"
         )
     }
 
@@ -147,6 +144,10 @@ class HubCloudExtractor : BaseExtractor() {
             val lowerUrl = absUrl.lowercase()
             if (SKIP_PATTERNS.any { lowerUrl.contains(it) }) continue
 
+            // Skip bare domain homepages
+            val path = try { URL(absUrl).path } catch (_: Exception) { "" }
+            if (path.isEmpty() || path == "/" || path == "/#") continue
+
             val text = (el.text() + " " + el.attr("title")).trim()
             val label = text.lowercase()
 
@@ -170,15 +171,11 @@ class HubCloudExtractor : BaseExtractor() {
                 continue
             }
 
-            val isIntermediateHub = lowerSafeUrl.contains("hubcloud.php") ||
-                                    lowerSafeUrl.contains("/drive/") ||
-                                    lowerSafeUrl.contains("/file/") ||
-                                    lowerSafeUrl.contains("gamerxyt.com") ||
-                                    lowerSafeUrl.contains("hubdrive.") ||
-                                    lowerSafeUrl.contains("hubcdn.") ||
-                                    lowerSafeUrl.contains("hubcloud.") ||
-                                    lowerSafeUrl.contains("gdflix.") ||
-                                    lowerSafeUrl.contains("greenmountmotors.com")
+            val isIntermediateHub = (lowerSafeUrl.contains("hubcloud.php") && (lowerSafeUrl.contains("id=") || lowerSafeUrl.contains("token="))) ||
+                                    (lowerSafeUrl.contains("/drive/") && !lowerSafeUrl.endsWith("/drive/") && !lowerSafeUrl.contains("/admin")) ||
+                                    (lowerSafeUrl.contains("/file/") && !lowerSafeUrl.endsWith("/file/")) ||
+                                    (lowerSafeUrl.contains("greenmountmotors.com") && lowerSafeUrl.contains("?id=")) ||
+                                    (lowerSafeUrl.contains("gdflix.") && lowerSafeUrl.contains("?id="))
 
             when {
                 // 1. FSL Server / FSLv2
