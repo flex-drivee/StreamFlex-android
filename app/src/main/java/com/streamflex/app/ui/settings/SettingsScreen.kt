@@ -29,6 +29,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 @Composable
 fun SettingsScreen(
     onBackClick: () -> Unit,
+    onNavigateToDownloads: () -> Unit = {},
     viewModel: SettingsViewModel = viewModel()
 ) {
     val appTheme by viewModel.appTheme.collectAsState()
@@ -161,6 +162,13 @@ fun SettingsScreen(
             item {
                 SettingsGroup("Downloads") {
                     SettingsTile(
+                        icon = Icons.Outlined.Folder,
+                        title = "Downloads Manager",
+                        subtitle = "Manage active downloads, pause, continue & offline videos",
+                        onTap = onNavigateToDownloads
+                    )
+                    SettingsDivider()
+                    SettingsTile(
                         icon = Icons.Outlined.AutoAwesome,
                         title = "Smart Downloads",
                         subtitle = if (smartDownloads) "Auto-download next episode" else "Disabled",
@@ -195,7 +203,7 @@ fun SettingsScreen(
                         icon = Icons.Outlined.SdStorage,
                         title = "Storage Usage",
                         subtitle = "StreamFlex: ${storageStats.formattedStreamFlexUsed} • Free: ${storageStats.formattedFree}",
-                        onTap = { viewModel.refreshStorageStats() }
+                        onTap = onNavigateToDownloads
                     )
                     SettingsDivider()
                     SettingsTile(

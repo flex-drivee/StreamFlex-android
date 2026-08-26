@@ -57,20 +57,25 @@ class ContentRepositoryImpl(
 
     // Fixed: Episode type is now recognized
     override suspend fun getSeasonEpisodes(showId: String, seasonNumber: Int): List<Episode> = withContext(Dispatchers.IO) {
-        val seasonDetails = tmdbApi.getSeasonDetails(showId.toInt(), seasonNumber, apiKey)
+        try {
+            val seasonDetails = tmdbApi.getSeasonDetails(showId.toInt(), seasonNumber, apiKey)
 
-        // Map TMDB Episodes to Domain Episodes manually here
-        return@withContext seasonDetails.episodes?.map { tmdbEp ->
-            Episode(
-                id = tmdbEp.id.toString(),
-                title = tmdbEp.title ?: "Episode ${tmdbEp.episodeNumber}",
-                episodeNumber = tmdbEp.episodeNumber,
-                overview = tmdbEp.overview,
-                airDate = tmdbEp.airDate,
-                runtime = tmdbEp.runtime,
-                stillPath = tmdbEp.stillPath?.let { "https://image.tmdb.org/t/p/w500$it" }
-            )
-        } ?: emptyList()
+            // Map TMDB Episodes to Domain Episodes manually here
+            return@withContext seasonDetails.episodes?.map { tmdbEp ->
+                Episode(
+                    id = tmdbEp.id.toString(),
+                    title = tmdbEp.title ?: "Episode ${tmdbEp.episodeNumber}",
+                    episodeNumber = tmdbEp.episodeNumber,
+                    overview = tmdbEp.overview,
+                    airDate = tmdbEp.airDate,
+                    runtime = tmdbEp.runtime,
+                    stillPath = tmdbEp.stillPath?.let { "https://image.tmdb.org/t/p/w500$it" }
+                )
+            } ?: emptyList()
+        } catch (e: Exception) {
+            android.util.Log.e("ContentRepository", "Failed to fetch season $seasonNumber for show $showId: ${e.message}")
+            emptyList()
+        }
     }
 
     override suspend fun getCategory(categoryId: String, page: Int): List<SearchResult> = withContext(Dispatchers.IO) {
