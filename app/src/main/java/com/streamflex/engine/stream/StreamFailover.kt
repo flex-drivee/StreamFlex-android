@@ -90,38 +90,21 @@ object StreamFailover {
     private fun hostPriority(
         stream: StreamLink
     ): Int {
-
         val url = stream.url.lowercase()
 
         return when {
-
             url.endsWith(".m3u8") -> 0
-
-            url.endsWith(".mp4") -> 1
-
-            url.endsWith(".mkv") -> 1
-
-            url.endsWith(".mpd") -> 2
-
-            stream.host == HostType.HUBCLOUD -> 3
-
-            stream.host == HostType.HUBDRIVE -> 4
-
-            stream.host == HostType.HUBCDN -> 5
-
-            stream.host == HostType.HBLINKS -> 6
-
-            stream.host == HostType.STREAMTAPE -> 7
-
-            stream.host == HostType.PIXELDRAIN -> 8
-
-            stream.host == HostType.FILEMOON -> 9
-
-            stream.host == HostType.MIXDROP -> 10
-
-            stream.host == HostType.GOOGLE_VIDEO -> 100
-
-            else -> 50
+            url.contains("googleusercontent.com") || stream.host == HostType.GOOGLE_VIDEO -> 1
+            url.endsWith(".mp4") || url.endsWith(".mkv") -> 2
+            url.endsWith(".mpd") -> 3
+            url.contains("workers.dev") || stream.host == HostType.HUBCLOUD -> 4
+            stream.host == HostType.HUBDRIVE -> 5
+            stream.host == HostType.HUBCDN -> 6
+            stream.host == HostType.HBLINKS -> 7
+            stream.host == HostType.PIXELDRAIN || url.contains("pixeldrain") -> 8
+            stream.host == HostType.STREAMTAPE -> 9
+            stream.host == HostType.FILEMOON -> 10
+            stream.host == HostType.MIXDROP -> 11
+            else -> 20
         }
-    }
 }
