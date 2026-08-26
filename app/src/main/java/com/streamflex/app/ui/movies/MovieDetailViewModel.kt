@@ -82,16 +82,24 @@ class MovieDetailViewModel(
     fun loadSeason(seasonNumber: Int) {
         val showId = _uiState.value.show?.id ?: return
 
-        viewModelScope.launch {
-            val eps = contentRepository.getSeasonEpisodes(
-                showId,
-                seasonNumber
-            )
+        _uiState.value = _uiState.value.copy(selectedSeason = seasonNumber)
 
-            _uiState.value = _uiState.value.copy(
-                selectedSeason = seasonNumber,
-                episodes = eps
-            )
+        viewModelScope.launch {
+            try {
+                val eps = contentRepository.getSeasonEpisodes(
+                    showId,
+                    seasonNumber
+                )
+
+                if (eps.isNotEmpty()) {
+                    _uiState.value = _uiState.value.copy(
+                        selectedSeason = seasonNumber,
+                        episodes = eps
+                    )
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("MovieDetailViewModel", "Failed to load season $seasonNumber: ${e.message}")
+            }
         }
     }
 

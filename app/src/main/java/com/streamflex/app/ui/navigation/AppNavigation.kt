@@ -94,7 +94,8 @@ fun AppNavigation(
             // --- SETTINGS ---
             composable(route = Screen.Settings.route) {
                 com.streamflex.app.ui.settings.SettingsScreen(
-                    onBackClick = { navController.popBackStack() }
+                    onBackClick = { navController.popBackStack() },
+                    onNavigateToDownloads = { navController.navigate(Screen.Downloads.route) }
                 )
             }
 

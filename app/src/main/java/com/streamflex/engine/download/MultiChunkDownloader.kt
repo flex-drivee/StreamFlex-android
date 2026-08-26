@@ -93,27 +93,73 @@ class MultiChunkDownloader(
         }
     }
 
+    private fun isDirectCdn(url: String): Boolean {
+        val lower = url.lowercase()
+        return lower.contains("workers.dev") ||
+               lower.contains("googleusercontent.com") ||
+               lower.contains("googlevideo.com") ||
+               lower.contains("pixeldrain.com") ||
+               lower.contains("buzzheavier.com") ||
+               lower.contains("publit.io") ||
+               lower.contains(".guru/") ||
+               lower.contains(".buzz/") ||
+               lower.contains("mega.nz")
+    }
+
+    private fun buildRequest(streamLink: StreamLink, byteRange: String? = null): Request {
+        val builder = Request.Builder().url(streamLink.url)
+        val directCdn = isDirectCdn(streamLink.url)
+
+        val requestHeaders = mutableMapOf<String, String>()
+        requestHeaders["User-Agent"] = streamLink.headers.entries.find { it.key.equals("User-Agent", ignoreCase = true) }?.value
+            ?: com.streamflex.core.constants.Constants.DEFAULT_USER_AGENT
+        requestHeaders["Accept"] = "*/*"
+
+        if (!directCdn) {
+            val referer = streamLink.referer ?: streamLink.headers.entries.find { it.key.equals("Referer", ignoreCase = true) }?.value
+            if (!referer.isNullOrBlank()) {
+                requestHeaders["Referer"] = referer
+            }
+        }
+
+        streamLink.headers.forEach { (k, v) ->
+            if (v.isNotBlank()) {
+                if (directCdn && k.equals("Referer", ignoreCase = true)) {
+                    // omit referer for direct CDNs
+                } else if (!k.equals("Connection", ignoreCase = true)) {
+                    requestHeaders[k] = v
+                }
+            }
+        }
+
+        if (streamLink.cookies.isNotEmpty()) {
+            val cookieHeader = streamLink.cookies.entries.joinToString("; ") { "${it.key}=${it.value}" }
+            if (cookieHeader.isNotBlank()) {
+                requestHeaders["Cookie"] = cookieHeader
+            }
+        }
+
+        if (!byteRange.isNullOrBlank()) {
+            requestHeaders["Range"] = byteRange
+        }
+
+        requestHeaders.forEach { (k, v) ->
+            builder.header(k, v)
+        }
+
+        return builder.build()
+    }
+
     private data class ProbeInfo(
         val contentLength: Long,
         val supportsRange: Boolean
     )
 
     private fun probeStream(streamLink: StreamLink): ProbeInfo {
-        val requestBuilder = Request.Builder()
-            .url(streamLink.url)
-            .header("Range", "bytes=0-1")
-
-        // Populate custom headers (Referer, User-Agent, etc.)
-        streamLink.headers.forEach { (k, v) -> requestBuilder.header(k, v) }
-        if (!streamLink.headers.containsKey("User-Agent")) {
-            requestBuilder.header("User-Agent", com.streamflex.core.constants.Constants.DEFAULT_USER_AGENT)
-        }
-        if (!streamLink.headers.containsKey("Referer") && !streamLink.referer.isNullOrBlank()) {
-            requestBuilder.header("Referer", streamLink.referer)
-        }
+        val req = buildRequest(streamLink, byteRange = "bytes=0-1")
 
         return try {
-            val response = okHttpClient.newCall(requestBuilder.build()).execute()
+            val response = okHttpClient.newCall(req).execute()
             response.use { resp ->
                 val code = resp.code
                 val rangeHeader = resp.header("Content-Range")
@@ -166,19 +212,8 @@ class MultiChunkDownloader(
             val endByte = if (chunkIndex == numChunks - 1) totalBytes - 1 else (startByte + chunkSize - 1)
 
             async(Dispatchers.IO) {
-                val reqBuilder = Request.Builder()
-                    .url(streamLink.url)
-                    .header("Range", "bytes=$startByte-$endByte")
-
-                streamLink.headers.forEach { (k, v) -> reqBuilder.header(k, v) }
-                if (!streamLink.headers.containsKey("User-Agent")) {
-                    reqBuilder.header("User-Agent", com.streamflex.core.constants.Constants.DEFAULT_USER_AGENT)
-                }
-                if (!streamLink.headers.containsKey("Referer") && !streamLink.referer.isNullOrBlank()) {
-                    reqBuilder.header("Referer", streamLink.referer)
-                }
-
-                val call = okHttpClient.newCall(reqBuilder.build())
+                val req = buildRequest(streamLink, byteRange = "bytes=$startByte-$endByte")
+                val call = okHttpClient.newCall(req)
                 val response = call.execute()
 
                 response.use { resp ->
@@ -251,17 +286,9 @@ class MultiChunkDownloader(
         isCancelled: () -> Boolean
     ): Result = withContext(Dispatchers.IO) {
         val partFile = File(targetFile.parentFile, "${targetFile.name}.part")
-        val reqBuilder = Request.Builder().url(streamLink.url)
+        val req = buildRequest(streamLink)
 
-        streamLink.headers.forEach { (k, v) -> reqBuilder.header(k, v) }
-        if (!streamLink.headers.containsKey("User-Agent")) {
-            reqBuilder.header("User-Agent", com.streamflex.core.constants.Constants.DEFAULT_USER_AGENT)
-        }
-        if (!streamLink.headers.containsKey("Referer") && !streamLink.referer.isNullOrBlank()) {
-            reqBuilder.header("Referer", streamLink.referer)
-        }
-
-        val call = okHttpClient.newCall(reqBuilder.build())
+        val call = okHttpClient.newCall(req)
         val response = call.execute()
 
         response.use { resp ->
