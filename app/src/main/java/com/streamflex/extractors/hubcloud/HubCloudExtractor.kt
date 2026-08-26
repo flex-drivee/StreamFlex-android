@@ -159,18 +159,44 @@ class HubCloudExtractor : BaseExtractor() {
                 put("User-Agent", com.streamflex.core.constants.Constants.DEFAULT_USER_AGENT)
             }
 
+            val lowerSafeUrl = safeUrl.lowercase()
+            val isZipOrArchive = lowerSafeUrl.endsWith(".zip") || lowerSafeUrl.contains(".zip?") ||
+                                 lowerSafeUrl.endsWith(".rar") || lowerSafeUrl.contains(".rar?") ||
+                                 lowerSafeUrl.endsWith(".7z") || lowerSafeUrl.contains(".7z?") ||
+                                 lowerSafeUrl.endsWith(".tar") || lowerSafeUrl.contains(".tar?")
+
+            if (isZipOrArchive) {
+                StreamLogger.info(TAG, "Skipping non-video archive: $safeUrl")
+                continue
+            }
+
+            val isIntermediateHub = lowerSafeUrl.contains("hubcloud.php") ||
+                                    lowerSafeUrl.contains("/drive/") ||
+                                    lowerSafeUrl.contains("/file/") ||
+                                    lowerSafeUrl.contains("gamerxyt.com") ||
+                                    lowerSafeUrl.contains("hubdrive.") ||
+                                    lowerSafeUrl.contains("hubcdn.") ||
+                                    lowerSafeUrl.contains("hubcloud.") ||
+                                    lowerSafeUrl.contains("gdflix.") ||
+                                    lowerSafeUrl.contains("greenmountmotors.com")
+
             when {
-                // 1. FSL Server
+                // 1. FSL Server / FSLv2
                 label.contains("fsl server") || label.contains("fslv2") || label.contains("fsl") -> {
-                    val serverName = if (label.contains("fslv2")) "[FSLv2]" else "[FSL Server]"
-                    StreamLogger.info(TAG, "Found $serverName: $safeUrl")
-                    streams += buildStreamLink(
-                        source = source,
-                        url = safeUrl,
-                        quality = detectedQuality,
-                        serverLabel = serverName + sizeSuffix,
-                        headers = baseHeaders
-                    )
+                    if (isIntermediateHub && !safeUrl.contains("cdn.") && !safeUrl.endsWith(".mp4") && !safeUrl.endsWith(".mkv")) {
+                        StreamLogger.info(TAG, "Forwarding intermediate FSL page: $safeUrl")
+                        pendingSources += source.copy(url = safeUrl, hostType = HostType.HUBCLOUD, quality = detectedQuality)
+                    } else {
+                        val serverName = if (label.contains("fslv2")) "[FSLv2]" else "[FSL Server]"
+                        StreamLogger.info(TAG, "Found $serverName: $safeUrl")
+                        streams += buildStreamLink(
+                            source = source,
+                            url = safeUrl,
+                            quality = detectedQuality,
+                            serverLabel = serverName + sizeSuffix,
+                            headers = baseHeaders
+                        )
+                    }
                 }
 
                 // 2. BuzzServer (Resolve HX-Redirect)
@@ -198,63 +224,88 @@ class HubCloudExtractor : BaseExtractor() {
 
                 // 4. S3 Server
                 label.contains("s3 server") || label.contains("s3") -> {
-                    StreamLogger.info(TAG, "Found S3 Server: $safeUrl")
-                    streams += buildStreamLink(
-                        source = source,
-                        url = safeUrl,
-                        quality = detectedQuality,
-                        serverLabel = "[S3 Server]" + sizeSuffix,
-                        headers = baseHeaders
-                    )
+                    if (isIntermediateHub && !safeUrl.contains("s3.") && !safeUrl.endsWith(".mp4") && !safeUrl.endsWith(".mkv")) {
+                        pendingSources += source.copy(url = safeUrl, hostType = HostType.HUBCLOUD, quality = detectedQuality)
+                    } else {
+                        StreamLogger.info(TAG, "Found S3 Server: $safeUrl")
+                        streams += buildStreamLink(
+                            source = source,
+                            url = safeUrl,
+                            quality = detectedQuality,
+                            serverLabel = "[S3 Server]" + sizeSuffix,
+                            headers = baseHeaders
+                        )
+                    }
                 }
 
                 // 5. Mega Server
                 label.contains("mega server") || label.contains("mega") -> {
-                    StreamLogger.info(TAG, "Found Mega Server: $safeUrl")
-                    streams += buildStreamLink(
-                        source = source,
-                        url = safeUrl,
-                        quality = detectedQuality,
-                        serverLabel = "[Mega Server]" + sizeSuffix,
-                        headers = baseHeaders
-                    )
+                    if (isIntermediateHub && !safeUrl.contains("mega.") && !safeUrl.endsWith(".mp4") && !safeUrl.endsWith(".mkv")) {
+                        pendingSources += source.copy(url = safeUrl, hostType = HostType.HUBCLOUD, quality = detectedQuality)
+                    } else {
+                        StreamLogger.info(TAG, "Found Mega Server: $safeUrl")
+                        streams += buildStreamLink(
+                            source = source,
+                            url = safeUrl,
+                            quality = detectedQuality,
+                            serverLabel = "[Mega Server]" + sizeSuffix,
+                            headers = baseHeaders
+                        )
+                    }
                 }
 
                 // 6. PDL Server
                 label.contains("pdl server") || label.contains("pdl") -> {
-                    StreamLogger.info(TAG, "Found PDL Server: $safeUrl")
-                    streams += buildStreamLink(
-                        source = source,
-                        url = safeUrl,
-                        quality = detectedQuality,
-                        serverLabel = "[PDL Server]" + sizeSuffix,
-                        headers = baseHeaders
-                    )
+                    if (isIntermediateHub && !safeUrl.endsWith(".mp4") && !safeUrl.endsWith(".mkv")) {
+                        pendingSources += source.copy(url = safeUrl, hostType = HostType.HUBCLOUD, quality = detectedQuality)
+                    } else {
+                        StreamLogger.info(TAG, "Found PDL Server: $safeUrl")
+                        streams += buildStreamLink(
+                            source = source,
+                            url = safeUrl,
+                            quality = detectedQuality,
+                            serverLabel = "[PDL Server]" + sizeSuffix,
+                            headers = baseHeaders
+                        )
+                    }
                 }
 
                 // 7. 10Gbps Download
                 label.contains("10gbps") -> {
                     val direct10Gbps = if (absUrl.contains("link=")) absUrl.substringAfter("link=") else safeUrl
-                    StreamLogger.info(TAG, "Found 10Gbps Download: $direct10Gbps")
-                    streams += buildStreamLink(
-                        source = source,
-                        url = direct10Gbps,
-                        quality = detectedQuality,
-                        serverLabel = "10Gbps [Download]" + sizeSuffix,
-                        headers = baseHeaders
-                    )
+                    if (isIntermediateHub && !direct10Gbps.endsWith(".mp4") && !direct10Gbps.endsWith(".mkv")) {
+                        pendingSources += source.copy(url = direct10Gbps, hostType = HostType.HUBCLOUD, quality = detectedQuality)
+                    } else {
+                        StreamLogger.info(TAG, "Found 10Gbps Download: $direct10Gbps")
+                        streams += buildStreamLink(
+                            source = source,
+                            url = direct10Gbps,
+                            quality = detectedQuality,
+                            serverLabel = "10Gbps [Download]" + sizeSuffix,
+                            headers = baseHeaders
+                        )
+                    }
                 }
 
-                // 8. Download File / Fast Download
-                label.contains("download file") || label.contains("fast cloud") || label.contains("direct download") -> {
-                    StreamLogger.info(TAG, "Found Direct Download: $safeUrl")
-                    streams += buildStreamLink(
-                        source = source,
-                        url = safeUrl,
-                        quality = detectedQuality,
-                        serverLabel = "[Download]" + sizeSuffix,
-                        headers = baseHeaders
-                    )
+                // 8. Download File / Fast Download / Generate Link
+                label.contains("download file") || label.contains("fast cloud") || label.contains("direct download") || label.contains("generate link") -> {
+                    if (isIntermediateHub) {
+                        StreamLogger.info(TAG, "Forwarding intermediate gateway page: $safeUrl")
+                        pendingSources += source.copy(
+                            url = safeUrl,
+                            hostType = HostType.HUBCLOUD,
+                            quality = detectedQuality
+                        )
+                    } else {
+                        StreamLogger.info(TAG, "Found Direct Download: $safeUrl")
+                        streams += buildStreamLink(
+                            source = source,
+                            url = safeUrl,
+                            quality = detectedQuality,
+                            serverLabel = "[Download]" + sizeSuffix,
+                            headers = baseHeaders
+                        )
+                    }
                 }
 
                 // 9. Google Drive direct links
@@ -291,17 +342,13 @@ class HubCloudExtractor : BaseExtractor() {
                             hostType = type,
                             quality = detectedQuality
                         )
-                    } else if (type == HostType.HUBCLOUD && absUrl != source.url) {
-                        // Sub-hubcloud link with different path
-                        val sourcePath = try { URL(source.url).path } catch (_: Exception) { "" }
-                        val targetPath = try { URL(absUrl).path } catch (_: Exception) { "" }
-                        if (sourcePath != targetPath) {
-                            pendingSources += source.copy(
-                                url = absUrl,
-                                hostType = HostType.HUBCLOUD,
-                                quality = detectedQuality
-                            )
-                        }
+                    } else if (isIntermediateHub && absUrl != source.url) {
+                        StreamLogger.info(TAG, "Forwarding sub-hubcloud step: $absUrl")
+                        pendingSources += source.copy(
+                            url = absUrl,
+                            hostType = HostType.HUBCLOUD,
+                            quality = detectedQuality
+                        )
                     }
                 }
             }
