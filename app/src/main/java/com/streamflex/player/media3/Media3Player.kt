@@ -258,16 +258,31 @@ class Media3Player(
         requestHeaders["Accept"] = "*/*"
         requestHeaders["Connection"] = "keep-alive"
 
-        // Attach Referer if present
-        val referer = stream.referer ?: stream.headers.entries.find { it.key.equals("Referer", ignoreCase = true) }?.value
-        if (!referer.isNullOrBlank()) {
-            requestHeaders["Referer"] = referer
+        val lowerUrl = stream.url.lowercase()
+        val isDirectCdn = lowerUrl.contains("workers.dev") ||
+                          lowerUrl.contains("pixeldrain.com") ||
+                          lowerUrl.contains("buzzheavier.com") ||
+                          lowerUrl.contains("publit.io") ||
+                          lowerUrl.contains(".guru/") ||
+                          lowerUrl.contains(".buzz/") ||
+                          lowerUrl.contains("mega.nz")
+
+        // Attach Referer only if not a direct CDN stream that rejects hotlinking
+        if (!isDirectCdn) {
+            val referer = stream.referer ?: stream.headers.entries.find { it.key.equals("Referer", ignoreCase = true) }?.value
+            if (!referer.isNullOrBlank()) {
+                requestHeaders["Referer"] = referer
+            }
         }
 
-        // Attach all stream headers
+        // Attach all stream headers (skipping Referer for direct CDNs)
         stream.headers.forEach { (k, v) ->
             if (v.isNotBlank()) {
-                requestHeaders[k] = v
+                if (isDirectCdn && k.equals("Referer", ignoreCase = true)) {
+                    // omit referer
+                } else {
+                    requestHeaders[k] = v
+                }
             }
         }
 

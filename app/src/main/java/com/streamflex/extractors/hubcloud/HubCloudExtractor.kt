@@ -154,10 +154,10 @@ class HubCloudExtractor : BaseExtractor() {
                 .replace("[", "%5B")
                 .replace("]", "%5D")
 
-            val baseHeaders = source.headers.toMutableMap().apply {
-                put("Referer", currentUrl)
-                put("User-Agent", com.streamflex.core.constants.Constants.DEFAULT_USER_AGENT)
-            }
+            val baseHeaders = mapOf(
+                "User-Agent" to com.streamflex.core.constants.Constants.DEFAULT_USER_AGENT,
+                "Accept" to "*/*"
+            )
 
             val lowerSafeUrl = safeUrl.lowercase()
             val isZipOrArchive = lowerSafeUrl.endsWith(".zip") || lowerSafeUrl.contains(".zip?") ||
