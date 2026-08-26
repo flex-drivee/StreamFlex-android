@@ -113,7 +113,8 @@ class DownloadQueueManager(
         processQueue()
     }
 
-    private fun processQueue() = synchronized(this) {
+    @Synchronized
+    private fun processQueue() {
         scope.launch {
             val all = repository.allDownloads.value
             val activeCount = activeJobs.size

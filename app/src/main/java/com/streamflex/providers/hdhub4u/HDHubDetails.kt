@@ -169,13 +169,17 @@ class HDHubDetails : DetailParser {
     }
 
     private fun parseSeasons(document: Document, detailUrl: String): List<ProviderSeason> {
-        val seasonNum = extractSeasonNumber(detailUrl)
-        val epLinksMap = mutableMapOf<Int, MutableList<ProviderSource>>()
+        val baseSeasonNum = extractSeasonNumber(detailUrl)
+        // Map<SeasonNumber, Map<EpisodeNumber, List<ProviderSource>>>
+        val seasonMap = mutableMapOf<Int, MutableMap<Int, MutableList<ProviderSource>>>()
 
         // 1. Check modern grid layout (div.episodes-list div.season-item)
         val seasonElements = document.select("div.episodes-list div.season-item")
         if (seasonElements.isNotEmpty()) {
             for (seasonEl in seasonElements) {
+                val detectedSeason = extractSeasonNumber(seasonEl.text())
+                val currentSeason = if (detectedSeason > 0) detectedSeason else baseSeasonNum
+
                 val episodeItems = seasonEl.select("div.episode-download-item")
                 for (epItem in episodeItems) {
                     val epBadgeText = epItem.select("div.episode-file-info span.badge-psa, span.badge").text()
@@ -199,7 +203,9 @@ class HDHubDetails : DetailParser {
                                 referer = detailUrl,
                                 headers = mapOf("Referer" to detailUrl, "Cookie" to HDHubConfig.COOKIE)
                             )
-                            epLinksMap.getOrPut(epNum) { mutableListOf() }.add(source)
+                            seasonMap.getOrPut(currentSeason) { mutableMapOf() }
+                                .getOrPut(epNum) { mutableListOf() }
+                                .add(source)
                         }
                     }
                 }
@@ -207,16 +213,27 @@ class HDHubDetails : DetailParser {
         }
 
         // 2. Sequential scanning over headings & paragraphs (classic HDHub4u layout)
-        if (epLinksMap.isEmpty()) {
+        if (seasonMap.isEmpty()) {
+            var currentSeason = baseSeasonNum
             var currentEpisode: Int? = null
             val elements = document.select("h1, h2, h3, h4, h5, h6, p, div, a[href]")
 
             for (el in elements) {
                 val text = el.ownText().trim()
                 val fullText = el.text().trim()
+                val checkText = text.ifBlank { fullText }
 
+                // Check for season headers (e.g., "Season 1", "Season 2", "S02")
+                val seasonMatch = Regex("""\b(?:season|s)\s*0*(\d{1,2})\b""", RegexOption.IGNORE_CASE).find(checkText)
+                if (seasonMatch != null && (el.tagName().startsWith("h") || el.tagName() in listOf("p", "strong", "b") || el.children().isEmpty())) {
+                    val sNum = seasonMatch.groupValues[1].toIntOrNull()
+                    if (sNum != null && sNum in 1..99) {
+                        currentSeason = sNum
+                    }
+                }
+
+                // Check for episode headers
                 if (el.tagName().startsWith("h") || el.tagName() in listOf("p", "strong", "b") || el.children().isEmpty()) {
-                    val checkText = text.ifBlank { fullText }
                     if (!checkText.contains("Single Episode", ignoreCase = true) && !checkText.contains("All Episodes", ignoreCase = true)) {
                         val num = extractEpNumber(checkText)
                         if (num != null && num in 1..999) {
@@ -232,6 +249,9 @@ class HDHubDetails : DetailParser {
                         if (hostType == HostType.UNKNOWN && url.contains("?id=")) hostType = HostType.REDIRECT
                         
                         if (hostType != HostType.UNKNOWN) {
+                            val directSeason = extractSeasonNumber(el.text()) ?: extractSeasonNumber(el.attr("title")) ?: extractSeasonNumber(url)
+                            val seasonToUse = if (directSeason > 0) directSeason else currentSeason
+
                             val directEp = extractEpNumber(el.text()) ?: extractEpNumber(el.attr("title")) ?: extractEpNumber(url)
                             val epToUse = directEp ?: currentEpisode
                             if (epToUse != null) {
@@ -245,7 +265,9 @@ class HDHubDetails : DetailParser {
                                     referer = detailUrl,
                                     headers = mapOf("Referer" to detailUrl, "Cookie" to HDHubConfig.COOKIE)
                                 )
-                                epLinksMap.getOrPut(epToUse) { mutableListOf() }.add(source)
+                                seasonMap.getOrPut(seasonToUse) { mutableMapOf() }
+                                    .getOrPut(epToUse) { mutableListOf() }
+                                    .add(source)
                             }
                         }
                     }
@@ -253,28 +275,38 @@ class HDHubDetails : DetailParser {
             }
         }
 
-        if (epLinksMap.isEmpty()) {
+        // 3. Fallback: Associating elements via DOM sibling scanning
+        if (seasonMap.isEmpty()) {
             val allSources = sourceParser.parseDocument(document, detailUrl)
             val linkElements = document.select("a[href]").associateBy { it.attr("href").trim() }
             for (source in allSources) {
                 val epNum = findEpisodeNumber(source, linkElements)
                 if (epNum != null) {
-                    epLinksMap.getOrPut(epNum) { mutableListOf() }.add(source)
+                    val directSeason = extractSeasonNumber(source.url)
+                    val seasonToUse = if (directSeason > 0) directSeason else baseSeasonNum
+                    seasonMap.getOrPut(seasonToUse) { mutableMapOf() }
+                        .getOrPut(epNum) { mutableListOf() }
+                        .add(source)
                 }
             }
         }
 
-        if (epLinksMap.isEmpty()) return emptyList()
+        if (seasonMap.isEmpty()) return emptyList()
 
-        val episodes = epLinksMap.entries.sortedBy { it.key }.map { (num, sources) ->
-            ProviderEpisode(
-                number = num,
-                title = "Episode $num",
-                sources = sources
+        return seasonMap.entries.sortedBy { it.key }.map { (sNum, epMap) ->
+            val episodes = epMap.entries.sortedBy { it.key }.map { (num, sources) ->
+                ProviderEpisode(
+                    number = num,
+                    title = "Episode $num",
+                    sources = sources
+                )
+            }
+            ProviderSeason(
+                number = sNum,
+                title = "Season $sNum",
+                episodes = episodes
             )
         }
-
-        return listOf(ProviderSeason(number = seasonNum, title = "Season $seasonNum", episodes = episodes))
     }
 
     private fun findEpisodeNumber(source: ProviderSource, linkElements: Map<String, Element>): Int? {
@@ -301,8 +333,8 @@ class HDHubDetails : DetailParser {
         return null
     }
 
-    private fun extractSeasonNumber(url: String): Int {
-        return SEASON_URL_REGEX.find(url)?.groupValues?.get(1)?.toIntOrNull() ?: 1
+    private fun extractSeasonNumber(urlOrText: String): Int {
+        return SEASON_URL_REGEX.find(urlOrText)?.groupValues?.get(1)?.toIntOrNull() ?: 1
     }
 
     private fun extractTitle(document: Document, fallback: String): String {

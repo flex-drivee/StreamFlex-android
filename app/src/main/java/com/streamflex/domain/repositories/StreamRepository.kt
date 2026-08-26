@@ -145,15 +145,12 @@ class StreamRepository(
         onStreamFound: suspend (FinalStreams) -> Unit = {}
     ): FinalStreams {
 
-        // First search by base title
-        var results = search(title)
+        // Search both base title and season-specific query
+        val baseResults = search(title)
+        val seasonResults = search("$title Season $season")
+        val combinedResults = (seasonResults + baseResults).distinctBy { it.url }
 
-        // If no results, try searching with season keyword
-        if (results.isEmpty()) {
-            results = search("$title Season $season")
-        }
-
-        if (results.isEmpty()) {
+        if (combinedResults.isEmpty()) {
             return FinalStreams.EMPTY
         }
 
@@ -161,8 +158,8 @@ class StreamRepository(
             title = title,
             season = season,
             episode = episode,
-            results = results
-        ) ?: results.firstOrNull() ?: return FinalStreams.EMPTY
+            results = combinedResults
+        ) ?: combinedResults.firstOrNull() ?: return FinalStreams.EMPTY
 
         val providerResult = loadContent(selected) ?: return FinalStreams.EMPTY
 
