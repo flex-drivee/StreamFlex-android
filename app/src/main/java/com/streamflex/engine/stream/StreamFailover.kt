@@ -107,4 +107,5 @@ object StreamFailover {
             stream.host == HostType.MIXDROP -> 11
             else -> 20
         }
+    }
 }
