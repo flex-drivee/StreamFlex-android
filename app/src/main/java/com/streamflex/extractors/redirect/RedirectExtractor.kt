@@ -152,8 +152,23 @@ class RedirectExtractor : BaseExtractor() {
             if (
                 lower.startsWith("javascript:") ||
                 lower == "#" ||
-                lower == source.url.lowercase()
+                lower == source.url.lowercase() ||
+                lower.endsWith("/#main") ||
+                lower.contains("/category/") ||
+                lower.contains("/author/") ||
+                lower.contains("/tag/") ||
+                lower.contains("/page/") ||
+                lower.contains("sample-page") ||
+                lower.contains("/wp-") ||
+                lower.contains("privacy-policy") ||
+                lower.contains("terms")
             ) {
+                return@forEach
+            }
+
+            // Skip bare domain homepages (e.g. https://gamerxyt.com/)
+            val path = try { java.net.URL(url).path } catch (_: Exception) { "" }
+            if (path.isEmpty() || path == "/" || path == "/#") {
                 return@forEach
             }
 
@@ -168,22 +183,19 @@ class RedirectExtractor : BaseExtractor() {
                 return@forEach
             }
 
-            val type =
-                if (
-                    lower.contains("go.php") ||
-                    lower.contains("download.php") ||
-                    lower.contains("redirect.php") ||
-                    lower.contains("gamerxyt")
-                ) {
-                    HostType.REDIRECT
-                } else {
-                    HostDetector.detect(url)
-                }
+            val type = when {
+                lower.contains("hubcloud.php") || lower.contains("/drive/") || lower.contains("/file/") -> HostType.HUBCLOUD
+                lower.contains("go.php") || lower.contains("download.php") || lower.contains("redirect.php") || lower.contains("?id=") -> HostType.REDIRECT
+                lower.contains("gamerxyt.com") -> return@forEach // skip random blog posts on gamerxyt
+                else -> HostDetector.detect(url)
+            }
 
-            nextSources += source.copy(
-                url = url,
-                hostType = type
-            )
+            if (type != HostType.UNKNOWN) {
+                nextSources += source.copy(
+                    url = url,
+                    hostType = type
+                )
+            }
         }
 
         return ExtractionResult(

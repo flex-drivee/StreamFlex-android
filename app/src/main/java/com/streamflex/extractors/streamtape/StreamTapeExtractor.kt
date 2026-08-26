@@ -44,23 +44,54 @@ class StreamTapeExtractor : BaseExtractor() {
         
         val html = document.html()
         
-        // StreamTape hides the video link by joining two strings. Patterns vary by version:
-        // Pattern A: document.getElementById('robotlink').innerHTML = '/streamtape.com/...' + '&t=...';
-        // Pattern B: innerHTML = "..." + "..."  (double quotes)
-        val regexSingle = Regex("""getElementById\('robotlink'\)\.innerHTML\s*=\s*'([^']+)'\s*\+\s*'([^']+)'""")
-        val regexDouble = Regex("""getElementById\("robotlink"\)\.innerHTML\s*=\s*"([^"]+)"\s*\+\s*"([^"]+)""")
-        // Pattern C: newer obfuscation — token + expiry concatenated
-        val regexToken  = Regex("""token=([\w-]+).*?expires=(\d+)""", RegexOption.DOT_MATCHES_ALL)
+        // Find script line with innerHTML assignment to StreamTape video link container
+        val targetLine = html.lines().firstOrNull { line ->
+            (line.contains("botlink", ignoreCase = true) || 
+             line.contains("robotlink", ignoreCase = true) || 
+             line.contains("norobotlink", ignoreCase = true) || 
+             line.contains("ideoolink", ignoreCase = true) ||
+             line.contains("crypted", ignoreCase = true)) &&
+            line.contains("innerHTML", ignoreCase = true) &&
+            line.contains("get_video")
+        }
 
-        val match = regexSingle.find(html) ?: regexDouble.find(html)
+        var streamUrl: String? = null
 
-        if (match != null) {
-            val part1 = match.groupValues[1]
-            val part2 = match.groupValues[2]
-            val streamUrl = "https:/" + part1 + part2
+        if (targetLine != null) {
+            val rhs = targetLine.substringAfter("innerHTML").substringAfter("=")
+            val stringParts = Regex("""['"]([^'"]+)['"]""").findAll(rhs).map { it.groupValues[1] }.toList()
+            if (stringParts.isNotEmpty()) {
+                val combined = stringParts.joinToString("")
+                streamUrl = when {
+                    combined.startsWith("http") -> combined
+                    combined.startsWith("//") -> "https:$combined"
+                    combined.startsWith("/") -> "https://streamtape.com$combined"
+                    else -> "https://$combined"
+                }
+            }
+        }
 
-            StreamLogger.info("StreamTapeExtractor", "Found stream URL: $streamUrl")
-            val stream = createStream(source = source, url = streamUrl)
+        // Fallback regex patterns
+        if (streamUrl == null) {
+            val regexSingle = Regex("""getElementById\(['"][^'"]*(?:botlink|ideoolink)[^'"]*['"]\)\.innerHTML\s*=\s*'([^']+)'\s*\+\s*'([^']+)'""")
+            val regexDouble = Regex("""getElementById\(['"][^'"]*(?:botlink|ideoolink)[^'"]*['"]\)\.innerHTML\s*=\s*"([^"]+)"\s*\+\s*"([^"]+)""")
+            val match = regexSingle.find(html) ?: regexDouble.find(html)
+            if (match != null) {
+                val combined = match.groupValues[1] + match.groupValues[2]
+                streamUrl = if (combined.startsWith("//")) "https:$combined" else if (combined.startsWith("http")) combined else "https://$combined"
+            }
+        }
+
+        if (!streamUrl.isNullOrBlank() && (streamUrl.contains("get_video") || streamUrl.contains("streamtape"))) {
+            val finalUrl = if (!streamUrl.contains("stream=1")) {
+                if (streamUrl.contains("?")) "$streamUrl&stream=1" else "$streamUrl?stream=1"
+            } else streamUrl
+
+            StreamLogger.info("StreamTapeExtractor", "Found stream URL: $finalUrl")
+            val stream = createStream(
+                source = source.copy(referer = url),
+                url = finalUrl
+            )
             return result(streams = listOf(stream))
         }
         

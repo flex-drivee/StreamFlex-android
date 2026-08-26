@@ -248,16 +248,124 @@ class Media3Player(
                 .clearOverrides()
                 .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, true) // Disable subtitles by default initially
         )
-        
-        val dataSourceFactory = DefaultHttpDataSource.Factory()
+
+        // 1. Resolve User-Agent and default streaming headers
+        val userAgent = stream.headers.entries.find { it.key.equals("User-Agent", ignoreCase = true) }?.value
+            ?: com.streamflex.core.constants.Constants.DEFAULT_USER_AGENT
+
+        val requestHeaders = mutableMapOf<String, String>()
+        requestHeaders["User-Agent"] = userAgent
+        requestHeaders["Accept"] = "*/*"
+
+        val lowerUrl = stream.url.lowercase()
+        val isDirectCdn = lowerUrl.contains("workers.dev") ||
+                          lowerUrl.contains("googleusercontent.com") ||
+                          lowerUrl.contains("googlevideo.com") ||
+                          lowerUrl.contains("pixeldrain.com") ||
+                          lowerUrl.contains("buzzheavier.com") ||
+                          lowerUrl.contains("publit.io") ||
+                          lowerUrl.contains(".guru/") ||
+                          lowerUrl.contains(".buzz/") ||
+                          lowerUrl.contains("mega.nz")
+
+        // Attach Referer only if not a direct CDN stream that rejects hotlinking
+        if (!isDirectCdn) {
+            val referer = stream.referer ?: stream.headers.entries.find { it.key.equals("Referer", ignoreCase = true) }?.value
+            if (!referer.isNullOrBlank()) {
+                requestHeaders["Referer"] = referer
+            }
+        }
+
+        // Attach all stream headers (skipping Referer for direct CDNs)
+        stream.headers.forEach { (k, v) ->
+            if (v.isNotBlank()) {
+                if (isDirectCdn && k.equals("Referer", ignoreCase = true)) {
+                    // omit referer
+                } else if (!k.equals("Connection", ignoreCase = true)) {
+                    requestHeaders[k] = v
+                }
+            }
+        }
+
+        // Attach cookies if present
+        if (stream.cookies.isNotEmpty()) {
+            val cookieHeader = stream.cookies.entries.joinToString("; ") { "${it.key}=${it.value}" }
+            if (cookieHeader.isNotBlank()) {
+                requestHeaders["Cookie"] = cookieHeader
+            }
+        }
+
+        // 2. High-performance HTTP Data Source with redirect, timeout, and custom headers
+        val httpDataSourceFactory = DefaultHttpDataSource.Factory()
+            .setUserAgent(userAgent)
             .setAllowCrossProtocolRedirects(true)
-            .setDefaultRequestProperties(stream.headers)
-            
-        val mediaSourceFactory = DefaultMediaSourceFactory(dataSourceFactory)
-        
-        val mediaItem = MediaItem.fromUri(stream.url)
+            .setConnectTimeoutMs(25_000)
+            .setReadTimeoutMs(30_000)
+            .setKeepPostFor302Redirects(true)
+            .setDefaultRequestProperties(requestHeaders)
+
+        // 3. Wrap in DefaultDataSource.Factory to support file://, content://, rawresource:// as well as http/https
+        val dataSourceFactory = androidx.media3.datasource.DefaultDataSource.Factory(context, httpDataSourceFactory)
+
+        // 4. Build MediaSourceFactory
+        val mediaSourceFactory = DefaultMediaSourceFactory(context)
+            .setDataSourceFactory(dataSourceFactory)
+
+        // 5. Detect container / MIME type for links without standard file extensions (e.g. Pixeldrain, BuzzServer)
+        val mimeType = when (stream.contentType) {
+            com.streamflex.core.network.detector.ContentType.M3U8,
+            com.streamflex.core.network.detector.ContentType.HLS -> androidx.media3.common.MimeTypes.APPLICATION_M3U8
+            com.streamflex.core.network.detector.ContentType.DASH -> androidx.media3.common.MimeTypes.APPLICATION_MPD
+            com.streamflex.core.network.detector.ContentType.VIDEO -> {
+                val lower = stream.url.lowercase()
+                when {
+                    lower.contains(".m3u8") -> androidx.media3.common.MimeTypes.APPLICATION_M3U8
+                    lower.contains(".mpd") -> androidx.media3.common.MimeTypes.APPLICATION_MPD
+                    lower.contains(".mp4") -> androidx.media3.common.MimeTypes.APPLICATION_MP4
+                    lower.contains(".mkv") -> androidx.media3.common.MimeTypes.APPLICATION_MATROSKA
+                    else -> null
+                }
+            }
+            else -> {
+                val lower = stream.url.lowercase()
+                when {
+                    lower.contains(".m3u8") -> androidx.media3.common.MimeTypes.APPLICATION_M3U8
+                    lower.contains(".mpd") -> androidx.media3.common.MimeTypes.APPLICATION_MPD
+                    lower.contains(".mp4") -> androidx.media3.common.MimeTypes.APPLICATION_MP4
+                    lower.contains(".mkv") -> androidx.media3.common.MimeTypes.APPLICATION_MATROSKA
+                    else -> null
+                }
+            }
+        }
+
+        val mediaItemBuilder = MediaItem.Builder()
+            .setUri(stream.url)
+
+        if (mimeType != null) {
+            mediaItemBuilder.setMimeType(mimeType)
+        }
+
+        // 6. Attach external subtitles if present
+        if (stream.subtitles.isNotEmpty()) {
+            val subtitleConfigs = stream.subtitles.map { sub ->
+                val subMime = if (sub.url.endsWith(".vtt", ignoreCase = true)) {
+                    androidx.media3.common.MimeTypes.TEXT_VTT
+                } else {
+                    androidx.media3.common.MimeTypes.APPLICATION_SUBRIP
+                }
+                MediaItem.SubtitleConfiguration.Builder(android.net.Uri.parse(sub.url))
+                    .setMimeType(subMime)
+                    .setLanguage(sub.language)
+                    .setLabel(sub.label)
+                    .setSelectionFlags(androidx.media3.common.C.SELECTION_FLAG_DEFAULT)
+                    .build()
+            }
+            mediaItemBuilder.setSubtitleConfigurations(subtitleConfigs)
+        }
+
+        val mediaItem = mediaItemBuilder.build()
         val source = mediaSourceFactory.createMediaSource(mediaItem)
-        
+
         exoPlayer.setMediaSource(source)
         exoPlayer.prepare()
     }

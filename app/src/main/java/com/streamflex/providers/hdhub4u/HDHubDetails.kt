@@ -26,9 +26,9 @@ class HDHubDetails : DetailParser {
         private const val PROVIDER_NAME = "HDHub4u"
         private const val TAG = "HDHubDetails"
 
-        // Matches: EP01, Ep.01, EP.01, E01, Episode 1, Episode.1
+        // Matches: EP01, Ep.01, EP.01, E01, Episode 1, Episode.1, S01E01, etc.
         private val EPISODE_NUM_REGEX = Regex(
-            """(?:ep(?:isode)?[.\s_-]?)(\d{1,3})""",
+            """(?:ep(?:isode)?[.\s_-]?|[eE]\s*0*)(\d{1,3})|(?:\b[sS]\d{1,2}[eE]0*(\d{1,3}))""",
             RegexOption.IGNORE_CASE
         )
         // Matches season number in URL: season-1, s01, s1
@@ -36,6 +36,12 @@ class HDHubDetails : DetailParser {
             """season[_-]?(\d{1,2})""",
             RegexOption.IGNORE_CASE
         )
+
+        private fun extractEpNumber(text: String): Int? {
+            val match = EPISODE_NUM_REGEX.find(text) ?: return null
+            return match.groupValues.getOrNull(1)?.takeIf { it.isNotBlank() }?.toIntOrNull()
+                ?: match.groupValues.getOrNull(2)?.takeIf { it.isNotBlank() }?.toIntOrNull()
+        }
     }
 
     private val sourceParser = HDHubSourceParser()
@@ -173,9 +179,7 @@ class HDHubDetails : DetailParser {
                 val episodeItems = seasonEl.select("div.episode-download-item")
                 for (epItem in episodeItems) {
                     val epBadgeText = epItem.select("div.episode-file-info span.badge-psa, span.badge").text()
-                    val epNum = EPISODE_NUM_REGEX.find(epBadgeText)?.groupValues?.get(1)?.toIntOrNull()
-                        ?: Regex("""Episode-0*([1-9][0-9]*)""").find(epBadgeText)?.groupValues?.get(1)?.toIntOrNull()
-                        ?: 1
+                    val epNum = extractEpNumber(epBadgeText) ?: 1
 
                     val links = epItem.select("a[href]")
                     for (link in links) {
@@ -214,34 +218,35 @@ class HDHubDetails : DetailParser {
                 if (el.tagName().startsWith("h") || el.tagName() in listOf("p", "strong", "b") || el.children().isEmpty()) {
                     val checkText = text.ifBlank { fullText }
                     if (!checkText.contains("Single Episode", ignoreCase = true) && !checkText.contains("All Episodes", ignoreCase = true)) {
-                        val epMatch = EPISODE_NUM_REGEX.find(checkText)
-                        if (epMatch != null) {
-                            val num = epMatch.groupValues[1].toIntOrNull()
-                            if (num != null && num in 1..999) {
-                                currentEpisode = num
-                            }
+                        val num = extractEpNumber(checkText)
+                        if (num != null && num in 1..999) {
+                            currentEpisode = num
                         }
                     }
                 }
 
-                if (el.tagName() == "a" && currentEpisode != null) {
+                if (el.tagName() == "a") {
                     val url = el.attr("abs:href").ifBlank { el.attr("href") }
                     if (url.isNotBlank() && !sourceParser.shouldSkipUrl(url)) {
                         var hostType = HostDetector.detect(url)
                         if (hostType == HostType.UNKNOWN && url.contains("?id=")) hostType = HostType.REDIRECT
                         
                         if (hostType != HostType.UNKNOWN) {
-                            val quality = QualityDetector.detect(el.text() + " " + (el.parent()?.text() ?: ""))
-                            val source = HDHubMapper.toProviderSource(
-                                provider = PROVIDER_NAME,
-                                host = hostType.name,
-                                hostType = hostType,
-                                url = url,
-                                quality = quality,
-                                referer = detailUrl,
-                                headers = mapOf("Referer" to detailUrl, "Cookie" to HDHubConfig.COOKIE)
-                            )
-                            epLinksMap.getOrPut(currentEpisode) { mutableListOf() }.add(source)
+                            val directEp = extractEpNumber(el.text()) ?: extractEpNumber(el.attr("title")) ?: extractEpNumber(url)
+                            val epToUse = directEp ?: currentEpisode
+                            if (epToUse != null) {
+                                val quality = QualityDetector.detect(el.text() + " " + (el.parent()?.text() ?: ""))
+                                val source = HDHubMapper.toProviderSource(
+                                    provider = PROVIDER_NAME,
+                                    host = hostType.name,
+                                    hostType = hostType,
+                                    url = url,
+                                    quality = quality,
+                                    referer = detailUrl,
+                                    headers = mapOf("Referer" to detailUrl, "Cookie" to HDHubConfig.COOKIE)
+                                )
+                                epLinksMap.getOrPut(epToUse) { mutableListOf() }.add(source)
+                            }
                         }
                     }
                 }
@@ -261,11 +266,11 @@ class HDHubDetails : DetailParser {
 
         if (epLinksMap.isEmpty()) return emptyList()
 
-        val episodes = epLinksMap.toSortedMap().map { (epNum, sources) ->
+        val episodes = epLinksMap.entries.sortedBy { it.key }.map { (num, sources) ->
             ProviderEpisode(
-                number = epNum,
-                title = "Episode $epNum",
-                sources = sources.distinctBy { it.url }
+                number = num,
+                title = "Episode $num",
+                sources = sources
             )
         }
 
@@ -274,9 +279,9 @@ class HDHubDetails : DetailParser {
 
     private fun findEpisodeNumber(source: ProviderSource, linkElements: Map<String, Element>): Int? {
         val element = linkElements[source.url] ?: return null
-        EPISODE_NUM_REGEX.find(element.text())?.groupValues?.get(1)?.toIntOrNull()?.let { return it }
+        extractEpNumber(element.text())?.let { return it }
         element.parent()?.let { parent ->
-            EPISODE_NUM_REGEX.find(parent.text())?.groupValues?.get(1)?.toIntOrNull()?.let { return it }
+            extractEpNumber(parent.text())?.let { return it }
         }
 
         var sibling: Element? = element.parent()?.previousElementSibling()
@@ -286,13 +291,13 @@ class HDHubDetails : DetailParser {
             if (tag in listOf("h2", "h3", "h4", "p", "strong", "b")) {
                 val text = sibling.text()
                 if (!text.contains("Single Episode", ignoreCase = true) && !text.contains("All Episodes", ignoreCase = true)) {
-                    EPISODE_NUM_REGEX.find(text)?.groupValues?.get(1)?.toIntOrNull()?.let { return it }
+                    extractEpNumber(text)?.let { return it }
                 }
             }
             sibling = sibling.previousElementSibling()
             hops++
         }
-        EPISODE_NUM_REGEX.find(source.url)?.groupValues?.get(1)?.toIntOrNull()?.let { return it }
+        extractEpNumber(source.url)?.let { return it }
         return null
     }
 

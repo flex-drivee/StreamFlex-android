@@ -66,12 +66,12 @@ object StreamEngine {
             )
         }
 
-        val tempCollected = mutableListOf<com.streamflex.domain.models.StreamLink>()
+        val tempCollected = java.util.concurrent.CopyOnWriteArrayList<com.streamflex.domain.models.StreamLink>()
 
         val collectedStreams =
             StreamCollector.collect(sources) { stream ->
                 tempCollected.add(stream)
-                val currentStreams = FinalStreamBuilder.build(tempCollected)
+                val currentStreams = FinalStreamBuilder.build(tempCollected.toList())
                 onStreamFound(currentStreams)
             }
 
