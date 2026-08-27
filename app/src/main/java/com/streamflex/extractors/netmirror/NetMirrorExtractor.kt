@@ -13,7 +13,6 @@ import com.streamflex.domain.models.StreamLink
 import com.streamflex.extractors.common.BaseExtractor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.util.UUID
 
 class NetMirrorExtractor : BaseExtractor() {
     override val hostType = HostType.NETMIRROR
@@ -32,6 +31,9 @@ class NetMirrorExtractor : BaseExtractor() {
     )
 
     private var resolvedApiUrl: String = ""
+    
+    // We must use an Android User-Agent with /OS.Gatu v3.0 so the CDN doesn't serve the harassment video.
+    private val NATIVE_USER_AGENT = "Mozilla/5.0 (Linux; Android 13; Pixel 5 Build/TQ3A.230901.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/149.0.7827.91 Safari/537.36 /OS.Gatu v3.0"
 
     private suspend fun resolveApiUrl(tHashT: String): String? {
         if (resolvedApiUrl.isNotBlank()) return resolvedApiUrl
@@ -40,7 +42,7 @@ class NetMirrorExtractor : BaseExtractor() {
             val base = String(Base64.decode(encoded, Base64.DEFAULT)).trimEnd('/')
             val request = RequestBuilder()
                 .url("$base/checknewtv.php")
-                .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0 /OS.GatuNewTV v1.0")
+                .header("User-Agent", NATIVE_USER_AGENT)
                 .header("Cookie", "t_hash_t=$tHashT")
                 .build()
                 
@@ -67,54 +69,34 @@ class NetMirrorExtractor : BaseExtractor() {
         val uri = Uri.parse(source.url)
         val id = uri.getQueryParameter("id") ?: return emptyResult()
         val ott = uri.getQueryParameter("ott") ?: return emptyResult()
-        
-        val NATIVE_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0 /OS.GatuNewTV v1.0"
+        val baseUrl = uri.getQueryParameter("base")?.trimEnd('/') ?: com.streamflex.providers.netmirror.NetMirrorConfig.DEFAULT_DOMAIN
         
         return withContext(Dispatchers.IO) {
-            // Step 1: Bypass Cloudflare entirely using the net52.cc POST backdoor!
+            // Step 1: Get t_hash_t cookie using WebViewResolver
+            // The net52.cc UUID POST backdoor is PATCHED by NetMirror (returns a fake token leading to harassment video).
+            // We MUST solve the CAPTCHA legitimately using the WebViewResolver.
             var tHashT = ""
-            try {
-                // net52.cc allows POST requests without Cloudflare Turnstile blocks!
-                // Sending a fake g-recaptcha-response generates a valid t_hash_t cookie.
-                val postBody = okhttp3.FormBody.Builder()
-                    .add("g-recaptcha-response", UUID.randomUUID().toString())
-                    .build()
-                
-                val req = okhttp3.Request.Builder()
-                    .url("https://net52.cc/verify.php")
-                    .post(postBody)
-                    .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8")
-                    .header("Content-Type", "application/x-www-form-urlencoded")
-                    .header("Origin", "https://net22.cc")
-                    .header("Referer", "https://net22.cc/verify2")
-                    .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36")
-                    .build()
-
-                val client = com.streamflex.core.network.StreamFlexHttpClient.okHttpClient
-                    .newBuilder()
-                    .followRedirects(false)
-                    .build()
-                    
-                val res = client.newCall(req).execute()
-                val cookies = res.headers("Set-Cookie")
-                res.close()
-                
-                for (cookie in cookies) {
-                    if (cookie.startsWith("t_hash_t=")) {
-                        val value = cookie.substringAfter("t_hash_t=").substringBefore(";")
-                        if (value.isNotBlank()) {
-                            tHashT = value
-                            com.streamflex.core.utils.StreamLogger.debug("NetMirrorExtractor", "Successfully bypassed CF using net52.cc backdoor! t_hash_t: $tHashT")
-                            break
-                        }
-                    }
+            val verifyUrl = "$baseUrl/verify.php"
+            
+            // Try to resolve using WebView. 
+            // Note: WebViewResolver now uses the real Android User-Agent so Turnstile doesn't loop!
+            val solved = com.streamflex.core.network.interceptor.WebViewResolver.resolveUsingWebView(
+                com.streamflex.app.StreamFlexApplication.instance,
+                verifyUrl,
+                requiredCookie = "t_hash_t"
+            )
+            
+            if (solved) {
+                val cookies = android.webkit.CookieManager.getInstance().getCookie(verifyUrl) ?: ""
+                val match = Regex("t_hash_t=([^;]+)").find(cookies)
+                if (match != null) {
+                    tHashT = match.groupValues[1]
+                    com.streamflex.core.utils.StreamLogger.debug("NetMirrorExtractor", "WebView Bypass success, got t_hash_t: $tHashT")
                 }
-            } catch (e: Exception) {
-                com.streamflex.core.utils.StreamLogger.error("NetMirrorExtractor", "Failed to backdoor net52.cc: ${e.message}")
             }
             
             if (tHashT.isBlank()) {
-                com.streamflex.core.utils.StreamLogger.error("NetMirrorExtractor", "Failed to acquire t_hash_t cookie via backdoor!")
+                com.streamflex.core.utils.StreamLogger.error("NetMirrorExtractor", "Failed to acquire valid t_hash_t cookie via WebViewResolver!")
                 return@withContext emptyResult()
             }
 

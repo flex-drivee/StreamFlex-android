@@ -42,7 +42,12 @@ object WebViewResolver {
                         javaScriptEnabled = true
                         domStorageEnabled = true
                         databaseEnabled = true
-                        userAgentString = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0"
+                        
+                        // Use the real Android WebView User-Agent to prevent Cloudflare Turnstile from looping!
+                        // If we spoof a Windows Firefox agent, Turnstile's JS fingerprinting detects the mismatch and loops forever.
+                        val defaultAgent = WebSettings.getDefaultUserAgent(activity)
+                        userAgentString = "$defaultAgent /OS.Gatu v3.0"
+                        
                         cacheMode = WebSettings.LOAD_DEFAULT
                     }
 
