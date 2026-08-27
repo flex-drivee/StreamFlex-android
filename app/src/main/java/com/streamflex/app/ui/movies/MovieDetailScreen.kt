@@ -348,7 +348,7 @@ fun MovieDetailScreen(
                             ) {
                                 Column(modifier = Modifier.padding(12.dp)) {
                                     Text(
-                                        text = stream.source, 
+                                        text = stream.name, 
                                         fontWeight = FontWeight.Bold,
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
