@@ -26,6 +26,8 @@ data class MovieDetailUiState(
     val episodes: List<Episode> = emptyList(), // For Shows
     val selectedSeason: Int = 1,
     val isResolvingDownload: Boolean = false,
+    val downloadStreamsAvailable: List<com.streamflex.domain.models.StreamLink>? = null,
+    val pendingDownloadEpisode: Episode? = null,
     val errorMessage: String? = null
 )
 
@@ -106,28 +108,19 @@ class MovieDetailViewModel(
     fun downloadMovie() {
         val movie = _uiState.value.movie ?: return
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isResolvingDownload = true)
+            _uiState.value = _uiState.value.copy(isResolvingDownload = true, downloadStreamsAvailable = null, pendingDownloadEpisode = null)
             try {
                 streamRepository.resolveMovie(
                     title = movie.title,
                     year = movie.year ?: 0
                 ) { finalStreams ->
                     if (finalStreams.isPlayable && finalStreams.streams.isNotEmpty()) {
-                        val primary = finalStreams.streams.first()
-                        val fallbacks = finalStreams.streams.drop(1)
-                        val downloadItem = DownloadItem(
-                            id = "${movie.id}_movie",
-                            mediaId = movie.id,
-                            title = movie.title,
-                            year = movie.year,
-                            isShow = false,
-                            posterUrl = movie.poster ?: movie.backdrop,
-                            quality = primary.quality,
-                            streamLink = primary,
-                            fallbackLinks = fallbacks,
-                            status = DownloadStatus.QUEUED
+                        _uiState.value = _uiState.value.copy(
+                            isResolvingDownload = false,
+                            downloadStreamsAvailable = finalStreams.streams,
+                            pendingDownloadEpisode = null
                         )
-                        downloadQueueManager.enqueueDownload(downloadItem)
+                    } else {
                         _uiState.value = _uiState.value.copy(isResolvingDownload = false)
                     }
                 }
@@ -140,6 +133,7 @@ class MovieDetailViewModel(
     fun downloadEpisode(episode: Episode) {
         val show = _uiState.value.show ?: return
         viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isResolvingDownload = true, downloadStreamsAvailable = null, pendingDownloadEpisode = episode)
             try {
                 streamRepository.resolveEpisode(
                     title = show.title,
@@ -148,32 +142,72 @@ class MovieDetailViewModel(
                     year = show.year ?: 0
                 ) { finalStreams ->
                     if (finalStreams.isPlayable && finalStreams.streams.isNotEmpty()) {
-                        val primary = finalStreams.streams.first()
-                        val fallbacks = finalStreams.streams.drop(1)
-                        val sNum = _uiState.value.selectedSeason
-                        val sPad = sNum.toString().padStart(2, '0')
-                        val ePad = episode.episodeNumber.toString().padStart(2, '0')
-
-                        val downloadItem = DownloadItem(
-                            id = "${show.id}_s${sNum}_e${episode.episodeNumber}",
-                            mediaId = show.id,
-                            title = show.title,
-                            subtitle = "S$sPad E$ePad - ${episode.title}",
-                            year = show.year,
-                            isShow = true,
-                            seasonNumber = sNum,
-                            episodeNumber = episode.episodeNumber,
-                            posterUrl = episode.stillPath ?: show.poster,
-                            quality = primary.quality,
-                            streamLink = primary,
-                            fallbackLinks = fallbacks,
-                            status = DownloadStatus.QUEUED
+                        _uiState.value = _uiState.value.copy(
+                            isResolvingDownload = false,
+                            downloadStreamsAvailable = finalStreams.streams
                         )
-                        downloadQueueManager.enqueueDownload(downloadItem)
+                    } else {
+                        _uiState.value = _uiState.value.copy(isResolvingDownload = false, pendingDownloadEpisode = null)
                     }
                 }
-            } catch (_: Exception) {}
+            } catch (_: Exception) {
+                _uiState.value = _uiState.value.copy(isResolvingDownload = false, pendingDownloadEpisode = null)
+            }
         }
+    }
+
+    fun startSelectedDownload(selectedStream: com.streamflex.domain.models.StreamLink) {
+        val state = _uiState.value
+        val allStreams = state.downloadStreamsAvailable ?: return
+        val fallbacks = allStreams.filter { it.url != selectedStream.url }
+
+        val movie = state.movie
+        val show = state.show
+        val episode = state.pendingDownloadEpisode
+
+        if (movie != null) {
+            val downloadItem = DownloadItem(
+                id = "${movie.id}_movie",
+                mediaId = movie.id,
+                title = movie.title,
+                year = movie.year,
+                isShow = false,
+                posterUrl = movie.poster ?: movie.backdrop,
+                quality = selectedStream.quality,
+                streamLink = selectedStream,
+                fallbackLinks = fallbacks,
+                status = DownloadStatus.QUEUED
+            )
+            downloadQueueManager.enqueueDownload(downloadItem)
+        } else if (show != null && episode != null) {
+            val sNum = state.selectedSeason
+            val sPad = sNum.toString().padStart(2, '0')
+            val ePad = episode.episodeNumber.toString().padStart(2, '0')
+
+            val downloadItem = DownloadItem(
+                id = "${show.id}_s${sNum}_e${episode.episodeNumber}",
+                mediaId = show.id,
+                title = show.title,
+                subtitle = "S$sPad E$ePad - ${episode.title}",
+                year = show.year,
+                isShow = true,
+                seasonNumber = sNum,
+                episodeNumber = episode.episodeNumber,
+                posterUrl = episode.stillPath ?: show.poster,
+                quality = selectedStream.quality,
+                streamLink = selectedStream,
+                fallbackLinks = fallbacks,
+                status = DownloadStatus.QUEUED
+            )
+            downloadQueueManager.enqueueDownload(downloadItem)
+        }
+
+        // Clear dialog state
+        _uiState.value = state.copy(downloadStreamsAvailable = null, pendingDownloadEpisode = null)
+    }
+
+    fun cancelDownloadDialog() {
+        _uiState.value = _uiState.value.copy(downloadStreamsAvailable = null, pendingDownloadEpisode = null)
     }
 
     fun cancelDownload(id: String) {

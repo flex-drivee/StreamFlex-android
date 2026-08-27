@@ -112,6 +112,7 @@ dependencies {
     implementation("androidx.media3:media3-exoplayer-hls:1.10.1")
     implementation("androidx.media3:media3-exoplayer-dash:1.10.1")
     implementation("androidx.media3:media3-common:1.10.1")
+    implementation("androidx.media3:media3-datasource-okhttp:1.10.1")
     
     // --- Nextlib FFmpeg Software Decoder ---
     implementation("io.github.anilbeesetti:nextlib-media3ext:1.10.1-0.13.0")

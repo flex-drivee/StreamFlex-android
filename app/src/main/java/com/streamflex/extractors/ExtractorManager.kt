@@ -61,6 +61,7 @@ object ExtractorManager {
         PixelDrainExtractor(),
 
         com.streamflex.extractors.hdstream4u.HdStream4uExtractor(),
+        com.streamflex.extractors.hdstream4u.HubStreamExtractor(),
 
         // Phase 3 — NetMirror complete extractors
         NetMirrorExtractor(),

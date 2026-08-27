@@ -38,6 +38,7 @@ fun SettingsScreen(
     val cellularData by viewModel.cellularData.collectAsState()
     val developerMode by viewModel.developerMode.collectAsState()
     val decoderMode by viewModel.decoderMode.collectAsState()
+    val dohProvider by viewModel.dohProvider.collectAsState()
     val wifiOnlyDownloads by viewModel.wifiOnlyDownloads.collectAsState()
     val downloadQuality by viewModel.downloadQuality.collectAsState()
     val smartDownloads by viewModel.smartDownloads.collectAsState()
@@ -46,6 +47,7 @@ fun SettingsScreen(
     val scrollState = rememberLazyListState()
     var showThemeDialog by remember { mutableStateOf(false) }
     var showDecoderDialog by remember { mutableStateOf(false) }
+    var showDohDialog by remember { mutableStateOf(false) }
     var showProviderDialog by remember { mutableStateOf(false) }
     var showMovieBoxSettings by remember { mutableStateOf(false) }
     var showQualityDialog by remember { mutableStateOf(false) }
@@ -158,6 +160,7 @@ fun SettingsScreen(
                 }
             }
 
+
             // --- Downloads ---
             item {
                 SettingsGroup("Downloads") {
@@ -246,10 +249,10 @@ fun SettingsScreen(
                     SettingsDivider()
                     SettingsTile(
                         icon = Icons.Outlined.Dns,
-                        title = "Custom DNS",
-                        subtitle = "Bypass ISP blocking (Cloudflare/Google)",
+                        title = "DNS over HTTPS",
+                        subtitle = com.streamflex.core.network.DohProvider.valueOf(dohProvider).title,
                         isLast = true,
-                        onTap = { /* TODO */ }
+                        onTap = { showDohDialog = true }
                     )
                 }
             }
@@ -407,6 +410,33 @@ fun SettingsScreen(
                 },
                 confirmButton = {
                     TextButton(onClick = { showDecoderDialog = false }) {
+                        Text("Cancel", color = MaterialTheme.colorScheme.primary)
+                    }
+                }
+            )
+        }
+
+        if (showDohDialog) {
+            AlertDialog(
+                onDismissRequest = { showDohDialog = false },
+                title = { Text("Select DNS over HTTPS", color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold) },
+                containerColor = MaterialTheme.colorScheme.surface,
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        com.streamflex.core.network.DohProvider.entries.forEach { provider ->
+                            ThemeOptionRow(
+                                title = provider.title,
+                                isSelected = dohProvider == provider.name,
+                                onClick = {
+                                    viewModel.setDohProvider(provider.name)
+                                    showDohDialog = false
+                                }
+                            )
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showDohDialog = false }) {
                         Text("Cancel", color = MaterialTheme.colorScheme.primary)
                     }
                 }

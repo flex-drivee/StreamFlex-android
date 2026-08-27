@@ -134,3 +134,16 @@ class HdStream4uExtractor : BaseExtractor() {
         }
     }
 }
+
+/**
+ * HubStream Extractor (hubstream.dad, hubstream.art)
+ */
+class HubStreamExtractor : BaseExtractor() {
+    override val hostType = HostType.HUBSTREAM
+    private val delegate = HdStream4uExtractor()
+
+    override suspend fun extract(source: ProviderSource): ExtractionResult {
+        return delegate.extract(source)
+    }
+}
+

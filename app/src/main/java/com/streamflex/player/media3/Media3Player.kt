@@ -10,7 +10,7 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.TrackSelectionOverride
 import androidx.media3.common.Tracks
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.datasource.DefaultHttpDataSource
+
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import com.streamflex.domain.models.StreamLink
@@ -258,8 +258,7 @@ class Media3Player(
         requestHeaders["Accept"] = "*/*"
 
         val lowerUrl = stream.url.lowercase()
-        val isDirectCdn = lowerUrl.contains("workers.dev") ||
-                          lowerUrl.contains("googleusercontent.com") ||
+        val isDirectCdn = lowerUrl.contains("googleusercontent.com") ||
                           lowerUrl.contains("googlevideo.com") ||
                           lowerUrl.contains("pixeldrain.com") ||
                           lowerUrl.contains("buzzheavier.com") ||
@@ -296,12 +295,8 @@ class Media3Player(
         }
 
         // 2. High-performance HTTP Data Source with redirect, fast failover timeout, and custom headers
-        val httpDataSourceFactory = DefaultHttpDataSource.Factory()
+        val httpDataSourceFactory = androidx.media3.datasource.okhttp.OkHttpDataSource.Factory(com.streamflex.core.network.StreamFlexHttpClient.okHttpClient)
             .setUserAgent(userAgent)
-            .setAllowCrossProtocolRedirects(true)
-            .setConnectTimeoutMs(8_000)
-            .setReadTimeoutMs(10_000)
-            .setKeepPostFor302Redirects(true)
             .setDefaultRequestProperties(requestHeaders)
 
         // 3. Wrap in DefaultDataSource.Factory to support file://, content://, rawresource:// as well as http/https

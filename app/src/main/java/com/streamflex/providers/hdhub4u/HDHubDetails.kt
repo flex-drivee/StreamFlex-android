@@ -28,7 +28,7 @@ class HDHubDetails : DetailParser {
 
         // Matches: EP01, Ep.01, EP.01, E01, Episode 1, Episode.1, S01E01, etc.
         private val EPISODE_NUM_REGEX = Regex(
-            """(?:ep(?:isode)?[.\s_-]?|[eE]\s*0*)(\d{1,3})|(?:\b[sS]\d{1,2}[eE]0*(\d{1,3}))""",
+            """\b(?:ep(?:isode)?[.\s_-]?|[eE]\s*0*)(\d{1,3})\b|(?:\b[sS]\d{1,2}[eE]0*(\d{1,3}))\b""",
             RegexOption.IGNORE_CASE
         )
         // Matches season number in URL: season-1, s01, s1
@@ -169,140 +169,166 @@ class HDHubDetails : DetailParser {
     }
 
     private fun parseSeasons(document: Document, detailUrl: String): List<ProviderSeason> {
-        val seasonNum = extractSeasonNumber(detailUrl)
-        val epLinksMap = mutableMapOf<Int, MutableList<ProviderSource>>()
+        val baseSeasonNum = extractSeasonNumber(detailUrl)
+        // Map<SeasonNumber, Map<EpisodeNumber, MutableList<ProviderSource>>>
+        val seasonMap = mutableMapOf<Int, MutableMap<Int, MutableList<ProviderSource>>>()
+        val visitedUrls = mutableSetOf<String>()
 
-        // 1. Check modern grid layout (div.episodes-list div.season-item)
-        val seasonElements = document.select("div.episodes-list div.season-item")
-        if (seasonElements.isNotEmpty()) {
-            for (seasonEl in seasonElements) {
-                val episodeItems = seasonEl.select("div.episode-download-item")
-                for (epItem in episodeItems) {
-                    val epBadgeText = epItem.select("div.episode-file-info span.badge-psa, span.badge").text()
-                    val epNum = extractEpNumber(epBadgeText) ?: 1
+        // Scan all anchor links across the entire document
+        val allAnchors = document.select("a[href]")
+        for (a in allAnchors) {
+            val href = a.absUrl("href").takeIf { it.isNotBlank() } ?: a.attr("href")
+            if (href.isBlank() || sourceParser.shouldSkipUrl(href) || !visitedUrls.add(href)) continue
 
-                    val links = epItem.select("a[href]")
-                    for (link in links) {
-                        val href = link.absUrl("href").takeIf { it.isNotBlank() } ?: link.attr("href")
-                        if (href.isBlank() || sourceParser.shouldSkipUrl(href)) continue
+            var hostType = HostDetector.detect(href)
+            if (hostType == HostType.UNKNOWN && href.contains("?id=")) hostType = HostType.REDIRECT
+            if (hostType == HostType.UNKNOWN) continue
 
-                        var hostType = HostDetector.detect(href)
-                        if (hostType == HostType.UNKNOWN && href.contains("?id=")) hostType = HostType.REDIRECT
-                        if (hostType != HostType.UNKNOWN) {
-                            val quality = QualityDetector.detect(link.text() + " " + epItem.text())
-                            val source = HDHubMapper.toProviderSource(
-                                provider = PROVIDER_NAME,
-                                host = hostType.name,
-                                hostType = hostType,
-                                url = href,
-                                quality = quality,
-                                referer = detailUrl,
-                                headers = mapOf("Referer" to detailUrl, "Cookie" to HDHubConfig.COOKIE)
-                            )
-                            epLinksMap.getOrPut(epNum) { mutableListOf() }.add(source)
-                        }
-                    }
+            val anchorText = a.text().trim()
+            val anchorTitle = a.attr("title").trim()
+
+            // Find episode number
+            val epNum = findEpisodeForAnchor(a, href, anchorText, anchorTitle)
+
+            if (epNum != null && epNum in 1..999) {
+                // Find season number
+                val seasonNum = findSeasonForAnchor(a, href, anchorText, baseSeasonNum)
+
+                // Detect quality from anchor, parent, and container
+                val contextText = buildString {
+                    append(anchorText)
+                    append(" ")
+                    append(anchorTitle)
+                    append(" ")
+                    a.parent()?.let { append(it.text()) }
+                    a.closest("div, p, tr, li")?.let { append(" ").append(it.text()) }
                 }
+                val quality = QualityDetector.detect(contextText)
+
+                val source = HDHubMapper.toProviderSource(
+                    provider = PROVIDER_NAME,
+                    host = hostType.name,
+                    hostType = hostType,
+                    url = href,
+                    quality = quality,
+                    referer = detailUrl,
+                    headers = mapOf("Referer" to detailUrl, "Cookie" to HDHubConfig.COOKIE)
+                )
+
+                seasonMap.getOrPut(seasonNum) { mutableMapOf() }
+                    .getOrPut(epNum) { mutableListOf() }
+                    .add(source)
             }
         }
 
-        // 2. Sequential scanning over headings & paragraphs (classic HDHub4u layout)
-        if (epLinksMap.isEmpty()) {
-            var currentEpisode: Int? = null
-            val elements = document.select("h1, h2, h3, h4, h5, h6, p, div, a[href]")
+        if (seasonMap.isEmpty()) return emptyList()
 
-            for (el in elements) {
-                val text = el.ownText().trim()
-                val fullText = el.text().trim()
-
-                if (el.tagName().startsWith("h") || el.tagName() in listOf("p", "strong", "b") || el.children().isEmpty()) {
-                    val checkText = text.ifBlank { fullText }
-                    if (!checkText.contains("Single Episode", ignoreCase = true) && !checkText.contains("All Episodes", ignoreCase = true)) {
-                        val num = extractEpNumber(checkText)
-                        if (num != null && num in 1..999) {
-                            currentEpisode = num
-                        }
-                    }
-                }
-
-                if (el.tagName() == "a") {
-                    val url = el.attr("abs:href").ifBlank { el.attr("href") }
-                    if (url.isNotBlank() && !sourceParser.shouldSkipUrl(url)) {
-                        var hostType = HostDetector.detect(url)
-                        if (hostType == HostType.UNKNOWN && url.contains("?id=")) hostType = HostType.REDIRECT
-                        
-                        if (hostType != HostType.UNKNOWN) {
-                            val directEp = extractEpNumber(el.text()) ?: extractEpNumber(el.attr("title")) ?: extractEpNumber(url)
-                            val epToUse = directEp ?: currentEpisode
-                            if (epToUse != null) {
-                                val quality = QualityDetector.detect(el.text() + " " + (el.parent()?.text() ?: ""))
-                                val source = HDHubMapper.toProviderSource(
-                                    provider = PROVIDER_NAME,
-                                    host = hostType.name,
-                                    hostType = hostType,
-                                    url = url,
-                                    quality = quality,
-                                    referer = detailUrl,
-                                    headers = mapOf("Referer" to detailUrl, "Cookie" to HDHubConfig.COOKIE)
-                                )
-                                epLinksMap.getOrPut(epToUse) { mutableListOf() }.add(source)
-                            }
-                        }
-                    }
-                }
+        return seasonMap.entries.sortedBy { it.key }.map { (sNum, epMap) ->
+            val episodes = epMap.entries.sortedBy { it.key }.map { (num, sources) ->
+                ProviderEpisode(
+                    number = num,
+                    title = "Episode $num",
+                    sources = sources.distinctBy { it.url }
+                )
             }
-        }
-
-        if (epLinksMap.isEmpty()) {
-            val allSources = sourceParser.parseDocument(document, detailUrl)
-            val linkElements = document.select("a[href]").associateBy { it.attr("href").trim() }
-            for (source in allSources) {
-                val epNum = findEpisodeNumber(source, linkElements)
-                if (epNum != null) {
-                    epLinksMap.getOrPut(epNum) { mutableListOf() }.add(source)
-                }
-            }
-        }
-
-        if (epLinksMap.isEmpty()) return emptyList()
-
-        val episodes = epLinksMap.entries.sortedBy { it.key }.map { (num, sources) ->
-            ProviderEpisode(
-                number = num,
-                title = "Episode $num",
-                sources = sources
+            ProviderSeason(
+                number = sNum,
+                title = "Season $sNum",
+                episodes = episodes
             )
         }
-
-        return listOf(ProviderSeason(number = seasonNum, title = "Season $seasonNum", episodes = episodes))
     }
 
-    private fun findEpisodeNumber(source: ProviderSource, linkElements: Map<String, Element>): Int? {
-        val element = linkElements[source.url] ?: return null
-        extractEpNumber(element.text())?.let { return it }
-        element.parent()?.let { parent ->
-            extractEpNumber(parent.text())?.let { return it }
-        }
+    private fun findEpisodeForAnchor(
+        a: Element,
+        href: String,
+        anchorText: String,
+        anchorTitle: String
+    ): Int? {
+        // 1. Direct match in anchor text, title, or href
+        extractEpNumber(anchorText)?.let { return it }
+        extractEpNumber(anchorTitle)?.let { return it }
+        extractEpNumber(href)?.let { return it }
 
-        var sibling: Element? = element.parent()?.previousElementSibling()
+        // 2. Check previous siblings in the DOM (e.g. <strong>Episode 03 : </strong> or text node)
+        var prev = a.previousSibling()
         var hops = 0
-        while (sibling != null && hops < 8) {
-            val tag = sibling.tagName()
-            if (tag in listOf("h2", "h3", "h4", "p", "strong", "b")) {
-                val text = sibling.text()
-                if (!text.contains("Single Episode", ignoreCase = true) && !text.contains("All Episodes", ignoreCase = true)) {
-                    extractEpNumber(text)?.let { return it }
-                }
+        while (prev != null && hops < 8) {
+            val text = when (prev) {
+                is org.jsoup.nodes.TextNode -> prev.text()
+                is Element -> prev.text()
+                else -> ""
+            }.trim()
+
+            if (text.isNotBlank()) {
+                val ep = extractEpNumber(text)
+                if (ep != null) return ep
             }
-            sibling = sibling.previousElementSibling()
+            prev = prev.previousSibling()
             hops++
         }
-        extractEpNumber(source.url)?.let { return it }
+
+        // 3. Check enclosing container / badge (e.g. div.episode-download-item span.badge)
+        val parentItem = a.closest("div.episode-download-item, div.episode-item, li, tr")
+        if (parentItem != null) {
+            val badgeText = parentItem.select("span.badge-psa, span.badge, .episode-file-info, .ep-title").text()
+            extractEpNumber(badgeText)?.let { return it }
+            extractEpNumber(parentItem.ownText())?.let { return it }
+        }
+
+        // 4. Check parent element text if it's a single episode line
+        val parent = a.parent()
+        if (parent != null) {
+            val epMatches = Regex("""\b(?:ep(?:isode)?[.\s_-]?|e)\s*0*(\d{1,3})\b""", RegexOption.IGNORE_CASE)
+                .findAll(parent.text()).toList()
+            if (epMatches.size == 1) {
+                return epMatches[0].groupValues[1].toIntOrNull()
+            }
+        }
+
         return null
     }
 
-    private fun extractSeasonNumber(url: String): Int {
-        return SEASON_URL_REGEX.find(url)?.groupValues?.get(1)?.toIntOrNull() ?: 1
+    private fun findSeasonForAnchor(
+        a: Element,
+        href: String,
+        anchorText: String,
+        fallbackSeason: Int
+    ): Int {
+        // 1. Direct match in anchor text or href
+        val directS = extractSeasonNumber(anchorText).takeIf { it > 0 }
+            ?: extractSeasonNumber(href).takeIf { it > 0 }
+        if (directS != null) return directS
+
+        // 2. Check previous sibling headings
+        var prevEl = a.previousElementSibling()
+        while (prevEl != null) {
+            if (prevEl.tagName().startsWith("h")) {
+                val s = extractSeasonNumber(prevEl.text())
+                if (s > 0) return s
+            }
+            prevEl = prevEl.previousElementSibling()
+        }
+
+        // 3. Walk up the DOM to find closest preceding heading
+        var parent = a.parent()
+        while (parent != null && parent.tagName() != "body") {
+            var sibling = parent.previousElementSibling()
+            while (sibling != null) {
+                if (sibling.tagName().startsWith("h")) {
+                    val s = extractSeasonNumber(sibling.text())
+                    if (s > 0) return s
+                }
+                sibling = sibling.previousElementSibling()
+            }
+            parent = parent.parent()
+        }
+
+        return fallbackSeason
+    }
+
+    private fun extractSeasonNumber(urlOrText: String): Int {
+        return SEASON_URL_REGEX.find(urlOrText)?.groupValues?.get(1)?.toIntOrNull() ?: 1
     }
 
     private fun extractTitle(document: Document, fallback: String): String {

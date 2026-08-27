@@ -321,6 +321,56 @@ fun MovieDetailScreen(
                     tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(22.dp))
             }
         }
+
+        // --- DOWNLOAD STREAMS DIALOG ---
+        val availableStreams = state.downloadStreamsAvailable
+        if (!availableStreams.isNullOrEmpty()) {
+            AlertDialog(
+                onDismissRequest = { viewModel.cancelDownloadDialog() },
+                title = { Text("Select Download Link", fontWeight = FontWeight.Bold) },
+                containerColor = MaterialTheme.colorScheme.surface,
+                text = {
+                    LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        items(availableStreams) { stream ->
+                            val isFast = stream.url.contains("google", true) || stream.url.contains("fsl", true)
+                            val isResume = stream.url.contains("google", true) || stream.url.contains("pixeldrain", true) || stream.url.contains("buzz", true)
+                            
+                            val tags = mutableListOf<String>()
+                            if (isFast) tags.add("Fast downloading")
+                            if (isResume) tags.add("Resume support")
+                            if (!isFast && !isResume) tags.add("Reliable")
+                            tags.add(stream.quality.name)
+                            
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { viewModel.startSelectedDownload(stream) },
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                            ) {
+                                Column(modifier = Modifier.padding(12.dp)) {
+                                    Text(
+                                        text = stream.name, 
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = tags.joinToString(" • "),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { viewModel.cancelDownloadDialog() }) {
+                        Text("Cancel", color = MaterialTheme.colorScheme.primary)
+                    }
+                }
+            )
+        }
     }
 }
 

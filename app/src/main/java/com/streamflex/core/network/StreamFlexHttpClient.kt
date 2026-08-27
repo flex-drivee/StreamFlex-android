@@ -109,8 +109,9 @@ object StreamFlexHttpClient {
      * Lazy init: OkHttp creates thread pools and connection pools at build time.
      * Deferring until first use avoids slowing down app startup.
      */
+    val okHttpClient: OkHttpClient get() = baseClient
     private val baseClient: OkHttpClient by lazy {
-        OkHttpClient.Builder()
+        val builder = OkHttpClient.Builder()
             // ─── Cookie Jar ────────────────────────────────────────────────
             .cookieJar(JavaNetCookieJar(cookieManager))
 
@@ -132,7 +133,7 @@ object StreamFlexHttpClient {
             .addInterceptor(LoggingInterceptor())      // Request/response logs
             .addInterceptor(RetryInterceptor())        // Retry on IO failure
 
-            .build()
+        com.streamflex.core.network.DohProviders.applyDoh(builder).build()
     }
 
     // ─── NoCookieJar ──────────────────────────────────────────────────────────
