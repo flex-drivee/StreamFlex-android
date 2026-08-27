@@ -34,6 +34,7 @@ object HttpClient {
             .addInterceptor(UserAgentInterceptor())
             .addInterceptor(LoggingInterceptor())
             .addInterceptor(RetryInterceptor())
+            .addInterceptor(com.streamflex.core.network.interceptor.CloudflareKiller())
 
             .build()
     }

@@ -124,9 +124,7 @@ class MultiChunkDownloader(
 
         streamLink.headers.forEach { (k, v) ->
             if (v.isNotBlank()) {
-                if (directCdn && k.equals("Referer", ignoreCase = true)) {
-                    // omit referer for direct CDNs
-                } else if (!k.equals("Connection", ignoreCase = true)) {
+                if (!k.equals("Connection", ignoreCase = true)) {
                     requestHeaders[k] = v
                 }
             }

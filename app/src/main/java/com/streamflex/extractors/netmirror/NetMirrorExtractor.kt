@@ -71,32 +71,26 @@ class NetMirrorExtractor : BaseExtractor() {
         val NATIVE_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0 /OS.GatuNewTV v1.0"
         
         return withContext(Dispatchers.IO) {
-            // Step 1: Bypass and get t_hash_t cookie
-            val verifyUrl = "$baseUrl/verify.php"
-            val bypassReq = RequestBuilder()
-                .url(verifyUrl)
-                .post("g-recaptcha-response=${java.util.UUID.randomUUID()}".toByteArray(Charsets.UTF_8))
-                .header("Content-Type", "application/x-www-form-urlencoded")
-                .header("Origin", baseUrl)
-                .header("Referer", "$baseUrl/verify2")
-                .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36")
-                .build()
-                
+            // Step 1: Bypass and get t_hash_t cookie using WebViewResolver
             var tHashT = ""
-            try {
-                val bypassRes = HttpClient.execute(bypassReq)
-                if (bypassRes is NetworkResult.Success) {
-                    val cookies = bypassRes.data.header("set-cookie")
-                    if (cookies != null) {
-                        val match = Regex("t_hash_t=([^;]+)").find(cookies)
-                        if (match != null) {
-                            tHashT = match.groupValues[1]
-                            com.streamflex.core.utils.StreamLogger.debug("NetMirrorExtractor", "Bypass success, got t_hash_t: $tHashT")
-                        }
-                    }
+            val verifyUrl = "$baseUrl/verify.php"
+            
+            // Try to resolve using WebView
+            val solved = com.streamflex.core.network.interceptor.WebViewResolver.resolveUsingWebView(
+                com.streamflex.app.StreamFlexApplication.instance,
+                verifyUrl,
+                requiredCookie = "t_hash_t"
+            )
+            
+            if (solved) {
+                val cookies = android.webkit.CookieManager.getInstance().getCookie(verifyUrl) ?: ""
+                val match = Regex("t_hash_t=([^;]+)").find(cookies)
+                if (match != null) {
+                    tHashT = match.groupValues[1]
+                    com.streamflex.core.utils.StreamLogger.debug("NetMirrorExtractor", "WebView Bypass success, got t_hash_t: $tHashT")
                 }
-            } catch (e: Exception) {
-                com.streamflex.core.utils.StreamLogger.error("NetMirrorExtractor", "Failed to bypass verify.php")
+            } else {
+                com.streamflex.core.utils.StreamLogger.error("NetMirrorExtractor", "Failed to bypass verify.php using WebView")
             }
 
             // Step 2: Resolve API URL
