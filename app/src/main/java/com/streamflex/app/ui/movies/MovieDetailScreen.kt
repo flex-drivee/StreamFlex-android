@@ -323,14 +323,15 @@ fun MovieDetailScreen(
         }
 
         // --- DOWNLOAD STREAMS DIALOG ---
-        if (!state.downloadStreamsAvailable.isNullOrEmpty()) {
+        val availableStreams = state.downloadStreamsAvailable
+        if (!availableStreams.isNullOrEmpty()) {
             AlertDialog(
                 onDismissRequest = { viewModel.cancelDownloadDialog() },
                 title = { Text("Select Download Link", fontWeight = FontWeight.Bold) },
                 containerColor = MaterialTheme.colorScheme.surface,
                 text = {
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        items(state.downloadStreamsAvailable!!) { stream ->
+                        items(availableStreams) { stream ->
                             val isFast = stream.url.contains("google", true) || stream.url.contains("fsl", true)
                             val isResume = stream.url.contains("google", true) || stream.url.contains("pixeldrain", true) || stream.url.contains("buzz", true)
                             
