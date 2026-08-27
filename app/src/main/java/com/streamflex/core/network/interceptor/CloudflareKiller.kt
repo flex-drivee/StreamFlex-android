@@ -21,10 +21,13 @@ class CloudflareKiller : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response = runBlocking {
         var request = chain.request()
         val urlString = request.url.toString()
+        // Helper to get root domain (e.g. s21.freecdn.top -> freecdn.top)
         val host = request.url.host
+        val rootDomain = host.split(".").takeLast(2).joinToString(".")
 
         // Pre-apply saved cookies if we already solved CF for this host
-        val knownCookies = savedCookies[host]
+        val knownCookies = savedCookies.entries.firstOrNull { rootDomain.endsWith(it.key) || it.key.endsWith(rootDomain) }?.value
+
         if (knownCookies != null) {
             val existingCookie = request.header("Cookie") ?: ""
             val mergedCookie = if (existingCookie.isNotEmpty()) {
@@ -60,7 +63,7 @@ class CloudflareKiller : Interceptor {
                 val solvedCookies = CookieManager.getInstance().getCookie(urlString) ?: ""
                 
                 // Save it for future requests to this host (to prevent CAPTCHA loops on video segments)
-                savedCookies[host] = solvedCookies
+                savedCookies[rootDomain] = solvedCookies
                 
                 // 5. Re-run the request with the new solved cookies and WebView User-Agent
                 val existingCookie = chain.request().header("Cookie") ?: ""
