@@ -132,6 +132,7 @@ object StreamFlexHttpClient {
             .addInterceptor(RefererInterceptor())      // Preserve Referer/Origin
             .addInterceptor(LoggingInterceptor())      // Request/response logs
             .addInterceptor(RetryInterceptor())        // Retry on IO failure
+            .addInterceptor(com.streamflex.core.network.interceptor.CloudflareKiller()) // WebView CAPTCHA Solver
 
         com.streamflex.core.network.DohProviders.applyDoh(builder).build()
     }
