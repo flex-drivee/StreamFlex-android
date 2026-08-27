@@ -28,7 +28,7 @@ class HDHubDetails : DetailParser {
 
         // Matches: EP01, Ep.01, EP.01, E01, Episode 1, Episode.1, S01E01, etc.
         private val EPISODE_NUM_REGEX = Regex(
-            """(?:ep(?:isode)?[.\s_-]?|[eE]\s*0*)(\d{1,3})|(?:\b[sS]\d{1,2}[eE]0*(\d{1,3}))""",
+            """\b(?:ep(?:isode)?[.\s_-]?|[eE]\s*0*)(\d{1,3})\b|(?:\b[sS]\d{1,2}[eE]0*(\d{1,3}))\b""",
             RegexOption.IGNORE_CASE
         )
         // Matches season number in URL: season-1, s01, s1

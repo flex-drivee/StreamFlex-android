@@ -19,11 +19,11 @@ class DownloadStorageManager(private val context: Context) {
 
     /**
      * Resolves the root directory for storing downloaded videos.
-     * Prefers app-specific external storage to ensure compatibility across all Android versions (Android 5 to 15+).
+     * Uses the public Downloads directory so files are visible to the user in File Managers on Android 11+.
      */
     fun getDownloadsRootDir(): File {
-        val baseDir = context.getExternalFilesDir(Environment.DIRECTORY_MOVIES)
-            ?: context.filesDir
+        @Suppress("DEPRECATION")
+        val baseDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
         val root = File(baseDir, ROOT_DIR_NAME)
         if (!root.exists()) {
             root.mkdirs()

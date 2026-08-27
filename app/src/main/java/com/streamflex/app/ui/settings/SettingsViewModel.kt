@@ -41,6 +41,11 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     )
     val decoderMode: StateFlow<String> = _decoderMode.asStateFlow()
 
+    private val _dohProvider = MutableStateFlow(
+        prefs.getString("doh_provider", com.streamflex.core.network.DohProvider.NONE.name) ?: com.streamflex.core.network.DohProvider.NONE.name
+    )
+    val dohProvider: StateFlow<String> = _dohProvider.asStateFlow()
+
     // --- Downloads Settings ---
     private val _wifiOnlyDownloads = MutableStateFlow(prefs.getBoolean("wifi_only_downloads", false))
     val wifiOnlyDownloads: StateFlow<Boolean> = _wifiOnlyDownloads.asStateFlow()
@@ -90,6 +95,11 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun setDecoderMode(mode: String) {
         prefs.edit().putString(com.streamflex.player.core.DecoderMode.PREF_KEY, mode).apply()
         _decoderMode.value = mode
+    }
+
+    fun setDohProvider(provider: String) {
+        prefs.edit().putString("doh_provider", provider).apply()
+        _dohProvider.value = provider
     }
 
     fun setWifiOnlyDownloads(enabled: Boolean) {
