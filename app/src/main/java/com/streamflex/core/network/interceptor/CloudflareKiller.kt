@@ -26,8 +26,15 @@ class CloudflareKiller : Interceptor {
         // Pre-apply saved cookies if we already solved CF for this host
         val knownCookies = savedCookies[host]
         if (knownCookies != null) {
+            val existingCookie = request.header("Cookie") ?: ""
+            val mergedCookie = if (existingCookie.isNotEmpty()) {
+                "$existingCookie; $knownCookies"
+            } else {
+                knownCookies
+            }
+            
             request = request.newBuilder()
-                .header("Cookie", knownCookies)
+                .header("Cookie", mergedCookie)
                 .header("User-Agent", CF_USER_AGENT)
                 .build()
         }
@@ -56,8 +63,15 @@ class CloudflareKiller : Interceptor {
                 savedCookies[host] = solvedCookies
                 
                 // 5. Re-run the request with the new solved cookies and WebView User-Agent
+                val existingCookie = chain.request().header("Cookie") ?: ""
+                val mergedCookie = if (existingCookie.isNotEmpty()) {
+                    "$existingCookie; $solvedCookies"
+                } else {
+                    solvedCookies
+                }
+                
                 val newRequest = chain.request().newBuilder()
-                    .header("Cookie", solvedCookies)
+                    .header("Cookie", mergedCookie)
                     .header("User-Agent", CF_USER_AGENT)
                     .build()
                 
