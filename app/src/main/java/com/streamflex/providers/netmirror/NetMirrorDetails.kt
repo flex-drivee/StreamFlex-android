@@ -108,37 +108,37 @@ class NetMirrorDetails {
                 if (castStr != null) put("cast",    castStr)
             }
 
-            // Parse episodes list
+            // Parse episodes list for the initially loaded season
             val episodesJson = JsonParser.array(root, "episodes")
-            val sources      = mutableListOf<ProviderSource>()
+            val sources = mutableListOf<ProviderSource>()
+            
+            sources.addAll(parseEpisodes(episodesJson, ott, base, providerName))
 
-            for (ep in episodesJson) {
-                if (ep.isJsonNull) continue // Skip null entries like [null]
-
-                val epId    = JsonParser.string(ep, "id")  ?: continue
-                val epNum   = JsonParser.string(ep, "ep")?.removePrefix("E")
-                val seasonN = JsonParser.string(ep, "s")?.removePrefix("S")
-                val epTitle = JsonParser.string(ep, "t")   ?: "Episode $epNum"
-                val epTime  = JsonParser.string(ep, "time")
-                val poster  = "https://imgcdn.kim/epimg/150/$epId.jpg"
-
-                // Episode-specific metadata stored in ProviderSource.metadata
-                val epMeta = buildMap<String, String> {
-                    if (epNum   != null) put("episode", epNum)
-                    if (seasonN != null) put("season",  seasonN)
-                    if (epTime  != null) put("runtime", epTime)
-                    put("poster", poster)
-                    put("epTitle", epTitle)
+            // Fetch other seasons if they exist
+            val seasonsJson = JsonParser.array(root, "season")
+            if (seasonsJson.size() > 1) {
+                val otherSeasonIds = mutableListOf<String>()
+                for (s in seasonsJson) {
+                    val sId = JsonParser.string(s, "id") ?: continue
+                    val isSelected = JsonParser.string(s, "sele")?.contains("selected") == true
+                    if (!isSelected) {
+                        otherSeasonIds.add(sId)
+                    }
                 }
-
-                sources += createPlayerSource(
-                    id           = epId,
-                    ott          = ott,
-                    baseUrl      = base,
-                    providerName = providerName,
-                    title        = epTitle,
-                    metadata     = epMeta
-                )
+                
+                // Fetch all other seasons concurrently
+                if (otherSeasonIds.isNotEmpty()) {
+                    kotlinx.coroutines.coroutineScope {
+                        val deferred = otherSeasonIds.map { sId ->
+                            kotlinx.coroutines.async {
+                                fetchSeasonEpisodes(sId, base, postPath, unixTs, cookieStr, referer, ott, providerName)
+                            }
+                        }
+                        deferred.awaitAll().forEach { seasonSources ->
+                            sources.addAll(seasonSources)
+                        }
+                    }
+                }
             }
 
             // If it's a movie, episodes array is empty or contains [null]
@@ -214,5 +214,78 @@ class NetMirrorDetails {
             quality  = Quality.UNKNOWN,
             metadata = metadata
         )
+    }
+
+    private fun parseEpisodes(
+        episodesJson: com.google.gson.JsonArray,
+        ott: String,
+        base: String,
+        providerName: String
+    ): List<ProviderSource> {
+        val sources = mutableListOf<ProviderSource>()
+        for (ep in episodesJson) {
+            if (ep.isJsonNull) continue
+
+            val epId    = JsonParser.string(ep, "id")  ?: continue
+            val epNum   = JsonParser.string(ep, "ep")?.removePrefix("E")
+            val seasonN = JsonParser.string(ep, "s")?.removePrefix("S")
+            val epTitle = JsonParser.string(ep, "t")   ?: "Episode $epNum"
+            val epTime  = JsonParser.string(ep, "time")
+            val poster  = "https://imgcdn.kim/epimg/150/$epId.jpg"
+
+            val epMeta = buildMap<String, String> {
+                if (epNum   != null) put("episode", epNum)
+                if (seasonN != null) put("season",  seasonN)
+                if (epTime  != null) put("runtime", epTime)
+                put("poster", poster)
+                put("epTitle", epTitle)
+            }
+
+            sources += createPlayerSource(
+                id           = epId,
+                ott          = ott,
+                baseUrl      = base,
+                providerName = providerName,
+                title        = epTitle,
+                metadata     = epMeta
+            )
+        }
+        return sources
+    }
+
+    private suspend fun fetchSeasonEpisodes(
+        sId: String,
+        base: String,
+        postPath: String,
+        unixTs: Long,
+        cookieStr: String,
+        referer: String,
+        ott: String,
+        providerName: String
+    ): List<ProviderSource> {
+        val postUrl = "$base$postPath?id=$sId&t=$unixTs"
+        return try {
+            val response = HttpClient.execute(
+                RequestBuilder()
+                    .url(postUrl)
+                    .header("User-Agent", NetMirrorBypassManager.NATIVE_UA)
+                    .header("X-Requested-With", "app.netmirror.netmirrornew")
+                    .header("Cookie", cookieStr)
+                    .header("Referer", referer)
+                    .header("Accept", "*/*")
+                    .build()
+            )
+            if (response is NetworkResult.Success) {
+                val json = response.data.bodyAsString()
+                val root = JsonParser.parse(json)
+                val eps = JsonParser.array(root, "episodes")
+                parseEpisodes(eps, ott, base, providerName)
+            } else {
+                emptyList()
+            }
+        } catch (e: Exception) {
+            StreamLogger.error(TAG, "fetchSeasonEpisodes failed: ${e.message}")
+            emptyList()
+        }
     }
 }
