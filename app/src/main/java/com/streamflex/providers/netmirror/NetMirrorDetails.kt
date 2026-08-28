@@ -107,36 +107,44 @@ class NetMirrorDetails {
             val episodesJson = JsonParser.array(root, "episodes")
             val sources      = mutableListOf<ProviderSource>()
 
-            if (episodesJson.isEmpty()) {
-                // Movie — single source
-                sources += createPlayerSource(id, ott, base, providerName, title)
-            } else {
-                for (ep in episodesJson) {
-                    val epId    = JsonParser.string(ep, "id")  ?: continue
-                    val epNum   = JsonParser.string(ep, "ep")?.removePrefix("E")
-                    val seasonN = JsonParser.string(ep, "s")?.removePrefix("S")
-                    val epTitle = JsonParser.string(ep, "t")   ?: "Episode $epNum"
-                    val epTime  = JsonParser.string(ep, "time")
-                    val poster  = "https://imgcdn.kim/epimg/150/$epId.jpg"
+            for (ep in episodesJson) {
+                if (ep.isJsonNull) continue // Skip null entries like [null]
 
-                    // Episode-specific metadata stored in ProviderSource.metadata
-                    val epMeta = buildMap<String, String> {
-                        if (epNum   != null) put("episode", epNum)
-                        if (seasonN != null) put("season",  seasonN)
-                        if (epTime  != null) put("runtime", epTime)
-                        put("poster", poster)
-                        put("epTitle", epTitle)
-                    }
+                val epId    = JsonParser.string(ep, "id")  ?: continue
+                val epNum   = JsonParser.string(ep, "ep")?.removePrefix("E")
+                val seasonN = JsonParser.string(ep, "s")?.removePrefix("S")
+                val epTitle = JsonParser.string(ep, "t")   ?: "Episode $epNum"
+                val epTime  = JsonParser.string(ep, "time")
+                val poster  = "https://imgcdn.kim/epimg/150/$epId.jpg"
 
-                    sources += createPlayerSource(
-                        id           = epId,
-                        ott          = ott,
-                        baseUrl      = base,
-                        providerName = providerName,
-                        title        = epTitle,
-                        metadata     = epMeta
-                    )
+                // Episode-specific metadata stored in ProviderSource.metadata
+                val epMeta = buildMap<String, String> {
+                    if (epNum   != null) put("episode", epNum)
+                    if (seasonN != null) put("season",  seasonN)
+                    if (epTime  != null) put("runtime", epTime)
+                    put("poster", poster)
+                    put("epTitle", epTitle)
                 }
+
+                sources += createPlayerSource(
+                    id           = epId,
+                    ott          = ott,
+                    baseUrl      = base,
+                    providerName = providerName,
+                    title        = epTitle,
+                    metadata     = epMeta
+                )
+            }
+
+            // If it's a movie, episodes array is empty or contains [null]
+            if (sources.isEmpty()) {
+                sources += createPlayerSource(
+                    id           = id,
+                    ott          = ott,
+                    baseUrl      = base,
+                    providerName = providerName,
+                    title        = title
+                )
             }
 
             ProviderResult(
