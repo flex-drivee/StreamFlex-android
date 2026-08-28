@@ -119,11 +119,20 @@ class NetMirrorDetails {
             // Fetch other seasons if they exist
             val seasonsJson = JsonParser.array(root, "season")
             if (seasonsJson.size > 1) {
+                // Find which season we actually got episodes for in the initial response
+                var currentLoadedSeason: String? = null
+                if (episodesJson.isNotEmpty()) {
+                    val firstEp = episodesJson[0]
+                    currentLoadedSeason = JsonParser.string(firstEp, "s")?.removePrefix("S")
+                }
+
                 val otherSeasonIds = mutableListOf<String>()
                 for (s in seasonsJson) {
                     val sId = JsonParser.string(s, "id") ?: continue
-                    val isSelected = JsonParser.string(s, "sele")?.contains("selected") == true
-                    if (!isSelected) {
+                    val sNum = JsonParser.string(s, "s")
+                    
+                    // Fetch if this season is not the one we already loaded
+                    if (sNum != currentLoadedSeason) {
                         otherSeasonIds.add(sId)
                     }
                 }
