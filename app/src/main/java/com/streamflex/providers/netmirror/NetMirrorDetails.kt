@@ -59,7 +59,12 @@ class NetMirrorDetails {
         val unixTs    = System.currentTimeMillis() / 1000L
 
         // ── Fetch /mobile/post.php ────────────────────────────────────────────
-        val postUrl = "$base/mobile/post.php?id=$id&t=$unixTs"
+        val postPath = when (ott) {
+            NetMirrorConfig.OTT_PRIME   -> "/mobile/pv/post.php"
+            NetMirrorConfig.OTT_HOTSTAR, NetMirrorConfig.OTT_DISNEY -> "/mobile/hs/post.php"
+            else                        -> "/mobile/post.php"
+        }
+        val postUrl = "$base$postPath?id=$id&t=$unixTs"
         StreamLogger.debug(TAG, "GET $postUrl")
 
         val response = try {

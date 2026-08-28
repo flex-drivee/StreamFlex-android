@@ -61,7 +61,12 @@ class NetMirrorExtractor : BaseExtractor() {
             val unixTs    = System.currentTimeMillis() / 1000L
 
             // ── Step 3: Fetch /mobile/playlist.php ──────────────────────────
-            val playlistUrl = "$baseUrl/mobile/playlist.php?id=$id&t=${Uri.encode(title)}&tm=$unixTs"
+            val playlistPath = when (ott) {
+                NetMirrorConfig.OTT_PRIME   -> "/mobile/pv/playlist.php"
+                NetMirrorConfig.OTT_HOTSTAR, NetMirrorConfig.OTT_DISNEY -> "/mobile/hs/playlist.php"
+                else                        -> "/mobile/playlist.php"
+            }
+            val playlistUrl = "$baseUrl$playlistPath?id=$id&t=${Uri.encode(title)}&tm=$unixTs"
             StreamLogger.debug(TAG, "GET $playlistUrl")
 
             val request = RequestBuilder()
