@@ -74,15 +74,19 @@ class SecurityInterceptor : Interceptor {
         // ─── Rule 2: Check redirect target is HTTPS ───────────────────────────
         if (response.isRedirect) {
             val location = response.header(HEADER_LOCATION)
-            if (location != null && !location.startsWith("https://")) {
-                response.close()
-                Logger.w(
-                    message = "Blocked non-HTTPS redirect: $location",
-                    tag = TAG
-                )
-                throw SecurityException(
-                    "Redirect to non-HTTPS URL blocked: $location"
-                )
+            if (location != null) {
+                // Resolve relative paths like "/home" against the current request URL
+                val resolvedLocation = request.url.resolve(location)?.toString() ?: location
+                if (!resolvedLocation.startsWith("https://")) {
+                    response.close()
+                    Logger.w(
+                        message = "Blocked non-HTTPS redirect: $resolvedLocation (original: $location)",
+                        tag = TAG
+                    )
+                    throw SecurityException(
+                        "Redirect to non-HTTPS URL blocked: $resolvedLocation"
+                    )
+                }
             }
         }
 

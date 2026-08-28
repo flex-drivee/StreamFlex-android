@@ -34,6 +34,7 @@ object WebViewResolver {
         return kotlinx.coroutines.withTimeoutOrNull(25000L) {
             withContext(Dispatchers.Main) {
                 kotlin.coroutines.suspendCoroutine { continuation ->
+                    val targetUrl = url
                     
                     val activity = StreamFlexApplication.topActivity ?: context
                     val webView = WebView(activity)
@@ -42,7 +43,12 @@ object WebViewResolver {
                         javaScriptEnabled = true
                         domStorageEnabled = true
                         databaseEnabled = true
-                        userAgentString = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:136.0) Gecko/20100101 Firefox/136.0"
+                        
+                        // Use the real Android WebView User-Agent to prevent Cloudflare Turnstile from looping!
+                        // If we spoof a Windows Firefox agent, Turnstile's JS fingerprinting detects the mismatch and loops forever.
+                        val defaultAgent = WebSettings.getDefaultUserAgent(activity)
+                        userAgentString = "$defaultAgent /OS.Gatu v3.0"
+                        
                         cacheMode = WebSettings.LOAD_DEFAULT
                     }
 
@@ -109,7 +115,7 @@ object WebViewResolver {
                             super.onPageFinished(view, url)
                             if (isFinished) return
                             
-                            val cookies = CookieManager.getInstance().getCookie(url)
+                            val cookies = CookieManager.getInstance().getCookie(targetUrl)
                             if (cookies != null && cookies.contains(requiredCookie)) {
                                 Logger.d("WebViewResolver", "Solved instantly on load!")
                                 finishWithResult(true)
@@ -124,9 +130,11 @@ object WebViewResolver {
                             request: WebResourceRequest?
                         ): WebResourceResponse? {
                             // Check periodically for required cookie on any resource load
-                            val cookies = CookieManager.getInstance().getCookie(request?.url?.toString())
+                            // We must check the original url (urlToLoad) as well, because the page might have
+                            // redirected to a different domain (like net77.cc) while setting the cookie on net52.cc.
+                            val cookies = CookieManager.getInstance().getCookie(targetUrl)
                             if (!isFinished && cookies != null && cookies.contains(requiredCookie)) {
-                                Logger.d("WebViewResolver", "Solved via intercepted request!")
+                                Logger.d("WebViewResolver", "Solved instantly on load!")
                                 view?.post {
                                     finishWithResult(true)
                                 }
