@@ -132,7 +132,7 @@ class NetMirrorDetails {
                 if (otherSeasonIds.isNotEmpty()) {
                     kotlinx.coroutines.coroutineScope {
                         val deferred = otherSeasonIds.map { sId ->
-                            kotlinx.coroutines.async {
+                            async {
                                 fetchSeasonEpisodes(sId, base, postPath, unixTs, cookieStr, referer, ott, providerName)
                             }
                         }
