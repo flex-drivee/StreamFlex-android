@@ -39,8 +39,11 @@ object NetMirrorBypassManager {
         "AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/147.0.7727.55 " +
         "Mobile Safari/537.36 /OS.Gatu v3.0"
 
-    // Max number of verify2.php poll iterations (7 × 10s = 70s max wait)
-    private const val MAX_VERIFY_LOOPS = 7
+    // Live-tested: NetMirror server unlocks at ~37s from userver ping regardless
+    // of how fast you poll. We poll every 3s (max 25 loops = 75s cap) instead of
+    // CNC Verse Mobile's 10s × 7 = 70s. Same speed, no wasted gaps between polls.
+    private const val POLL_INTERVAL_MS  = 3_000L
+    private const val MAX_VERIFY_LOOPS  = 25
 
     // Cookie validity window: 15 hours (same as native app, verified from source)
     private const val COOKIE_TTL_MS = 54_000_000L
@@ -143,10 +146,10 @@ object NetMirrorBypassManager {
 
         // ── Step 3: Poll /mobile/verify2.php until "All Done" ────────────────
         val verifyUrl = "$base/mobile/verify2.php"
-        StreamLogger.debug(TAG, "Starting verify poll loop (max $MAX_VERIFY_LOOPS × 10s)")
+        StreamLogger.debug(TAG, "Starting verify poll (${POLL_INTERVAL_MS}ms interval, max $MAX_VERIFY_LOOPS polls)")
 
         for (loop in 1..MAX_VERIFY_LOOPS) {
-            delay(10_000L) // 10-second mandatory wait between polls
+            delay(POLL_INTERVAL_MS) // poll every 3s — server unlocks at ~37s from ping
 
             StreamLogger.debug(TAG, "Verify loop $loop/$MAX_VERIFY_LOOPS — POST $verifyUrl")
 
