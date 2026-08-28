@@ -135,8 +135,19 @@ class NetMirrorExtractor : BaseExtractor() {
             for (playlistItem in root) {
                 val sources = JsonParser.array(playlistItem, "sources")
                 for (src in sources) {
-                    val file  = JsonParser.string(src, "file")  ?: continue
-                    val label = JsonParser.string(src, "label") ?: "Auto"
+                    val fileRaw = JsonParser.string(src, "file")  ?: continue
+                    val label   = JsonParser.string(src, "label") ?: "Auto"
+
+                    // file can be a relative path like "/mobile/hls/...", ensure absolute URL
+                    val file = if (fileRaw.startsWith("/")) {
+                        val base = referer.substringBefore("/mobile")
+                        "$base$fileRaw"
+                    } else if (fileRaw.startsWith("http")) {
+                        fileRaw
+                    } else {
+                        val base = referer.substringBefore("/mobile")
+                        "$base/$fileRaw"
+                    }
 
                     // Quality label comes from "label" field (e.g. "Full HD", "720p")
                     val quality = Quality.fromLabel(label)
