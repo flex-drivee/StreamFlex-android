@@ -1,7 +1,6 @@
 package com.streamflex.extractors.netmirror
 
 import android.net.Uri
-import android.util.Base64
 import com.streamflex.core.network.HttpClient
 import com.streamflex.core.network.NetworkResult
 import com.streamflex.core.network.RequestBuilder
@@ -10,7 +9,9 @@ import com.streamflex.core.utils.StreamLogger
 import com.streamflex.domain.models.ExtractionResult
 import com.streamflex.domain.models.HostType
 import com.streamflex.domain.models.ProviderSource
+import com.streamflex.domain.models.Quality
 import com.streamflex.domain.models.StreamLink
+import com.streamflex.domain.models.Subtitle
 import com.streamflex.extractors.common.BaseExtractor
 import com.streamflex.providers.netmirror.NetMirrorConfig
 import kotlinx.coroutines.Dispatchers
@@ -24,10 +25,10 @@ import kotlinx.coroutines.withContext
  * /mobile/ REST API endpoints instead of the Cloudflare-protected web endpoints.
  *
  * Flow:
- *   1. Parse source URI  →  extract id, ott, baseUrl
+ *   1. Parse source URI  ->  extract id, ott, baseUrl
  *   2. Call NetMirrorBypassManager.getToken() to acquire t_hash_t silently
  *   3. GET /mobile/playlist.php?id=<id>&t=<title>&tm=<unix_ts>
- *   4. Parse JSON PlayList  →  build StreamLink list (m3u8 + subtitles)
+ *   4. Parse JSON PlayList  ->  build StreamLink list (m3u8 + subtitles)
  */
 class NetMirrorExtractor : BaseExtractor() {
 
@@ -39,7 +40,7 @@ class NetMirrorExtractor : BaseExtractor() {
 
     override suspend fun extract(source: ProviderSource): ExtractionResult {
         // source.url format: netmirror://player?id=$id&ott=$ott&base=$baseUrl&title=$title
-        val uri = Uri.parse(source.url)
+        val uri     = Uri.parse(source.url)
         val id      = uri.getQueryParameter("id")    ?: return emptyResult()
         val ott     = uri.getQueryParameter("ott")   ?: return emptyResult()
         val baseUrl = uri.getQueryParameter("base")?.trimEnd('/') ?: NetMirrorConfig.DEFAULT_DOMAIN
@@ -72,24 +73,21 @@ class NetMirrorExtractor : BaseExtractor() {
                 .header("Accept", "*/*")
                 .header("Accept-Language", "en-IN,en-US;q=0.9,en;q=0.8")
                 .header("Connection", "keep-alive")
-                .header("Sec-Fetch-Dest", "empty")
-                .header("Sec-Fetch-Mode", "cors")
-                .header("Sec-Fetch-Site", "same-origin")
                 .build()
 
             val response = HttpClient.execute(request)
             if (response !is NetworkResult.Success) {
                 StreamLogger.error(TAG, "playlist.php request failed: $response")
-                // Token may be stale — clear cache and bail; next request will re-bypass
+                // Token may be stale — clear cache; next request will re-bypass
                 NetMirrorBypassManager.refreshToken(baseUrl)
                 return@withContext emptyResult()
             }
 
-            val json = response.data.body?.toString(Charsets.UTF_8) ?: return@withContext emptyResult()
+            val json = response.data.bodyAsString()
             StreamLogger.debug(TAG, "playlist.php response: $json")
 
             // ── Step 4: Parse PlayList JSON ──────────────────────────────────
-            parsePlaylist(json, source, baseUrl, tHashT, ott, referer)
+            parsePlaylist(json, source, tHashT, referer)
         }
     }
 
@@ -99,7 +97,7 @@ class NetMirrorExtractor : BaseExtractor() {
      * Expected structure (array of PlayList items):
      * [
      *   {
-     *     "sources": [ { "file": "...m3u8?q=1080", "label": "1080p" }, ... ],
+     *     "sources": [ { "file": "...m3u8?q=1080p", "label": "1080p" }, ... ],
      *     "tracks":  [ { "kind": "captions", "file": "...srt", "label": "English" }, ... ]
      *   }
      * ]
@@ -107,27 +105,41 @@ class NetMirrorExtractor : BaseExtractor() {
     private fun parsePlaylist(
         json: String,
         source: ProviderSource,
-        baseUrl: String,
         tHashT: String,
-        ott: String,
         referer: String
     ): ExtractionResult {
         return try {
-            val root = JsonParser.parseArray(json) ?: return emptyResult()
-            val streams = mutableListOf<StreamLink>()
-            val subtitles = mutableListOf<com.streamflex.domain.models.SubtitleTrack>()
+            // Use Gson-based parsing (JsonElement) for consistent API usage
+            val root = JsonParser.parse(json)?.asJsonArray?.toList()
+                ?: return emptyResult()
 
+            val subtitles = mutableListOf<Subtitle>()
+            val streams   = mutableListOf<StreamLink>()
+
+            // First pass: collect subtitle tracks from all playlist items
             for (playlistItem in root) {
-                // Parse video sources
+                val tracks = JsonParser.array(playlistItem, "tracks")
+                for (track in tracks) {
+                    val kind  = JsonParser.string(track, "kind")  ?: continue
+                    if (kind != "captions") continue
+                    val file  = JsonParser.string(track, "file")  ?: continue
+                    val label = JsonParser.string(track, "label") ?: "Unknown"
+                    val url   = file.replace("\\", "").let {
+                        if (it.startsWith("//")) "https:$it" else it
+                    }
+                    subtitles += Subtitle(language = label, url = url, label = label)
+                }
+            }
+
+            // Second pass: build StreamLinks with subtitle list attached
+            for (playlistItem in root) {
                 val sources = JsonParser.array(playlistItem, "sources")
                 for (src in sources) {
                     val file  = JsonParser.string(src, "file")  ?: continue
                     val label = JsonParser.string(src, "label") ?: "Auto"
 
-                    // Quality is encoded in the URL query param: ?q=1080
-                    val quality = file.substringAfter("q=", "").let { q ->
-                        com.streamflex.domain.models.Quality.fromString(q)
-                    }
+                    // Quality label comes from "label" field (e.g. "Full HD", "720p")
+                    val quality = Quality.fromLabel(label)
 
                     streams += StreamLink(
                         name        = "${source.provider} - $label",
@@ -139,24 +151,8 @@ class NetMirrorExtractor : BaseExtractor() {
                             "Referer"    to referer,
                             "User-Agent" to NetMirrorBypassManager.NATIVE_UA
                         ),
-                        quality = quality
-                    )
-                }
-
-                // Parse subtitle tracks
-                val tracks = JsonParser.array(playlistItem, "tracks")
-                for (track in tracks) {
-                    val kind  = JsonParser.string(track, "kind")  ?: continue
-                    if (kind != "captions") continue
-                    val file  = JsonParser.string(track, "file")  ?: continue
-                    val label = JsonParser.string(track, "label") ?: "Unknown"
-
-                    subtitles += com.streamflex.domain.models.SubtitleTrack(
-                        label    = label,
-                        url      = file.replace("\\", "").let {
-                            if (it.startsWith("//")) "https:$it" else it
-                        },
-                        language = label
+                        quality     = quality,
+                        subtitles   = subtitles
                     )
                 }
             }
@@ -167,7 +163,7 @@ class NetMirrorExtractor : BaseExtractor() {
             }
 
             StreamLogger.debug(TAG, "Extracted ${streams.size} streams, ${subtitles.size} subtitles")
-            result(streams, subtitles)
+            result(streams)
         } catch (e: Exception) {
             StreamLogger.error(TAG, "Playlist parse error: ${e.message}")
             emptyResult()

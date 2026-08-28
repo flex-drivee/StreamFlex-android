@@ -1,13 +1,12 @@
 package com.streamflex.extractors.netmirror
 
-import android.util.Base64
 import com.streamflex.core.network.HttpClient
+import com.streamflex.core.network.HttpMethod
 import com.streamflex.core.network.NetworkResult
+import com.streamflex.core.network.NetworkUtils
 import com.streamflex.core.network.RequestBuilder
-import com.streamflex.core.parser.JsonParser
 import com.streamflex.core.utils.StreamLogger
 import kotlinx.coroutines.delay
-import kotlin.math.random
 
 /**
  * NetMirrorBypassManager
@@ -17,8 +16,8 @@ import kotlin.math.random
  *
  * Verified bypass sequence (reverse-engineered from CNC Verse Mobile plugin):
  *   1. GET /mobile/home?app=1  -> extract `data-addhash` from <body>
- *   2. GET userver.net52.cc with the hash   -> triggers server-side timer
- *   3. Loop (max 7x, 10s delay each) POST /mobile/verify2.php
+ *   2. GET userver.net52.cc with the hash   -> triggers server-side timer (~37s)
+ *   3. Loop (max 25x, 3s delay each) POST /mobile/verify2.php
  *      until response contains `"statusup":"All Done"`
  *   4. Read `t_hash_t` cookie from the successful POST response
  *
@@ -41,14 +40,14 @@ object NetMirrorBypassManager {
 
     // Live-tested: NetMirror server unlocks at ~37s from userver ping regardless
     // of how fast you poll. We poll every 3s (max 25 loops = 75s cap) instead of
-    // CNC Verse Mobile's 10s × 7 = 70s. Same speed, no wasted gaps between polls.
-    private const val POLL_INTERVAL_MS  = 3_000L
-    private const val MAX_VERIFY_LOOPS  = 25
+    // CNC Verse Mobile's 10s x 7 = 70s. Same speed, no wasted gaps between polls.
+    private const val POLL_INTERVAL_MS = 3_000L
+    private const val MAX_VERIFY_LOOPS = 25
 
     // Cookie validity window: 15 hours (same as native app, verified from source)
     private const val COOKIE_TTL_MS = 54_000_000L
 
-    // In-memory cache: Pair<token, timestamp_acquired>
+    // In-memory cache: token + timestamp
     @Volatile private var cachedToken: String = ""
     @Volatile private var cachedTokenTimestamp: Long = 0L
 
@@ -60,7 +59,6 @@ object NetMirrorBypassManager {
      * @return         A valid t_hash_t string, or null on failure
      */
     suspend fun getToken(baseUrl: String): String? {
-        // Return cached token if still valid
         val now = System.currentTimeMillis()
         if (cachedToken.isNotBlank() && (now - cachedTokenTimestamp) < COOKIE_TTL_MS) {
             StreamLogger.debug(TAG, "Using cached t_hash_t (age: ${now - cachedTokenTimestamp}ms)")
@@ -88,10 +86,7 @@ object NetMirrorBypassManager {
     }
 
     /**
-     * Core bypass logic. Steps:
-     *   1. GET /mobile/home?app=1 to get the session hash
-     *   2. Ping the verification challenge server
-     *   3. Poll /mobile/verify2.php until success
+     * Core bypass logic.
      */
     private suspend fun runBypass(baseUrl: String): String? {
         val base = baseUrl.trimEnd('/')
@@ -115,7 +110,7 @@ object NetMirrorBypassManager {
         }
 
         val homeHtml = when (homeResponse) {
-            is NetworkResult.Success -> homeResponse.data.body?.toString(Charsets.UTF_8) ?: ""
+            is NetworkResult.Success -> homeResponse.data.bodyAsString()
             else -> {
                 StreamLogger.error(TAG, "Home request failed: $homeResponse")
                 return null
@@ -148,8 +143,11 @@ object NetMirrorBypassManager {
         val verifyUrl = "$base/mobile/verify2.php"
         StreamLogger.debug(TAG, "Starting verify poll (${POLL_INTERVAL_MS}ms interval, max $MAX_VERIFY_LOOPS polls)")
 
+        // Build form body: verify=<url-encoded-hash>
+        val postBody = "verify=${NetworkUtils.encode(addHash)}".toByteArray(Charsets.UTF_8)
+
         for (loop in 1..MAX_VERIFY_LOOPS) {
-            delay(POLL_INTERVAL_MS) // poll every 3s — server unlocks at ~37s from ping
+            delay(POLL_INTERVAL_MS) // server unlocks at ~37s from ping
 
             StreamLogger.debug(TAG, "Verify loop $loop/$MAX_VERIFY_LOOPS — POST $verifyUrl")
 
@@ -157,8 +155,8 @@ object NetMirrorBypassManager {
                 HttpClient.execute(
                     RequestBuilder()
                         .url(verifyUrl)
-                        .method("POST")
-                        .formBody(mapOf("verify" to addHash))
+                        .method(HttpMethod.POST)
+                        .post(postBody)
                         .header("User-Agent", NATIVE_UA)
                         .header("X-Requested-With", "XMLHttpRequest")
                         .header("Content-Type", "application/x-www-form-urlencoded")
@@ -171,14 +169,14 @@ object NetMirrorBypassManager {
 
             if (verifyResponse !is NetworkResult.Success) continue
 
-            val body = verifyResponse.data.body?.toString(Charsets.UTF_8) ?: continue
+            val body = verifyResponse.data.bodyAsString()
             StreamLogger.debug(TAG, "Verify response loop $loop: $body")
 
             if (body.contains("\"statusup\":\"All Done\"")) {
-                // Extract t_hash_t from the Set-Cookie response header
-                val tHashT = verifyResponse.data.headers["Set-Cookie"]
+                // headers is Map<String, List<String>> — use header() helper to get first value
+                val tHashT = verifyResponse.data.header("Set-Cookie")
                     ?.let { Regex("t_hash_t=([^;]+)").find(it)?.groupValues?.get(1) }
-                    ?: verifyResponse.data.cookies?.get("t_hash_t")
+                    ?: verifyResponse.data.cookies["t_hash_t"]
 
                 if (!tHashT.isNullOrBlank()) {
                     StreamLogger.debug(TAG, "Got t_hash_t on loop $loop: $tHashT")

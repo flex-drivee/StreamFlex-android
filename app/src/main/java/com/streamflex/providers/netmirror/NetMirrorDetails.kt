@@ -6,28 +6,29 @@ import com.streamflex.core.network.NetworkResult
 import com.streamflex.core.network.RequestBuilder
 import com.streamflex.core.parser.JsonParser
 import com.streamflex.core.utils.StreamLogger
-import com.streamflex.domain.models.*
+import com.streamflex.domain.models.HostType
+import com.streamflex.domain.models.MediaType
+import com.streamflex.domain.models.ProviderResult
+import com.streamflex.domain.models.ProviderSource
+import com.streamflex.domain.models.Quality
+import com.streamflex.domain.models.SearchResult
 import com.streamflex.extractors.netmirror.NetMirrorBypassManager
 
 /**
  * NetMirrorDetails — v2 (Mobile API)
  *
- * Replaces the old stub that skipped the network request entirely.
- * Now fetches full metadata from /mobile/post.php using the authenticated
+ * Fetches full metadata from /mobile/post.php using the authenticated
  * session token from NetMirrorBypassManager.
  *
  * Endpoint: GET /mobile/post.php?id=<id>&t=<unix_timestamp>
  *
- * Response JSON (PostData):
- * {
- *   "title": "...",
- *   "cast":  "Actor1, Actor2",
- *   "genre": "Action, Drama",
- *   "match": "IMDb 8.1",
- *   "runtime": "120",
- *   "suggest": [ { "id": "...", "t": "..." } ],
- *   "episodes": [ { "id": "...", "ep": "E01", "s": "S01", "t": "Title", "time": "45m" }, ... ]
- * }
+ * Extra metadata (rating, runtime, genres, cast) is stored in
+ * ProviderResult.metadata as strings since ProviderResult has no
+ * dedicated fields for them.
+ *
+ * Episode-specific info (episode, season, runtime, poster) is stored
+ * in ProviderSource.metadata as strings since ProviderSource has no
+ * dedicated fields for them.
  */
 class NetMirrorDetails {
 
@@ -43,7 +44,6 @@ class NetMirrorDetails {
         providerName: String
     ): ProviderResult? {
 
-        // URL format from Search: netmirror://{ott}/{id}
         val id   = result.url.substringAfterLast("/")
         val base = baseUrl.trimEnd('/')
 
@@ -58,7 +58,7 @@ class NetMirrorDetails {
         val referer   = "$base/mobile/home?app=1"
         val unixTs    = System.currentTimeMillis() / 1000L
 
-        // ── Fetch /mobile/post.php ─────────────────────────────────────────────
+        // ── Fetch /mobile/post.php ────────────────────────────────────────────
         val postUrl = "$base/mobile/post.php?id=$id&t=$unixTs"
         StreamLogger.debug(TAG, "GET $postUrl")
 
@@ -83,65 +83,75 @@ class NetMirrorDetails {
             return buildFallback(id, ott, base, providerName, result)
         }
 
-        val json = response.data.body?.toString(Charsets.UTF_8) ?: return buildFallback(id, ott, base, providerName, result)
+        val json = response.data.bodyAsString()
         StreamLogger.debug(TAG, "post.php response: $json")
 
-        // ── Parse PostData ─────────────────────────────────────────────────────
+        // ── Parse PostData ────────────────────────────────────────────────────
         return try {
             val root    = JsonParser.parse(json)
             val title   = JsonParser.string(root, "title") ?: result.title
             val castStr = JsonParser.string(root, "cast")
             val genre   = JsonParser.string(root, "genre")
-            val imdb    = JsonParser.string(root, "match")?.replace("IMDb ", "")?.toFloatOrNull()
-            val runtime = JsonParser.string(root, "runtime")?.replace("m", "")?.toIntOrNull()
+            val imdb    = JsonParser.string(root, "match")?.replace("IMDb ", "")
+            val runtime = JsonParser.string(root, "runtime")
 
-            // Parse episodes list to build seasons
+            // Build extra metadata map (ProviderResult has no dedicated fields)
+            val meta = buildMap<String, String> {
+                if (imdb    != null) put("rating",  imdb)
+                if (runtime != null) put("runtime", runtime)
+                if (genre   != null) put("genres",  genre)
+                if (castStr != null) put("cast",    castStr)
+            }
+
+            // Parse episodes list
             val episodesJson = JsonParser.array(root, "episodes")
             val sources      = mutableListOf<ProviderSource>()
 
             if (episodesJson.isEmpty()) {
-                // Movie: single source pointing to episode ID = post ID
-                sources += createPlayerSource(id, id, ott, base, providerName, title)
+                // Movie — single source
+                sources += createPlayerSource(id, ott, base, providerName, title)
             } else {
                 for (ep in episodesJson) {
-                    val epId     = JsonParser.string(ep, "id")  ?: continue
-                    val epNum    = JsonParser.string(ep, "ep")?.removePrefix("E")?.toIntOrNull()
-                    val seasonN  = JsonParser.string(ep, "s")?.removePrefix("S")?.toIntOrNull()
-                    val epTitle  = JsonParser.string(ep, "t")   ?: "Episode $epNum"
-                    val epTime   = JsonParser.string(ep, "time")?.removeSuffix("m")?.toIntOrNull()
-                    val posterKim = "https://imgcdn.kim/epimg/150/$epId.jpg"
+                    val epId    = JsonParser.string(ep, "id")  ?: continue
+                    val epNum   = JsonParser.string(ep, "ep")?.removePrefix("E")
+                    val seasonN = JsonParser.string(ep, "s")?.removePrefix("S")
+                    val epTitle = JsonParser.string(ep, "t")   ?: "Episode $epNum"
+                    val epTime  = JsonParser.string(ep, "time")
+                    val poster  = "https://imgcdn.kim/epimg/150/$epId.jpg"
+
+                    // Episode-specific metadata stored in ProviderSource.metadata
+                    val epMeta = buildMap<String, String> {
+                        if (epNum   != null) put("episode", epNum)
+                        if (seasonN != null) put("season",  seasonN)
+                        if (epTime  != null) put("runtime", epTime)
+                        put("poster", poster)
+                        put("epTitle", epTitle)
+                    }
 
                     sources += createPlayerSource(
-                        id          = epId,
-                        postId      = id,
-                        ott         = ott,
-                        baseUrl     = base,
+                        id           = epId,
+                        ott          = ott,
+                        baseUrl      = base,
                         providerName = providerName,
-                        title       = epTitle,
-                        episode     = epNum,
-                        season      = seasonN,
-                        runtime     = epTime,
-                        poster      = posterKim
+                        title        = epTitle,
+                        metadata     = epMeta
                     )
                 }
             }
 
             ProviderResult(
-                id          = id,
-                providerId  = providerId,
-                title       = title,
-                detailUrl   = result.url,
-                mediaType   = result.mediaType,
-                sources     = sources,
-                seasons     = emptyList(), // seasons resolved inline via sources
-                year        = result.year,
-                poster      = result.poster,
-                overview    = null,
-                rating      = imdb,
-                runtime     = runtime,
-                genres      = genre?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() },
-                cast        = castStr?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() },
-                success     = true
+                id        = id,
+                providerId = providerId,
+                title     = title,
+                detailUrl = result.url,
+                mediaType = result.mediaType,
+                sources   = sources,
+                seasons   = emptyList(),
+                year      = result.year,
+                poster    = result.poster,
+                overview  = null,
+                metadata  = meta,
+                success   = true
             )
         } catch (e: Exception) {
             StreamLogger.error(TAG, "Post data parse error: ${e.message}")
@@ -149,10 +159,6 @@ class NetMirrorDetails {
         }
     }
 
-    /**
-     * Fallback used when the API call fails: constructs a minimal ProviderResult
-     * with a single player source so playback can still be attempted.
-     */
     private fun buildFallback(
         id: String,
         ott: String,
@@ -162,46 +168,38 @@ class NetMirrorDetails {
     ): ProviderResult {
         StreamLogger.debug(TAG, "Building fallback result for id=$id")
         return ProviderResult(
-            id          = id,
-            providerId  = "",
-            title       = result.title,
-            detailUrl   = result.url,
-            mediaType   = result.mediaType,
-            sources     = listOf(createPlayerSource(id, id, ott, baseUrl, providerName, result.title)),
-            seasons     = emptyList(),
-            year        = result.year,
-            poster      = result.poster,
-            overview    = null,
-            success     = false
+            id         = id,
+            providerId = "",
+            title      = result.title,
+            detailUrl  = result.url,
+            mediaType  = result.mediaType,
+            sources    = listOf(createPlayerSource(id, ott, baseUrl, providerName, result.title)),
+            seasons    = emptyList(),
+            year       = result.year,
+            poster     = result.poster,
+            overview   = null,
+            success    = false
         )
     }
 
     private fun createPlayerSource(
         id: String,
-        postId: String,
         ott: String,
         baseUrl: String,
         providerName: String,
         title: String,
-        episode: Int?   = null,
-        season: Int?    = null,
-        runtime: Int?   = null,
-        poster: String? = null
+        metadata: Map<String, String> = emptyMap()
     ): ProviderSource {
         val encodedTitle = Uri.encode(title)
         val playerUri    = "netmirror://player?id=$id&ott=$ott&base=$baseUrl&title=$encodedTitle"
 
         return ProviderSource(
-            provider  = providerName,
-            host      = "NetMirror Mobile API",
-            hostType  = HostType.NETMIRROR,
-            url       = playerUri,
-            quality   = Quality.UNKNOWN,
-            episode   = episode,
-            season    = season,
-            runtime   = runtime,
-            poster    = poster,
-            title     = title
+            provider = providerName,
+            host     = "NetMirror Mobile API",
+            hostType = HostType.NETMIRROR,
+            url      = playerUri,
+            quality  = Quality.UNKNOWN,
+            metadata = metadata
         )
     }
 }
