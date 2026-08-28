@@ -52,7 +52,20 @@ class NetMirrorProvider(
         }
         
         // Wait for all searches to finish and flatten the results
-        deferredResults.awaitAll().flatten()
+        val allResults = deferredResults.awaitAll().flatten()
+        
+        // Clean query to remove things like " Season 1" which StreamFlex appends
+        val cleanQuery = query.replace(Regex("(?i)\\s*Season\\s*\\d+"), "").trim()
+
+        // Sort results to prioritize exact matches so StreamFlex selects the correct show
+        allResults.sortedByDescending { result ->
+            when {
+                result.title.equals(cleanQuery, ignoreCase = true) -> 3
+                result.title.equals(query, ignoreCase = true) -> 3
+                result.title.contains(cleanQuery, ignoreCase = true) -> 2
+                else -> 1
+            }
+        }
     }
 
     override suspend fun load(searchResult: SearchResult): ProviderResult? {
