@@ -13,6 +13,8 @@ import com.streamflex.domain.models.ProviderSource
 import com.streamflex.domain.models.Quality
 import com.streamflex.domain.models.SearchResult
 import com.streamflex.extractors.netmirror.NetMirrorBypassManager
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 
 /**
  * NetMirrorDetails — v2 (Mobile API)
@@ -116,7 +118,7 @@ class NetMirrorDetails {
 
             // Fetch other seasons if they exist
             val seasonsJson = JsonParser.array(root, "season")
-            if (seasonsJson.size() > 1) {
+            if (seasonsJson.size > 1) {
                 val otherSeasonIds = mutableListOf<String>()
                 for (s in seasonsJson) {
                     val sId = JsonParser.string(s, "id") ?: continue
@@ -217,7 +219,7 @@ class NetMirrorDetails {
     }
 
     private fun parseEpisodes(
-        episodesJson: com.google.gson.JsonArray,
+        episodesJson: List<com.google.gson.JsonElement>,
         ott: String,
         base: String,
         providerName: String
