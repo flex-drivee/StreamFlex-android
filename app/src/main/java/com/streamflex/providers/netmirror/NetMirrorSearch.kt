@@ -59,7 +59,12 @@ class NetMirrorSearch : SearchResultParser {
         val referer   = "$base/mobile/home?app=1"
 
         // ── Build the mobile search URL ──────────────────────────────────────
-        val searchUrl = "$base/mobile/search.php?q=${NetworkUtils.encode(query)}&t=$unixTs"
+        val searchPath = when (ott) {
+            NetMirrorConfig.OTT_PRIME   -> "/mobile/pv/search.php"
+            NetMirrorConfig.OTT_HOTSTAR, NetMirrorConfig.OTT_DISNEY -> "/mobile/hs/search.php"
+            else                        -> "/mobile/search.php"
+        }
+        val searchUrl = "$base$searchPath?s=${NetworkUtils.encode(query)}&t=$unixTs"
         StreamLogger.debug(TAG, "GET $searchUrl")
 
         val request = RequestBuilder()
