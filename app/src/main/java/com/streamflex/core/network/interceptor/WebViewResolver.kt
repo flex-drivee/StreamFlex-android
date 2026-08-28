@@ -34,6 +34,7 @@ object WebViewResolver {
         return kotlinx.coroutines.withTimeoutOrNull(25000L) {
             withContext(Dispatchers.Main) {
                 kotlin.coroutines.suspendCoroutine { continuation ->
+                    val targetUrl = url
                     
                     val activity = StreamFlexApplication.topActivity ?: context
                     val webView = WebView(activity)
@@ -114,7 +115,7 @@ object WebViewResolver {
                             super.onPageFinished(view, url)
                             if (isFinished) return
                             
-                            val cookies = CookieManager.getInstance().getCookie(urlToLoad)
+                            val cookies = CookieManager.getInstance().getCookie(targetUrl)
                             if (cookies != null && cookies.contains(requiredCookie)) {
                                 Logger.d("WebViewResolver", "Solved instantly on load!")
                                 finishWithResult(true)
@@ -131,7 +132,7 @@ object WebViewResolver {
                             // Check periodically for required cookie on any resource load
                             // We must check the original url (urlToLoad) as well, because the page might have
                             // redirected to a different domain (like net77.cc) while setting the cookie on net52.cc.
-                            val cookies = CookieManager.getInstance().getCookie(urlToLoad)
+                            val cookies = CookieManager.getInstance().getCookie(targetUrl)
                             if (!isFinished && cookies != null && cookies.contains(requiredCookie)) {
                                 Logger.d("WebViewResolver", "Solved instantly on load!")
                                 view?.post {
