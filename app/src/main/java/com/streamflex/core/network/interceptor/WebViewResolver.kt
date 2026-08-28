@@ -114,7 +114,7 @@ object WebViewResolver {
                             super.onPageFinished(view, url)
                             if (isFinished) return
                             
-                            val cookies = CookieManager.getInstance().getCookie(url)
+                            val cookies = CookieManager.getInstance().getCookie(urlToLoad)
                             if (cookies != null && cookies.contains(requiredCookie)) {
                                 Logger.d("WebViewResolver", "Solved instantly on load!")
                                 finishWithResult(true)
@@ -129,9 +129,11 @@ object WebViewResolver {
                             request: WebResourceRequest?
                         ): WebResourceResponse? {
                             // Check periodically for required cookie on any resource load
-                            val cookies = CookieManager.getInstance().getCookie(request?.url?.toString())
+                            // We must check the original url (urlToLoad) as well, because the page might have
+                            // redirected to a different domain (like net77.cc) while setting the cookie on net52.cc.
+                            val cookies = CookieManager.getInstance().getCookie(urlToLoad)
                             if (!isFinished && cookies != null && cookies.contains(requiredCookie)) {
-                                Logger.d("WebViewResolver", "Solved via intercepted request!")
+                                Logger.d("WebViewResolver", "Solved instantly on load!")
                                 view?.post {
                                     finishWithResult(true)
                                 }
