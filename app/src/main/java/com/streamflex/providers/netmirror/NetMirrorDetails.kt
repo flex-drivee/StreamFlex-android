@@ -6,36 +6,13 @@ import com.streamflex.core.network.NetworkResult
 import com.streamflex.core.network.RequestBuilder
 import com.streamflex.core.parser.JsonParser
 import com.streamflex.core.utils.StreamLogger
-import com.streamflex.domain.models.HostType
-import com.streamflex.domain.models.MediaType
-import com.streamflex.domain.models.ProviderResult
-import com.streamflex.domain.models.ProviderSource
-import com.streamflex.domain.models.Quality
-import com.streamflex.domain.models.SearchResult
+import com.streamflex.domain.models.*
 import com.streamflex.extractors.netmirror.NetMirrorBypassManager
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 
-/**
- * NetMirrorDetails — v2 (Mobile API)
- *
- * Fetches full metadata from /mobile/post.php using the authenticated
- * session token from NetMirrorBypassManager.
- *
- * Endpoint: GET /mobile/post.php?id=<id>&t=<unix_timestamp>
- *
- * Extra metadata (rating, runtime, genres, cast) is stored in
- * ProviderResult.metadata as strings since ProviderResult has no
- * dedicated fields for them.
- *
- * Episode-specific info (episode, season, runtime, poster) is stored
- * in ProviderSource.metadata as strings since ProviderSource has no
- * dedicated fields for them.
- */
 class NetMirrorDetails {
 
-    private companion object {
-        const val TAG = "NetMirrorDetails"
+    companion object {
+        private const val TAG = "NetMirrorDetails"
     }
 
     suspend fun load(
@@ -44,33 +21,27 @@ class NetMirrorDetails {
         ott: String,
         providerId: String,
         providerName: String
-    ): ProviderResult? {
-
-        val id   = result.url.substringAfterLast("/")
+    ): ProviderResult {
+        val id = result.url.substringAfterLast("/")
         val base = baseUrl.trimEnd('/')
+        val postPath = "/mobile/$ott/post.php"
 
-        // ── Acquire session token ─────────────────────────────────────────────
-        val tHashT = NetMirrorBypassManager.getToken(base)
-        if (tHashT.isNullOrBlank()) {
-            StreamLogger.error(TAG, "Cannot load details: no t_hash_t for $base")
+        // Bypass security layer
+        val bypassToken = NetMirrorBypassManager.getToken(base)
+        if (bypassToken.isNullOrEmpty()) {
+            StreamLogger.error(TAG, "Bypass failed for '$base'")
             return buildFallback(id, ott, base, providerName, result)
         }
 
-        val cookieStr = "t_hash_t=$tHashT; ott=$ott; hd=on"
-        val referer   = "$base/mobile/home?app=1"
         val unixTs    = System.currentTimeMillis() / 1000L
+        val cookieStr = "t_hash_t=$bypassToken; ott=$ott; hd=on"
+        val referer   = "$base/mobile/home?app=1"
+        val postUrl   = "$base$postPath?id=$id&t=$unixTs"
 
-        // ── Fetch /mobile/post.php ────────────────────────────────────────────
-        val postPath = when (ott) {
-            NetMirrorConfig.OTT_PRIME   -> "/mobile/pv/post.php"
-            NetMirrorConfig.OTT_HOTSTAR, NetMirrorConfig.OTT_DISNEY -> "/mobile/hs/post.php"
-            else                        -> "/mobile/post.php"
-        }
-        val postUrl = "$base$postPath?id=$id&t=$unixTs"
         StreamLogger.debug(TAG, "GET $postUrl")
 
-        val response = try {
-            HttpClient.execute(
+        return try {
+            val response = HttpClient.execute(
                 RequestBuilder()
                     .url(postUrl)
                     .header("User-Agent", NetMirrorBypassManager.NATIVE_UA)
@@ -80,29 +51,27 @@ class NetMirrorDetails {
                     .header("Accept", "*/*")
                     .build()
             )
-        } catch (e: Exception) {
-            StreamLogger.error(TAG, "post.php request failed: ${e.message}")
-            return buildFallback(id, ott, base, providerName, result)
-        }
 
-        if (response !is NetworkResult.Success) {
-            StreamLogger.error(TAG, "post.php non-success: $response")
-            return buildFallback(id, ott, base, providerName, result)
-        }
+            if (response !is NetworkResult.Success) {
+                StreamLogger.error(TAG, "Post load failed with non-success response")
+                return buildFallback(id, ott, base, providerName, result)
+            }
 
-        val json = response.data.bodyAsString()
-        StreamLogger.debug(TAG, "post.php response: $json")
+            val json = response.data.bodyAsString()
+            val root = JsonParser.parse(json)
 
-        // ── Parse PostData ────────────────────────────────────────────────────
-        return try {
-            val root    = JsonParser.parse(json)
+            val status = JsonParser.string(root, "status")
+            if (status == "n") {
+                StreamLogger.error(TAG, "API Error: ${JsonParser.string(root, "error")}")
+                return buildFallback(id, ott, base, providerName, result)
+            }
+
             val title   = JsonParser.string(root, "title") ?: result.title
-            val castStr = JsonParser.string(root, "cast")
-            val genre   = JsonParser.string(root, "genre")
-            val imdb    = JsonParser.string(root, "match")?.replace("IMDb ", "")
+            val imdb    = JsonParser.string(root, "match")
             val runtime = JsonParser.string(root, "runtime")
+            val genre   = JsonParser.string(root, "genre")
+            val castStr = JsonParser.string(root, "cast")
 
-            // Build extra metadata map (ProviderResult has no dedicated fields)
             val meta = buildMap<String, String> {
                 if (imdb    != null) put("rating",  imdb)
                 if (runtime != null) put("runtime", runtime)
@@ -110,51 +79,73 @@ class NetMirrorDetails {
                 if (castStr != null) put("cast",    castStr)
             }
 
-            // Parse episodes list for the initially loaded season
             val episodesJson = JsonParser.array(root, "episodes")
-            val sources = mutableListOf<ProviderSource>()
+            val allSources = mutableListOf<ProviderSource>()
             
-            sources.addAll(parseEpisodes(episodesJson, ott, base, providerName))
+            allSources.addAll(parseEpisodes(episodesJson, ott, base, providerName))
 
-            // Fetch other seasons if they exist
             val seasonsJson = JsonParser.array(root, "season")
             if (seasonsJson.size > 1) {
-                // Find which season we actually got episodes for in the initial response
                 var currentLoadedSeason: String? = null
                 if (episodesJson.isNotEmpty()) {
                     val firstEp = episodesJson[0]
                     currentLoadedSeason = JsonParser.string(firstEp, "s")?.removePrefix("S")
                 }
+                StreamLogger.debug(TAG, "Current loaded season is: $currentLoadedSeason")
 
                 val otherSeasonIds = mutableListOf<String>()
                 for (s in seasonsJson) {
                     val sId = JsonParser.string(s, "id") ?: continue
-                    val sNum = JsonParser.string(s, "s")
+                    val sNum = JsonParser.string(s, "s")?.removePrefix("S")
                     
-                    // Fetch if this season is not the one we already loaded
                     if (sNum != currentLoadedSeason) {
                         otherSeasonIds.add(sId)
                     }
                 }
                 
-                // Fetch all other seasons concurrently
+                // Fetch other seasons sequentially to prevent "Invalid User" rate limits
                 if (otherSeasonIds.isNotEmpty()) {
-                    kotlinx.coroutines.coroutineScope {
-                        val deferred = otherSeasonIds.map { sId ->
-                            async {
-                                fetchSeasonEpisodes(sId, base, postPath, unixTs, cookieStr, referer, ott, providerName)
-                            }
-                        }
-                        deferred.awaitAll().forEach { seasonSources ->
-                            sources.addAll(seasonSources)
-                        }
+                    StreamLogger.debug(TAG, "Fetching ${otherSeasonIds.size} other seasons sequentially...")
+                    var currentTs = unixTs
+                    for (sId in otherSeasonIds) {
+                        currentTs += 1
+                        val seasonSources = fetchSeasonEpisodes(sId, base, postPath, currentTs, cookieStr, referer, ott, providerName)
+                        allSources.addAll(seasonSources)
+                        StreamLogger.debug(TAG, "Added ${seasonSources.size} episodes from season id $sId")
+                        kotlinx.coroutines.delay(200)
                     }
                 }
             }
 
-            // If it's a movie, episodes array is empty or contains [null]
-            if (sources.isEmpty()) {
-                sources += createPlayerSource(
+            // Group into proper ProviderSeason and ProviderEpisode structures for TV Shows
+            val providerSeasons = mutableListOf<ProviderSeason>()
+            val isMovie = result.mediaType == MediaType.MOVIE || (seasonsJson.isEmpty() && episodesJson.isEmpty())
+
+            if (!isMovie) {
+                val bySeason = allSources.groupBy { it.metadata["season"]?.toIntOrNull() ?: 1 }
+                for ((seasonNum, seasonSources) in bySeason) {
+                    val byEpisode = seasonSources.groupBy { it.metadata["episode"]?.toIntOrNull() ?: 1 }
+                    val providerEpisodes = byEpisode.map { (epNum, epSources) ->
+                        ProviderEpisode(
+                            number = epNum,
+                            title = epSources.first().metadata["epTitle"] ?: "Episode $epNum",
+                            thumbnail = epSources.first().metadata["poster"],
+                            sources = epSources
+                        )
+                    }
+                    providerSeasons.add(
+                        ProviderSeason(
+                            number = seasonNum,
+                            title = "Season $seasonNum",
+                            episodes = providerEpisodes.sortedBy { it.number }
+                        )
+                    )
+                }
+                providerSeasons.sortBy { it.number }
+            }
+
+            if (isMovie && allSources.isEmpty()) {
+                allSources += createPlayerSource(
                     id           = id,
                     ott          = ott,
                     baseUrl      = base,
@@ -169,8 +160,8 @@ class NetMirrorDetails {
                 title     = title,
                 detailUrl = result.url,
                 mediaType = result.mediaType,
-                sources   = sources,
-                seasons   = emptyList(),
+                sources   = if (isMovie) allSources else emptyList(),
+                seasons   = providerSeasons,
                 year      = result.year,
                 poster    = result.poster,
                 overview  = null,
@@ -190,7 +181,6 @@ class NetMirrorDetails {
         providerName: String,
         result: SearchResult
     ): ProviderResult {
-        StreamLogger.debug(TAG, "Building fallback result for id=$id")
         return ProviderResult(
             id         = id,
             providerId = "",
@@ -275,6 +265,7 @@ class NetMirrorDetails {
         providerName: String
     ): List<ProviderSource> {
         val postUrl = "$base$postPath?id=$sId&t=$unixTs"
+        StreamLogger.debug(TAG, "fetchSeasonEpisodes: GET $postUrl")
         return try {
             val response = HttpClient.execute(
                 RequestBuilder()
@@ -289,6 +280,11 @@ class NetMirrorDetails {
             if (response is NetworkResult.Success) {
                 val json = response.data.bodyAsString()
                 val root = JsonParser.parse(json)
+                val status = JsonParser.string(root, "status")
+                if (status == "n") {
+                    StreamLogger.error(TAG, "fetchSeasonEpisodes API Error: ${JsonParser.string(root, "error")}")
+                    return emptyList()
+                }
                 val eps = JsonParser.array(root, "episodes")
                 parseEpisodes(eps, ott, base, providerName)
             } else {

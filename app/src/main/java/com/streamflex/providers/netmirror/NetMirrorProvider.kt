@@ -55,16 +55,26 @@ class NetMirrorProvider(
         val allResults = deferredResults.awaitAll().flatten()
         
         // Clean query to remove things like " Season 1" which StreamFlex appends
+        val isSeasonQuery = query.contains(Regex("(?i)\\s*Season\\s*\\d+"))
         val cleanQuery = query.replace(Regex("(?i)\\s*Season\\s*\\d+"), "").trim()
 
-        // Sort results to prioritize exact matches so StreamFlex selects the correct show
+        // Sort results to prioritize exact matches
         allResults.sortedByDescending { result ->
-            when {
-                result.title.equals(cleanQuery, ignoreCase = true) -> 3
-                result.title.equals(query, ignoreCase = true) -> 3
-                result.title.contains(cleanQuery, ignoreCase = true) -> 2
-                else -> 1
+            var score = 0
+            if (result.title.equals(cleanQuery, ignoreCase = true)) score += 30
+            else if (result.title.equals(query, ignoreCase = true)) score += 30
+            else if (result.title.contains(cleanQuery, ignoreCase = true)) score += 10
+            
+            // If StreamFlex automatically appended " Season X", prioritize TV Shows!
+            if (isSeasonQuery && result.mediaType == MediaType.TV) {
+                score += 50
             }
+            // In general, if there is a tie between a movie and a show with the exact same name, 
+            // give the series a slight edge since TV shows are searched more often.
+            if (result.mediaType == MediaType.TV) {
+                score += 1
+            }
+            score
         }
     }
 
