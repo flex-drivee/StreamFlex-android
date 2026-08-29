@@ -17,16 +17,17 @@ class NetMirrorDetails {
 
     suspend fun load(
         result: SearchResult,
+        baseUrl: String,
+        ott: String,
         providerId: String,
         providerName: String
     ): ProviderResult {
         val id = result.url.substringAfterLast("/")
-        val base = result.url.substringBefore("/mobile/")
-        val postPath = "/mobile/" + result.url.substringAfter("/mobile/").substringBefore("/post.php") + "/post.php"
-        val ott = result.url.substringAfter("/mobile/").substringBefore("/")
+        val base = baseUrl.trimEnd('/')
+        val postPath = "/mobile/$ott/post.php"
 
         // Bypass security layer
-        val bypassToken = NetMirrorBypassManager.bypass(base)
+        val bypassToken = NetMirrorBypassManager.getToken(base)
         if (bypassToken.isNullOrEmpty()) {
             StreamLogger.error(TAG, "Bypass failed for '$base'")
             return buildFallback(id, ott, base, providerName, result)
