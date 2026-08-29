@@ -7,6 +7,7 @@ import com.streamflex.core.network.RequestBuilder
 import com.streamflex.core.parser.JsonParser
 import com.streamflex.core.utils.StreamLogger
 import com.streamflex.domain.models.*
+import com.streamflex.extractors.netmirror.NetMirrorBypassManager
 
 class NetMirrorDetails {
 
