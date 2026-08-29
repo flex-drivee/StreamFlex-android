@@ -1,0 +1,30 @@
+--- app/src/main/java/com/streamflex/core/network/interceptor/WebViewResolver.kt
++++ app/src/main/java/com/streamflex/core/network/interceptor/WebViewResolver.kt
+@@ -34,6 +34,7 @@
+         return kotlinx.coroutines.withTimeoutOrNull(25000L) {
+             withContext(Dispatchers.Main) {
+                 kotlin.coroutines.suspendCoroutine { continuation ->
++                    val targetUrl = url
+                     
+                     val activity = StreamFlexApplication.topActivity ?: context
+                     
+@@ -113,8 +114,8 @@
+                         override fun onPageFinished(view: WebView?, url: String?) {
+                             super.onPageFinished(view, url)
+                             if (isFinished) return
+                             
+-                            val cookies = CookieManager.getInstance().getCookie(urlToLoad)
++                            val cookies = CookieManager.getInstance().getCookie(targetUrl)
+                             if (cookies != null && cookies.contains(requiredCookie)) {
+                                 Logger.d("WebViewResolver", "Solved instantly on load!")
+                                 finishWithResult(true)
+@@ -130,8 +131,8 @@
+                         ): WebResourceResponse? {
+                             // Check periodically for required cookie on any resource load
+                             // We must check the original url (urlToLoad) as well, because the page might have
+                             // redirected to a different domain (like net77.cc) while setting the cookie on net52.cc.
+-                            val cookies = CookieManager.getInstance().getCookie(urlToLoad)
++                            val cookies = CookieManager.getInstance().getCookie(targetUrl)
+                             if (!isFinished && cookies != null && cookies.contains(requiredCookie)) {
+                                 Logger.d("WebViewResolver", "Solved instantly on load!")
+                                 view?.post {

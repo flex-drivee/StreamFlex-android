@@ -96,7 +96,7 @@ class NetMirrorDetails {
                 val otherSeasonIds = mutableListOf<String>()
                 for (s in seasonsJson) {
                     val sId = JsonParser.string(s, "id") ?: continue
-                    val sNum = JsonParser.string(s, "s")
+                    val sNum = JsonParser.string(s, "s")?.removePrefix("S")
                     
                     if (sNum != currentLoadedSeason) {
                         otherSeasonIds.add(sId)
