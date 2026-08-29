@@ -165,18 +165,17 @@ class StreamRepository(
 
         // Find the matching season
         val targetSeason = providerResult.seasons.find { it.number == season }
-            ?: providerResult.seasons.firstOrNull()
 
         // Find the matching episode in that season
         val targetEpisode = targetSeason?.episodes?.find { it.number == episode }
-            ?: targetSeason?.episodes?.firstOrNull()
 
         val sources = if (targetEpisode != null && targetEpisode.sources.isNotEmpty()) {
             targetEpisode.sources
-        } else if (providerResult.sources.isNotEmpty()) {
+        } else if (providerResult.sources.isNotEmpty() && providerResult.seasons.isEmpty()) {
+            // Fallback for providers that just return raw sources without season mapping (e.g. movies)
             providerResult.sources
         } else {
-            providerResult.seasons.flatMap { s -> s.episodes.flatMap { it.sources } }
+            emptyList()
         }
 
         return streamEngine.resolve(sources, onStreamFound)
