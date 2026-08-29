@@ -107,7 +107,7 @@ class NetMirrorExtractor : BaseExtractor() {
      *   }
      * ]
      */
-    private fun parsePlaylist(
+    private suspend fun parsePlaylist(
         json: String,
         source: ProviderSource,
         tHashT: String,
@@ -156,10 +156,35 @@ class NetMirrorExtractor : BaseExtractor() {
 
                     // Quality label comes from "label" field (e.g. "Full HD", "720p")
                     val quality = Quality.fromLabel(label)
+                    
+                    // Fetch and filter the m3u8 to prevent ExoPlayer from probing 28 audio tracks at once
+                    var finalUrl = file
+                    try {
+                        val req = com.streamflex.core.network.RequestBuilder().url(file)
+                            .header("Cookie", "hd=on; t_hash_t=$tHashT")
+                            .header("Referer", referer)
+                            .header("User-Agent", NetMirrorBypassManager.NATIVE_UA)
+                            .build()
+                        val m3u8Resp = com.streamflex.core.network.HttpClient.execute(req)
+                        if (m3u8Resp is com.streamflex.core.network.NetworkResult.Success) {
+                            val m3u8Text = m3u8Resp.data.bodyAsString()
+                            
+                            // Keep lines that aren't AUDIO tracks, OR keep the audio track if it's default or English
+                            val filteredM3u8 = m3u8Text.lines().filter { line ->
+                                if (!line.startsWith("#EXT-X-MEDIA:TYPE=AUDIO")) return@filter true
+                                line.contains("DEFAULT=YES") || line.contains("LANGUAGE=\"eng\"")
+                            }.joinToString("\n")
+                            
+                            val base64 = android.util.Base64.encodeToString(filteredM3u8.toByteArray(), android.util.Base64.NO_WRAP)
+                            finalUrl = "data:application/vnd.apple.mpegurl;base64,$base64"
+                        }
+                    } catch (e: Exception) {
+                        StreamLogger.error(TAG, "Failed to filter m3u8: ${e.message}")
+                    }
 
                     streams += StreamLink(
                         name        = "${source.provider} - $label",
-                        url         = file,
+                        url         = finalUrl,
                         host        = HostType.M3U8,
                         contentType = com.streamflex.core.network.detector.ContentType.M3U8,
                         headers     = mapOf(
