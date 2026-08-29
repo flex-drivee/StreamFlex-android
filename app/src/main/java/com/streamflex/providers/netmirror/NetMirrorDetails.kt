@@ -106,13 +106,17 @@ class NetMirrorDetails {
                 // Fetch other seasons sequentially to prevent "Invalid User" rate limits
                 if (otherSeasonIds.isNotEmpty()) {
                     StreamLogger.debug(TAG, "Fetching ${otherSeasonIds.size} other seasons sequentially...")
-                    var currentTs = unixTs
+                    var tsOffset = 1L
+                    // Fetch episodes for all missing seasons using episodes.php
                     for (sId in otherSeasonIds) {
-                        currentTs += 1
-                        val seasonSources = fetchSeasonEpisodes(sId, base, postPath, currentTs, cookieStr, referer, ott, providerName)
-                        allSources.addAll(seasonSources)
-                        StreamLogger.debug(TAG, "Added ${seasonSources.size} episodes from season id $sId")
-                        kotlinx.coroutines.delay(200)
+                        val eps = fetchSeasonEpisodes(sId, id, base, ott, unixTs + tsOffset, cookieStr, referer, providerName)
+                        allSources.addAll(eps)
+                        tsOffset++
+                        StreamLogger.debug(TAG, "Added ${eps.size} episodes from season id $sId")
+                        
+                        if (otherSeasonIds.last() != sId) {
+                            kotlinx.coroutines.delay(200)
+                        }
                     }
                 }
             }
@@ -256,15 +260,20 @@ class NetMirrorDetails {
 
     private suspend fun fetchSeasonEpisodes(
         sId: String,
+        seriesId: String,
         base: String,
-        postPath: String,
+        ott: String,
         unixTs: Long,
         cookieStr: String,
         referer: String,
-        ott: String,
         providerName: String
     ): List<ProviderSource> {
-        val postUrl = "$base$postPath?id=$sId&t=$unixTs"
+        val episodesPath = when (ott) {
+            NetMirrorConfig.OTT_PRIME   -> "/mobile/pv/episodes.php"
+            NetMirrorConfig.OTT_HOTSTAR, NetMirrorConfig.OTT_DISNEY -> "/mobile/hs/episodes.php"
+            else                        -> "/mobile/episodes.php"
+        }
+        val postUrl = "$base$episodesPath?s=$sId&series=$seriesId&page=1&t=$unixTs"
         StreamLogger.debug(TAG, "fetchSeasonEpisodes: GET $postUrl")
         return try {
             val response = HttpClient.execute(

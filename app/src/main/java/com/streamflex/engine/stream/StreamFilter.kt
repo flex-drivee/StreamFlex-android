@@ -32,7 +32,9 @@ object StreamFilter {
         if (url.isBlank())
             return false
 
-        if (!url.startsWith("http"))
+        // Allow data: URIs (e.g. base64-encoded inline m3u8 playlists we generate ourselves)
+        val isDataUri = url.startsWith("data:")
+        if (!isDataUri && !url.startsWith("http"))
             return false
 
         if (
