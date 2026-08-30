@@ -359,7 +359,13 @@ class Media3Player(
         }
 
         val mediaItem = mediaItemBuilder.build()
-        val source = mediaSourceFactory.createMediaSource(mediaItem)
+        val source = if (mimeType == androidx.media3.common.MimeTypes.APPLICATION_M3U8) {
+            androidx.media3.exoplayer.hls.HlsMediaSource.Factory(dataSourceFactory)
+                .setAllowChunklessPreparation(true)
+                .createMediaSource(mediaItem)
+        } else {
+            mediaSourceFactory.createMediaSource(mediaItem)
+        }
 
         exoPlayer.setMediaSource(source)
         exoPlayer.prepare()
