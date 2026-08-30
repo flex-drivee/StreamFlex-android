@@ -24,7 +24,11 @@ class NetMirrorDetails {
     ): ProviderResult {
         val id = result.url.substringAfterLast("/")
         val base = baseUrl.trimEnd('/')
-        val postPath = "/mobile/$ott/post.php"
+        val postPath = when (ott) {
+            NetMirrorConfig.OTT_PRIME -> "/mobile/pv/post.php"
+            NetMirrorConfig.OTT_HOTSTAR, NetMirrorConfig.OTT_DISNEY -> "/mobile/hs/post.php"
+            else -> "/mobile/post.php"
+        }
 
         // Bypass security layer
         val bypassToken = NetMirrorBypassManager.getToken(base)
