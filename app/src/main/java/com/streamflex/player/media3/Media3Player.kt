@@ -295,7 +295,25 @@ class Media3Player(
         }
 
         // 2. High-performance HTTP Data Source with redirect, fast failover timeout, and custom headers
-        val httpDataSourceFactory = androidx.media3.datasource.okhttp.OkHttpDataSource.Factory(com.streamflex.core.network.StreamFlexHttpClient.okHttpClient)
+        val isNetMirror = stream.name.contains("NetMirror", ignoreCase = true)
+        val okHttpClient = if (isNetMirror) {
+            com.streamflex.core.network.StreamFlexHttpClient.okHttpClient.newBuilder()
+                .addInterceptor { chain ->
+                    val request = chain.request()
+                    if (request.url.toString().contains(".m3u8")) {
+                        // Strip NetMirror tokens for m3u8 to prevent backend routing bug
+                        val newRequest = request.newBuilder().header("Cookie", "hd=on").build()
+                        chain.proceed(newRequest)
+                    } else {
+                        chain.proceed(request)
+                    }
+                }
+                .build()
+        } else {
+            com.streamflex.core.network.StreamFlexHttpClient.okHttpClient
+        }
+
+        val httpDataSourceFactory = androidx.media3.datasource.okhttp.OkHttpDataSource.Factory(okHttpClient)
             .setUserAgent(userAgent)
             .setDefaultRequestProperties(requestHeaders)
 
@@ -359,7 +377,13 @@ class Media3Player(
         }
 
         val mediaItem = mediaItemBuilder.build()
-        val source = mediaSourceFactory.createMediaSource(mediaItem)
+        val source = if (mimeType == androidx.media3.common.MimeTypes.APPLICATION_M3U8) {
+            androidx.media3.exoplayer.hls.HlsMediaSource.Factory(dataSourceFactory)
+                .setAllowChunklessPreparation(true)
+                .createMediaSource(mediaItem)
+        } else {
+            mediaSourceFactory.createMediaSource(mediaItem)
+        }
 
         exoPlayer.setMediaSource(source)
         exoPlayer.prepare()
