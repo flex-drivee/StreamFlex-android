@@ -1,7 +1,7 @@
 package com.streamflex.domain.repositories
 
-import com.streamflex.domain.matchers.EpisodeMatcher
-import com.streamflex.domain.matchers.MovieMatcher
+import com.streamflex.engine.matcher.EpisodeMatcher
+import com.streamflex.engine.matcher.MovieMatcher
 import com.streamflex.domain.models.FinalStreams
 import com.streamflex.domain.models.ProviderResult
 import com.streamflex.domain.models.SearchResult
@@ -95,8 +95,8 @@ class StreamRepository(
             return@coroutineScope FinalStreams.EMPTY
         }
 
-        val bestMatches = results.groupBy { it.providerName }.mapNotNull { (_, providerResults) ->
-            MovieMatcher.bestMatch(title, year, providerResults)
+        val bestMatches = results.groupBy { it.providerName }.mapNotNull { entry ->
+            MovieMatcher.bestMatch(title, year, entry.value)
         }
 
         val deferredResults = bestMatches.map { selected ->
@@ -139,8 +139,8 @@ class StreamRepository(
             return@coroutineScope FinalStreams.EMPTY
         }
 
-        val bestMatches = combinedResults.groupBy { it.providerName }.mapNotNull { (_, providerResults) ->
-            EpisodeMatcher.bestMatch(title, season, episode, providerResults) ?: providerResults.firstOrNull()
+        val bestMatches = combinedResults.groupBy { it.providerName }.mapNotNull { entry ->
+            EpisodeMatcher.bestMatch(title, season, episode, entry.value) ?: entry.value.firstOrNull()
         }
 
         val deferredResults = bestMatches.map { selected ->
