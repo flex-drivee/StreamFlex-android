@@ -22,22 +22,10 @@ object EpisodeMatcher {
 
         return results
             .maxByOrNull {
-
-                score(
-                    title,
-                    season,
-                    episode,
-                    it
-                )
+                score(title, season, episode, it)
             }
             ?.takeIf {
-
-                score(
-                    title,
-                    season,
-                    episode,
-                    it
-                ) > 0
+                score(title, season, episode, it) >= 45
             }
     }
 
@@ -50,14 +38,13 @@ object EpisodeMatcher {
         episode: Int,
         result: SearchResult
     ): Int {
-        var score = 0
-        val title = SearchNormalizer.normalize(result.title)
-        val expected = SearchNormalizer.normalize(expectedTitle)
-
-        // Exact / base title match
-        if (title.contains(expected)) {
-            score += 50
+        val sim = TitleMatcher.similarity(expectedTitle, result.title)
+        if (sim < 0.4) {
+            return -1 // Title is completely unrelated, discard immediately
         }
+
+        var score = (sim * 50).toInt()
+        val title = SearchNormalizer.normalize(result.title)
 
         val seasonStr = season.toString()
         val seasonPadded = "%02d".format(season)

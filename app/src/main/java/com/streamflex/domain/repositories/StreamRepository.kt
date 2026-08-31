@@ -140,7 +140,7 @@ class StreamRepository(
         }
 
         val bestMatches = combinedResults.groupBy { it.providerName }.mapNotNull { entry ->
-            EpisodeMatcher.bestMatch(title, season, episode, entry.value) ?: entry.value.firstOrNull()
+            EpisodeMatcher.bestMatch(title, season, episode, entry.value)
         }
 
         val deferredResults = bestMatches.map { selected ->
