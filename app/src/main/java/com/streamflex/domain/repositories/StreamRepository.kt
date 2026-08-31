@@ -95,7 +95,7 @@ class StreamRepository(
             return@coroutineScope FinalStreams.EMPTY
         }
 
-        val bestMatches = results.groupBy { it.providerId }.mapNotNull { (_, providerResults) ->
+        val bestMatches = results.groupBy { it.providerName }.mapNotNull { (_, providerResults) ->
             MovieMatcher.bestMatch(title, year, providerResults)
         }
 
@@ -139,7 +139,7 @@ class StreamRepository(
             return@coroutineScope FinalStreams.EMPTY
         }
 
-        val bestMatches = combinedResults.groupBy { it.providerId }.mapNotNull { (_, providerResults) ->
+        val bestMatches = combinedResults.groupBy { it.providerName }.mapNotNull { (_, providerResults) ->
             EpisodeMatcher.bestMatch(title, season, episode, providerResults) ?: providerResults.firstOrNull()
         }
 
