@@ -301,9 +301,26 @@ class Media3Player(
                 .addInterceptor { chain ->
                     val request = chain.request()
                     if (request.url.toString().contains(".m3u8")) {
-                        // Strip NetMirror tokens for m3u8 to prevent backend routing bug
                         val newRequest = request.newBuilder().header("Cookie", "hd=on").build()
-                        chain.proceed(newRequest)
+                        val response = chain.proceed(newRequest)
+                        val body = response.body
+                        if (body != null && response.isSuccessful) {
+                            val bodyString = body.string()
+                            
+                            // Log the original M3U8
+                            com.streamflex.core.utils.StreamLogger.debug("Media3Player", "Original M3U8:\n$bodyString")
+                            
+                            var rewritten = bodyString
+                            if (!rewritten.contains("CODECS=")) {
+                                rewritten = rewritten.replace("#EXT-X-STREAM-INF:", "#EXT-X-STREAM-INF:CODECS=\"avc1.42c01e,mp4a.40.2\",")
+                            } else if (!rewritten.contains("mp4a")) {
+                                rewritten = rewritten.replace(Regex("""CODECS="([^,"]+)""""), """CODECS="$1,mp4a.40.2"""")
+                            }
+                            
+                            val newBody = okhttp3.ResponseBody.create(body.contentType(), rewritten)
+                            return@addInterceptor response.newBuilder().body(newBody).build()
+                        }
+                        response
                     } else {
                         chain.proceed(request)
                     }
