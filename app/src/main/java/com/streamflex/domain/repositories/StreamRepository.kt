@@ -155,9 +155,6 @@ class StreamRepository(
 
             val sources = if (targetEpisode != null && targetEpisode.sources.isNotEmpty()) {
                 targetEpisode.sources
-            } else if (providerResult.sources.isNotEmpty() && providerResult.seasons.isEmpty()) {
-                // Fallback for providers that just return raw sources without season mapping (e.g. movies)
-                providerResult.sources
             } else {
                 emptyList()
             }
