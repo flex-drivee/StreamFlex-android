@@ -41,7 +41,7 @@ object MovieMatcher {
 
             .maxByOrNull { it.second }
 
-            ?.takeIf { it.second >= 0.35 }?.first
+            ?.takeIf { it.second >= 0.45 }?.first
     }
 
     /**
