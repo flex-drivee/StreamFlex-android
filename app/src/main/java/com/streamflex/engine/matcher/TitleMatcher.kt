@@ -47,20 +47,20 @@ object TitleMatcher {
         val a = normalize(first)
         val b = normalize(second)
 
-        // Exact containment bonus
-        if (
-            a.contains(b) ||
-            b.contains(a)
-        ) {
-            return 0.95
+        if (a.isBlank() || b.isBlank()) {
+            return 0.0
         }
 
         if (a == b) {
             return 1.0
         }
 
-        if (a.isBlank() || b.isBlank()) {
-            return 0.0
+        // Exact containment bonus
+        if (
+            (a.contains(b) && b.length > 3) ||
+            (b.contains(a) && a.length > 3)
+        ) {
+            return 0.90
         }
 
         val distance = levenshtein(a, b)
