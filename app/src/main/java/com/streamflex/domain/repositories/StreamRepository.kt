@@ -1,31 +1,24 @@
 package com.streamflex.domain.repositories
 
+import com.streamflex.domain.matchers.EpisodeMatcher
+import com.streamflex.domain.matchers.MovieMatcher
 import com.streamflex.domain.models.FinalStreams
 import com.streamflex.domain.models.ProviderResult
 import com.streamflex.domain.models.SearchResult
 import com.streamflex.engine.stream.StreamEngine
-import com.streamflex.engine.matcher.EpisodeMatcher
-import com.streamflex.engine.matcher.MovieMatcher
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 
 /**
- * High-level entry point for the streaming system.
- *
- * The UI should communicate only with this repository.
- *
- * Internally it coordinates:
- *
- * ProviderRepository
- *      ↓
- * StreamEngine
- *      ↓
- * FinalStreams
+ * High-level repository that combines:
+ * 1. Provider search
+ * 2. Match selection
+ * 3. Content loading
+ * 4. Stream resolution
  */
 class StreamRepository(
-
     private val providerRepository: ProviderRepository,
-
-    private val streamEngine: StreamEngine = StreamEngine
-
+    private val streamEngine: StreamEngine
 ) {
 
     /**
@@ -69,24 +62,9 @@ class StreamRepository(
     }
 
     /**
-     * Resolve streams from a SearchResult.
+     * Directly resolve a loaded provider result.
      */
-    suspend fun getStreams(
-        item: SearchResult,
-        onStreamFound: suspend (FinalStreams) -> Unit = {}
-    ): FinalStreams {
-
-        val providerResult =
-            loadContent(item)
-                ?: return FinalStreams.EMPTY
-
-        return getStreams(providerResult, onStreamFound)
-    }
-
-    /**
-     * Resolve streams from ProviderResult.
-     */
-    suspend fun getStreams(
+    suspend fun resolve(
         providerResult: ProviderResult,
         onStreamFound: suspend (FinalStreams) -> Unit = {}
     ): FinalStreams {
@@ -109,29 +87,36 @@ class StreamRepository(
         title: String,
         year: Int? = null,
         onStreamFound: suspend (FinalStreams) -> Unit = {}
-    ): FinalStreams {
+    ): FinalStreams = coroutineScope {
 
         val results = search(title)
 
         if (results.isEmpty()) {
-            return FinalStreams.EMPTY
+            return@coroutineScope FinalStreams.EMPTY
         }
 
-        val selected = MovieMatcher.bestMatch(
-            title = title,
-            year = year,
-            results = results
-        ) ?: return FinalStreams.EMPTY
-
-        val providerResult = loadContent(selected) ?: return FinalStreams.EMPTY
-
-        val sources = if (providerResult.sources.isNotEmpty()) {
-            providerResult.sources
-        } else {
-            providerResult.seasons.firstOrNull()?.episodes?.firstOrNull()?.sources ?: emptyList()
+        val bestMatches = results.groupBy { it.providerId }.mapNotNull { (_, providerResults) ->
+            MovieMatcher.bestMatch(title, year, providerResults)
         }
 
-        return streamEngine.resolve(sources, onStreamFound)
+        val deferredResults = bestMatches.map { selected ->
+            async { loadContent(selected) }
+        }
+
+        val allSources = mutableListOf<com.streamflex.domain.models.ProviderSource>()
+        for (deferred in deferredResults) {
+            val providerResult = deferred.await() ?: continue
+            val sources = if (providerResult.sources.isNotEmpty()) {
+                providerResult.sources
+            } else {
+                providerResult.seasons.firstOrNull()?.episodes?.firstOrNull()?.sources ?: emptyList()
+            }
+            allSources.addAll(sources)
+        }
+
+        if (allSources.isEmpty()) return@coroutineScope FinalStreams.EMPTY
+
+        return@coroutineScope streamEngine.resolve(allSources, onStreamFound)
     }
 
     /**
@@ -143,7 +128,7 @@ class StreamRepository(
         episode: Int,
         year: Int? = null,
         onStreamFound: suspend (FinalStreams) -> Unit = {}
-    ): FinalStreams {
+    ): FinalStreams = coroutineScope {
 
         // Search both base title and season-specific query
         val baseResults = search(title)
@@ -151,33 +136,36 @@ class StreamRepository(
         val combinedResults = (seasonResults + baseResults).distinctBy { it.url }
 
         if (combinedResults.isEmpty()) {
-            return FinalStreams.EMPTY
+            return@coroutineScope FinalStreams.EMPTY
         }
 
-        val selected = EpisodeMatcher.bestMatch(
-            title = title,
-            season = season,
-            episode = episode,
-            results = combinedResults
-        ) ?: combinedResults.firstOrNull() ?: return FinalStreams.EMPTY
-
-        val providerResult = loadContent(selected) ?: return FinalStreams.EMPTY
-
-        // Find the matching season
-        val targetSeason = providerResult.seasons.find { it.number == season }
-
-        // Find the matching episode in that season
-        val targetEpisode = targetSeason?.episodes?.find { it.number == episode }
-
-        val sources = if (targetEpisode != null && targetEpisode.sources.isNotEmpty()) {
-            targetEpisode.sources
-        } else if (providerResult.sources.isNotEmpty() && providerResult.seasons.isEmpty()) {
-            // Fallback for providers that just return raw sources without season mapping (e.g. movies)
-            providerResult.sources
-        } else {
-            emptyList()
+        val bestMatches = combinedResults.groupBy { it.providerId }.mapNotNull { (_, providerResults) ->
+            EpisodeMatcher.bestMatch(title, season, episode, providerResults) ?: providerResults.firstOrNull()
         }
 
-        return streamEngine.resolve(sources, onStreamFound)
+        val deferredResults = bestMatches.map { selected ->
+            async { loadContent(selected) }
+        }
+
+        val allSources = mutableListOf<com.streamflex.domain.models.ProviderSource>()
+        for (deferred in deferredResults) {
+            val providerResult = deferred.await() ?: continue
+            val targetSeason = providerResult.seasons.find { it.number == season }
+            val targetEpisode = targetSeason?.episodes?.find { it.number == episode }
+
+            val sources = if (targetEpisode != null && targetEpisode.sources.isNotEmpty()) {
+                targetEpisode.sources
+            } else if (providerResult.sources.isNotEmpty() && providerResult.seasons.isEmpty()) {
+                // Fallback for providers that just return raw sources without season mapping (e.g. movies)
+                providerResult.sources
+            } else {
+                emptyList()
+            }
+            allSources.addAll(sources)
+        }
+
+        if (allSources.isEmpty()) return@coroutineScope FinalStreams.EMPTY
+
+        return@coroutineScope streamEngine.resolve(allSources, onStreamFound)
     }
 }
