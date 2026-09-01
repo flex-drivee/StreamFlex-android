@@ -129,4 +129,29 @@ class ContentRepositoryImpl(
         }
         return@withContext response.results.map { TmdbMapper.toDomain(it) }
     }
+
+    override fun getSupportedCategories(): List<Pair<String, String>> {
+        return listOf(
+            "trending_cinema" to "Trending in Cinema",
+            "top_series" to "Top Series This Week",
+            "netflix_originals" to "Netflix Originals",
+            "prime_originals" to "Prime Originals",
+            "korean_dramas" to "Top K-Dramas",
+            "bollywood_movies" to "Bollywood Blockbusters",
+            "indian_web_series" to "Indian Web Series",
+            "south_indian" to "South Indian Hits",
+            "anime_shows" to "Anime Shows",
+            "anime_movies" to "Anime Movies",
+            "action_movies" to "Action & Adventure",
+            "comedy_movies" to "Comedy Movies",
+            "romance_movies" to "Romance Movies",
+            "crime_movies" to "Crime Movies",
+            "turkish_drama" to "Turkish Dramas",
+            "chinese_series" to "Chinese Series",
+            "japan_series" to "Japanese Series",
+            "thai_series" to "Thai Series",
+            "ph_movies" to "Philippines Movies",
+            "usa_movies" to "USA Movies"
+        )
+    }
 }

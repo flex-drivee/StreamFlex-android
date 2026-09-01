@@ -152,6 +152,21 @@ class AnilistRepositoryImpl(
     }
 
     override suspend fun getCategory(categoryId: String, page: Int): List<SearchResult> {
-        return getPopularShows()
+        return when (categoryId) {
+            "trending_anime" -> getPopularShows()
+            "popular_anime" -> getPopularShows() // Can be customized later
+            "trending_movies" -> getPopularMovies()
+            "popular_movies" -> getPopularMovies()
+            else -> getPopularShows()
+        }
+    }
+
+    override fun getSupportedCategories(): List<Pair<String, String>> {
+        return listOf(
+            "trending_anime" to "Trending Anime",
+            "popular_anime" to "All-Time Popular",
+            "trending_movies" to "Trending Anime Movies",
+            "popular_movies" to "Popular Anime Movies"
+        )
     }
 }

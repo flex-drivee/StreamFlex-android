@@ -514,9 +514,19 @@ fun SettingsScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
+                                    val oldId = providerRepository.selectedProviderId
                                     providerRepository.selectedProviderId = null
                                     selectedProviderName = "All in One"
                                     showProviderDialog = false
+                                    
+                                    context.getSharedPreferences("streamflex_settings", android.content.Context.MODE_PRIVATE)
+                                        .edit().putString("selected_provider", null).apply()
+                                        
+                                    if (oldId != null) {
+                                        val intent = android.content.Intent(context, com.streamflex.app.MainActivity::class.java)
+                                        intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                                        context.startActivity(intent)
+                                    }
                                 }
                                 .padding(16.dp),
                             verticalAlignment = Alignment.CenterVertically
@@ -529,9 +539,19 @@ fun SettingsScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clickable {
+                                        val oldId = providerRepository.selectedProviderId
                                         providerRepository.selectedProviderId = provider.id
                                         selectedProviderName = provider.name
                                         showProviderDialog = false
+                                        
+                                        context.getSharedPreferences("streamflex_settings", android.content.Context.MODE_PRIVATE)
+                                            .edit().putString("selected_provider", provider.id).apply()
+                                            
+                                        if (oldId != provider.id) {
+                                            val intent = android.content.Intent(context, com.streamflex.app.MainActivity::class.java)
+                                            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                                            context.startActivity(intent)
+                                        }
                                     }
                                     .padding(horizontal = 16.dp, vertical = 8.dp),
                                 verticalAlignment = Alignment.CenterVertically
