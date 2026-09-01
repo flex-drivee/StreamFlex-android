@@ -83,7 +83,22 @@ object EpisodeMatcher {
             val otherSeasonMatch = Regex("""\b(?:season|s)\s*0*(\d{1,2})\b""", RegexOption.IGNORE_CASE).findAll(title)
             val mentionedSeasons = otherSeasonMatch.mapNotNull { it.groupValues[1].toIntOrNull() }.toList()
             if (mentionedSeasons.isNotEmpty() && !mentionedSeasons.contains(season)) {
-                score -= 40 // Penalize results targeting another season
+                // FIX: If the provider mentions a season (e.g. "Season 2"), but we requested Season 1,
+                // check if the EXPECTED TITLE actually contains that same number (e.g. AniList "Jujutsu Kaisen 2nd Season").
+                // If it does, this is actually a PERFECT match for Anime sites that use Titles for seasons!
+                val expectedLower = expectedTitle.lowercase()
+                var shouldPenalize = true
+                for (m in mentionedSeasons) {
+                    if (expectedLower.contains(m.toString())) {
+                        shouldPenalize = false
+                        score += 60 // Treat as a direct match
+                        break
+                    }
+                }
+                
+                if (shouldPenalize) {
+                    score -= 40 // Penalize results targeting another season
+                }
             }
         }
 
