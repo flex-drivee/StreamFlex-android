@@ -31,11 +31,7 @@ object RepositoryModule {
         )
     }
     
-    private val anilistRepository: com.streamflex.app.data.repositories.AnilistRepositoryImpl by lazy {
-        com.streamflex.app.data.repositories.AnilistRepositoryImpl(
-            anilistApi = NetworkModule.anilistApi
-        )
-    }
+
 
     /**
      * Metadata repository. Switches dynamically to AniList if an Anime provider is selected.
