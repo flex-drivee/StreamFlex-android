@@ -42,14 +42,9 @@ object RepositoryModule {
      */
     val contentRepository: com.streamflex.app.domain.repository.ContentRepository
         get() {
-            val selected = ProviderModule.repository.selectedProviderId
-            val isAnime = selected != null && (selected.contains("anime", ignoreCase = true) || selected == "gogoanime")
-            
-            return if (isAnime) {
-                anilistRepository
-            } else {
-                tmdbRepository
-            }
+            // Reverting back to TMDB exclusively as per user request to restore episode metadata
+            // and avoid AnimeDekho season splitting mismatches.
+            return tmdbRepository
         }
 
     /**
