@@ -29,8 +29,7 @@ class MainActivity : ComponentActivity() {
 
         val contentRepository = RepositoryModule.contentRepository
         
-        android.util.Log.d("MainActivity", "Selected Provider ID from Prefs: $spId")
-        android.util.Log.d("MainActivity", "Content Repository Class: ${contentRepository::class.java.simpleName}")
+        android.widget.Toast.makeText(this, "Loaded Provider: $spId | Repo: ${contentRepository::class.java.simpleName}", android.widget.Toast.LENGTH_LONG).show()
         val streamRepository = RepositoryModule.streamRepository
 
         setContent {
