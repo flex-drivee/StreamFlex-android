@@ -38,9 +38,28 @@ object EpisodeMatcher {
         episode: Int,
         result: SearchResult
     ): Int {
-        val sim = TitleMatcher.similarity(expectedTitle, result.title)
-        if (sim < 0.4) {
-            return -1 // Title is completely unrelated, discard immediately
+        // Many anime providers omit the subtitle (e.g. "Re:ZERO" instead of "Re:ZERO -Starting Life in Another World-")
+        // We take the first part before a hyphen if it's long enough.
+        val mainExpectedTitle = expectedTitle.split(" -", "-").first().trim()
+        val expectedToUse = if (mainExpectedTitle.length > 3) mainExpectedTitle else expectedTitle
+        
+        // Strip season and episode info from the provider's title to get the base title
+        var baseResultTitle = result.title.replace(Regex("(?i)\\b(?:season|s)\\s*0*\\d+.*"), "")
+        baseResultTitle = baseResultTitle.replace(Regex("(?i)\\b(?:episode|ep|e)\\s*0*\\d+.*"), "")
+        baseResultTitle = baseResultTitle.replace(Regex("(?i)\\b\\d+x\\d+.*"), "")
+        baseResultTitle = baseResultTitle.replace(Regex("(?i)hindi dub.*"), "")
+        baseResultTitle = baseResultTitle.trim()
+        
+        // If the base title is empty after stripping, just use the original
+        if (baseResultTitle.isEmpty()) baseResultTitle = result.title
+        
+        // Use the highest similarity between the full expected title and the main expected title
+        val sim1 = TitleMatcher.similarity(expectedTitle, baseResultTitle)
+        val sim2 = TitleMatcher.similarity(expectedToUse, baseResultTitle)
+        val sim = maxOf(sim1, sim2)
+
+        if (sim < 0.75) {
+            return -1 // Title doesn't match closely enough, discard to prevent season/episode bonuses from overpowering it
         }
 
         var score = (sim * 50).toInt()

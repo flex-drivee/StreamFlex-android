@@ -130,10 +130,19 @@ class StreamRepository(
         onStreamFound: suspend (FinalStreams) -> Unit = {}
     ): FinalStreams = coroutineScope {
 
-        // Search both base title and season-specific query
+        // Search base title, season-specific query, and a short/clean title for picky WP search engines
         val baseResults = search(title)
         val seasonResults = search("$title Season $season")
-        val combinedResults = (seasonResults + baseResults).distinctBy { it.url }
+        
+        val cleanTitle = title.replace(Regex("[^a-zA-Z0-9 ]"), " ").replace(Regex("\\s+"), " ").trim()
+        val shortTitle = cleanTitle.split(" ").take(2).joinToString(" ")
+        val shortResults = if (shortTitle.length > 3 && shortTitle.lowercase() != title.lowercase()) {
+            search(shortTitle)
+        } else {
+            emptyList()
+        }
+        
+        val combinedResults = (seasonResults + baseResults + shortResults).distinctBy { it.url }
 
         if (combinedResults.isEmpty()) {
             return@coroutineScope FinalStreams.EMPTY
