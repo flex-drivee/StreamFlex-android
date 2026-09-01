@@ -147,8 +147,11 @@ class AnilistRepositoryImpl(
         return if (type == ContentType.MOVIE) getPopularMovies() else getPopularShows()
     }
 
-    override suspend fun getSeasonEpisodes(showId: String, seasonNumber: Int): List<Episode> {
-        return emptyList()
+    override suspend fun getSeasonEpisodes(showId: String, seasonNumber: Int): List<com.streamflex.app.domain.models.Episode> {
+        // Anilist groups everything into Season 1.
+        if (seasonNumber != 1) return emptyList()
+        val show = getShowDetails(showId)
+        return show.seasons.firstOrNull { it.seasonNumber == 1 }?.episodes ?: emptyList()
     }
 
     override suspend fun getCategory(categoryId: String, page: Int): List<SearchResult> {
