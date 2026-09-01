@@ -40,8 +40,10 @@ class AnimeDekhoExtractor : BaseExtractor() {
         val termId = bodyClasses
             .firstOrNull { it.startsWith("term-") && it.removePrefix("term-").all(Char::isDigit) }
             ?.removePrefix("term-")
+            ?: bodyClasses.firstOrNull { it.startsWith("postid-") && it.removePrefix("postid-").all(Char::isDigit) }
+            ?.removePrefix("postid-")
             ?: run {
-                Logger.w("[$TAG] term ID not found in body class for $pageUrl")
+                Logger.w("[$TAG] term ID or postid not found in body class for $pageUrl")
                 return@coroutineScope emptyResult()
             }
 
