@@ -25,13 +25,32 @@ object RepositoryModule {
     /**
      * Metadata repository.
      */
-    val contentRepository: ContentRepositoryImpl by lazy {
-
+    private val tmdbRepository: ContentRepositoryImpl by lazy {
         ContentRepositoryImpl(
             tmdbApi = NetworkModule.tmdbApi
         )
-
     }
+    
+    private val anilistRepository: com.streamflex.app.data.repositories.AnilistRepositoryImpl by lazy {
+        com.streamflex.app.data.repositories.AnilistRepositoryImpl(
+            anilistApi = NetworkModule.anilistApi
+        )
+    }
+
+    /**
+     * Metadata repository. Switches dynamically to AniList if an Anime provider is selected.
+     */
+    val contentRepository: com.streamflex.app.domain.repository.ContentRepository
+        get() {
+            val selected = ProviderModule.repository.selectedProviderId
+            val isAnime = selected != null && (selected.contains("anime", ignoreCase = true) || selected == "gogoanime")
+            
+            return if (isAnime) {
+                anilistRepository
+            } else {
+                tmdbRepository
+            }
+        }
 
     /**
      * Streaming repository.
