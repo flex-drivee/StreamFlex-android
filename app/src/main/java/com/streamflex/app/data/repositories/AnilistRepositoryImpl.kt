@@ -103,7 +103,7 @@ class AnilistRepositoryImpl(
             year = media.startDate?.year,
             rating = media.averageScore?.div(10.0),
             genres = media.genres ?: emptyList(),
-            sources = emptyList(), // Filled by StreamRepository later
+            providerSources = emptyList(), // Filled by StreamRepository later
             runtime = null
         )
     }
