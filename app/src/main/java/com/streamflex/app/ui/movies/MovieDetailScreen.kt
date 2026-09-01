@@ -39,7 +39,8 @@ fun MovieDetailScreen(
     viewModel: MovieDetailViewModel,
     onBackClick: () -> Unit,
     onMoviePlayClick: () -> Unit,
-    onEpisodePlayClick: (Episode) -> Unit
+    onEpisodePlayClick: (Episode) -> Unit,
+    onNavigateToDetail: (String, String) -> Unit = { _, _ -> }
 ) {
     val state by viewModel.uiState.collectAsState()
     val allDownloads by viewModel.allDownloads.collectAsState()
@@ -80,11 +81,13 @@ fun MovieDetailScreen(
                 item {
                     SFDetailHero(
                         backdrop = backdrop,
+                        poster   = poster,
                         title    = title,
                         year     = year,
                         rating   = rating,
                         runtime  = movieRuntime,
-                        isShow   = isShow
+                        isShow   = isShow,
+                        genres   = state.movie?.genres ?: state.show?.genres ?: emptyList()
                     )
                 }
 
@@ -297,7 +300,12 @@ fun MovieDetailScreen(
                     item {
                         SFMoreLikeThis(
                             items       = state.similarContent,
-                            onItemClick = { /* navigate */ }
+                            onItemClick = { clickedId -> 
+                                val clickedItem = state.similarContent.find { it.id == clickedId }
+                                if (clickedItem != null) {
+                                    onNavigateToDetail(clickedItem.type.name, clickedItem.id)
+                                }
+                            }
                         )
                     }
                 }
