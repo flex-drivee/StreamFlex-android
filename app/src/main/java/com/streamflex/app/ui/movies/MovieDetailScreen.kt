@@ -1,5 +1,8 @@
 package com.streamflex.app.ui.movies
 
+import androidx.compose.ui.draw.blur
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
@@ -387,88 +390,135 @@ fun MovieDetailScreen(
 // ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
+
+@OptIn(ExperimentalLayoutApi::class)
 private fun SFDetailHero(
     backdrop: String?,
+    poster:   String?,
     title:    String,
     year:     Int?,
     rating:   Double?,
     runtime:  Int?,
-    isShow:   Boolean
+    isShow:   Boolean,
+    genres:   List<String>
 ) {
-    val screenH = LocalConfiguration.current.screenHeightDp.dp
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(screenH * 0.55f)
+            .heightIn(min = 340.dp)
     ) {
+        // Blurred Background
         SubcomposeAsyncImage(
-            model              = backdrop,
-            contentDescription = title,
+            model              = backdrop ?: poster,
+            contentDescription = null,
             contentScale       = ContentScale.Crop,
-            loading            = {
-                Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant))
-            },
-            modifier           = Modifier.fillMaxSize()
+            modifier           = Modifier
+                .fillMaxSize()
+                .matchParentSize()
+                .blur(radiusX = 15.dp, radiusY = 15.dp)
         )
 
-        // Gradient overlays
+        // Dim Overlay
         Box(
             modifier = Modifier
-                .fillMaxSize()
+                .matchParentSize()
+                .background(Color.Black.copy(alpha = 0.75f))
+        )
+        
+        // Gradient fade to background at the bottom
+        Box(
+            modifier = Modifier
+                .matchParentSize()
                 .background(
                     Brush.verticalGradient(
-                        colorStops = arrayOf(
-                            0.0f to Color.Black.copy(0.4f),
-                            0.5f to Color.Transparent,
-                            0.8f to MaterialTheme.colorScheme.background.copy(0.6f),
-                            1.0f to MaterialTheme.colorScheme.background
-                        )
+                        colors = listOf(
+                            Color.Transparent,
+                            MaterialTheme.colorScheme.background.copy(alpha = 0.5f),
+                            MaterialTheme.colorScheme.background
+                        ),
+                        startY = 400f
                     )
                 )
         )
 
-        // Bottom metadata
-        Column(
+        // Content
+        Row(
             modifier = Modifier
-                .align(Alignment.BottomStart)
-                .padding(horizontal = 16.dp, vertical = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp, top = 80.dp, bottom = 20.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text  = title,
-                style = MaterialTheme.typography.headlineMedium.copy(
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize   = 26.sp
-                ),
-                color    = MaterialTheme.colorScheme.onBackground,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            Row(
-                verticalAlignment      = Alignment.CenterVertically,
-                horizontalArrangement  = Arrangement.spacedBy(8.dp)
+            // Poster Card
+            Card(
+                modifier = Modifier
+                    .width(130.dp)
+                    .aspectRatio(2f / 3f),
+                shape = RoundedCornerShape(12.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
             ) {
-                year?.let {
-                    Text(it.toString(), style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-                SFBadge("HD", SFHDTag, Color.Black)
-                if (isShow) SFBadge("SERIES", SFDubBg, Color.White)
-                runtime?.let {
-                    if (it > 0) {
-                        Text(formatRuntime(it),
-                            style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                SubcomposeAsyncImage(
+                    model              = poster,
+                    contentDescription = title,
+                    contentScale       = ContentScale.Crop,
+                    modifier           = Modifier.fillMaxSize(),
+                    loading            = { Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant)) }
+                )
+            }
+            
+            Spacer(modifier = Modifier.width(16.dp))
+            
+            // Text Details
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text  = title,
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize   = 22.sp
+                    ),
+                    color    = Color.White,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
+                )
+                
+                Row(
+                    verticalAlignment      = Alignment.CenterVertically,
+                    horizontalArrangement  = Arrangement.spacedBy(8.dp)
+                ) {
+                    year?.let {
+                        Text(it.toString(), style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(0.8f))
+                    }
+                    SFBadge("HD", SFHDTag, Color.Black)
+                    if (isShow) SFBadge("SERIES", SFDubBg, Color.White)
+                    runtime?.let {
+                        if (it > 0) {
+                            Text(formatRuntime(it), style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(0.8f))
+                        }
+                    }
+                    rating?.let {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                            Icon(Icons.Default.Star, null, tint = SFRatingBg, modifier = Modifier.size(14.dp))
+                            Text(String.format("%.1f", it), style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(0.8f))
+                        }
                     }
                 }
-                rating?.let {
-                    Row(verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(3.dp)) {
-                        Icon(Icons.Default.Star, null, tint = SFRatingBg,
-                            modifier = Modifier.size(14.dp))
-                        Text(String.format("%.1f", it),
-                            style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                
+                if (genres.isNotEmpty()) {
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        genres.take(4).forEach { genre ->
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .background(Color.White.copy(alpha = 0.15f))
+                                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                            ) {
+                                Text(genre, style = MaterialTheme.typography.labelSmall, color = Color.White)
+                            }
+                        }
                     }
                 }
             }
