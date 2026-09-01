@@ -1,5 +1,8 @@
 package com.streamflex.extractors.netmirror
 
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+
 import com.streamflex.core.network.HttpClient
 import com.streamflex.core.network.HttpMethod
 import com.streamflex.core.network.NetworkResult
@@ -50,6 +53,7 @@ object NetMirrorBypassManager {
     // In-memory cache: token + timestamp
     @Volatile private var cachedToken: String = ""
     @Volatile private var cachedTokenTimestamp: Long = 0L
+    private val bypassMutex = Mutex()
 
     /**
      * Returns a valid `t_hash_t` session token.
@@ -58,7 +62,7 @@ object NetMirrorBypassManager {
      * @param baseUrl  The active NetMirror base URL (e.g. "https://net52.cc")
      * @return         A valid t_hash_t string, or null on failure
      */
-    suspend fun getToken(baseUrl: String): String? {
+    suspend fun getToken(baseUrl: String): String? = bypassMutex.withLock {
         val now = System.currentTimeMillis()
         if (cachedToken.isNotBlank() && (now - cachedTokenTimestamp) < COOKIE_TTL_MS) {
             StreamLogger.debug(TAG, "Using cached t_hash_t (age: ${now - cachedTokenTimestamp}ms)")

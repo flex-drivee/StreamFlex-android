@@ -52,7 +52,20 @@ class CloudflareKiller : Interceptor {
         // 1. Check if we hit a Cloudflare 403/503 block
         val isCloudflare = response.header("Server")?.contains("cloudflare", ignoreCase = true) == true
         
+        var isChallenge = false
         if (isCloudflare && response.code in ERROR_CODES) {
+            try {
+                val bodyString = response.peekBody(1024 * 50).string()
+                isChallenge = bodyString.contains("cf-browser-verification") || 
+                              bodyString.contains("cf-turnstile") || 
+                              bodyString.contains("challenges.cloudflare.com") ||
+                              bodyString.contains("just a moment", ignoreCase = true)
+            } catch (e: Exception) {
+                // Ignore
+            }
+        }
+        
+        if (isChallenge) {
             response.close()
             
             // 2. Lock so that only ONE thread spawns a WebView at a time!

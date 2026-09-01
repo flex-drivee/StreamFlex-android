@@ -51,4 +51,15 @@ object NetworkModule {
         )
 
     }
+    
+    val anilistRetrofit: Retrofit by lazy {
+        Retrofit.Builder()
+            .baseUrl("https://graphql.anilist.co/")
+            .addConverterFactory(retrofit2.converter.gson.GsonConverterFactory.create())
+            .build()
+    }
+    
+    val anilistApi: com.streamflex.app.data.metadata.AnilistApi by lazy {
+        anilistRetrofit.create(com.streamflex.app.data.metadata.AnilistApi::class.java)
+    }
 }

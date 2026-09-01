@@ -127,7 +127,7 @@ class NetMirrorDetails {
 
             // Group into proper ProviderSeason and ProviderEpisode structures for TV Shows
             val providerSeasons = mutableListOf<ProviderSeason>()
-            val isMovie = seasonsJson.isEmpty() && episodesJson.isEmpty() // Ignore search mediaType as it may incorrectly report TV shows as movies
+            val isMovie = allSources.isEmpty() || (seasonsJson.isEmpty() && episodesJson.isEmpty()) // Treat as movie if no valid episodes were parsed
 
             if (!isMovie) {
                 val bySeason = allSources.groupBy { it.metadata["season"]?.toIntOrNull() ?: 1 }

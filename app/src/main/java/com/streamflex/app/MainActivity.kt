@@ -22,7 +22,14 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Restore selected provider before UI dependencies evaluate
+        val mainPrefs = getSharedPreferences("streamflex_settings", android.content.Context.MODE_PRIVATE)
+        val spId = mainPrefs.getString("selected_provider", null)
+        com.streamflex.app.di.ProviderModule.repository.selectedProviderId = spId
+
         val contentRepository = RepositoryModule.contentRepository
+        
+        android.widget.Toast.makeText(this, "Loaded Provider: $spId | Repo: ${contentRepository::class.java.simpleName}", android.widget.Toast.LENGTH_LONG).show()
         val streamRepository = RepositoryModule.streamRepository
 
         setContent {

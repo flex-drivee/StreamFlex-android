@@ -10,10 +10,10 @@ interface ContentRepository {
     suspend fun getPopularShows(): List<SearchResult>
     suspend fun getMovieDetails(id: String): Movie
     suspend fun getShowDetails(id: String): Show
-    // NEW:
     suspend fun getSimilarContent(id: String, type: com.streamflex.app.domain.models.ContentType): List<SearchResult>
     suspend fun getSeasonEpisodes(showId: String, seasonNumber: Int): List<com.streamflex.app.domain.models.Episode>
     
     // Generic Category Fetch
     suspend fun getCategory(categoryId: String, page: Int = 1): List<SearchResult>
+    fun getSupportedCategories(): List<Pair<String, String>>
 }

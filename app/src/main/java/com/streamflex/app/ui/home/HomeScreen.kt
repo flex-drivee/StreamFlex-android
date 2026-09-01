@@ -271,18 +271,38 @@ private fun SFTopBar(
                             DropdownMenuItem(
                                 text = { Text("All in One", color = MaterialTheme.colorScheme.onSurface) },
                                 onClick = {
+                                    val oldId = providerRepository.selectedProviderId
                                     providerRepository.selectedProviderId = null
                                     selectedProviderName = "All in One"
                                     showProviderDropdown = false
+                                    
+                                    context.getSharedPreferences("streamflex_settings", android.content.Context.MODE_PRIVATE)
+                                        .edit().putString("selected_provider", null).apply()
+                                        
+                                    if (oldId != null) {
+                                        val intent = android.content.Intent(context, com.streamflex.app.MainActivity::class.java)
+                                        intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                                        context.startActivity(intent)
+                                    }
                                 }
                             )
                             providerRepository.enabledProviders().forEach { provider ->
                                 DropdownMenuItem(
                                     text = { Text(provider.name, color = MaterialTheme.colorScheme.onSurface) },
                                     onClick = {
+                                        val oldId = providerRepository.selectedProviderId
                                         providerRepository.selectedProviderId = provider.id
                                         selectedProviderName = provider.name
                                         showProviderDropdown = false
+                                        
+                                        context.getSharedPreferences("streamflex_settings", android.content.Context.MODE_PRIVATE)
+                                            .edit().putString("selected_provider", provider.id).apply()
+                                            
+                                        if (oldId != provider.id) {
+                                            val intent = android.content.Intent(context, com.streamflex.app.MainActivity::class.java)
+                                            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                                            context.startActivity(intent)
+                                        }
                                     },
                                     trailingIcon = {
                                         if (provider.id == "moviebox") {
