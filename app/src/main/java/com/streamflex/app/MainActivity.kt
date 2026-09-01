@@ -24,9 +24,13 @@ class MainActivity : ComponentActivity() {
 
         // Restore selected provider before UI dependencies evaluate
         val mainPrefs = getSharedPreferences("streamflex_settings", android.content.Context.MODE_PRIVATE)
-        com.streamflex.app.di.ProviderModule.repository.selectedProviderId = mainPrefs.getString("selected_provider", null)
+        val spId = mainPrefs.getString("selected_provider", null)
+        com.streamflex.app.di.ProviderModule.repository.selectedProviderId = spId
 
         val contentRepository = RepositoryModule.contentRepository
+        
+        android.util.Log.d("MainActivity", "Selected Provider ID from Prefs: $spId")
+        android.util.Log.d("MainActivity", "Content Repository Class: ${contentRepository::class.java.simpleName}")
         val streamRepository = RepositoryModule.streamRepository
 
         setContent {
