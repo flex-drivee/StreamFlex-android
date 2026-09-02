@@ -94,10 +94,19 @@ class ToonStreamDetails {
             }
             .filter { "episode" in it.lowercase() || "/ep-" in it.lowercase() }
             .distinct()
-            .reversed() // For consistency, keep the parsing order logic. Wait, earlier I removed reversed(). Toonstream actually lists episodes from 1 to N top-to-bottom for seasons. Let's not reverse unless needed. Wait, in my python script it output 3x137 first. So Episode 1 is FIRST! Let's NOT reverse.
 
+        val regexX = Regex("(\\d+)x(\\d+)")
+        val regexEp = Regex("(?:ep|episode)-(\\d+)", RegexOption.IGNORE_CASE)
+        
         val episodes = episodeLinks.mapIndexed { index, epUrl ->
-            val epNum = index + 1
+            val matchX = regexX.find(epUrl)
+            val matchEp = regexEp.find(epUrl)
+            
+            val parsedEpNum = matchX?.groupValues?.getOrNull(2)?.toIntOrNull()
+                ?: matchEp?.groupValues?.getOrNull(1)?.toIntOrNull()
+                
+            val epNum = parsedEpNum ?: (index + 1)
+            
             val source = ToonStreamMapper.toProviderSource(
                 iframeUrl = epUrl,
                 hostType  = HostType.TOONSTREAM,
