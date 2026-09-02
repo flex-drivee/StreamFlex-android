@@ -161,6 +161,7 @@ class StreamRepository(
             val providerResult = deferred.await() ?: continue
             val targetSeason = providerResult.seasons.find { it.number == season }
             val targetEpisode = targetSeason?.episodes?.find { it.number == episode }
+                ?: providerResult.seasons.flatMap { it.episodes }.find { it.number == episode }
 
             val sources = if (targetEpisode != null && targetEpisode.sources.isNotEmpty()) {
                 targetEpisode.sources
