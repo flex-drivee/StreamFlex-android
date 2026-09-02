@@ -3,6 +3,7 @@ package com.streamflex.extractors.toonstream
 import com.streamflex.core.network.HttpClient
 import com.streamflex.core.network.NetworkResult
 import com.streamflex.core.network.RequestBuilder
+import com.streamflex.core.network.detector.HostDetector
 import com.streamflex.core.parser.HtmlParser
 import com.streamflex.domain.models.ExtractionResult
 import com.streamflex.domain.models.HostType
@@ -43,18 +44,14 @@ class ToonStreamExtractor : BaseExtractor() {
                 val embedDoc = HtmlParser.parse(embedHtml)
                 val realIframe = embedDoc.selectFirst("iframe")?.attr("src") ?: return@async null
                 
-                val hostType = when {
-                    "rubystm" in realIframe || "streamruby" in realIframe -> HostType.valueOf("STREAMRUBY")
-                    "filemoon" in realIframe -> HostType.FILEMOON
-                    "dood" in realIframe || "d000d" in realIframe -> HostType.DOOD
-                    "sb" in realIframe -> HostType.valueOf("STREAMSB")
-                    "vidmoly" in realIframe -> HostType.VIDMOLY
-                    else -> HostType.REDIRECT
-                }
+                // Let the Engine's HostDetector classify the URL!
+                val detectedType = HostDetector.detect(realIframe)
+                // If it couldn't detect it, we pass it as REDIRECT so RedirectExtractor can try its best
+                val finalType = if (detectedType == HostType.UNKNOWN) HostType.REDIRECT else detectedType
 
                 ToonStreamMapper.toProviderSource(
                     iframeUrl = realIframe,
-                    hostType  = runCatching { hostType }.getOrDefault(HostType.REDIRECT),
+                    hostType  = finalType,
                     referer   = embedUrl,
                     metadata  = mapOf("server" to (index + 1).toString())
                 )
