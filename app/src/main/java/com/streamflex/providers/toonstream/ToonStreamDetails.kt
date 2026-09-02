@@ -28,12 +28,17 @@ class ToonStreamDetails {
         val isTV = result.mediaType == MediaType.TV
 
         val detailHtml = fetchHtml(result.url, baseUrl) ?: return@withContext null
-        val detailDoc  = HtmlParser.parse(detailHtml)
+        val detailDoc  = HtmlParser.parse(detailHtml, baseUrl)
 
         if (isTV) {
             val episodeLinks = detailDoc
                 .select("a[href]")
-                .map { it.attr("abs:href") }
+                .map { 
+                    it.attr("abs:href").takeIf { abs -> abs.isNotBlank() } ?: run {
+                        val raw = it.attr("href")
+                        if (raw.startsWith("http")) raw else "$baseUrl/${raw.trimStart('/')}"
+                    }
+                }
                 .filter { "episode" in it.lowercase() || "/ep-" in it.lowercase() }
                 .distinct()
 
