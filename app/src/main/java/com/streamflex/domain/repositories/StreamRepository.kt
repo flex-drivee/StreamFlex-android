@@ -1,5 +1,6 @@
 package com.streamflex.domain.repositories
 
+import com.streamflex.core.logger.Logger
 import com.streamflex.engine.matcher.EpisodeMatcher
 import com.streamflex.engine.matcher.MovieMatcher
 import com.streamflex.domain.models.FinalStreams
@@ -63,6 +64,8 @@ class StreamRepository(
     }
 
     suspend fun resolveEpisode(title: String, season: Int, episode: Int, year: Int? = null, onStreamFound: suspend (FinalStreams) -> Unit = {}): FinalStreams = coroutineScope {
+        Logger.d("resolveEpisode called: title=$title, season=$season, episode=$episode", "StreamRepository")
+        
         val baseResults = search(title)
         val seasonResults = search("$title Season $season")
         
@@ -75,10 +78,19 @@ class StreamRepository(
         }
         
         val combinedResults = (seasonResults + baseResults + shortResults).distinctBy { it.url }
-        if (combinedResults.isEmpty()) return@coroutineScope FinalStreams.EMPTY
+        if (combinedResults.isEmpty()) {
+            Logger.w("No search results found for query: $title", "StreamRepository")
+            return@coroutineScope FinalStreams.EMPTY
+        }
 
         val bestMatches = combinedResults.groupBy { it.providerName }.mapNotNull { entry ->
-            EpisodeMatcher.bestMatch(title, season, episode, entry.value)
+            val match = EpisodeMatcher.bestMatch(title, season, episode, entry.value)
+            if (match != null) {
+                Logger.d("Best match for ${entry.key}: ${match.title} | ${match.url}", "StreamRepository")
+            } else {
+                Logger.w("No match passed score threshold for ${entry.key}", "StreamRepository")
+            }
+            match
         }
 
         val deferredResults = bestMatches.map { selected ->
@@ -87,24 +99,35 @@ class StreamRepository(
 
         val allSources = mutableListOf<com.streamflex.domain.models.ProviderSource>()
         for (deferred in deferredResults) {
-            val providerResult = deferred.await() ?: continue
+            val providerResult = deferred.await()
+            if (providerResult == null) {
+                Logger.w("loadContent returned null", "StreamRepository")
+                continue
+            }
             
             val allProviderEpisodes = providerResult.seasons.flatMap { it.episodes }
             val targetSeason = providerResult.seasons.find { it.number == season }
             
+            Logger.d("Provider ${providerResult.providerId} has ${providerResult.seasons.size} seasons, ${allProviderEpisodes.size} total episodes", "StreamRepository")
+            
             // 1. Exact match in exact season
             var targetEpisode = targetSeason?.episodes?.find { it.number == episode }
+            if (targetEpisode != null) Logger.d("Found via exact season match", "StreamRepository")
             
             // 2. Exact absolute match across all seasons
             if (targetEpisode == null) {
                 targetEpisode = allProviderEpisodes.find { it.number == episode }
+                if (targetEpisode != null) Logger.d("Found via absolute cross-season match", "StreamRepository")
             }
             
-            // 3. Positional fallback (flattens split-season relative episodes into a single absolute timeline)
-            // Example: Jujutsu Kaisen Ep 25. Provider has S1 (24 eps) and S2 (23 eps). 
-            // 25th episode in the flattened list corresponds to S2 E1!
+            // 3. Positional fallback
             if (targetEpisode == null && episode > 0 && episode <= allProviderEpisodes.size) {
                 targetEpisode = allProviderEpisodes[episode - 1]
+                Logger.d("Found via positional fallback: fallback episode is ${targetEpisode.title} (num: ${targetEpisode.number})", "StreamRepository")
+            }
+
+            if (targetEpisode == null) {
+                Logger.w("Could not find episode $episode using any method", "StreamRepository")
             }
 
             val sources = if (targetEpisode != null && targetEpisode.sources.isNotEmpty()) {
@@ -115,7 +138,9 @@ class StreamRepository(
             allSources.addAll(sources)
         }
 
+        Logger.d("All collected sources: ${allSources.size}", "StreamRepository")
         if (allSources.isEmpty()) return@coroutineScope FinalStreams.EMPTY
+        
         return@coroutineScope streamEngine.resolve(allSources, onStreamFound)
     }
 }
