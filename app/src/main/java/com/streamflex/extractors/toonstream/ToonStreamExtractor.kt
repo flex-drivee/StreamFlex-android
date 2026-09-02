@@ -12,15 +12,15 @@ import com.streamflex.extractors.common.BaseExtractor
 import com.streamflex.providers.toonstream.ToonStreamConfig
 import com.streamflex.providers.toonstream.ToonStreamMapper
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.delay
 
 class ToonStreamExtractor : BaseExtractor() {
 
     override val hostType = HostType.TOONSTREAM
 
-    override suspend fun extract(source: ProviderSource): ExtractionResult = coroutineScope {
+    override suspend fun extract(source: ProviderSource): ExtractionResult = withContext(Dispatchers.IO) {
         val pageUrl = source.url
         val baseUrl = source.metadata["baseUrl"] ?: ToonStreamConfig.DEFAULT_DOMAIN
 
@@ -28,7 +28,7 @@ class ToonStreamExtractor : BaseExtractor() {
         val html = when (val res = HttpClient.execute(req)) {
             is NetworkResult.Success -> res.data.body?.toString(Charsets.UTF_8)
             else -> null
-        } ?: return@coroutineScope emptyResult()
+        } ?: return@withContext emptyResult()
 
         val doc = HtmlParser.parse(html)
         
@@ -38,29 +38,30 @@ class ToonStreamExtractor : BaseExtractor() {
             .map { if (it.startsWith("http")) it else "$baseUrl$it" }
             .distinct()
 
-        val deferredSources = embedUrls.mapIndexed { index, embedUrl ->
-            async(Dispatchers.IO) {
-                val embedHtml = fetchHtml(embedUrl, baseUrl) ?: return@async null
-                val embedDoc = HtmlParser.parse(embedHtml)
-                val realIframe = embedDoc.selectFirst("iframe")?.attr("src") ?: return@async null
-                
-                // Let the Engine's HostDetector classify the URL!
-                val detectedType = HostDetector.detect(realIframe)
-                // If it couldn't detect it, we pass it as REDIRECT so RedirectExtractor can try its best
-                val finalType = if (detectedType == HostType.UNKNOWN) HostType.REDIRECT else detectedType
+        val extractedSources = mutableListOf<ProviderSource>()
+        
+        for ((index, embedUrl) in embedUrls.withIndex()) {
+            if (index > 0) delay(200) // Delay to avoid Toonstream 502 Rate Limit
+            
+            val embedHtml = fetchHtml(embedUrl, baseUrl) ?: continue
+            val embedDoc = HtmlParser.parse(embedHtml)
+            val realIframe = embedDoc.selectFirst("iframe")?.attr("src") ?: continue
+            
+            // Let the Engine's HostDetector classify the URL!
+            val detectedType = HostDetector.detect(realIframe)
+            // If it couldn't detect it, we pass it as REDIRECT so RedirectExtractor can try its best
+            val finalType = if (detectedType == HostType.UNKNOWN) HostType.REDIRECT else detectedType
 
-                ToonStreamMapper.toProviderSource(
-                    iframeUrl = realIframe,
-                    hostType  = finalType,
-                    referer   = embedUrl,
-                    metadata  = mapOf("server" to (index + 1).toString())
-                )
-            }
+            val providerSource = ToonStreamMapper.toProviderSource(
+                iframeUrl = realIframe,
+                hostType  = finalType,
+                referer   = embedUrl,
+                metadata  = mapOf("server" to (index + 1).toString())
+            )
+            extractedSources.add(providerSource)
         }
 
-        val extractedSources = deferredSources.awaitAll().filterNotNull()
-
-        return@coroutineScope result(streams = emptyList(), sources = extractedSources)
+        return@withContext result(streams = emptyList(), sources = extractedSources)
     }
 
     private suspend fun fetchHtml(url: String, referer: String): String? {

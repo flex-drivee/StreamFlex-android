@@ -12,10 +12,9 @@ import com.streamflex.domain.models.ProviderResult
 import com.streamflex.domain.models.ProviderSeason
 import com.streamflex.domain.models.SearchResult
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
 import org.jsoup.nodes.Document
+import kotlinx.coroutines.delay
 
 class ToonStreamDetails {
 
@@ -40,15 +39,17 @@ class ToonStreamDetails {
                 .distinct()
 
             val allSeasons = if (seasonLinks.isNotEmpty()) {
-                val deferredSeasons = seasonLinks.mapIndexed { sIndex, sUrl ->
-                    async {
-                        val sNum = sIndex + 1
-                        val sHtml = fetchHtml(sUrl, baseUrl) ?: return@async null
-                        val sDoc = HtmlParser.parse(sHtml, baseUrl)
-                        parseSeason(sDoc, sNum, baseUrl)
-                    }
+                val fetchedSeasons = mutableListOf<ProviderSeason>()
+                for ((sIndex, sUrl) in seasonLinks.withIndex()) {
+                    val sNum = sIndex + 1
+                    // Add a tiny delay to prevent triggering Toonstream's 502 rate limiter
+                    if (sIndex > 0) delay(200) 
+                    
+                    val sHtml = fetchHtml(sUrl, baseUrl) ?: continue
+                    val sDoc = HtmlParser.parse(sHtml, baseUrl)
+                    fetchedSeasons.add(parseSeason(sDoc, sNum, baseUrl))
                 }
-                deferredSeasons.awaitAll().filterNotNull()
+                fetchedSeasons
             } else {
                 // Single season fallback
                 listOf(parseSeason(detailDoc, 1, baseUrl))
