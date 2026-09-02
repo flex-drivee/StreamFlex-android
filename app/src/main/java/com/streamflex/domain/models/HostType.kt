@@ -25,6 +25,7 @@ enum class HostType {
 
     // AnimeDekho extractors
     ANIMEDEKHO,
+    TOONSTREAM,
     ABYSS,
     VIDMOLY,
     STREAMRUBY,

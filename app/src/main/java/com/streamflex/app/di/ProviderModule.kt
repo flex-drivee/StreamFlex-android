@@ -7,6 +7,7 @@ import com.streamflex.providers.netmirror.NetMirrorProvider
 import com.streamflex.providers.moviebox.MovieBoxProvider
 import com.streamflex.providers.fourkhdhub.FourKHDHubProvider
 import com.streamflex.providers.animedekho.AnimeDekhoProvider
+import com.streamflex.providers.toonstream.ToonStreamProvider
 
 /**
  * Dependency module for streaming providers.
@@ -33,7 +34,8 @@ object ProviderModule {
 
             NetMirrorProvider(),
             
-            AnimeDekhoProvider()
+            AnimeDekhoProvider(),
+                        ToonStreamProvider()
         )
     }
 
