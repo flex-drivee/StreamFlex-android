@@ -45,13 +45,13 @@ interface TmdbApi {
 
     // --- Recommendations / Similar ---
 
-    @GET("movie/{movie_id}/similar")
+    @GET("movie/{movie_id}/recommendations")
     suspend fun getSimilarMovies(
         @Path("movie_id") movieId: Int,
         @Query("api_key") apiKey: String
     ): TmdbSearchResponse
 
-    @GET("tv/{tv_id}/similar")
+    @GET("tv/{tv_id}/recommendations")
     suspend fun getSimilarTvShows(
         @Path("tv_id") tvId: Int,
         @Query("api_key") apiKey: String
