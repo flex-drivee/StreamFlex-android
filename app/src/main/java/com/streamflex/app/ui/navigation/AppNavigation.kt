@@ -215,6 +215,7 @@ fun AppNavigation(
                         }
                         context.startActivity(intent)
                     }
+                , onNavigateToDetail = { type, id -> navController.navigate(Screen.Detail.createRoute(type, id)) }
                 )
             }
         }
