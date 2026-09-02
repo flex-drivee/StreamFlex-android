@@ -21,7 +21,7 @@ class ToonStreamSearch {
         baseUrl : String = ToonStreamConfig.DEFAULT_DOMAIN
     ): List<SearchResult> = withContext(Dispatchers.IO) {
         val request = RequestBuilder()
-            .url("$baseUrl/?s=${NetworkUtils.encode(query)}")
+            .url("$baseUrl/s?q=${NetworkUtils.encode(query)}")
             .header("Referer", baseUrl)
             .build()
 
