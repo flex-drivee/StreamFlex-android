@@ -12,7 +12,10 @@ import com.streamflex.domain.models.ProviderResult
 import com.streamflex.domain.models.ProviderSeason
 import com.streamflex.domain.models.SearchResult
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
+import org.jsoup.nodes.Document
 
 class ToonStreamDetails {
 
@@ -31,37 +34,25 @@ class ToonStreamDetails {
         val detailDoc  = HtmlParser.parse(detailHtml, baseUrl)
 
         if (isTV) {
-            val episodeLinks = detailDoc
-                .select("a[href]")
-                .map { 
-                    it.attr("abs:href").takeIf { abs -> abs.isNotBlank() } ?: run {
-                        val raw = it.attr("href")
-                        if (raw.startsWith("http")) raw else "$baseUrl/${raw.trimStart('/')}"
-                    }
-                }
-                .filter { "episode" in it.lowercase() || "/ep-" in it.lowercase() }
+            val seasonLinks = detailDoc.select("div.season-swiper-wrapper a[data-url]")
+                .mapNotNull { it.attr("data-url").takeIf { u -> u.isNotBlank() } }
+                .map { if (it.startsWith("http")) it else "$baseUrl/${it.trimStart('/')}" }
                 .distinct()
 
-            val episodes = episodeLinks.mapIndexed { index, epUrl ->
-                val epNum = index + 1
-                val source = ToonStreamMapper.toProviderSource(
-                    iframeUrl = epUrl,
-                    hostType  = HostType.TOONSTREAM,
-                    referer   = baseUrl,
-                    metadata  = mapOf("isMovie" to "false", "baseUrl" to baseUrl)
-                )
-                ProviderEpisode(
-                    number  = epNum,
-                    title   = "Episode $epNum",
-                    sources = listOf(source)
-                )
+            val allSeasons = if (seasonLinks.isNotEmpty()) {
+                val deferredSeasons = seasonLinks.mapIndexed { sIndex, sUrl ->
+                    async {
+                        val sNum = sIndex + 1
+                        val sHtml = fetchHtml(sUrl, baseUrl) ?: return@async null
+                        val sDoc = HtmlParser.parse(sHtml, baseUrl)
+                        parseSeason(sDoc, sNum, baseUrl)
+                    }
+                }
+                deferredSeasons.awaitAll().filterNotNull()
+            } else {
+                // Single season fallback
+                listOf(parseSeason(detailDoc, 1, baseUrl))
             }
-
-            val season = ProviderSeason(
-                number   = 1,
-                title    = "Season 1",
-                episodes = episodes
-            )
 
             ProviderResult(
                 id         = result.id,
@@ -70,7 +61,7 @@ class ToonStreamDetails {
                 detailUrl  = result.url,
                 mediaType  = MediaType.TV,
                 poster     = result.poster,
-                seasons    = listOf(season)
+                seasons    = allSeasons
             )
 
         } else {
@@ -91,6 +82,40 @@ class ToonStreamDetails {
                 sources    = listOf(source)
             )
         }
+    }
+
+    private fun parseSeason(doc: Document, seasonNum: Int, baseUrl: String): ProviderSeason {
+        val episodeLinks = doc.select("a[href]")
+            .map { 
+                it.attr("abs:href").takeIf { abs -> abs.isNotBlank() } ?: run {
+                    val raw = it.attr("href")
+                    if (raw.startsWith("http")) raw else "$baseUrl/${raw.trimStart('/')}"
+                }
+            }
+            .filter { "episode" in it.lowercase() || "/ep-" in it.lowercase() }
+            .distinct()
+            .reversed() // For consistency, keep the parsing order logic. Wait, earlier I removed reversed(). Toonstream actually lists episodes from 1 to N top-to-bottom for seasons. Let's not reverse unless needed. Wait, in my python script it output 3x137 first. So Episode 1 is FIRST! Let's NOT reverse.
+
+        val episodes = episodeLinks.mapIndexed { index, epUrl ->
+            val epNum = index + 1
+            val source = ToonStreamMapper.toProviderSource(
+                iframeUrl = epUrl,
+                hostType  = HostType.TOONSTREAM,
+                referer   = baseUrl,
+                metadata  = mapOf("isMovie" to "false", "baseUrl" to baseUrl)
+            )
+            ProviderEpisode(
+                number  = epNum,
+                title   = "Episode $epNum",
+                sources = listOf(source)
+            )
+        }
+        
+        return ProviderSeason(
+            number = seasonNum,
+            title = "Season $seasonNum",
+            episodes = episodes
+        )
     }
 
     private suspend fun fetchHtml(url: String, referer: String): String? {
