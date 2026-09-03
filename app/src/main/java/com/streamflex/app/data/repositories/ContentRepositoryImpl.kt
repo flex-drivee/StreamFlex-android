@@ -114,6 +114,11 @@ class ContentRepositoryImpl(
             "indian_web_series" -> tmdbApi.discoverTvShows(apiKey, originCountry = "IN", originalLanguage = "hi", page = page)
             "netflix_originals" -> tmdbApi.discoverTvShows(apiKey, networks = "213", page = page)
             "prime_originals" -> tmdbApi.discoverTvShows(apiKey, networks = "1024", page = page)
+                        "netflix_anime" -> tmdbApi.discoverTvShows(apiKey, genres = "16", originalLanguage = "ja", networks = "213", page = page)
+            "prime_anime" -> tmdbApi.discoverTvShows(apiKey, genres = "16", originalLanguage = "ja", networks = "1024", page = page)
+            "crunchyroll_anime" -> tmdbApi.discoverTvShows(apiKey, genres = "16", originalLanguage = "ja", networks = "1112", page = page)
+            "cartoon_network" -> tmdbApi.discoverTvShows(apiKey, genres = "16", networks = "56", page = page)
+            "nickelodeon" -> tmdbApi.discoverTvShows(apiKey, genres = "16", networks = "13", page = page)
             "anime_movies" -> tmdbApi.discoverMovies(apiKey, genres = "16", originalLanguage = "ja", page = page)
             "anime_shows" -> tmdbApi.discoverTvShows(apiKey, genres = "16", originalLanguage = "ja", page = page)
             "top_anime_movies" -> tmdbApi.discoverMovies(apiKey, genres = "16", originalLanguage = "ja", sortBy = "vote_average.desc", voteCountGte = 200, page = page)
@@ -143,7 +148,12 @@ class ContentRepositoryImpl(
             "south_indian" to "South Indian Hits",
             "anime_shows" to "Trending Anime Series",
             "anime_movies" to "Trending Anime Movies",
-            "top_anime_shows" to "Top Rated Anime Series",
+                        "top_anime_shows" to "Top Rated Anime Series",
+            "netflix_anime" to "Netflix Anime",
+            "prime_anime" to "Prime Anime",
+            "crunchyroll_anime" to "Crunchyroll Originals",
+            "cartoon_network" to "Cartoon Network Classics",
+            "nickelodeon" to "Nickelodeon Hits",
             "top_anime_movies" to "Top Rated Anime Movies",
             "action_movies" to "Action & Adventure",
             "comedy_movies" to "Comedy Movies",

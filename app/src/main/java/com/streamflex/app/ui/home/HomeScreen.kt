@@ -69,7 +69,11 @@ fun HomeScreen(
         when (selectedTab) {
             1 -> state.sections.filter { it.id.contains("movie", ignoreCase = true) || it.id == "trending_cinema" }
             2 -> state.sections.filter { it.id.contains("series", ignoreCase = true) || it.id.contains("show", ignoreCase = true) || it.id.contains("drama", ignoreCase = true) }
-            3 -> state.sections.filter { it.id.contains("anime", ignoreCase = true) }
+            3 -> state.sections.filter { 
+                it.id.contains("anime", ignoreCase = true) || 
+                it.id.contains("cartoon", ignoreCase = true) || 
+                it.id.contains("nickelodeon", ignoreCase = true) 
+            }
             else -> state.sections // 0 -> Home
         }
     }
