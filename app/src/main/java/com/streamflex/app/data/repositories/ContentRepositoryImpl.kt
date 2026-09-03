@@ -96,8 +96,6 @@ class ContentRepositoryImpl(
             "usa_series" -> tmdbApi.discoverTvShows(apiKey, originCountry = "US", page = page)
             "indian_movies" -> tmdbApi.discoverMovies(apiKey, originCountry = "IN", page = page)
             "indian_series" -> tmdbApi.discoverTvShows(apiKey, originCountry = "IN", page = page)
-            "ph_movies" -> tmdbApi.discoverMovies(apiKey, originCountry = "PH", originalLanguage = "tl", page = page)
-            "ph_series" -> tmdbApi.discoverTvShows(apiKey, originCountry = "PH", originalLanguage = "tl", page = page)
             "thai_movies" -> tmdbApi.discoverMovies(apiKey, originCountry = "TH", page = page)
             "thai_series" -> tmdbApi.discoverTvShows(apiKey, originCountry = "TH", page = page)
             "korean_dramas" -> tmdbApi.discoverTvShows(apiKey, originCountry = "KR", page = page)
@@ -163,7 +161,6 @@ class ContentRepositoryImpl(
             "chinese_series" to "Chinese Series",
             "japan_series" to "Japanese Series",
             "thai_series" to "Thai Series",
-            "ph_movies" to "Philippines Movies",
             "usa_movies" to "USA Movies"
         )
     }
