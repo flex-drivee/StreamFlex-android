@@ -51,7 +51,14 @@ fun HomeScreen(
     val scrollState = rememberLazyListState()
 
     // Hero auto-cycle through first 5 featured items
-    val featuredItems = state.popularMovies.take(5)
+    val featuredItems = remember(state, selectedTab) {
+        when (selectedTab) {
+            1 -> state.sections.find { it.id == "trending_cinema" }?.items?.take(5) ?: state.popularMovies.take(5)
+            2 -> state.sections.find { it.id == "top_series" }?.items?.take(5) ?: state.popularMovies.take(5)
+            3 -> state.sections.find { it.id == "anime_shows" }?.items?.take(5) ?: state.popularMovies.take(5)
+            else -> state.popularMovies.take(5)
+        }
+    }
     var heroIndex by remember { mutableIntStateOf(0) }
     val featuredContent = featuredItems.getOrNull(heroIndex)
 
@@ -70,6 +77,25 @@ fun HomeScreen(
     // Tab state for Home / Movies / Series / Anime
     val tabs = listOf("Home", "Movies", "Series", "Anime")
     var selectedTab by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(selectedTab) {
+        if (selectedTab == 3) {
+            // Automatically switch to an Anime provider when on Anime tab
+            providerRepository.selectedProviderId = "toonstream"
+        } else {
+            // Reset to default (all providers) for other tabs
+            providerRepository.selectedProviderId = null
+        }
+    }
+
+    val filteredSections = remember(state.sections, selectedTab) {
+        when (selectedTab) {
+            1 -> state.sections.filter { it.id.contains("movie", ignoreCase = true) || it.id == "trending_cinema" }
+            2 -> state.sections.filter { it.id.contains("series", ignoreCase = true) || it.id.contains("show", ignoreCase = true) || it.id.contains("drama", ignoreCase = true) }
+            3 -> state.sections.filter { it.id.contains("anime", ignoreCase = true) }
+            else -> state.sections // 0 -> Home
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.reloadHistory()
@@ -121,7 +147,7 @@ fun HomeScreen(
             }
 
             // ── DYNAMIC CONTENT ROWS ──────────────────────────────────────────
-            items(state.sections) { section ->
+            items(filteredSections) { section ->
                 SFSectionRow(
                     title    = section.title,
                     items    = section.items,
