@@ -1,560 +1,543 @@
-STREAM_PIPELINE: #EXTINF:9.551844,
-21:30:48.045 [D] STREAM_PIPELINE: 9983_1116.jpg
-21:30:48.045 [D] STREAM_PIPELINE: #EXTINF:9.593556,
-21:30:48.046 [D] STREAM_PIPELINE: 9983_1117.jpg
-21:30:48.046 [D] STREAM_PIPELINE: #EXT-X-ENDLIST
-21:30:48.047 [D] HTTP: ← [200] https://makhi13.top/s23.nm-cdn9.top/files/82048312/1080p/1080p.m3u8?in=77d6e4978f9af0f6df1efd5827a25ed9::180c0d0e54f1f27370aa6b304e4eea35::1788453045::kp::myes (1278ms)
-21:30:48.047 [D] SecurityInterceptor: Binary content-type detected: application/vnd.apple.mpegurl — URL: https://makhi13.top/s23.nm-cdn9.top/files/82048312/1080p/1080p.m3u8?in=77d6e4978f9af0f6df1efd5827a25ed9::180c0d0e54f1f27370aa6b304e4eea35::1788453045::kp::myes
-21:30:48.053 [D] HTTP: → [GET] https://makhi13.top/s23.nm-cdn9.top/files/82048312/a/2/2.m3u8
-21:30:48.053 [D] HTTP: → [GET] https://makhi13.top/s23.nm-cdn9.top/files/82048312/720p/720p.m3u8?in=77d6e4978f9af0f6df1efd5827a25ed9::180c0d0e54f1f27370aa6b304e4eea35::1788453045::kp::myes
-21:30:48.072 [D] STREAM_PIPELINE: [Media3Player] Original M3U8:
-21:30:48.073 [D] STREAM_PIPELINE: #EXTM3U
-21:30:48.074 [D] STREAM_PIPELINE: #EXT-X-VERSION:3
-21:30:48.074 [D] STREAM_PIPELINE: #EXT-X-TARGETDURATION:5
-21:30:48.075 [D] STREAM_PIPELINE: #EXT-X-MEDIA-SEQUENCE:0
-21:30:48.075 [D] STREAM_PIPELINE: #EXTINF:5.013333,
-30:48.820 [D] STREAM_PIPELINE: #EXTINF:4.522333,
-21:30:48.821 [D] STREAM_PIPELINE: 9983_711.js
-21:30:48.821 [D] STREAM_PIPELINE: #EXT-X-ENDLIST
-21:30:48.822 [D] HTTP: ← [200] https://makhi13.top/s23.nm-cdn9.top/files/82048312/a/2/2.m3u8 (617ms)
-21:30:48.823 [D] SecurityInterceptor: Binary content-type detected: application/vnd.apple.mpegurl — URL: https://makhi13.top/s23.nm-cdn9.top/files/82048312/a/2/2.m3u8
-21:30:48.825 [D] STREAM_PIPELINE: [Media3Player] Original M3U8:
-21:30:48.826 [D] STREAM_PIPELINE: #EXTM3U
-21:30:48.826 [D] STREAM_PIPELINE: #EXT-X-VERSION:3
-21:30:48.827 [D] STREAM_PIPELINE: #EXT-X-TARGETDURATION:10
-21:30:48.828 [D] STREAM_PIPELINE: #EXT-X-MEDIA-SEQUENCE:0
-21:30:48.828 [D] STREAM_PIPELINE: #EXTINF:3.670578,
-21:30:48.829 [D] STREAM_PIPELINE: 9983_000.jpg
-21:30:48.830 [D] STREAM_PIPELINE: #EXTINF:6.340089,
-21:30:48.831 [D] STRE
-:30:50.209 [D] STREAM_PIPELINE: 9983_1115.jpg
-21:30:50.210 [D] STREAM_PIPELINE: #EXTINF:9.551844,
-21:30:50.211 [D] STREAM_PIPELINE: 9983_1116.jpg
-21:30:50.212 [D] STREAM_PIPELINE: #EXTINF:9.593556,
-21:30:50.213 [D] STREAM_PIPELINE: 9983_1117.jpg
-21:30:50.214 [D] STREAM_PIPELINE: #EXT-X-ENDLIST
-21:30:50.215 [D] HTTP: ← [200] https://makhi13.top/s23.nm-cdn9.top/files/82048312/720p/720p.m3u8?in=77d6e4978f9af0f6df1efd5827a25ed9::180c0d0e54f1f27370aa6b304e4eea35::1788453045::kp::myes (683ms)
-21:30:50.216 [D] SecurityInterceptor: Binary content-type detected: application/vnd.apple.mpegurl — URL: https://makhi13.top/s23.nm-cdn9.top/files/82048312/720p/720p.m3u8?in=77d6e4978f9af0f6df1efd5827a25ed9::180c0d0e54f1f27370aa6b304e4eea35::1788453045::kp::myes
-21:30:50.217 [D] HTTP: → [GET] https://makhi13.top/s23.nm-cdn9.top/files/82048312/a/2/9983_000.js
-21:30:50.220 [D] HTTP: → [GET] https://makhi13.top/s23.nm-cdn9.top/files/82048312/720p/9983_000.jpg
-21:30:50.223 [D] HTTP: ← [200] https://makhi13.top/s23.nm-cdn9.top/files/82048312/a/2/9983_000.js (253ms)
-21:30:50.224 [I] DMCodecAdapterFactory: Creating an asynchronous MediaCodec adapter for track type audio
-21:30:50.224 [D] CCodec: allocate(c2.android.aac.decoder)
-21:30:50.225 [I] CCodec: setting up 'default' as default (vendor) store
-21:30:50.225 [D] BufferPoolAccessor2.0: bufferpool2 0xb400007891031a38 : 0(0 size) total buffers - 0(0 size) used buffers - 96/106 (recycle/alloc) - 10/101 (fetch/transfer)
-21:30:50.226 [D] BufferPoolAccessor2.0: Destruction - bufferpool2 0xb400007891031a38 cached: 0/0M, 0/0% in use; allocs: 106, 91% recycled; transfers: 101, 90% unfetched
-21:30:50.226 [I] CCodec: Created component [c2.android.aac.decoder]
-21:30:50.227 [D] CCodecConfig: read media type: audio/mp4a-latm
-21:30:50.227 [D] ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.max-count.values
-21:30:50.228 [D] ReflectedParamUpdater: extent() != 1 for single value type: output.subscribed-indices.values
-21:30:50.228 [D] ReflectedParamUpdater: extent() != 1 for single value type: input.buffers.allocator-ids.values
-21:30:50.229 [D] ReflectedParamUpdater: extent() != 1 for single value type: output.buffers.allocator-ids.values
-21:30:50.230 [D] ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.allocator-ids.values
-21:30:50.230 [D] ReflectedParamUpdater: extent() != 1 for single value type: output.buffers.pool-ids.values
-21:30:50.231 [D] ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.pool-ids.values
-21:30:50.232 [I] CCodecConfig: query failed after returning 19 values (BAD_INDEX)
-21:30:50.233 [D] CCodecConfig: c2 config diff is Dict {
-21:30:50.234 [D] CCodecConfig: c2::u32 coded.aac-packaging.value = 0
-21:30:50.234 [D] CCodecConfig: c2::u32 coded.bitrate.value = 64000
-21:30:50.235 [D] CCodecConfig: c2::u32 coded.pl.level = 0
-21:30:50.235 [D] CCodecConfig: c2::u32 coded.pl.profile = 8192
-21:30:50.236 [D] CCodecConfig: c2::i32 coding.drc.album-mode.value = 0
-21:30:50.236 [D] CCodecConfig: c2::float coding.drc.attenuation-factor.value = 1
-21:30:50.237 [D] CCodecConfig: c2::float coding.drc.boost-factor.value = 1
-21:30:50.238 [D] CCodecConfig: c2::i32 coding.drc.compression-mode.value = 3
-21:30:50.239 [D] CCodecConfig: c2::i32 coding.drc.effect-type.value = 3
-21:30:50.240 [D] CCodecConfig: c2::float coding.drc.encoded-level.value = 0.25
-21:30:50.240 [D] CCodecConfig: c2::float coding.drc.reference-level.value = -16
-21:30:50.241 [D] CCodecConfig: c2::u32 input.buffers.max-size.value = 8192
-21:30:50.242 [D] CCodecConfig: c2::u32 input.delay.value = 0
-21:30:50.243 [D] CCodecConfig: string input.media-type.value = "audio/mp4a-latm"
-21:30:50.243 [D] CCodecConfig: c2::u32 output.delay.value = 2
-21:30:50.244 [D] CCodecConfig: c2::float output.drc.output-loudness.value = 0.25
-21:30:50.245 [D] CCodecConfig: string output.media-type.value = "audio/raw"
-21:30:50.246 [D] CCodecConfig: c2::u32 raw.channel-count.value = 1
-21:30:50.247 [D] CCodecConfig: c2::u32 raw.max-channel-count.value = 8
-21:30:50.248 [D] CCodecConfig: c2::u32 raw.sample-rate.value = 44100
-21:30:50.249 [D] CCodecConfig: }
-21:30:50.250 [I] MediaCodec: MediaCodec will operate in async mode
-21:30:50.250 [D] MediaCodec: flushMediametrics
-21:30:50.251 [D] CCodec: [c2.android.aac.decoder] buffers are bound to CCodec for this session
-21:30:50.251 [D] CCodecConfig: no c2 equivalents for log-session-id
-21:30:50.252 [D] CCodecConfig: no c2 equivalents for flags
-21:30:50.253 [D] CCodecConfig: c2 config diff is   c2::u32 raw.channel-count.value = 2
-21:30:50.253 [D] CCodecConfig: c2::u32 raw.sample-rate.value = 48000
-21:30:50.253 [W] Codec2Client: query -- param skipped: index = 1107298332.
-21:30:50.254 [D] CCodec: setup formats input: AMessage(what = 0x00000000) = {
-21:30:50.254 [D] CCodec: int32_t aac-drc-album-mode = 0
-21:30:50.255 [D] CCodec: int32_t aac-drc-boost-level = 127
-21:30:50.255 [D] CCodec: int32_t aac-drc-cut-level = 127
-21:30:50.256 [D] CCodec: int32_t aac-drc-effect-type = 3
-21:30:50.257 [D] CCodec: int32_t aac-encoded-target-level = -1
-21:30:50.258 [D] CCodec: int32_t aac-max-output-channel_count = 8
-21:30:50.258 [D] CCodec: int32_t aac-target-ref-level = 64
-21:30:50.259 [D] CCodec: int32_t bitrate = 64000
-21:30:50.259 [D] CCodec: int32_t channel-count = 2
-21:30:50.260 [D] CCodec: int32_t level = 0
-21:30:50.261 [D] CCodec: int32_t max-input-size = 8192
-21:30:50.261 [D] CCodec: string mime = "audio/mp4a-latm"
-21:30:50.262 [D] CCodec: int32_t profile = 2
-21:30:50.263 [D] CCodec: int32_t sample-rate = 48000
-21:30:50.264 [D] CCodec: }
-21:30:50.265 [D] CCodec: setup formats output: AMessage(what = 0x00000000) = {
-21:30:50.265 [D] CCodec: int32_t aac-drc-album-mode = 0
-21:30:50.266 [D] CCodec: int32_t aac-drc-boost-level = 127
-21:30:50.266 [D] CCodec: int32_t aac-drc-cut-level = 127
-21:30:50.267 [D] CCodec: int32_t aac-drc-effect-type = 3
-21:30:50.267 [D] CCodec: int32_t aac-drc-output-loudness = -1
-21:30:50.267 [D] CCodec: int32_t aac-encoded-target-level = -1
-21:30:50.268 [D] CCodec: int32_t aac-max-output-channel_count = 8
-21:30:50.268 [D] CCodec: int32_t aac-target-ref-level = 64
-21:30:50.269 [D] CCodec: int32_t channel-count = 2
-21:30:50.269 [D] CCodec: string mime = "audio/raw"
-21:30:50.269 [D] CCodec: int32_t sample-rate = 48000
-21:30:50.270 [D] CCodec: }
-21:30:50.270 [I] CCodecConfig: query failed after returning 19 values (BAD_INDEX)
-21:30:50.271 [D] MediaCodec: keep callback message for reclaim
-21:30:50.271 [W] Codec2Client: query -- param skipped: index = 1342179345.
-21:30:50.272 [W] Codec2Client: query -- param skipped: index = 2415921170.
-21:30:50.272 [W] Codec2Client: query -- param skipped: index = 1610614798.
-21:30:50.273 [D] CCodecBufferChannel: [c2.android.aac.decoder#48] Created input block pool with allocatorID 16 => poolID 21 - OK (0)
-21:30:50.275 [I] CCodecBufferChannel: [c2.android.aac.decoder#48] Created output block pool with allocatorID 16 => poolID 834 - OK
-21:30:50.276 [D] CCodecBufferChannel: [c2.android.aac.decoder#48] Configured output block pool ids 834 => OK
-21:30:50.277 [D] CCodecConfig: c2 config diff is   c2::u32 raw.channel-mask.value = 12
-21:30:50.277 [D] AudioTrack: INSP: type=audio,case=1,set=0xb4000078c102ea30,stream_type=-1,sample_rate=48000,format=0x1,channel_mask=0x3,frame_count=12000,flags=0x0,notification_frames=0,session_id=6001,transfer_type=3,uid=-1,pid=-1
-21:30:50.278 [D] AudioTrack: INSP: type=audio,case=1,attributes=1,content_type=0,usage=1,source=-1,flags=0xa00
-21:30:50.279 [D] AudioTrack: set(): Building AudioTrack with attributes: usage = 1, content = 0, flags = 0xa00, tags = []
-21:30:50.279 [D] AudioTrack: set(): 0xb4000078c102ea30, Create AudioTrackThread, tid = 11041
-21:30:50.280 [D] AudioTrack: createTrack_l(600): 0xb4000078c102ea30, mCblk = 0x7a4e0c6000, mLatency = 335, mAfLatency = 85, frameCount = 12000, mSampleRate = 48000, mFlags = 0x8, mReqFrameCount = 12000, mNotificationFramesAct = 6000
-21:30:50.280 [D] AudioTrack: setVolume(600): 0xb4000078c102ea30, left = 1.000000, right = 1.000000
-21:30:50.281 [W] PesReader: Unexpected start code prefix: 2162723
-21:30:50.282 [D] HTTP: ← [200] https://makhi13.top/s23.nm-cdn9.top/files/82048312/720p/9983_000.jpg (342ms)
-21:30:50.283 [I] DMCodecAdapterFactory: Creating an asynchronous MediaCodec adapter for track type video
-21:30:50.285 [D] CCodec: allocate(c2.mtk.avc.decoder)
-21:30:50.286 [I] CCodec: setting up 'default' as default (vendor) store
-21:30:50.286 [I] CCodec: Created component [c2.mtk.avc.decoder]
-21:30:50.286 [D] CCodecConfig: read media type: video/avc
-21:30:50.287 [D] ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.max-count.values
-21:30:50.287 [D] ReflectedParamUpdater: extent() != 1 for single value type: output.subscribed-indices.values
-21:30:50.288 [D] ReflectedParamUpdater: extent() != 1 for single value type: input.buffers.allocator-ids.values
-21:30:50.289 [D] ReflectedParamUpdater: extent() != 1 for single value type: output.buffers.allocator-ids.values
-21:30:50.290 [D] ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.allocator-ids.values
-21:30:50.291 [D] ReflectedParamUpdater: extent() != 1 for single value type: output.buffers.pool-ids.values
-21:30:50.292 [D] ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.pool-ids.values
-21:30:50.293 [D] ReflectedParamUpdater: ignored struct field coded.color-format.locations
-21:30:50.296 [D] CCodecConfig: ignoring local param raw.size (0xd2001800) as it is already supported
-21:30:50.297 [D] CCodecConfig: ignoring local param raw.crop (0xd2001801) as it is already supported
-21:30:50.298 [D] CCodecConfig: ignoring local param default.color (0x5200180b) as it is already supported
-21:30:50.298 [D] CCodecConfig: ignoring local param raw.hdr-static-info (0xd200180a) as it is already supported
-21:30:50.300 [I] CCodecConfig: query failed after returning 17 values (BAD_INDEX)
-21:30:50.301 [D] CCodecConfig: c2 config diff is Dict {
-21:30:50.302 [D] CCodecConfig: c2::i32 algo.priority.value = 1
-21:30:50.302 [D] CCodecConfig: c2::float algo.rate.value = 0
-21:30:50.302 [D] CCodecConfig: c2::float coded.frame-rate.value = 30
-21:30:50.303 [D] CCodecConfig: c2::u32 coded.pl.level = 20495
-21:30:50.304 [D] CCodecConfig: c2::u32 coded.pl.profile = 20481
-21:30:50.305 [D] CCodecConfig: c2::u32 coded.vui.color.matrix = 0
-21:30:50.306 [D] CCodecConfig: c2::u32 coded.vui.color.primaries = 0
-21:30:50.307 [D] CCodecConfig: c2::u32 coded.vui.color.range = 2
-21:30:50.307 [D] CCodecConfig: c2::u32 coded.vui.color.transfer = 0
-21:30:50.308 [D] CCodecConfig: c2::u32 default.color.matrix = 0
-21:30:50.308 [D] CCodecConfig: c2::u32 default.color.primaries = 0
-21:30:50.308 [D] CCodecConfig: c2::u32 default.color.range = 0
-21:30:50.309 [D] CCodecConfig: c2::u32 default.color.transfer = 0
-21:30:50.309 [D] CCodecConfig: c2::u32 input.buffers.max-size.value = 2097152
-21:30:50.310 [D] CCodecConfig: c2::u32 input.delay.value = 4
-21:30:50.311 [D] CCodecConfig: string input.media-type.value = "video/avc"
-21:30:50.311 [D] CCodecConfig: c2::u32 output.delay.value = 12
-21:30:50.312 [D] CCodecConfig: string output.media-type.value = "video/raw"
-21:30:50.312 [D] CCodecConfig: c2::u32 raw.color.matrix = 0
-21:30:50.313 [D] CCodecConfig: c2::u32 raw.color.primaries = 0
-21:30:50.314 [D] CCodecConfig: c2::u32 raw.color.range = 2
-21:30:50.314 [D] CCodecConfig: c2::u32 raw.color.transfer = 0
-21:30:50.315 [D] CCodecConfig: c2::u32 raw.crop.height = 239
-21:30:50.315 [D] CCodecConfig: c2::u32 raw.crop.left = 0
-21:30:50.316 [D] CCodecConfig: c2::u32 raw.crop.top = 0
-21:30:50.316 [D] CCodecConfig: c2::u32 raw.crop.width = 319
-21:30:50.317 [D] CCodecConfig: c2::float raw.hdr-static-info.mastering.blue.x = 0
-21:30:50.318 [D] CCodecConfig: c2::float raw.hdr-s
-21:30:50.319 [W] ColorUtils: expected specified color aspects (2:0:0:0)
-21:30:50.320 [I] MediaCodec: MediaCodec will operate in async mode
-21:30:50.320 [D] MediaCodec: flushMediametrics
-21:30:50.321 [D] SurfaceUtils: connecting to surface 0xb40000793100ebd0, reason connectToSurface
-21:30:50.323 [I] MediaCodec: [c2.mtk.avc.decoder] setting surface generation to 10825733
-21:30:50.323 [D] SurfaceUtils: disconnecting from surface 0xb40000793100ebd0, reason connectToSurface(reconnect)
-21:30:50.325 [D] SurfaceUtils: connecting to surface 0xb40000793100ebd0, reason connectToSurface(reconnect)
-21:30:50.326 [D] MediaCodec: [c2.mtk.avc.decoder] current pid: 10572, current process name: com.streamflex.app
-21:30:50.328 [D] CCodec: [c2.mtk.avc.decoder] buffers are bound to CCodec for this session
-21:30:50.328 [D] CCodecConfig: no c2 equivalents for csd-1
-21:30:50.329 [D] CCodecConfig: no c2 equivalents for log-session-id
-21:30:50.329 [D] CCodecConfig: no c2 equivalents for native-window
-21:30:50.330 [D] CCodecConfig: no c2 equivalents for flags
-21:30:50.330 [D] CCodecConfig: c2 config diff is   c2::i32 algo.priority.value = 0
-21:30:50.331 [D] CCodecConfig: c2::u32 input.buffers.max-size.value = 2094080
-21:30:50.332 [D] CCodecConfig: c2::u32 raw.max-size.height = 720
-21:30:50.333 [D] CCodecConfig: c2::u32 raw.max-size.width = 1280
-21:30:50.334 [D] CCodecConfig: c2::u32 raw.pixel-format.value = 34
-21:30:50.335 [D] CCodecConfig: c2::u32 raw.size.height = 720
-21:30:50.335 [D] CCodecConfig: c2::u32 raw.size.width = 1280
-21:30:50.336 [W] Codec2Client: query -- param skipped: index = 1107298332.
-21:30:50.336 [D] CCodec: client requested max input size 691200, which is smaller than what component recommended (2094080); overriding with component recommendation.
-21:30:50.337 [W] CCodec: This behavior is subject to change. It is recommended that app developers double check whether the requested max input size is in reasonable range.
-21:30:50.338 [W] PesReader: Unexpected start code prefix: 3211293
-21:30:50.338 [D] CCodec: setup formats input: AMessage(what = 0x00000000) = {
-21:30:50.339 [D] CCodec: string mime = "video/avc"
-21:30:50.339 [D] CCodec: int32_t width = 1280
-21:30:50.340 [D] CCodec: int32_t profile = 65536
-21:30:50.341 [D] CCodec: int32_t priority = 0
-21:30:50.341 [D] CCodec: int32_t frame-rate = 30
-21:30:50.341 [D] CCodec: int32_t height = 720
-21:30:50.342 [D] CCodec: int32_t level = 32768
-21:30:50.343 [D] CCodec: int32_t max-input-size = 2094080
-21:30:50.343 [D] CCodec: Rect crop(0, 0, 318, 238)
-21:30:50.344 [D] CCodec: }
-21:30:50.344 [D] CCodec: setup formats output: AMessage(what = 0x00000000) = {
-21:30:50.345 [D] CCodec: int32_t android._color-format = 2130708361
-21:30:50.345 [D] CCodec: int32_t android._video-scaling = 1
-21:30:50.346 [D] CCodec: int32_t sar-width = 1
-21:30:50.346 [D] CCodec: int32_t color-standard = 4
-21:30:50.346 [D] CCodec: int32_t color-range = 2
-21:30:50.347 [D] CCodec: int32_t color-transfer = 3
-21:30:50.347 [D] CCodec: int32_t android._dataspace = 259
-21:30:50.347 [D] CCodec: int32_t width = 1280
-21:30:50.347 [D] CCodec: int32_t rotation-degrees = 0
-21:30:50.348 [D] CCodec: int32_t sar-height = 1
-21:30:50.349 [D] CCodec: int32_t max-width = 1280
-21:30:50.349 [D] CCodec: int32_t max-height = 720
-21:30:50.350 [D] CCodec: int32_t priority = 0
-21:30:50.351 [D] CCodec: string mime = "video/raw"
-21:30:50.351 [D] CCodec: Rect crop(0, 0, 318, 238)
-21:30:50.352 [D] CCodec: Buffer hdr-static-info = {
-21:30:50.353 [D] CCodec: 00000000:  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  ................
-21:30:50.353 [D] CCodec: 00000010:  00 00 00 00 00 00 00 00  00                       .........
-21:30:50.354 [D] CCodec: }
-21:30:50.354 [D] CCodec: int32_t frame-rate = 30
-21:30:50.355 [D] CCodec: int32_t height = 720
-21:30:50.356 [D] CCodec: int32_t color-format = 2130708361
-21:30:50.356 [D] CCodec: }
-21:30:50.357 [I] CCodecConfig: query failed after returning 17 values (BAD_INDEX)
-21:30:50.357 [D] MediaCodec: keep callback message for reclaim
-21:30:50.358 [W] Codec2Client: query -- param skipped: index = 1342179345.
-21:30:50.359 [W] Codec2Client: query -- param skipped: index = 2415921170.
-21:30:50.359 [W] Codec2Client: query -- param skipped: index = 1610614798.
-21:30:50.360 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#218] Created input block pool with allocatorID 16 => poolID 22 - OK (0)
-21:30:50.360 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#218] Query output surface allocator returned 0 params => BAD_INDEX (6)
-21:30:50.360 [I] CCodecBufferChannel: [c2.mtk.avc.decoder#218] Created output block pool with allocatorID 18 => poolID 134 - OK
-21:30:50.361 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#218] Configured output block pool ids 134 => OK
-21:30:50.361 [D] Codec2-OutputBufferQueue: remote graphic buffer migration 0/0
-21:30:50.362 [D] Codec2Client: setOutputSurface -- generation=10825733 consumer usage=0x900
-21:30:50.362 [D] Codec2Client: Surface configure completed
-21:30:50.363 [D] BufferPoolAccessor2.0: bufferpool2 0xb4000078911c3b98 : 0(0 size) total buffers - 0(0 size) used buffers - 89/98 (recycle/alloc) - 10/82 (fetch/transfer)
-21:30:50.363 [D] BufferPoolAccessor2.0: Destruction - bufferpool2 0xb4000078911c3b98 cached: 0/0M, 0/0% in use; allocs: 98, 91% recycled; transfers: 82, 88% unfetched
-21:30:50.364 [D] HTTP: → [GET] https://makhi13.top/s23.nm-cdn9.top/files/82048312/720p/9983_001.jpg
-21:30:50.365 [D] HTTP: → [GET] https://makhi13.top/s23.nm-cdn9.top/files/82048312/a/2/9983_001.js
-21:30:50.366 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#218] flushed work; ignored.
-21:30:50.367 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#218] Discard frames from previous generation.
-21:30:50.367 [D] PipelineWatcher: onWorkDone: frameIndex not found (18446744073709551615); ignored
-21:30:50.368 [D] CCodecConfig: c2 config diff is   c2::u32 output.delay.value = 14
-21:30:50.368 [D] CCodecConfig: c2::u32 raw.color.range = 0
-21:30:50.369 [D] Codec2-OutputBufferQueue: set max dequeue count 21 from update
-21:30:50.370 [D] CCodecConfig: c2 config diff is   c2::u32 raw.crop.height = 720
-21:30:50.373 [D] CCodecConfig: c2::u32 raw.crop.width = 1280
-21:30:50.373 [D] CCodecConfig: c2::u32 raw.pixel-format.value = 2130706433
-21:30:50.375 [D] CCodecBuffers: [c2.mtk.avc.decoder#218:2D-Output] popFromStashAndRegister: at 1000000083422us, output format changed to AMessage(what = 0x00000000) = {
-21:30:50.376 [D] CCodecBuffers: int32_t android._color-format = 2130706433
-21:30:50.377 [D] CCodecBuffers: int32_t android._video-scaling = 1
-21:30:50.378 [D] CCodecBuffers: int32_t sar-width = 1
-21:30:50.379 [D] CCodecBuffers: int32_t color-standard = 1
-21:30:50.380 [D] CCodecBuffers: int32_t color-range = 2
-21:30:50.381 [D] CCodecBuffers: int32_t color-transfer = 3
-21:30:50.383 [D] CCodecBuffers: int32_t android._dataspace = 260
-21:30:50.386 [D] CCodecBuffers: int32_t width = 1280
-21:30:50.387 [D] CCodecBuffers: int32_t rotation-degrees = 0
-21:30:50.388 [D] CCodecBuffers: int32_t sar-height = 1
-21:30:50.389 [D] CCodecBuffers: int32_t max-width = 1280
-21:30:50.390 [D] CCodecBuffers: int32_t max-height = 720
-21:30:50.391 [D] CCodecBuffers: int32_t priority = 0
-21:30:50.393 [D] CCodecBuffers: string mime = "video/raw"
-21:30:50.394 [D] CCodecBuffers: Rect crop(0, 0, 1279, 719)
-21:30:50.395 [D] CCodecBuffers: Buffer hdr-static-info = {
-21:30:50.396 [D] CCodecBuffers: 00000000:  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  ................
-21:30:50.397 [D] CCodecBuffers: 00000010:  00 00 00 00 00 00 00 00  00                       .........
-21:30:50.398 [D] CCodecBuffers: }
-21:30:50.398 [D] CCodecBuffers: int32_t frame-rate = 30
-21:30:50.398 [D] CCodecBuffers: int32_t height = 720
-21:30:50.399 [D] CCodecBuffers: int32_t color-format = 2130708361
-21:30:50.399 [D] CCodecBuffers: }
-21:30:50.400 [W] MediaCodec: mapFormat: no mediaType information
-21:30:50.401 [D] AudioTrack: start(600): 0xb4000078c102ea30, prior state:STATE_STOPPED
-21:30:50.403 [W] SpeakerLayoutUtil: Built-in speaker's getSpeakerLayoutChannelMask not usable, defaulting to stereo.
-21:30:50.406 [D] AudioTrack: getTimestamp_l(600): device stall time corrected using current time 125742172389648
-21:30:50.412 [D] HTTP: ← [200] https://makhi13.top/s23.nm-cdn9.top/files/82048312/720p/9983_001.jpg (360ms)
-21:30:50.443 [D] HTTP: ← [200] https://makhi13.top/s23.nm-cdn9.top/files/82048312/a/2/9983_001.js (1880ms)
-21:30:50.444 [W] PesReader: Unexpected start code prefix: 3211327
-21:30:50.446 [D] ViewRootImpl[PlayerActivity]: hardware acceleration = true, sRendererEnabled = true, forceHwAccelerated = false
-21:30:50.448 [W] PesReader: Unexpected start code prefix: 2162751
-21:30:50.449 [D] HTTP: → [GET] https://makhi13.top/s23.nm-cdn9.top/files/82048312/a/2/9983_002.js
-21:30:50.449 [D] HTTP: → [GET] https://makhi13.top/s23.nm-cdn9.top/files/82048312/720p/9983_002.jpg
-21:30:50.451 [I] BLASTBufferQueue: [ViewRootImpl[PlayerActivity]#17] constructor()
-21:30:50.451 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.0   /fraction:0.0   /allowWhenFinished:false
-21:30:50.452 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.452 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.0   /fraction:0.0   /allowWhenFinished:false
-21:30:50.453 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.453 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.0021566378   /fraction:0.022   /allowWhenFinished:false
-21:30:50.454 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.454 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.007324831   /fraction:0.046   /allowWhenFinished:false
-21:30:50.455 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.456 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.0141958995   /fraction:0.068   /allowWhenFinished:false
-21:30:50.458 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.459 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.023094956   /fraction:0.09   /allowWhenFinished:false
-21:30:50.460 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.461 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.034073614   /fraction:0.112   /allowWhenFinished:false
-21:30:50.463 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.464 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.04599736   /fraction:0.134   /allowWhenFinished:false
-21:30:50.465 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.467 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.059599563   /fraction:0.156   /allowWhenFinished:false
-21:30:50.468 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.469 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.07423706   /fraction:0.178   /allowWhenFinished:false
-21:30:50.469 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.470 [D] HTTP: ← [200] https://makhi13.top/s23.nm-cdn9.top/files/82048312/a/2/9983_002.js (170ms)
-21:30:50.471 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.089694895   /fraction:0.2   /allowWhenFinished:false
-21:30:50.471 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.471 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.107089624   /fraction:0.222   /allowWhenFinished:false
-21:30:50.472 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.473 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.124874264   /fraction:0.244   /allowWhenFinished:false
-21:30:50.474 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.475 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.14265889   /fraction:0.266   /allowWhenFinished:false
-21:30:50.476 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.477 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.16103464   /fraction:0.288   /allowWhenFinished:false
-21:30:50.478 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.479 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.18132624   /fraction:0.31   /allowWhenFinished:false
-21:30:50.480 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.482 [W] PesReader: Unexpected start code prefix: 2162777
-21:30:50.483 [D] HTTP: → [GET] https://makhi13.top/s23.nm-cdn9.top/files/82048312/a/2/9983_003.js
-21:30:50.484 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.2016178   /fraction:0.332   /allowWhenFinished:false
-21:30:50.485 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.486 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.2237541   /fraction:0.356   /allowWhenFinished:false
-21:30:50.486 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.487 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.24523847   /fraction:0.378   /allowWhenFinished:false
-21:30:50.488 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.488 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.26752838   /fraction:0.4   /allowWhenFinished:false
-21:30:50.489 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.489 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.28981826   /fraction:0.422   /allowWhenFinished:false
-21:30:50.490 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.491 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.31210816   /fraction:0.444   /allowWhenFinished:false
-21:30:50.491 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.492 [D] HTTP: ← [200] https://makhi13.top/s23.nm-cdn9.top/files/82048312/720p/9983_002.jpg (303ms)
-21:30:50.493 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.33625445   /fraction:0.466   /allowWhenFinished:false
-21:30:50.494 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.495 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.36084422   /fraction:0.488   /allowWhenFinished:false
-21:30:50.497 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.498 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.38543397   /fraction:0.51   /allowWhenFinished:false
-21:30:50.499 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.500 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.41002378   /fraction:0.532   /allowWhenFinished:false
-21:30:50.501 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.502 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.4346136   /fraction:0.554   /allowWhenFinished:false
-21:30:50.502 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.503 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.4592033   /fraction:0.576   /allowWhenFinished:false
-21:30:50.504 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.505 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.48602855   /fraction:0.6   /allowWhenFinished:false
-21:30:50.506 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.507 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.5114083   /fraction:0.622   /allowWhenFinished:false
-21:30:50.508 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.511 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.535426   /fraction:0.642   /allowWhenFinished:false
-21:30:50.515 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.516 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.5618453   /fraction:0.664   /allowWhenFinished:false
-21:30:50.518 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.520 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.59066653   /fraction:0.688   /allowWhenFinished:false
-21:30:50.520 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.521 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.6179685   /fraction:0.71   /allowWhenFinished:false
-21:30:50.522 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.522 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.64536667   /fraction:0.732   /allowWhenFinished:false
-21:30:50.523 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.524 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.6727649   /fraction:0.754   /allowWhenFinished:false
-21:30:50.524 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.525 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.70067513   /fraction:0.776   /allowWhenFinished:false
-21:30:50.525 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.526 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.72892   /fraction:0.798   /allowWhenFinished:false
-21:30:50.527 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.530 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.7571649   /fraction:0.82   /allowWhenFinished:false
-21:30:50.530 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.531 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.7858638   /fraction:0.842   /allowWhenFinished:false
-21:30:50.532 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.533 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.81484807   /fraction:0.864   /allowWhenFinished:false
-21:30:50.534 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.535 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.84383374   /fraction:0.886   /allowWhenFinished:false
-21:30:50.535 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.536 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.8733241   /fraction:0.908   /allowWhenFinished:false
-21:30:50.537 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.538 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.9030789   /fraction:0.93   /allowWhenFinished:false
-21:30:50.539 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.541 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.9358684   /fraction:0.954   /allowWhenFinished:false
-21:30:50.541 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.542 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.96630543   /fraction:0.976   /allowWhenFinished:false
-21:30:50.543 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.544 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.99715585   /fraction:0.998   /allowWhenFinished:false
-21:30:50.545 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.546 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:1.0   /allowWhenFinished:false
-21:30:50.546 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.549 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:1.0   /allowWhenFinished:true
-21:30:50.551 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.604 [D] View: [Warning] assignParent to null: this = DecorView@fbfe95c[PlayerActivity]
-21:30:50.607 [I] BLASTBufferQueue: [ViewRootImpl[PlayerActivity]#17] destructor()
-21:30:50.627 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.0   /allowWhenFinished:false
-21:30:50.635 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.639 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.0   /allowWhenFinished:false
-21:30:50.641 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.645 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.032352943   /allowWhenFinished:false
-21:30:50.647 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.654 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.064705886   /allowWhenFinished:false
-21:30:50.655 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.665 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.097058825   /allowWhenFinished:false
-21:30:50.667 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.676 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.12941177   /allowWhenFinished:false
-21:30:50.677 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.688 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.16176471   /allowWhenFinished:false
-21:30:50.689 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.698 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.19411765   /allowWhenFinished:false
-21:30:50.699 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.709 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.22647059   /allowWhenFinished:false
-21:30:50.710 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.720 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.25882354   /allowWhenFinished:false
-21:30:50.721 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.731 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.29117647   /allowWhenFinished:false
-21:30:50.732 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.742 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.32352942   /allowWhenFinished:false
-21:30:50.743 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.753 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.35588235   /allowWhenFinished:false
-21:30:50.754 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.768 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.3882353   /allowWhenFinished:false
-21:30:50.768 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.776 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.42058823   /allowWhenFinished:false
-21:30:50.777 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.780 [I] BLASTBufferQueue: releaseBufferCallbackThunk bufferId:45406394254135 framenumber:4 blastBufferQueue is dead
-21:30:50.787 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.45294118   /allowWhenFinished:false
-21:30:50.788 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.798 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.4882353   /allowWhenFinished:false
-21:30:50.799 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.809 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.5205882   /allowWhenFinished:false
-21:30:50.810 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.820 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.5529412   /allowWhenFinished:false
-21:30:50.821 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.831 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.5852941   /allowWhenFinished:false
-21:30:50.832 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.842 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.61764705   /allowWhenFinished:false
-21:30:50.842 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.853 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.65   /allowWhenFinished:false
-21:30:50.854 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.864 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.68235296   /allowWhenFinished:false
-21:30:50.865 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.875 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.7147059   /allowWhenFinished:false
-21:30:50.876 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.887 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.7470588   /allowWhenFinished:false
-21:30:50.888 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.897 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.7794118   /allowWhenFinished:false
-21:30:50.898 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.908 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.8117647   /allowWhenFinished:false
-21:30:50.909 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.919 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.84411764   /allowWhenFinished:false
-21:30:50.920 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.930 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.87647057   /allowWhenFinished:false
-21:30:50.931 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.942 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.90882355   /allowWhenFinished:false
-21:30:50.943 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.952 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.9411765   /allowWhenFinished:false
-21:30:50.953 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.963 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.9735294   /allowWhenFinished:false
-21:30:50.964 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.974 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:1.0   /allowWhenFinished:false
-21:30:50.975 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:50.976 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:1.0   /allowWhenFinished:true
-21:30:50.977 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
-21:30:51.259 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
-21:30:51.491 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
-21:30:51.604 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
-21:30:51.614 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
-21:30:52.347 [D] TransactionExecutor: Token :android.os.BinderProxy@b801d98 has ActivityClientRecord : com.streamflex.app
-21:30:52.350 [D] AudioTrack: pause(600): 0xb4000078c102ea30, prior state:STATE_ACTIVE
-21:30:52.351 [D] AudioTrackShared: this(0xb40000786101f0b0), mCblk(0x7a4e0c6000), front(212992), mIsOut 1, interrupt() FUTEX_WAKE
-21:30:52.371 [D] TransactionExecutor: Token :android.os.BinderProxy@69e260e has ActivityClientRecord : com.streamflex.app
-21:30:52.410 [I] BLASTBufferQueue: [ViewRootImpl[MainActivity]#18] constructor()
-21:30:52.462 [E] OpenGLRenderer: EglManager::makeCurrent mED = 0xb400007880f70390, surface = 0x0, mEC = 0xb400007820f98e10, error = EGL_SUCCESS
-21:30:52.608 [D] BufferPoolAccessor2.0: evictor expired: 1, evicted: 0
-21:30:52.816 [D] libMEOW: meow new tls: 0xb4000079b19c5a80
-21:30:52.817 [D] libMEOW: applied 1 plugins for [com.streamflex.app]:
-21:30:52.818 [D] libMEOW: plugin 1: [libMEOW_gift.so]: 0xb400007970f51820
-21:30:52.819 [D] libMEOW: rebuild call chain: 0xb4000079b1545600
-21:30:52.823 [D] SurfaceUtils: connecting to surface 0xb400007930fdba50, reason connectToSurface
-21:30:52.825 [I] MediaCodec: [c2.mtk.avc.decoder] setting surface generation to 10825734
-21:30:52.826 [D] SurfaceUtils: disconnecting from surface 0xb400007930fdba50, reason connectToSurface(reconnect)
-21:30:52.834 [D] SurfaceUtils: connecting to surface 0xb400007930fdba50, reason connectToSurface(reconnect)
-21:30:52.842 [D] Codec2-OutputBufferQueue: remote graphic buffer migration 17/17
-21:30:52.845 [D] Codec2Client: setOutputSurface -- generation=10825734 consumer usage=0x900
-21:30:52.926 [D] Codec2Client: Surface configure completed
-21:30:52.927 [D] SurfaceUtils: disconnecting from surface 0xb40000793100ebd0, reason disconnectFromSurface
-21:30:52.932 [D] BufferPoolAccessor2.0: bufferpool2 0xb4000078910a3ac8 : 9(18846720 size) total buffers - 8(16752640 size) used buffers - 126/135 (recycle/alloc) - 9/135 (fetch/transfer)
-21:30:52.934 [I] BLASTBufferQueue: [SurfaceView[com.streamflex.app/com.streamflex.player.PlayerActivity]#16] destructor()
-21:30:52.938 [I] BLASTBufferQueue: releaseBufferCallbackThunk bufferId:45406394254038 framenumber:104 blastBufferQueue is dead
-21:30:52.940 [I] BLASTBufferQueue: [ViewRootImpl[PlayerActivity]#15] destructor()
-21:30:52.942 [D] ActivityThread: -- comp:com.streamflex.app/com.streamflex.player.PlayerActivity
-21:30:52.944 [I] ExoPlayerImpl: Release c1840c5 [AndroidXMedia3/1.10.1] [Infinix-X6817, Infinix X6817, INFINIX, 31] [media3.common, media3.exoplayer, media3.decoder, media3.ui, media3.exoplayer.hls, media3.datasource, media3.datasource.okhttp, media3.decoder.ffmpeg, media3.extractor]
-21:30:52.946 [D] BufferPoolAccessor2.0: bufferpool2 0xb4000078910c40c8 : 5(40960 size) total buffers - 0(0 size) used buffers - 222/232 (recycle/alloc) - 10/232 (fetch/transfer)
-21:30:52.947 [D] PipelineWatcher: onWorkDone: frameIndex not found (18446744073709551615); ignored
-21:30:52.949 [D] PipelineWatcher: onWorkDone: frameIndex not found (18446744073709551615); ignored
-21:30:52.950 [D] PipelineWatcher: onWorkDone: frameIndex not found (18446744073709551615); ignored
-21:30:52.953 [D] PipelineWatcher: onWorkDone: frameIndex not found (18446744073709551615); ignored
-21:30:52.954 [D] PipelineWatcher: onWorkDone: frameIndex not found (18446744073709551615); ignored
-21:30:52.956 [D] PipelineWatcher: onWorkDone: frameIndex not found (18446744073709551615); ignored
-21:30:52.958 [D] MediaCodec: keep callback message for reclaim
-21:30:52.961 [I] CCodecConfig: query failed after returning 17 values (BAD_INDEX)
-21:30:52.963 [D] CCodecConfig: c2 config diff is   c2::u32 coded.vui.color.range = 0
-21:30:52.964 [D] CCodecConfig: c2::u32 output.delay.value = 12
-21:30:52.965 [W] Codec2Client: query -- param skipped: index = 1342179345.
-21:30:52.967 [W] Codec2Client: query -- param skipped: index = 2415921170.
-21:30:52.971 [W] Codec2Client: query -- param skipped: index = 1610614798.
-21:30:52.973 [D] CCodecBuffers: [c2.android.aac.decoder#48:1D-Output.Impl[N]] Client returned a buffer it does not own according to our record: 0
-21:30:52.974 [D] MediaCodec: keep callback message for reclaim
-21:30:52.974 [I] CCodecConfig: query failed after returning 19 values (BAD_INDEX)
-21:30:52.975 [W] Codec2Client: query -- param skipped: index = 1342179345.
-21:30:52.976 [W] Codec2Client: query -- param skipped: index = 2415921170.
-21:30:52.977 [W] Codec2Client: query -- param skipped: index = 1610614798.
-21:30:52.978 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#218] MediaCodec discarded an unknown buffer
-21:30:52.978 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#218] MediaCodec discarded an unknown buffer
-21:30:52.979 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#218] MediaCodec discarded an unknown buffer
-21:30:52.980 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#218] MediaCodec discarded an unknown buffer
-21:30:52.980 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#218] MediaCodec discarded an unknown buffer
-21:30:52.981 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#218] MediaCodec discarded an unknown buffer
-21:30:52.982 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#218] MediaCodec discarded an unknown buffer
-21:30:52.983 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#218] MediaCodec discarded an unknown buffer
-21:30:52.983 [D] SurfaceUtils: disconnecting from surface 0xb400007930fdba50, reason disconnectFromSurface
-21:30:53.004 [D] libMEOW: meow delete tls: 0xb4000079b19c5a80
-21:30:53.005 [D] CCodecBufferChannel: [c2.android.aac.decoder#48] MediaCodec discarded an unknown buffer
-21:30:53.005 [D] CCodecBufferChannel: [c2.android.aac.decoder#48] MediaCodec discarded an unknown buffer
-21:30:53.005 [D] CCodecBufferChannel: [c2.android.aac.decoder#48] MediaCodec discarded an unknown buffer
-21:30:53.007 [D] CCodecBufferChannel: [c2.android.aac.decoder#48] MediaCodec discarded an unknown buffer
-21:30:53.008 [D] AudioTrack: flush(600): 0xb4000078c102ea30, prior state:STATE_PAUSED
-21:30:53.008 [D] AudioTrack: stop(600): 0xb4000078c102ea30, prior state:STATE_FLUSHED
-21:30:53.009 [D] AudioTrack: ~AudioTrack(600): 0xb4000078c102ea30
-21:30:53.012 [D] AudioTrack: stop(600): 0xb4000078c102ea30, prior state:STATE_FLUSHED
-21:30:53.012 [D] AudioTrackShared: this(0xb40000786101f0b0), mCblk(0x7a4e0c6000), front(227040), mIsOut 1, interrupt() FUTEX_WAKE
-21:30:53.013 [D] AudioTrack: stopAndJoinCallbacks(600) done
-21:30:53.016 [I] hw-BpHwBinder: onLastStrongRef automatically unlinking death recipients
-21:30:53.017 [D] MediaCodec: flushMediametrics
-21:30:53.017 [D] MediaCodec: flushMediametrics
-21:30:53.018 [I] hw-BpHwBinder: onLastStrongRef automatically unlinking death recipients
-21:30:53.018 [D] MediaCodec: flushMediametrics
-21:30:53.019 [D] MediaCodec: flushMediametrics
-21:30:53.019 [D] View: [Warning] assignParent to null: this = DecorView@c06c8b4[PlayerActivity]
-21:30:53.022 [I] BLASTBufferQueue: releaseBufferCallbackThunk bufferId:45406394254024 framenumber:682 blastBufferQueue is dead
-21:30:53.023 [E] OpenGLRenderer: EglManager::makeCurrent mED = 0xb400007880f70390, surface = 0x0, mEC = 0xb400007820f98e10, error = EGL_SUCCESS
-21:30:53.608 [D] BufferPoolAccessor2.0: evictor expired: 1, evicted: 0
-21:30:53.828 [D] TransactionExecutor: Token :android.os.BinderProxy@69e260e has ActivityClientRecord : com.streamflex.app
-21:30:53.925 [E] OpenGLRenderer: EglManager::makeCurrent mED = 0xb400007880f70390, surface = 0x0, mEC = 0xb400007820f98e10, error = EGL_SUCCESS
-21:30:53.964 [I] BLASTBufferQueue: [ViewRootImpl[MainActivity]#18] destructor()
-21:30:53.967 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
-21:30:53.975 [I] GED: ged_boost_gpu_freq, level 100, eOrigin 2, final_idx 31, oppidx_max 31, oppidx_min 0
-21:30:53.984 [I] BLASTBufferQueue: releaseBufferCallbackThunk bufferId:45406394254219 framenumber:6 blastBufferQueue is dead
-21:30:54.442 [E] HTTP: ← [ERROR] https://makhi13.top/s23.nm-cdn9.top/files/82048312/a/2/9983_003.js (4390ms) — Canceled
-21:30:57.610 [D] BufferPoolAccessor2.0: evictor expired: 1, evicted: 1
-21:30:58.610 [D] BufferPoolAccessor2.0: bufferpool2 0xb4000078910c40c8 : 0(0 size) total buffers - 0(0 size) used buffers - 227/237 (recycle/alloc) - 10/232 (fetch/transfer)
-21:30:58.611 [D] BufferPoolAccessor2.0: evictor expired: 1, evicted: 1
+...
+...
+.....
+21:53:37.709 [D] STREAM_PIPELINE: 1350_757.js
+21:53:37.710 [D] STREAM_PIPELINE: #EXTINF:4.992000,
+21:53:37.710 [D] STREAM_PIPELINE: 1350_758.js
+21:53:37.711 [D] STREAM_PIPELINE: #EXTINF:1.535333,
+21:53:37.711 [D] STREAM_PIPELINE: 1350_759.js
+21:53:37.712 [D] STREAM_PIPELINE: #EXT-X-ENDLIST
+21:53:37.712 [D] HTTP: ← [200] https://makhi14.top/s23.nm-cdn9.top/files/82048310/a/2/2.m3u8 (1177ms)
+21:53:37.713 [D] SecurityInterceptor: Binary content-type detected: application/vnd.apple.mpegurl — URL: https://makhi14.top/s23.nm-cdn9.top/files/82048310/a/2/2.m3u8
+21:53:37.714 [D] HTTP: ← [200] https://makhi14.top/s23.nm-cdn9.top/files/82048310/720p/1350_006.jpg (481ms)
+21:53:37.715 [I] DMCodecAdapterFactory: Creating an asynchronous MediaCodec adapter for track type video
+21:53:37.715 [D] CCodec: allocate(c2.mtk.avc.decoder)
+21:53:37.716 [I] CCodec: setting up 'default' as default (vendor) store
+21:53:37.718 [I] CCodec: Created component [c2.mtk.avc.decoder]
+21:53:37.719 [D] CCodecConfig: read media type: video/avc
+21:53:37.720 [D] ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.max-count.values
+21:53:37.721 [D] ReflectedParamUpdater: extent() != 1 for single value type: output.subscribed-indices.values
+21:53:37.721 [D] ReflectedParamUpdater: extent() != 1 for single value type: input.buffers.allocator-ids.values
+21:53:37.722 [D] ReflectedParamUpdater: extent() != 1 for single value type: output.buffers.allocator-ids.values
+21:53:37.722 [D] ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.allocator-ids.values
+21:53:37.723 [D] ReflectedParamUpdater: extent() != 1 for single value type: output.buffers.pool-ids.values
+21:53:37.724 [D] ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.pool-ids.values
+21:53:37.724 [D] ReflectedParamUpdater: ignored struct field coded.color-format.locations
+21:53:37.725 [D] CCodecConfig: ignoring local param raw.size (0xd2001800) as it is already supported
+21:53:37.726 [D] CCodecConfig: ignoring local param raw.crop (0xd2001801) as it is already supported
+21:53:37.726 [D] CCodecConfig: ignoring local param default.color (0x5200180b) as it is already supported
+21:53:37.727 [D] CCodecConfig: ignoring local param raw.hdr-static-info (0xd200180a) as it is already supported
+21:53:37.727 [I] CCodecConfig: query failed after returning 17 values (BAD_INDEX)
+21:53:37.728 [D] CCodecConfig: c2 config diff is Dict {
+21:53:37.730 [D] CCodecConfig: c2::i32 algo.priority.value = 1
+21:53:37.730 [D] CCodecConfig: c2::float algo.rate.value = 0
+21:53:37.731 [D] CCodecConfig: c2::float coded.frame-rate.value = 30
+21:53:37.732 [D] CCodecConfig: c2::u32 coded.pl.level = 20495
+21:53:37.733 [D] CCodecConfig: c2::u32 coded.pl.profile = 20481
+21:53:37.734 [D] CCodecConfig: c2::u32 coded.vui.color.matrix = 0
+21:53:37.735 [D] CCodecConfig: c2::u32 coded.vui.color.primaries = 0
+21:53:37.735 [D] CCodecConfig: c2::u32 coded.vui.color.range = 2
+21:53:37.736 [D] CCodecConfig: c2::u32 coded.vui.color.transfer = 0
+21:53:37.736 [D] CCodecConfig: c2::u32 default.color.matrix = 0
+21:53:37.737 [D] CCodecConfig: c2::u32 default.color.primaries = 0
+21:53:37.737 [D] CCodecConfig: c2::u32 default.color.range = 0
+21:53:37.737 [D] CCodecConfig: c2::u32 default.color.transfer = 0
+21:53:37.738 [D] CCodecConfig: c2::u32 input.buffers.max-size.value = 2097152
+21:53:37.738 [D] CCodecConfig: c2::u32 input.delay.value = 4
+21:53:37.739 [D] CCodecConfig: string input.media-type.value = "video/avc"
+21:53:37.740 [D] CCodecConfig: c2::u32 output.delay.value = 12
+21:53:37.740 [D] CCodecConfig: string output.media-type.value = "video/raw"
+21:53:37.741 [D] CCodecConfig: c2::u32 raw.color.matrix = 0
+21:53:37.742 [D] CCodecConfig: c2::u32 raw.color.primaries = 0
+21:53:37.742 [D] CCodecConfig: c2::u32 raw.color.range = 2
+21:53:37.743 [D] CCodecConfig: c2::u32 raw.color.transfer = 0
+21:53:37.744 [D] CCodecConfig: c2::u32 raw.crop.height = 239
+21:53:37.744 [D] CCodecConfig: c2::u32 raw.crop.left = 0
+21:53:37.745 [D] CCodecConfig: c2::u32 raw.crop.top = 0
+21:53:37.746 [D] CCodecConfig: c2::u32 raw.crop.width = 319
+21:53:37.747 [D] CCodecConfig: c2::float raw.hdr-static-info.mastering.blue.x = 0
+21:53:37.747 [D] CCodecConfig: c2::float raw.hdr-s
+21:53:37.748 [W] ColorUtils: expected specified color aspects (2:0:0:0)
+21:53:37.749 [I] MediaCodec: MediaCodec will operate in async mode
+21:53:37.750 [D] MediaCodec: flushMediametrics
+21:53:37.751 [D] SurfaceUtils: connecting to surface 0xb4000079310df5f0, reason connectToSurface
+21:53:37.753 [I] MediaCodec: [c2.mtk.avc.decoder] setting surface generation to 13593603
+21:53:37.754 [D] SurfaceUtils: disconnecting from surface 0xb4000079310df5f0, reason connectToSurface(reconnect)
+21:53:37.755 [D] SurfaceUtils: connecting to surface 0xb4000079310df5f0, reason connectToSurface(reconnect)
+21:53:37.757 [D] MediaCodec: [c2.mtk.avc.decoder] current pid: 13275, current process name: com.streamflex.app
+21:53:37.757 [D] CCodec: [c2.mtk.avc.decoder] buffers are bound to CCodec for this session
+21:53:37.758 [D] CCodecConfig: no c2 equivalents for csd-1
+21:53:37.759 [D] CCodecConfig: no c2 equivalents for log-session-id
+21:53:37.759 [D] CCodecConfig: no c2 equivalents for native-window
+21:53:37.760 [D] CCodecConfig: no c2 equivalents for flags
+21:53:37.760 [D] CCodecConfig: c2 config diff is   c2::i32 algo.priority.value = 0
+21:53:37.761 [D] CCodecConfig: c2::u32 input.buffers.max-size.value = 2094080
+21:53:37.761 [D] CCodecConfig: c2::u32 raw.max-size.height = 720
+21:53:37.762 [D] CCodecConfig: c2::u32 raw.max-size.width = 1280
+21:53:37.762 [D] CCodecConfig: c2::u32 raw.pixel-format.value = 34
+21:53:37.762 [D] CCodecConfig: c2::u32 raw.size.height = 720
+21:53:37.764 [D] CCodecConfig: c2::u32 raw.size.width = 1280
+21:53:37.765 [W] Codec2Client: query -- param skipped: index = 1107298332.
+21:53:37.766 [D] CCodec: client requested max input size 691200, which is smaller than what component recommended (2094080); overriding with component recommendation.
+21:53:37.767 [W] CCodec: This behavior is subject to change. It is recommended that app developers double check whether the requested max input size is in reasonable range.
+21:53:37.768 [D] CCodec: setup formats input: AMessage(what = 0x00000000) = {
+21:53:37.769 [D] CCodec: string mime = "video/avc"
+21:53:37.769 [D] CCodec: int32_t width = 1280
+21:53:37.770 [D] CCodec: int32_t profile = 65536
+21:53:37.771 [D] CCodec: int32_t priority = 0
+21:53:37.772 [D] CCodec: int32_t frame-rate = 30
+21:53:37.773 [D] CCodec: int32_t height = 720
+21:53:37.774 [D] CCodec: int32_t level = 32768
+21:53:37.774 [D] CCodec: int32_t max-input-size = 2094080
+21:53:37.775 [D] CCodec: Rect crop(0, 0, 318, 238)
+21:53:37.776 [D] CCodec: }
+21:53:37.777 [D] CCodec: setup formats output: AMessage(what = 0x00000000) = {
+21:53:37.778 [D] CCodec: int32_t android._color-format = 2130708361
+21:53:37.778 [D] CCodec: int32_t android._video-scaling = 1
+21:53:37.779 [D] CCodec: int32_t sar-width = 1
+21:53:37.780 [D] CCodec: int32_t color-standard = 4
+21:53:37.781 [D] CCodec: int32_t color-range = 2
+21:53:37.781 [D] CCodec: int32_t color-transfer = 3
+21:53:37.781 [D] CCodec: int32_t android._dataspace = 259
+21:53:37.782 [D] CCodec: int32_t width = 1280
+21:53:37.782 [D] CCodec: int32_t rotation-degrees = 0
+21:53:37.782 [D] CCodec: int32_t sar-height = 1
+21:53:37.783 [D] CCodec: int32_t max-width = 1280
+21:53:37.783 [D] CCodec: int32_t max-height = 720
+21:53:37.784 [D] CCodec: int32_t priority = 0
+21:53:37.785 [D] CCodec: string mime = "video/raw"
+21:53:37.786 [D] CCodec: Rect crop(0, 0, 318, 238)
+21:53:37.787 [D] CCodec: Buffer hdr-static-info = {
+21:53:37.788 [D] CCodec: 00000000:  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  ................
+21:53:37.789 [D] CCodec: 00000010:  00 00 00 00 00 00 00 00  00                       .........
+21:53:37.790 [D] CCodec: }
+21:53:37.791 [D] CCodec: int32_t frame-rate = 30
+21:53:37.792 [D] CCodec: int32_t height = 720
+21:53:37.792 [D] CCodec: int32_t color-format = 2130708361
+21:53:37.793 [D] CCodec: }
+21:53:37.793 [I] CCodecConfig: query failed after returning 17 values (BAD_INDEX)
+21:53:37.794 [D] MediaCodec: keep callback message for reclaim
+21:53:37.795 [W] Codec2Client: query -- param skipped: index = 1342179345.
+21:53:37.795 [W] Codec2Client: query -- param skipped: index = 2415921170.
+21:53:37.796 [W] Codec2Client: query -- param skipped: index = 1610614798.
+21:53:37.797 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#713] Created input block pool with allocatorID 16 => poolID 19 - OK (0)
+21:53:37.797 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#713] Query output surface allocator returned 0 params => BAD_INDEX (6)
+21:53:37.798 [I] CCodecBufferChannel: [c2.mtk.avc.decoder#713] Created output block pool with allocatorID 18 => poolID 137 - OK
+21:53:37.798 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#713] Configured output block pool ids 137 => OK
+21:53:37.799 [D] Codec2-OutputBufferQueue: remote graphic buffer migration 0/0
+21:53:37.800 [D] Codec2Client: setOutputSurface -- generation=13593603 consumer usage=0x900
+21:53:37.801 [D] Codec2Client: Surface configure completed
+21:53:37.802 [D] BufferPoolAccessor2.0: bufferpool2 0xb400007891043d98 : 0(0 size) total buffers - 0(0 size) used buffers - 239/248 (recycle/alloc) - 9/248 (fetch/transfer)
+21:53:37.803 [D] BufferPoolAccessor2.0: Destruction - bufferpool2 0xb400007891043d98 cached: 0/0M, 0/0% in use; allocs: 248, 96% recycled; transfers: 248, 96% unfetched
+21:53:37.804 [D] HTTP: → [GET] https://makhi14.top/s23.nm-cdn9.top/files/82048310/a/2/1350_005.js
+21:53:37.805 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#713] flushed work; ignored.
+21:53:37.807 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#713] Discard frames from previous generation.
+21:53:37.807 [D] PipelineWatcher: onWorkDone: frameIndex not found (18446744073709551615); ignored
+21:53:37.808 [D] CCodecConfig: c2 config diff is   c2::u32 output.delay.value = 14
+21:53:37.809 [D] CCodecConfig: c2::u32 raw.color.range = 0
+21:53:37.809 [D] Codec2-OutputBufferQueue: set max dequeue count 21 from update
+21:53:37.810 [D] CCodecConfig: c2 config diff is   c2::u32 raw.crop.height = 720
+21:53:37.811 [D] CCodecConfig: c2::u32 raw.crop.width = 1280
+21:53:37.812 [D] CCodecConfig: c2::u32 raw.pixel-format.value = 2130706433
+21:53:37.813 [D] CCodecBuffers: [c2.mtk.avc.decoder#713:2D-Output] popFromStashAndRegister: at 1000025527201us, output format changed to AMessage(what = 0x00000000) = {
+21:53:37.813 [D] CCodecBuffers: int32_t android._color-format = 2130706433
+21:53:37.814 [D] CCodecBuffers: int32_t android._video-scaling = 1
+21:53:37.814 [D] CCodecBuffers: int32_t sar-width = 1
+21:53:37.816 [D] CCodecBuffers: int32_t color-standard = 1
+21:53:37.817 [D] CCodecBuffers: int32_t color-range = 2
+21:53:37.818 [D] CCodecBuffers: int32_t color-transfer = 3
+21:53:37.818 [D] CCodecBuffers: int32_t android._dataspace = 260
+21:53:37.819 [D] CCodecBuffers: int32_t width = 1280
+21:53:37.820 [D] CCodecBuffers: int32_t rotation-degrees = 0
+21:53:37.821 [D] CCodecBuffers: int32_t sar-height = 1
+21:53:37.822 [D] CCodecBuffers: int32_t max-width = 1280
+21:53:37.822 [D] CCodecBuffers: int32_t max-height = 720
+21:53:37.823 [D] CCodecBuffers: int32_t priority = 0
+21:53:37.824 [D] CCodecBuffers: string mime = "video/raw"
+21:53:37.825 [D] CCodecBuffers: Rect crop(0, 0, 1279, 719)
+21:53:37.826 [D] CCodecBuffers: Buffer hdr-static-info = {
+21:53:37.826 [D] CCodecBuffers: 00000000:  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  ................
+21:53:37.827 [D] CCodecBuffers: 00000010:  00 00 00 00 00 00 00 00  00                       .........
+21:53:37.828 [D] CCodecBuffers: }
+21:53:37.829 [D] CCodecBuffers: int32_t frame-rate = 30
+21:53:37.829 [D] CCodecBuffers: int32_t height = 720
+21:53:37.830 [D] CCodecBuffers: int32_t color-format = 2130708361
+21:53:37.831 [D] CCodecBuffers: }
+21:53:37.831 [W] MediaCodec: mapFormat: no mediaType information
+21:53:37.833 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+21:53:37.835 [W] PesReader: Unexpected start code prefix: 3211425
+21:53:37.837 [D] HTTP: → [GET] https://makhi14.top/s23.nm-cdn9.top/files/82048310/720p/1350_007.jpg
+21:53:37.845 [D] HTTP: ← [200] https://makhi14.top/s23.nm-cdn9.top/files/82048310/720p/1350_007.jpg (566ms)
+21:53:37.868 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+21:53:37.869 [D] ViewRootImpl[PlayerActivity]: hardware acceleration = true, sRendererEnabled = true, forceHwAccelerated = false
+21:53:37.871 [I] BLASTBufferQueue: [ViewRootImpl[PlayerActivity]#11] constructor()
+21:53:37.872 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.0   /fraction:0.0   /allowWhenFinished:false
+21:53:37.873 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.875 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.0   /fraction:0.0   /allowWhenFinished:false
+21:53:37.875 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.876 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.0021566378   /fraction:0.022   /allowWhenFinished:false
+21:53:37.876 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.878 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.007324831   /fraction:0.046   /allowWhenFinished:false
+21:53:37.879 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.879 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.0141958995   /fraction:0.068   /allowWhenFinished:false
+21:53:37.879 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.880 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.023094956   /fraction:0.09   /allowWhenFinished:false
+21:53:37.880 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.881 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+21:53:37.881 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.034073614   /fraction:0.112   /allowWhenFinished:false
+21:53:37.881 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.882 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+21:53:37.883 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.04599736   /fraction:0.134   /allowWhenFinished:false
+21:53:37.884 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.884 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.059599563   /fraction:0.156   /allowWhenFinished:false
+21:53:37.886 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.887 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+21:53:37.887 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.07423706   /fraction:0.178   /allowWhenFinished:false
+21:53:37.888 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.889 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.089694895   /fraction:0.2   /allowWhenFinished:false
+21:53:37.889 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.890 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.107089624   /fraction:0.222   /allowWhenFinished:false
+21:53:37.890 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.891 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.124874264   /fraction:0.244   /allowWhenFinished:false
+21:53:37.892 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.892 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.14265889   /fraction:0.266   /allowWhenFinished:false
+21:53:37.893 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.894 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.16287933   /fraction:0.29   /allowWhenFinished:false
+21:53:37.894 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.896 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.18317093   /fraction:0.312   /allowWhenFinished:false
+21:53:37.897 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.897 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.20346251   /fraction:0.334   /allowWhenFinished:false
+21:53:37.898 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.898 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.2237541   /fraction:0.356   /allowWhenFinished:false
+21:53:37.898 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.899 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.24523847   /fraction:0.378   /allowWhenFinished:false
+21:53:37.899 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.900 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.26752838   /fraction:0.4   /allowWhenFinished:false
+21:53:37.901 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.902 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.28981826   /fraction:0.422   /allowWhenFinished:false
+21:53:37.904 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.905 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.31210816   /fraction:0.444   /allowWhenFinished:false
+21:53:37.905 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.906 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.33625445   /fraction:0.466   /allowWhenFinished:false
+21:53:37.906 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.907 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.36084422   /fraction:0.488   /allowWhenFinished:false
+21:53:37.908 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.909 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.38543397   /fraction:0.51   /allowWhenFinished:false
+21:53:37.910 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.910 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.41002378   /fraction:0.532   /allowWhenFinished:false
+21:53:37.911 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.912 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.4346136   /fraction:0.554   /allowWhenFinished:false
+21:53:37.912 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.913 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.4592033   /fraction:0.576   /allowWhenFinished:false
+21:53:37.913 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.914 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.48602855   /fraction:0.6   /allowWhenFinished:false
+21:53:37.914 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.916 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.5114083   /fraction:0.622   /allowWhenFinished:false
+21:53:37.917 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.918 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.53782773   /fraction:0.644   /allowWhenFinished:false
+21:53:37.919 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.920 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.56424713   /fraction:0.666   /allowWhenFinished:false
+21:53:37.921 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.922 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.59066653   /fraction:0.688   /allowWhenFinished:false
+21:53:37.923 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.923 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.6179685   /fraction:0.71   /allowWhenFinished:false
+21:53:37.925 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.925 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.64536667   /fraction:0.732   /allowWhenFinished:false
+21:53:37.926 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.926 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.6727649   /fraction:0.754   /allowWhenFinished:false
+21:53:37.927 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.927 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.70067513   /fraction:0.776   /allowWhenFinished:false
+21:53:37.928 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.928 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.72892   /fraction:0.798   /allowWhenFinished:false
+21:53:37.929 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.930 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.7571649   /fraction:0.82   /allowWhenFinished:false
+21:53:37.931 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.931 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.7858638   /fraction:0.842   /allowWhenFinished:false
+21:53:37.932 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.932 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.81484807   /fraction:0.864   /allowWhenFinished:false
+21:53:37.933 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.934 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.84383374   /fraction:0.886   /allowWhenFinished:false
+21:53:37.934 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.935 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.8733241   /fraction:0.908   /allowWhenFinished:false
+21:53:37.937 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.938 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.9030789   /fraction:0.93   /allowWhenFinished:false
+21:53:37.940 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.941 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.93312   /fraction:0.952   /allowWhenFinished:false
+21:53:37.941 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.942 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.9635221   /fraction:0.974   /allowWhenFinished:false
+21:53:37.942 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.943 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.99715585   /fraction:0.998   /allowWhenFinished:false
+21:53:37.944 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.944 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:1.0   /allowWhenFinished:false
+21:53:37.945 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:37.945 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:1.0   /allowWhenFinished:true
+21:53:37.946 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:38.021 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+21:53:38.032 [D] View: [Warning] assignParent to null: this = DecorView@9d05414[PlayerActivity]
+21:53:38.032 [I] BLASTBufferQueue: [ViewRootImpl[PlayerActivity]#11] destructor()
+21:53:38.056 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.0   /allowWhenFinished:false
+21:53:38.057 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:38.059 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.0   /allowWhenFinished:false
+21:53:38.060 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:38.069 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.032352943   /allowWhenFinished:false
+21:53:38.074 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:38.080 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.064705886   /allowWhenFinished:false
+21:53:38.081 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:38.091 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.097058825   /allowWhenFinished:false
+21:53:38.092 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:38.102 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.12941177   /allowWhenFinished:false
+21:53:38.103 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:38.113 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.16176471   /allowWhenFinished:false
+21:53:38.114 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:38.124 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.19411765   /allowWhenFinished:false
+21:53:38.125 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:38.135 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.22647059   /allowWhenFinished:false
+21:53:38.136 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:38.147 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.25882354   /allowWhenFinished:false
+21:53:38.147 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:38.158 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.29411766   /allowWhenFinished:false
+21:53:38.159 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:38.169 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.32647058   /allowWhenFinished:false
+21:53:38.170 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:38.180 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.35882354   /allowWhenFinished:false
+21:53:38.180 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:38.191 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.39117646   /allowWhenFinished:false
+21:53:38.191 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:38.203 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.42352942   /allowWhenFinished:false
+21:53:38.204 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:38.207 [I] BLASTBufferQueue: releaseBufferCallbackThunk bufferId:57015690854859 framenumber:2 blastBufferQueue is dead
+21:53:38.213 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.45588234   /allowWhenFinished:false
+21:53:38.215 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:38.225 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.4882353   /allowWhenFinished:false
+21:53:38.226 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:38.235 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.5205882   /allowWhenFinished:false
+21:53:38.236 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:38.246 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.5529412   /allowWhenFinished:false
+21:53:38.247 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:38.258 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.5852941   /allowWhenFinished:false
+21:53:38.259 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:38.269 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.61764705   /allowWhenFinished:false
+21:53:38.270 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:38.280 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.65294117   /allowWhenFinished:false
+21:53:38.281 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:38.293 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.6852941   /allowWhenFinished:false
+21:53:38.294 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:38.302 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.7176471   /allowWhenFinished:false
+21:53:38.304 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:38.314 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.75   /allowWhenFinished:false
+21:53:38.315 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:38.325 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.7823529   /allowWhenFinished:false
+21:53:38.326 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:38.335 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.8147059   /allowWhenFinished:false
+21:53:38.337 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:38.346 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.84705883   /allowWhenFinished:false
+21:53:38.348 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:38.358 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.87941176   /allowWhenFinished:false
+21:53:38.360 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:38.369 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.9117647   /allowWhenFinished:false
+21:53:38.370 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:38.380 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.94411767   /allowWhenFinished:false
+21:53:38.381 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:38.391 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.9764706   /allowWhenFinished:false
+21:53:38.392 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:38.403 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:1.0   /allowWhenFinished:false
+21:53:38.404 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:38.405 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:1.0   /allowWhenFinished:true
+21:53:38.407 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+21:53:39.082 [D] BufferPoolAccessor2.0: bufferpool2 0xb400007891100e58 : 9(18846720 size) total buffers - 8(16752640 size) used buffers - 28/37 (recycle/alloc) - 9/37 (fetch/transfer)
+21:53:39.084 [D] BufferPoolAccessor2.0: evictor expired: 1, evicted: 1
+21:53:40.083 [D] BufferPoolAccessor2.0: evictor expired: 1, evicted: 0
+21:53:42.640 [W] PesReader: Unexpected start code prefix: 3211435
+21:53:42.641 [D] HTTP: ← [200] https://makhi14.top/s23.nm-cdn9.top/files/82048310/a/2/1350_005.js (8543ms)
+21:53:42.651 [D] HTTP: → [GET] https://makhi14.top/s23.nm-cdn9.top/files/82048310/720p/1350_008.jpg
+21:53:42.666 [I] DMCodecAdapterFactory: Creating an asynchronous MediaCodec adapter for track type audio
+21:53:42.668 [D] CCodec: allocate(c2.android.aac.decoder)
+21:53:42.673 [I] CCodec: setting up 'default' as default (vendor) store
+21:53:42.681 [D] BufferPoolAccessor2.0: bufferpool2 0xb400007890fceec8 : 0(0 size) total buffers - 0(0 size) used buffers - 431/441 (recycle/alloc) - 10/436 (fetch/transfer)
+21:53:42.682 [D] BufferPoolAccessor2.0: Destruction - bufferpool2 0xb400007890fceec8 cached: 0/0M, 0/0% in use; allocs: 441, 98% recycled; transfers: 436, 98% unfetched
+21:53:42.684 [I] CCodec: Created component [c2.android.aac.decoder]
+21:53:42.686 [D] CCodecConfig: read media type: audio/mp4a-latm
+21:53:42.692 [D] ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.max-count.values
+21:53:42.694 [D] ReflectedParamUpdater: extent() != 1 for single value type: output.subscribed-indices.values
+21:53:42.695 [D] ReflectedParamUpdater: extent() != 1 for single value type: input.buffers.allocator-ids.values
+21:53:42.696 [D] ReflectedParamUpdater: extent() != 1 for single value type: output.buffers.allocator-ids.values
+21:53:42.698 [D] ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.allocator-ids.values
+21:53:42.701 [D] ReflectedParamUpdater: extent() != 1 for single value type: output.buffers.pool-ids.values
+21:53:42.703 [D] ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.pool-ids.values
+21:53:42.704 [W] PesReader: Unexpected start code prefix: 2162861
+21:53:42.706 [I] CCodecConfig: query failed after returning 19 values (BAD_INDEX)
+21:53:42.707 [D] CCodecConfig: c2 config diff is Dict {
+21:53:42.708 [D] CCodecConfig: c2::u32 coded.aac-packaging.value = 0
+21:53:42.709 [D] CCodecConfig: c2::u32 coded.bitrate.value = 64000
+21:53:42.710 [D] CCodecConfig: c2::u32 coded.pl.level = 0
+21:53:42.711 [D] CCodecConfig: c2::u32 coded.pl.profile = 8192
+21:53:42.713 [D] CCodecConfig: c2::i32 coding.drc.album-mode.value = 0
+21:53:42.713 [D] CCodecConfig: c2::float coding.drc.attenuation-factor.value = 1
+21:53:42.714 [D] CCodecConfig: c2::float coding.drc.boost-factor.value = 1
+21:53:42.715 [D] CCodecConfig: c2::i32 coding.drc.compression-mode.value = 3
+21:53:42.717 [D] CCodecConfig: c2::i32 coding.drc.effect-type.value = 3
+21:53:42.719 [D] CCodecConfig: c2::float coding.drc.encoded-level.value = 0.25
+21:53:42.720 [D] CCodecConfig: c2::float coding.drc.reference-level.value = -16
+21:53:42.720 [D] CCodecConfig: c2::u32 input.buffers.max-size.value = 8192
+21:53:42.721 [D] CCodecConfig: c2::u32 input.delay.value = 0
+21:53:42.721 [D] CCodecConfig: string input.media-type.value = "audio/mp4a-latm"
+21:53:42.722 [D] CCodecConfig: c2::u32 output.delay.value = 2
+21:53:42.723 [D] CCodecConfig: c2::float output.drc.output-loudness.value = 0.25
+21:53:42.724 [D] CCodecConfig: string output.media-type.value = "audio/raw"
+21:53:42.725 [D] CCodecConfig: c2::u32 raw.channel-count.value = 1
+21:53:42.726 [D] CCodecConfig: c2::u32 raw.max-channel-count.value = 8
+21:53:42.727 [D] CCodecConfig: c2::u32 raw.sample-rate.value = 44100
+21:53:42.727 [D] CCodecConfig: }
+21:53:42.728 [I] MediaCodec: MediaCodec will operate in async mode
+21:53:42.730 [D] MediaCodec: flushMediametrics
+21:53:42.732 [D] CCodec: [c2.android.aac.decoder] buffers are bound to CCodec for this session
+21:53:42.733 [D] CCodecConfig: no c2 equivalents for log-session-id
+21:53:42.734 [D] CCodecConfig: no c2 equivalents for flags
+21:53:42.735 [D] CCodecConfig: c2 config diff is   c2::u32 raw.channel-count.value = 2
+21:53:42.736 [D] CCodecConfig: c2::u32 raw.sample-rate.value = 48000
+21:53:42.737 [W] Codec2Client: query -- param skipped: index = 1107298332.
+21:53:42.738 [D] CCodec: setup formats input: AMessage(what = 0x00000000) = {
+21:53:42.738 [D] CCodec: int32_t aac-drc-album-mode = 0
+21:53:42.739 [D] CCodec: int32_t aac-drc-boost-level = 127
+21:53:42.740 [D] CCodec: int32_t aac-drc-cut-level = 127
+21:53:42.741 [D] CCodec: int32_t aac-drc-effect-type = 3
+21:53:42.742 [D] CCodec: int32_t aac-encoded-target-level = -1
+21:53:42.745 [D] CCodec: int32_t aac-max-output-channel_count = 8
+21:53:42.746 [D] CCodec: int32_t aac-target-ref-level = 64
+21:53:42.746 [D] CCodec: int32_t bitrate = 64000
+21:53:42.747 [D] CCodec: int32_t channel-count = 2
+21:53:42.748 [D] CCodec: int32_t level = 0
+21:53:42.748 [D] CCodec: int32_t max-input-size = 8192
+21:53:42.749 [D] CCodec: string mime = "audio/mp4a-latm"
+21:53:42.750 [D] CCodec: int32_t profile = 2
+21:53:42.751 [D] CCodec: int32_t sample-rate = 48000
+21:53:42.753 [D] CCodec: }
+21:53:42.754 [D] CCodec: setup formats output: AMessage(what = 0x00000000) = {
+21:53:42.755 [D] CCodec: int32_t aac-drc-album-mode = 0
+21:53:42.755 [D] CCodec: int32_t aac-drc-boost-level = 127
+21:53:42.756 [D] CCodec: int32_t aac-drc-cut-level = 127
+21:53:42.757 [D] CCodec: int32_t aac-drc-effect-type = 3
+21:53:42.758 [D] CCodec: int32_t aac-drc-output-loudness = -1
+21:53:42.759 [D] CCodec: int32_t aac-encoded-target-level = -1
+21:53:42.761 [D] CCodec: int32_t aac-max-output-channel_count = 8
+21:53:42.762 [D] CCodec: int32_t aac-target-ref-level = 64
+21:53:42.763 [D] CCodec: int32_t channel-count = 2
+21:53:42.764 [D] CCodec: string mime = "audio/raw"
+21:53:42.765 [D] CCodec: int32_t sample-rate = 48000
+21:53:42.766 [D] CCodec: }
+21:53:42.767 [I] CCodecConfig: query failed after returning 19 values (BAD_INDEX)
+21:53:42.768 [D] MediaCodec: keep callback message for reclaim
+21:53:42.769 [W] Codec2Client: query -- param skipped: index = 1342179345.
+21:53:42.770 [W] Codec2Client: query -- param skipped: index = 2415921170.
+21:53:42.771 [W] Codec2Client: query -- param skipped: index = 1610614798.
+21:53:42.772 [D] CCodecBufferChannel: [c2.android.aac.decoder#240] Created input block pool with allocatorID 16 => poolID 20 - OK (0)
+21:53:42.776 [I] CCodecBufferChannel: [c2.android.aac.decoder#240] Created output block pool with allocatorID 16 => poolID 844 - OK
+21:53:42.778 [D] CCodecBufferChannel: [c2.android.aac.decoder#240] Configured output block pool ids 844 => OK
+21:53:42.782 [D] HTTP: → [GET] https://makhi14.top/s23.nm-cdn9.top/files/82048310/a/2/1350_006.js
+21:53:42.783 [D] CCodecConfig: c2 config diff is   c2::u32 raw.channel-mask.value = 12
+21:53:42.783 [D] AudioTrack: INSP: type=audio,case=1,set=0xb4000078c1043280,stream_type=-1,sample_rate=48000,format=0x1,channel_mask=0x3,frame_count=12000,flags=0x0,notification_frames=0,session_id=6025,transfer_type=3,uid=-1,pid=-1
+21:53:42.784 [D] AudioTrack: INSP: type=audio,case=1,attributes=1,content_type=0,usage=1,source=-1,flags=0xa00
+21:53:42.785 [D] AudioTrack: set(): Building AudioTrack with attributes: usage = 1, content = 0, flags = 0xa00, tags = []
+21:53:42.786 [D] AudioTrack: set(): 0xb4000078c1043280, Create AudioTrackThread, tid = 13680
+21:53:42.787 [D] AudioTrack: createTrack_l(603): 0xb4000078c1043280, mCblk = 0x7a4e2e5000, mLatency = 335, mAfLatency = 85, frameCount = 12000, mSampleRate = 48000, mFlags = 0x8, mReqFrameCount = 12000, mNotificationFramesAct = 6000
+21:53:42.788 [D] AudioTrack: setVolume(603): 0xb4000078c1043280, left = 1.000000, right = 1.000000
+21:53:42.796 [D] AudioTrack: start(603): 0xb4000078c1043280, prior state:STATE_STOPPED
+21:53:42.824 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+21:53:42.845 [W] SpeakerLayoutUtil: Built-in speaker's getSpeakerLayoutChannelMask not usable, defaulting to stereo.
+21:53:42.871 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+21:53:42.904 [D] AudioTrack: getTimestamp_l(603): device stall time corrected using current time 127117047411807
+21:53:42.981 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+21:53:43.298 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+21:53:43.354 [D] HTTP: ← [200] https://makhi14.top/s23.nm-cdn9.top/files/82048310/720p/1350_008.jpg (704ms)
+21:53:43.467 [D] HTTP: ← [200] https://makhi14.top/s23.nm-cdn9.top/files/82048310/a/2/1350_006.js (723ms)
+21:53:43.726 [W] PesReader: Unexpected start code prefix: 3211441
+21:53:43.744 [D] HTTP: → [GET] https://makhi14.top/s23.nm-cdn9.top/files/82048310/720p/1350_009.jpg
+21:53:43.770 [W] PesReader: Unexpected start code prefix: 2162887
+21:53:43.898 [D] TransactionExecutor: Token :android.os.BinderProxy@df9e665 has ActivityClientRecord : com.streamflex.app
+21:53:43.903 [D] AudioTrack: pause(603): 0xb4000078c1043280, prior state:STATE_ACTIVE
+21:53:43.904 [D] AudioTrackShared: this(0xb40000786105fcd0), mCblk(0x7a4e2e5000), front(51200), mIsOut 1, interrupt() FUTEX_WAKE
+21:53:43.920 [D] TransactionExecutor: Token :android.os.BinderProxy@1ff9db4 has ActivityClientRecord : com.streamflex.app
+21:53:43.949 [I] BLASTBufferQueue: [ViewRootImpl[MainActivity]#12] constructor()
+21:53:44.003 [E] OpenGLRenderer: EglManager::makeCurrent mED = 0xb400007880f70390, surface = 0x0, mEC = 0xb400007820f97ee0, error = EGL_SUCCESS
+21:53:44.328 [D] HTTP: ← [200] https://makhi14.top/s23.nm-cdn9.top/files/82048310/720p/1350_009.jpg (585ms)
+21:53:44.358 [D] libMEOW: meow new tls: 0xb4000079b1b15bd0
+21:53:44.359 [D] libMEOW: applied 1 plugins for [com.streamflex.app]:
+21:53:44.360 [D] libMEOW: plugin 1: [libMEOW_gift.so]: 0xb400007970f51820
+21:53:44.361 [D] libMEOW: rebuild call chain: 0xb4000079b1b05bc0
+21:53:44.364 [D] SurfaceUtils: connecting to surface 0xb400007931107d20, reason connectToSurface
+21:53:44.365 [I] MediaCodec: [c2.mtk.avc.decoder] setting surface generation to 13593604
+21:53:44.366 [D] SurfaceUtils: disconnecting from surface 0xb400007931107d20, reason connectToSurface(reconnect)
+21:53:44.370 [D] SurfaceUtils: connecting to surface 0xb400007931107d20, reason connectToSurface(reconnect)
+21:53:44.393 [D] Codec2-OutputBufferQueue: remote graphic buffer migration 16/16
+21:53:44.397 [D] Codec2Client: setOutputSurface -- generation=13593604 consumer usage=0x900
+21:53:44.497 [D] Codec2Client: Surface configure completed
+21:53:44.500 [D] SurfaceUtils: disconnecting from surface 0xb4000079310df5f0, reason disconnectFromSurface
+21:53:44.504 [I] BLASTBufferQueue: [SurfaceView[com.streamflex.app/com.streamflex.player.PlayerActivity]#10] destructor()
+21:53:44.506 [D] BufferPoolAccessor2.0: bufferpool2 0xb400007891100e58 : 9(18846720 size) total buffers - 8(16752640 size) used buffers - 51/61 (recycle/alloc) - 10/61 (fetch/transfer)
+21:53:44.508 [I] BLASTBufferQueue: releaseBufferCallbackThunk bufferId:57015690854817 framenumber:25 blastBufferQueue is dead
+21:53:44.511 [I] BLASTBufferQueue: [ViewRootImpl[PlayerActivity]#9] destructor()
+21:53:44.514 [D] ActivityThread: -- comp:com.streamflex.app/com.streamflex.player.PlayerActivity
+21:53:44.520 [I] ExoPlayerImpl: Release 3d0d43e [AndroidXMedia3/1.10.1] [Infinix-X6817, Infinix X6817, INFINIX, 31] [media3.common, media3.exoplayer, media3.decoder, media3.ui, media3.exoplayer.hls, media3.datasource, media3.datasource.okhttp, media3.decoder.ffmpeg, media3.extractor]
+21:53:44.524 [D] PipelineWatcher: onWorkDone: frameIndex not found (18446744073709551615); ignored
+21:53:44.526 [D] PipelineWatcher: onWorkDone: frameIndex not found (18446744073709551615); ignored
+21:53:44.527 [D] PipelineWatcher: onWorkDone: frameIndex not found (18446744073709551615); ignored
+21:53:44.534 [D] PipelineWatcher: onWorkDone: frameIndex not found (18446744073709551615); ignored
+21:53:44.536 [D] PipelineWatcher: onWorkDone: frameIndex not found (18446744073709551615); ignored
+21:53:44.537 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#713] flushed work; ignored.
+21:53:44.538 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#713] Discard frames from previous generation.
+21:53:44.541 [D] PipelineWatcher: onWorkDone: frameIndex not found (18446744073709551615); ignored
+21:53:44.542 [D] MediaCodec: keep callback message for reclaim
+21:53:44.543 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#713] flushed work; ignored.
+21:53:44.545 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#713] Discard frames from previous generation.
+21:53:44.546 [D] PipelineWatcher: onWorkDone: frameIndex not found (18446744073709551615); ignored
+21:53:44.547 [I] CCodecConfig: query failed after returning 17 values (BAD_INDEX)
+21:53:44.548 [D] CCodecConfig: c2 config diff is   c2::u32 coded.vui.color.range = 0
+21:53:44.549 [D] CCodecConfig: c2::u32 output.delay.value = 12
+21:53:44.551 [W] Codec2Client: query -- param skipped: index = 1342179345.
+21:53:44.555 [W] Codec2Client: query -- param skipped: index = 2415921170.
+21:53:44.557 [W] Codec2Client: query -- param skipped: index = 1610614798.
+21:53:44.558 [D] CCodecBuffers: [c2.android.aac.decoder#240:1D-Output.Impl[N]] Client returned a buffer it does not own according to our record: 0
+21:53:44.559 [D] MediaCodec: keep callback message for reclaim
+21:53:44.560 [I] CCodecConfig: query failed after returning 19 values (BAD_INDEX)
+21:53:44.560 [W] Codec2Client: query -- param skipped: index = 1342179345.
+21:53:44.561 [W] Codec2Client: query -- param skipped: index = 2415921170.
+21:53:44.563 [W] Codec2Client: query -- param skipped: index = 1610614798.
+21:53:44.567 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#713] MediaCodec discarded an unknown buffer
+21:53:44.568 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#713] MediaCodec discarded an unknown buffer
+21:53:44.569 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#713] MediaCodec discarded an unknown buffer
+21:53:44.570 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#713] MediaCodec discarded an unknown buffer
+21:53:44.571 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#713] MediaCodec discarded an unknown buffer
+21:53:44.572 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#713] MediaCodec discarded an unknown buffer
+21:53:44.573 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#713] MediaCodec discarded an unknown buffer
+21:53:44.574 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#713] MediaCodec discarded an unknown buffer
+21:53:44.576 [D] SurfaceUtils: disconnecting from surface 0xb400007931107d20, reason disconnectFromSurface
+21:53:44.603 [D] CCodecBufferChannel: [c2.android.aac.decoder#240] MediaCodec discarded an unknown buffer
+21:53:44.603 [D] CCodecBufferChannel: [c2.android.aac.decoder#240] MediaCodec discarded an unknown buffer
+21:53:44.604 [D] CCodecBufferChannel: [c2.android.aac.decoder#240] MediaCodec discarded an unknown buffer
+21:53:44.605 [D] libMEOW: meow delete tls: 0xb4000079b1b15bd0
+21:53:44.606 [D] AudioTrack: flush(603): 0xb4000078c1043280, prior state:STATE_PAUSED
+21:53:44.608 [D] AudioTrack: stop(603): 0xb4000078c1043280, prior state:STATE_FLUSHED
+21:53:44.611 [D] CCodecBufferChannel: [c2.android.aac.decoder#240] MediaCodec discarded an unknown buffer
+21:53:44.611 [D] AudioTrack: ~AudioTrack(603): 0xb4000078c1043280
+21:53:44.612 [D] AudioTrack: stop(603): 0xb4000078c1043280, prior state:STATE_FLUSHED
+21:53:44.613 [D] AudioTrackShared: this(0xb40000786105fcd0), mCblk(0x7a4e2e5000), front(65248), mIsOut 1, interrupt() FUTEX_WAKE
+21:53:44.614 [D] AudioTrack: stopAndJoinCallbacks(603) done
+21:53:44.614 [I] hw-BpHwBinder: onLastStrongRef automatically unlinking death recipients
+21:53:44.615 [D] MediaCodec: flushMediametrics
+21:53:44.615 [D] MediaCodec: flushMediametrics
+21:53:44.615 [D] MediaCodec: flushMediametrics
+21:53:44.616 [D] MediaCodec: flushMediametrics
+21:53:44.616 [I] hw-BpHwBinder: onLastStrongRef automatically unlinking death recipients
+21:53:44.624 [D] View: [Warning] assignParent to null: this = DecorView@900ad34[PlayerActivity]
+21:53:44.625 [I] BLASTBufferQueue: releaseBufferCallbackThunk bufferId:57015690854797 framenumber:3214 blastBufferQueue is dead
+21:53:44.627 [E] OpenGLRenderer: EglManager::makeCurrent mED = 0xb400007880f70390, surface = 0x0, mEC = 0xb400007820f97ee0, error = EGL_SUCCESS
+21:53:45.494 [D] TransactionExecutor: Token :android.os.BinderProxy@1ff9db4 has ActivityClientRecord : com.streamflex.app
+21:53:45.520 [E] OpenGLRenderer: EglManager::makeCurrent mED = 0xb400007880f70390, surface = 0x0, mEC = 0xb400007820f97ee0, error = EGL_SUCCESS
+21:53:45.534 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+21:53:45.535 [I] BLASTBufferQueue: [ViewRootImpl[MainActivity]#12] destructor()
+21:53:45.554 [I] GED: ged_boost_gpu_freq, level 100, eOrigin 2, final_idx 31, oppidx_max 31, oppidx_min 0
+21:53:45.566 [I] BLASTBufferQueue: releaseBufferCallbackThunk bufferId:57015690854920 framenumber:3 blastBufferQueue is dead
+21:53:47.682 [D] BufferPoolAccessor2.0: evictor expired: 1, evicted: 0
+21:53:49.683 [D] BufferPoolAccessor2.0: bufferpool2 0xb400007891075b68 : 0(0 size) total buffers - 0(0 size) used buffers - 74/79 (recycle/alloc) - 5/74 (fetch/transfer)
+21:53:49.683 [D] BufferPoolAccessor2.0: bufferpool2 0xb400007891100e58 : 0(0 size) total buffers - 0(0 size) used buffers - 59/69 (recycle/alloc) - 10/69 (fetch/transfer)
+21:53:49.684 [D] BufferPoolAccessor2.0: evictor expired: 2, evicted: 2

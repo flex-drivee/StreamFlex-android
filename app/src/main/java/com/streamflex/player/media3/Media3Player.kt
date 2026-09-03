@@ -246,7 +246,7 @@ class Media3Player(
         trackSelector.setParameters(
             trackSelector.buildUponParameters()
                 .clearOverrides()
-                .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, true) // Disable subtitles by default initially
+                .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, false) // Enable subtitles so they can be probed and listed
         )
 
         // 1. Resolve User-Agent and default streaming headers
