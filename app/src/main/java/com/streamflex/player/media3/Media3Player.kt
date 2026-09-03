@@ -376,8 +376,8 @@ class Media3Player(
         }
 
         // 6. Attach external subtitles if present
-        if (stream.subtitles.isNotEmpty()) {
-            val subtitleConfigs = stream.subtitles.map { sub ->
+        if (streams.subtitles.isNotEmpty()) {
+            val subtitleConfigs = streams.subtitles.map { sub ->
                 val subMime = if (sub.url.endsWith(".vtt", ignoreCase = true)) {
                     androidx.media3.common.MimeTypes.TEXT_VTT
                 } else {
