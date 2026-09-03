@@ -690,7 +690,22 @@ fun SFEpisodeItem(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            Spacer(Modifier.height(4.dp))
+            
+            // TMDB Rating & Date Row
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 2.dp, bottom = 4.dp)) {
+                episode.rating?.let { rating ->
+                    if (rating > 0.0) {
+                        Icon(Icons.Default.Star, contentDescription = "Rating", tint = Color(0xFFFFC107), modifier = Modifier.size(14.dp))
+                        Spacer(Modifier.width(2.dp))
+                        Text(String.format("%.1f", rating), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onBackground)
+                        Spacer(Modifier.width(8.dp))
+                    }
+                }
+                episode.airDate?.let { date ->
+                    Text(date, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+            
             Text(
                 episode.overview ?: "No description available",
                 style    = MaterialTheme.typography.bodyMedium,
@@ -749,16 +764,9 @@ fun SFEpisodeItem(
 
 @Composable
 fun SFMoreLikeThis(
-    items:       List<SearchResult>,
+    items:       List<com.streamflex.app.domain.models.SearchResult>,
     onItemClick: (String) -> Unit
 ) {
-    val screenW   = LocalConfiguration.current.screenWidthDp.dp
-    val padding   = 16.dp
-    val gap       = 10.dp
-    // Auto-calculate columns: aim for ~110dp cards, minimum 2 cols
-    val columns   = maxOf(2, ((screenW - padding * 2 + gap) / (110.dp + gap)).toInt())
-    val cardWidth = (screenW - padding * 2 - gap * (columns - 1)) / columns
-
     Column(modifier = Modifier.padding(vertical = 16.dp)) {
         Row(
             modifier = Modifier
@@ -769,34 +777,61 @@ fun SFMoreLikeThis(
         ) {
             Text(
                 "More Like This",
-                style = MaterialTheme.typography.headlineMedium.copy(fontSize = 17.sp),
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.onBackground
             )
-            Text("See All", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+            Text("See All", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.primary)
         }
 
         Spacer(Modifier.height(12.dp))
 
-        // Chunked into rows of `columns`
-        val rows = items.take(9).chunked(columns)
-        Column(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            rows.forEach { rowItems ->
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(gap)
+            items(items) { item ->
+                Card(
+                    modifier = Modifier
+                        .width(125.dp)
+                        .aspectRatio(2f/3f)
+                        .clickable { onItemClick(item.id) },
+                    shape = RoundedCornerShape(12.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
                 ) {
-                    rowItems.forEach { item ->
-                        SFVideoCard(
-                            item    = item,
-                            onClick = { onItemClick(item.id) },
-                            modifier = Modifier.width(cardWidth)
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        AsyncImage(
+                            model = item.poster,
+                            contentDescription = item.title,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
                         )
-                    }
-                    // Fill empty slots in last row
-                    repeat(columns - rowItems.size) {
-                        Spacer(modifier = Modifier.width(cardWidth))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .fillMaxHeight(0.5f)
+                                .align(Alignment.BottomCenter)
+                                .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.9f))))
+                        )
+                        Text(
+                            text = item.title,
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                            color = Color.White,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.align(Alignment.BottomStart).padding(8.dp)
+                        )
+                        item.year?.let { yr ->
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.TopStart)
+                                    .padding(6.dp)
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .background(Color.Black.copy(alpha = 0.6f))
+                                    .padding(horizontal = 4.dp, vertical = 2.dp)
+                            ) {
+                                Text(yr.toString(), style = MaterialTheme.typography.labelSmall, color = Color.White)
+                            }
+                        }
                     }
                 }
             }
@@ -895,6 +930,7 @@ fun SFCastList(cast: List<com.streamflex.app.domain.models.CastMember>) {
 // ─────────────────────────────────────────────────────────────────────────────
 @Composable
 fun SFTrailersCarousel(trailers: List<com.streamflex.app.domain.models.Trailer>) {
+    val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
     if (trailers.isEmpty()) return
     Column(modifier = Modifier.fillMaxWidth().padding(top = 24.dp)) {
         Text(
@@ -914,7 +950,8 @@ fun SFTrailersCarousel(trailers: List<com.streamflex.app.domain.models.Trailer>)
                             .fillMaxWidth()
                             .aspectRatio(16f/9f)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(MaterialTheme.colorScheme.surfaceVariant),
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                            .clickable { uriHandler.openUri("https://www.youtube.com/watch?v=${trailer.key}") },
                         contentAlignment = Alignment.Center
                     ) {
                         AsyncImage(

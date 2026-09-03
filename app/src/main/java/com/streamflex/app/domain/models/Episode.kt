@@ -14,6 +14,7 @@ data class Episode(
     val airDate: String? = null,
     val runtime: Int? = null,
     val stillPath: String? = null,
+    val rating: Double? = null,
     val providerSources: List<ProviderSource> = emptyList(),
     val streams: List<VideoStream> = emptyList()
 )

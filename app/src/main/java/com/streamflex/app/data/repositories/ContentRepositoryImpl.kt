@@ -69,7 +69,8 @@ class ContentRepositoryImpl(
                     overview = tmdbEp.overview,
                     airDate = tmdbEp.airDate,
                     runtime = tmdbEp.runtime,
-                    stillPath = tmdbEp.stillPath?.let { "https://image.tmdb.org/t/p/w500$it" }
+                    stillPath = tmdbEp.stillPath?.let { "https://image.tmdb.org/t/p/w500$it" },
+                    rating = tmdbEp.voteAverage
                 )
             } ?: emptyList()
         } catch (e: Exception) {

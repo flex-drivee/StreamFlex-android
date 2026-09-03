@@ -14,18 +14,11 @@ data class TmdbSearchResponse(
 
 data class TmdbSearchResult(
     @SerializedName("id") val id: Int,
-
-    // Type differentiator: "movie" or "tv"
     @SerializedName("media_type") val mediaType: String?,
-
-    // Movie fields
     @SerializedName("title") val movieTitle: String?,
     @SerializedName("release_date") val releaseDate: String?,
-
-    // TV fields
     @SerializedName("name") val tvName: String?,
     @SerializedName("first_air_date") val firstAirDate: String?,
-
     @SerializedName("overview") val overview: String?,
     @SerializedName("poster_path") val posterPath: String?,
     @SerializedName("backdrop_path") val backdropPath: String?,
@@ -37,18 +30,6 @@ data class TmdbSearchResult(
 // -----------------------------
 data class TmdbMovieDetails(
     @SerializedName("id") val id: Int,
-    @SerializedName("title") val title: String?,
-    @SerializedName("overview") val overview: String?,
-    @SerializedName("release_date") val releaseDate: String?,
-    @SerializedName("runtime") val runtime: Int?,
-    @SerializedName("poster_path") val posterPath: String?,
-    @SerializedName("backdrop_path") val backdropPath: String?,
-    @SerializedName("vote_average") val voteAverage: Double?,
-    @SerializedName("genres") val genres: List<TmdbGenre>?,
-    @SerializedName("credits") val credits: TmdbCredits?,
-    @SerializedName("videos") val videos: TmdbVideos?,
-    @SerializedName("production_companies") val productionCompanies: List<TmdbProductionCompany>?
-) val id: Int,
     @SerializedName("title") val title: String?,
     @SerializedName("overview") val overview: String?,
     @SerializedName("release_date") val releaseDate: String?,
@@ -81,24 +62,6 @@ data class TmdbShowDetails(
     @SerializedName("credits") val credits: TmdbCredits?,
     @SerializedName("videos") val videos: TmdbVideos?,
     @SerializedName("production_companies") val productionCompanies: List<TmdbProductionCompany>?
-) val id: Int,
-    @SerializedName("name") val name: String?,
-    @SerializedName("overview") val overview: String?,
-    @SerializedName("first_air_date") val firstAirDate: String?,
-    @SerializedName("last_air_date") val lastAirDate: String?,
-    @SerializedName("number_of_seasons") val numberOfSeasons: Int?,
-    @SerializedName("number_of_episodes") val numberOfEpisodes: Int?,
-    @SerializedName("poster_path") val posterPath: String?,
-    @SerializedName("backdrop_path") val backdropPath: String?,
-    @SerializedName("vote_average") val voteAverage: Double?,
-    @SerializedName("genres") val genres: List<TmdbGenre>?,
-    @SerializedName("credits") val credits: TmdbCredits?,
-    @SerializedName("videos") val videos: TmdbVideos?,
-    @SerializedName("production_companies") val productionCompanies: List<TmdbProductionCompany>?
-    @SerializedName("seasons") val seasons: List<TmdbSeason>?,
-    @SerializedName("credits") val credits: TmdbCredits?,
-    @SerializedName("videos") val videos: TmdbVideos?,
-    @SerializedName("production_companies") val productionCompanies: List<TmdbProductionCompany>?
 )
 
 // -----------------------------
@@ -120,7 +83,8 @@ data class TmdbEpisodeDetails(
     @SerializedName("episode_number") val episodeNumber: Int,
     @SerializedName("season_number") val seasonNumber: Int,
     @SerializedName("runtime") val runtime: Int?,
-    @SerializedName("still_path") val stillPath: String?
+    @SerializedName("still_path") val stillPath: String?,
+    @SerializedName("vote_average") val voteAverage: Double?
 )
 
 // -----------------------------
@@ -141,6 +105,7 @@ data class TmdbSeasonDetails(
     @SerializedName("season_number") val seasonNumber: Int,
     @SerializedName("episodes") val episodes: List<TmdbEpisodeDetails>?
 )
+
 data class TmdbCredits(
     @SerializedName("cast") val cast: List<TmdbCast>?
 )
