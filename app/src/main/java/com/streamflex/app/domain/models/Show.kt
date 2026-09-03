@@ -1,7 +1,28 @@
 package com.streamflex.app.domain.models
 
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.InternalSerializationApi // 1. Add Import
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.InternalSerializationApi
+
+@Serializable
+data class CastMember(
+    val name: String,
+    val character: String?,
+    val imageUrl: String?
+)
+
+@Serializable
+data class Trailer(
+    val key: String,
+    val name: String
+)
+
+@Serializable
+data class ProductionCompany(
+    val name: String,
+    val logoUrl: String?
+)
+
 
 @OptIn(InternalSerializationApi::class)
 @Serializable
@@ -14,5 +35,8 @@ data class Show(
     val year: Int? = null,
     val rating: Double? = null,
     val genres: List<String> = emptyList(),
-    val seasons: List<Season> = emptyList()
+    val seasons: List<Season> = emptyList(),
+    val cast: List<CastMember> = emptyList(),
+    val trailers: List<Trailer> = emptyList(),
+    val productionCompanies: List<ProductionCompany> = emptyList()
 )

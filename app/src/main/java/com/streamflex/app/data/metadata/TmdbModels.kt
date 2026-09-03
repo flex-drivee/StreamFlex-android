@@ -45,6 +45,9 @@ data class TmdbMovieDetails(
     @SerializedName("backdrop_path") val backdropPath: String?,
     @SerializedName("vote_average") val voteAverage: Double?,
     @SerializedName("genres") val genres: List<TmdbGenre>?,
+    @SerializedName("credits") val credits: TmdbCredits?,
+    @SerializedName("videos") val videos: TmdbVideos?,
+    @SerializedName("production_companies") val productionCompanies: List<TmdbProductionCompany>?
 )
 
 // -----------------------------
@@ -62,7 +65,13 @@ data class TmdbShowDetails(
     @SerializedName("backdrop_path") val backdropPath: String?,
     @SerializedName("vote_average") val voteAverage: Double?,
     @SerializedName("genres") val genres: List<TmdbGenre>?,
-    @SerializedName("seasons") val seasons: List<TmdbSeason>?
+    @SerializedName("credits") val credits: TmdbCredits?,
+    @SerializedName("videos") val videos: TmdbVideos?,
+    @SerializedName("production_companies") val productionCompanies: List<TmdbProductionCompany>?
+    @SerializedName("seasons") val seasons: List<TmdbSeason>?,
+    @SerializedName("credits") val credits: TmdbCredits?,
+    @SerializedName("videos") val videos: TmdbVideos?,
+    @SerializedName("production_companies") val productionCompanies: List<TmdbProductionCompany>?
 )
 
 // -----------------------------
@@ -104,4 +113,32 @@ data class TmdbSeasonDetails(
     @SerializedName("poster_path") val posterPath: String?,
     @SerializedName("season_number") val seasonNumber: Int,
     @SerializedName("episodes") val episodes: List<TmdbEpisodeDetails>?
+)
+data class TmdbCredits(
+    @SerializedName("cast") val cast: List<TmdbCast>?
+)
+
+data class TmdbCast(
+    @SerializedName("id") val id: Int,
+    @SerializedName("name") val name: String,
+    @SerializedName("character") val character: String?,
+    @SerializedName("profile_path") val profilePath: String?
+)
+
+data class TmdbVideos(
+    @SerializedName("results") val results: List<TmdbVideo>?
+)
+
+data class TmdbVideo(
+    @SerializedName("id") val id: String,
+    @SerializedName("key") val key: String,
+    @SerializedName("name") val name: String,
+    @SerializedName("site") val site: String,
+    @SerializedName("type") val type: String
+)
+
+data class TmdbProductionCompany(
+    @SerializedName("id") val id: Int,
+    @SerializedName("logo_path") val logoPath: String?,
+    @SerializedName("name") val name: String
 )
