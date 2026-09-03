@@ -850,7 +850,7 @@ fun SFCastList(cast: List<com.streamflex.app.domain.models.CastMember>) {
             text = "Cast",
             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
             color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(horizontal = 16.dp, bottom = 12.dp)
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp)
         )
         LazyRow(
             contentPadding = PaddingValues(horizontal = 16.dp),
@@ -901,7 +901,7 @@ fun SFTrailersCarousel(trailers: List<com.streamflex.app.domain.models.Trailer>)
             text = "Trailers & Extras",
             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
             color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(horizontal = 16.dp, bottom = 12.dp)
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp)
         )
         LazyRow(
             contentPadding = PaddingValues(horizontal = 16.dp),
@@ -958,7 +958,7 @@ fun SFProductionCompanies(companies: List<com.streamflex.app.domain.models.Produ
             text = "Studios",
             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
             color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(horizontal = 16.dp, bottom = 12.dp)
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 12.dp)
         )
         LazyRow(
             contentPadding = PaddingValues(horizontal = 16.dp),

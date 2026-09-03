@@ -1,7 +1,6 @@
 package com.streamflex.app.domain.models
 
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.InternalSerializationApi
 
 @Serializable

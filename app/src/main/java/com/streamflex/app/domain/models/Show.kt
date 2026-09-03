@@ -1,28 +1,7 @@
 package com.streamflex.app.domain.models
 
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.InternalSerializationApi
-
-@Serializable
-data class CastMember(
-    val name: String,
-    val character: String?,
-    val imageUrl: String?
-)
-
-@Serializable
-data class Trailer(
-    val key: String,
-    val name: String
-)
-
-@Serializable
-data class ProductionCompany(
-    val name: String,
-    val logoUrl: String?
-)
-
 
 @OptIn(InternalSerializationApi::class)
 @Serializable

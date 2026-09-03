@@ -48,6 +48,18 @@ data class TmdbMovieDetails(
     @SerializedName("credits") val credits: TmdbCredits?,
     @SerializedName("videos") val videos: TmdbVideos?,
     @SerializedName("production_companies") val productionCompanies: List<TmdbProductionCompany>?
+) val id: Int,
+    @SerializedName("title") val title: String?,
+    @SerializedName("overview") val overview: String?,
+    @SerializedName("release_date") val releaseDate: String?,
+    @SerializedName("runtime") val runtime: Int?,
+    @SerializedName("poster_path") val posterPath: String?,
+    @SerializedName("backdrop_path") val backdropPath: String?,
+    @SerializedName("vote_average") val voteAverage: Double?,
+    @SerializedName("genres") val genres: List<TmdbGenre>?,
+    @SerializedName("credits") val credits: TmdbCredits?,
+    @SerializedName("videos") val videos: TmdbVideos?,
+    @SerializedName("production_companies") val productionCompanies: List<TmdbProductionCompany>?
 )
 
 // -----------------------------
@@ -55,6 +67,21 @@ data class TmdbMovieDetails(
 // -----------------------------
 data class TmdbShowDetails(
     @SerializedName("id") val id: Int,
+    @SerializedName("name") val name: String?,
+    @SerializedName("overview") val overview: String?,
+    @SerializedName("first_air_date") val firstAirDate: String?,
+    @SerializedName("last_air_date") val lastAirDate: String?,
+    @SerializedName("number_of_seasons") val numberOfSeasons: Int?,
+    @SerializedName("number_of_episodes") val numberOfEpisodes: Int?,
+    @SerializedName("poster_path") val posterPath: String?,
+    @SerializedName("backdrop_path") val backdropPath: String?,
+    @SerializedName("vote_average") val voteAverage: Double?,
+    @SerializedName("genres") val genres: List<TmdbGenre>?,
+    @SerializedName("seasons") val seasons: List<TmdbSeason>?,
+    @SerializedName("credits") val credits: TmdbCredits?,
+    @SerializedName("videos") val videos: TmdbVideos?,
+    @SerializedName("production_companies") val productionCompanies: List<TmdbProductionCompany>?
+) val id: Int,
     @SerializedName("name") val name: String?,
     @SerializedName("overview") val overview: String?,
     @SerializedName("first_air_date") val firstAirDate: String?,
