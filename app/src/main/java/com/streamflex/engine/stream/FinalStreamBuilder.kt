@@ -43,15 +43,18 @@ object FinalStreamBuilder {
                 .let(StreamSorter::sort)
                 .map(::normalizeName)
         )
+        val mergedSubtitles = orderedStreams.flatMap { it.subtitles }.distinctBy { it.url }
+        val augmentedStreams = orderedStreams.map { it.copy(subtitles = mergedSubtitles) }
+
         return FinalStreams(
 
-            streams = orderedStreams,
+            streams = augmentedStreams,
 
             defaultStream =
-                StreamFailover.primary(orderedStreams),
+                StreamFailover.primary(augmentedStreams),
 
             fallbackStream =
-                StreamFailover.fallback(orderedStreams)
+                StreamFailover.fallback(augmentedStreams)
         )
     }
 
