@@ -51,29 +51,6 @@ fun HomeScreen(
     val scrollState = rememberLazyListState()
 
     // Hero auto-cycle through first 5 featured items
-    val featuredItems = remember(state, selectedTab) {
-        when (selectedTab) {
-            1 -> state.sections.find { it.id == "trending_cinema" }?.items?.take(5) ?: state.popularMovies.take(5)
-            2 -> state.sections.find { it.id == "top_series" }?.items?.take(5) ?: state.popularMovies.take(5)
-            3 -> state.sections.find { it.id == "anime_shows" }?.items?.take(5) ?: state.popularMovies.take(5)
-            else -> state.popularMovies.take(5)
-        }
-    }
-    var heroIndex by remember { mutableIntStateOf(0) }
-    val featuredContent = featuredItems.getOrNull(heroIndex)
-
-    // Top bar fades from transparent → semi-opaque as user scrolls
-    val isScrolled by remember {
-        derivedStateOf {
-            scrollState.firstVisibleItemIndex > 0 || scrollState.firstVisibleItemScrollOffset > 80
-        }
-    }
-    val topBarAlpha by animateFloatAsState(
-        targetValue = if (isScrolled) 1f else 0f,
-        animationSpec = tween(300),
-        label = "topBarAlpha"
-    )
-
     // Tab state for Home / Movies / Series / Anime
     val tabs = listOf("Home", "Movies", "Series", "Anime")
     var selectedTab by remember { mutableIntStateOf(0) }
@@ -96,6 +73,29 @@ fun HomeScreen(
             else -> state.sections // 0 -> Home
         }
     }
+
+    val featuredItems = remember(state, selectedTab) {
+        when (selectedTab) {
+            1 -> state.sections.find { it.id == "trending_cinema" }?.items?.take(5) ?: state.popularMovies.take(5)
+            2 -> state.sections.find { it.id == "top_series" }?.items?.take(5) ?: state.popularMovies.take(5)
+            3 -> state.sections.find { it.id == "anime_shows" }?.items?.take(5) ?: state.popularMovies.take(5)
+            else -> state.popularMovies.take(5)
+        }
+    }
+    var heroIndex by remember { mutableIntStateOf(0) }
+    val featuredContent = featuredItems.getOrNull(heroIndex)
+
+    // Top bar fades from transparent → semi-opaque as user scrolls
+    val isScrolled by remember {
+        derivedStateOf {
+            scrollState.firstVisibleItemIndex > 0 || scrollState.firstVisibleItemScrollOffset > 80
+        }
+    }
+    val topBarAlpha by animateFloatAsState(
+        targetValue = if (isScrolled) 1f else 0f,
+        animationSpec = tween(300),
+        label = "topBarAlpha"
+    )
 
     LaunchedEffect(Unit) {
         viewModel.reloadHistory()
