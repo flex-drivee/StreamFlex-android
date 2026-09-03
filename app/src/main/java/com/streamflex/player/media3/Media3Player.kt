@@ -376,6 +376,11 @@ class Media3Player(
         }
 
         // 6. Attach external subtitles if present
+        com.streamflex.core.utils.StreamLogger.error("SUBTITLE_DEBUG", "Starting player with URL: ${stream.url}")
+        com.streamflex.core.utils.StreamLogger.error("SUBTITLE_DEBUG", "Subtitles count: ${stream.subtitles.size}")
+        for (sub in stream.subtitles) {
+            com.streamflex.core.utils.StreamLogger.error("SUBTITLE_DEBUG", "SUB: ${sub.label} -> ${sub.url}")
+        }
         if (stream.subtitles.isNotEmpty()) {
             val subtitleConfigs = stream.subtitles.map { sub ->
                 val subMime = if (sub.url.endsWith(".vtt", ignoreCase = true)) {

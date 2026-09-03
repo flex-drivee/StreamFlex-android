@@ -190,6 +190,7 @@ class NetMirrorExtractor : BaseExtractor() {
                 return emptyResult()
             }
 
+            com.streamflex.core.utils.StreamLogger.error("SUBTITLE_DEBUG", "NetMirrorExtractor Extracted ${streams.size} streams, ${subtitles.size} subtitles")
             StreamLogger.debug(TAG, "Extracted ${streams.size} streams, ${subtitles.size} subtitles")
             result(streams)
         } catch (e: Exception) {

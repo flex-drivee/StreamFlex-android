@@ -44,6 +44,7 @@ object FinalStreamBuilder {
                 .map(::normalizeName)
         )
         val mergedSubtitles = orderedStreams.flatMap { it.subtitles }.distinctBy { it.url }
+        com.streamflex.core.utils.StreamLogger.error("SUBTITLE_DEBUG", "FinalStreamBuilder merged ${mergedSubtitles.size} subtitles from ${orderedStreams.size} ordered streams")
         val augmentedStreams = orderedStreams.map { it.copy(subtitles = mergedSubtitles) }
 
         return FinalStreams(
