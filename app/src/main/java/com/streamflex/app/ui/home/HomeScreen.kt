@@ -55,18 +55,6 @@ fun HomeScreen(
     val tabs = listOf("Home", "Movies", "Series", "Anime")
     var selectedTab by remember { mutableIntStateOf(0) }
 
-    val context = androidx.compose.ui.platform.LocalContext.current
-    LaunchedEffect(selectedTab) {
-        if (selectedTab == 3) {
-            // Automatically switch to an Anime provider when on Anime tab
-            providerRepository.selectedProviderId = "toonstream"
-        } else {
-            // Reset to user's saved provider for other tabs
-            val savedProvider = context.getSharedPreferences("streamflex_settings", android.content.Context.MODE_PRIVATE)
-                                       .getString("selected_provider", null)
-            providerRepository.selectedProviderId = savedProvider
-        }
-    }
 
     val filteredSections = remember(state.sections, selectedTab) {
         when (selectedTab) {

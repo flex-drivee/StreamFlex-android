@@ -99,6 +99,8 @@ interface TmdbApi {
         @Query("with_origin_country") originCountry: String? = null,
         @Query("with_original_language") originalLanguage: String? = null,
         @Query("with_networks") networks: String? = null,
+        @Query("with_watch_providers") withWatchProviders: String? = null,
+        @Query("watch_region") watchRegion: String? = null,
         @Query("with_genres") genres: String? = null,
         @Query("sort_by") sortBy: String? = "popularity.desc",
         @Query("vote_count.gte") voteCountGte: Int? = null,
