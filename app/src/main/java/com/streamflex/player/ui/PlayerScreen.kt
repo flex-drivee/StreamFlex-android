@@ -292,7 +292,7 @@ fun SettingsDialog(
                             items(state.subtitleTracks) { track ->
                                 val isSelected = track.id == state.selectedSubtitle?.id
                                 SettingsRow(
-                                    label = track.label ?: "Subtitle",
+                                    label = track.label?.takeIf { it.isNotBlank() } ?: track.language?.takeIf { it.isNotBlank() && it != "und" } ?: "Subtitle",
                                     isSelected = isSelected,
                                     onClick = { onSubtitleSelected(track) }
                                 )
