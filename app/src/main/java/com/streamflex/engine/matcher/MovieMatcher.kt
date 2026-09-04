@@ -53,34 +53,24 @@ object MovieMatcher {
         result: SearchResult
     ): Double {
 
-        var score = 0.0
-
-        //----------------------------------------------------
-        // Title similarity (0.0 → 1.0)
-        //----------------------------------------------------
-
-        score += TitleMatcher.similarity(
+        var titleSim = TitleMatcher.similarity(
             title,
             result.title
         )
-
-        //----------------------------------------------------
-        // Original title bonus
-        //----------------------------------------------------
-
+        
         result.originalTitle?.let {
-
-            score = maxOf(
-
-                score,
-
-                TitleMatcher.similarity(
-                    title,
-                    it
-                )
-
-            )
+            titleSim = maxOf(titleSim, TitleMatcher.similarity(title, it))
         }
+        
+        // If the title is completely different (e.g., sim < 0.50), reject it entirely.
+        // Otherwise, year=match (+0.4) and type=movie (+0.2) will cause random movies from the same year to pass the 0.45 threshold!
+        if (titleSim < 0.50) {
+            return 0.0
+        }
+
+        var score = titleSim
+
+
 
         //----------------------------------------------------
         // Year bonus

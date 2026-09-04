@@ -190,7 +190,7 @@ fun MovieDetailScreen(
                                     .border(BorderStroke(1.dp, MaterialTheme.colorScheme.outline), RoundedCornerShape(6.dp))
                             ) {
                                 Icon(
-                                    if (isInMyList) Icons.Default.Check else Icons.Default.Add,
+                                    if (isInMyList) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
                                     null, tint = Color.White, modifier = Modifier.size(22.dp)
                                 )
                             }

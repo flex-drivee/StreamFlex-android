@@ -93,6 +93,28 @@ fun MyListScreen(
                                 contentScale = ContentScale.Crop
                             )
                         }
+                        
+                        // Remove Bookmark Button
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(4.dp)
+                                .size(28.dp)
+                                .clip(CircleShape)
+                                .background(Color.Black.copy(alpha = 0.6f))
+                                .clickable {
+                                    BookmarkManager.removeBookmark(item.id)
+                                    bookmarks = BookmarkManager.getBookmarks()
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                androidx.compose.material.icons.Icons.Default.Close,
+                                contentDescription = "Remove Bookmark",
+                                tint = Color.White,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
                     }
                     Spacer(Modifier.height(4.dp))
                     Text(
