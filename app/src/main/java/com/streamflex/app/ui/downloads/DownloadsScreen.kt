@@ -334,6 +334,15 @@ fun DownloadListItem(
         Spacer(modifier = Modifier.width(8.dp))
 
         // Options dropdown
+        if (item.status == DownloadStatus.COMPLETED) {
+            IconButton(onClick = onDelete) {
+                Icon(
+                    imageVector = Icons.Outlined.Delete,
+                    contentDescription = "Delete Download",
+                    tint = Color.Red.copy(alpha = 0.8f)
+                )
+            }
+        } else {
         Box {
             IconButton(onClick = { showMenu = true }) {
                 Icon(
@@ -385,6 +394,7 @@ fun DownloadListItem(
                     }
                 )
             }
+        }
         }
     }
 }
