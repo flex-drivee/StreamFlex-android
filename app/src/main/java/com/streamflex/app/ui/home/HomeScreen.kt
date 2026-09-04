@@ -524,7 +524,7 @@ fun SFHeroSection(
                     onClick = {
                         isInMyList = !isInMyList
                         if (isInMyList) {
-                            BookmarkManager.addBookmark(BookmarkItem(movie.id, movie.title, movie.posterUrl, movie.mediaType == com.streamflex.domain.models.MediaType.TV))
+                            BookmarkManager.addBookmark(BookmarkItem(movie.id, movie.title, movie.poster ?: "", movie.type == com.streamflex.app.domain.models.ContentType.SHOW))
                         } else {
                             BookmarkManager.removeBookmark(movie.id)
                         }
