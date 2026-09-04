@@ -167,7 +167,19 @@ fun MovieDetailScreen(
 
                             // My List toggle
                             IconButton(
-                                onClick  = { isInMyList = !isInMyList },
+                                onClick  = { 
+                                    isInMyList = !isInMyList 
+                                    if (isInMyList) {
+                                        val m = uiState.movie
+                                        val s = uiState.show
+                                        val title = m?.title ?: s?.title ?: "Unknown"
+                                        val poster = m?.poster ?: s?.poster
+                                        val isShow = s != null
+                                        BookmarkManager.addBookmark(BookmarkItem(contentId, title, poster, isShow))
+                                    } else {
+                                        BookmarkManager.removeBookmark(contentId)
+                                    }
+                                },
                                 modifier = Modifier
                                     .size(46.dp)
                                     .clip(RoundedCornerShape(6.dp))

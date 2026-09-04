@@ -1,0 +1,198 @@
+17:55:23.026 [D] TransactionExecutor: Token :android.os.BinderProxy@4dd1c24 has ActivityClientRecord : com.streamflex.app
+17:55:23.086 [I] BLASTBufferQueue: [ViewRootImpl[MainActivity]#2] constructor()
+17:55:23.746 [D] TransactionExecutor: Token :android.os.BinderProxy@4dd1c24 has ActivityClientRecord : com.streamflex.app
+17:55:24.332 [D] ActivityThread: performLaunchActivity: com.streamflex.app
+17:55:24.342 [I] OpenGLRenderer: Davey! duration=726ms; Flags=0, FrameTimelineVsyncId=8482751, IntendedVsync=157660811790866, Vsync=157660911790865, InputEventId=911428409, HandleInputStart=157660917771858, AnimationStart=157660917775858, PerformTraversalsStart=157660937434089, DrawStart=157660937704858, FrameDeadline=157660831790866, FrameInterval=157660917763012, FrameStartTime=11111111, SyncQueued=157660948994089, SyncStart=157660949122012, IssueDrawCommandsStart=157660949421704, SwapBuffers=157661530764551, FrameCompleted=157661538617781, DequeueBufferDuration=29307, QueueBufferDuration=1348230, GpuCompleted=157661538617781, SwapBuffersCompleted=157661534929781, DisplayPresentTime=511844488092,
+17:55:24.352 [D] libMEOW: meow new tls: 0xb4000079b12a5360
+17:55:24.353 [D] libMEOW: applied 1 plugins for [com.streamflex.app]:
+17:55:24.355 [D] libMEOW: plugin 1: [libMEOW_gift.so]: 0xb400007970f51820
+17:55:24.357 [D] libMEOW: rebuild call chain: 0xb4000079b1195250
+17:55:24.359 [D] libMEOW: meow delete tls: 0xb4000079b12a5360
+17:55:24.361 [D] ApplicationPackageManager: [getText] isMxtcMarket: false, isCoclmarket: false, isWomStkSupport: true
+17:55:24.370 [I] WhiteNavigationLice: Modify naviBarColor to 0xFFF0F0F0, and windowBackgroundColor is -13619152   /windowIsTranslucent:false
+17:55:24.422 [D] ActivityThread: ++ activityComponent:com.streamflex.app/com.streamflex.player.PlayerActivity counts:1 trigger:null
+17:55:24.437 [D] STREAM_PIPELINE: [NetMirrorBypassManager] Using cached t_hash_t (age: 6009137ms)
+17:55:24.441 [D] STREAM_PIPELINE: [NetMirrorBypassManager] Using cached t_hash_t (age: 6009165ms)
+17:55:24.451 [D] STREAM_PIPELINE: [NetMirrorBypassManager] Using cached t_hash_t (age: 6009167ms)
+17:55:24.456 [D] STREAM_PIPELINE: [NetMirrorSearch] GET https://net52.cc/mobile/pv/search.php?s=Toxic%3A+A+Fairy+Tale+for+Grown-ups&t=1788526524
+17:55:24.473 [D] STREAM_PIPELINE: [NetMirrorBypassManager] Using cached t_hash_t (age: 6009168ms)
+17:55:24.476 [D] STREAM_PIPELINE: [NetMirrorSearch] GET https://net52.cc/mobile/hs/search.php?s=Toxic%3A+A+Fairy+Tale+for+Grown-ups&t=1788526524
+17:55:24.482 [D] STREAM_PIPELINE: [NetMirrorSearch] GET https://net52.cc/mobile/hs/search.php?s=Toxic%3A+A+Fairy+Tale+for+Grown-ups&t=1788526524
+17:55:24.485 [D] STREAM_PIPELINE: [NetMirrorSearch] GET https://net52.cc/mobile/search.php?s=Toxic%3A+A+Fairy+Tale+for+Grown-ups&t=1788526524
+17:55:24.502 [D] ViewRootImpl[PlayerActivity]: hardware acceleration = true, sRendererEnabled = true, forceHwAccelerated = false
+17:55:24.509 [D] HTTP: → [GET] https://net52.cc/mobile/search.php?s=Toxic%3A+A+Fairy+Tale+for+Grown-ups&t=1788526524
+17:55:24.510 [D] HTTP: → [GET] https://net52.cc/mobile/hs/search.php?s=Toxic%3A+A+Fairy+Tale+for+Grown-ups&t=1788526524
+17:55:24.512 [D] HTTP: → [GET] https://net52.cc/mobile/hs/search.php?s=Toxic%3A+A+Fairy+Tale+for+Grown-ups&t=1788526524
+17:55:24.522 [D] TransactionExecutor: Token :android.os.BinderProxy@5d20c12 has ActivityClientRecord : com.streamflex.app
+17:55:24.526 [D] HTTP: → [GET] https://net52.cc/mobile/pv/search.php?s=Toxic%3A+A+Fairy+Tale+for+Grown-ups&t=1788526524
+17:55:24.682 [I] ExoPlayerImpl: Init 79a46f6 [AndroidXMedia3/1.10.1] [Infinix-X6817, Infinix X6817, INFINIX, 31]
+17:55:24.750 [I] NextRenderersFactory: Loaded FfmpegVideoRenderer.
+17:55:24.789 [I] NextRenderersFactory: Loaded FfmpegAudioRenderer.
+17:55:24.904 [I] BLASTBufferQueue: [ViewRootImpl[PlayerActivity]#3] constructor()
+17:55:24.974 [I] OpenGLRenderer: Davey! duration=1165ms; Flags=1, FrameTimelineVsyncId=8482793, IntendedVsync=157661011358815, Vsync=157661700247697, InputEventId=0, HandleInputStart=157661704418012, AnimationStart=157661704424551, PerformTraversalsStart=157661704755012, DrawStart=157662138833166, FrameDeadline=157661031358815, FrameInterval=157661704208474, FrameStartTime=11111111, SyncQueued=157662144786012, SyncStart=157662149472474, IssueDrawCommandsStart=157662149547858, SwapBuffers=157662178355243, FrameCompleted=157662181651243, DequeueBufferDuration=4775923, QueueBufferDuration=1236692, GpuCompleted=157662180996166, SwapBuffersCompleted=157662181651243, DisplayPresentTime=65542,
+17:55:25.017 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=72, right=0, bottom=1}   /alpha:1.0   /fraction:0.0   /allowWhenFinished:false
+17:55:25.026 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+17:55:25.034 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1544.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+17:55:25.039 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 0.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+17:55:25.041 [I] OpenGLRenderer: Davey! duration=1197ms; Flags=1, FrameTimelineVsyncId=8482793, IntendedVsync=157661011358815, Vsync=157661700247697, InputEventId=0, HandleInputStart=157661704418012, AnimationStart=157661704424551, PerformTraversalsStart=157661704755012, DrawStart=157662194128474, FrameDeadline=157661042469926, FrameInterval=157661704208474, FrameStartTime=11111111, SyncQueued=157662195910320, SyncStart=157662202399320, IssueDrawCommandsStart=157662202847627, SwapBuffers=157662208512551, FrameCompleted=157662215737704, DequeueBufferDuration=46692, QueueBufferDuration=676000, GpuCompleted=157662215737704, SwapBuffersCompleted=157662211285474, DisplayPresentTime=127973117132825,
+17:55:25.042 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=72, right=0, bottom=1}   /alpha:1.0   /fraction:0.0   /allowWhenFinished:false
+17:55:25.043 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+17:55:25.044 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1544.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+17:55:25.045 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 0.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+17:55:25.047 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=71, right=0, bottom=0}   /alpha:1.0   /fraction:0.032352943   /allowWhenFinished:false
+17:55:25.049 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+17:55:25.050 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+17:55:25.052 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -1.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+17:55:25.053 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=71, right=0, bottom=0}   /alpha:1.0   /fraction:0.064705886   /allowWhenFinished:false
+17:55:25.054 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+17:55:25.056 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+17:55:25.057 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -1.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+17:55:25.058 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=70, right=0, bottom=0}   /alpha:1.0   /fraction:0.097058825   /allowWhenFinished:false
+17:55:25.059 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+17:55:25.060 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+17:55:25.061 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -2.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+17:55:25.070 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=68, right=0, bottom=0}   /alpha:1.0   /fraction:0.12941177   /allowWhenFinished:false
+17:55:25.071 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+17:55:25.073 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+17:55:25.074 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -4.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+17:55:25.080 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=66, right=0, bottom=0}   /alpha:1.0   /fraction:0.16176471   /allowWhenFinished:false
+17:55:25.082 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+17:55:25.083 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+17:55:25.084 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -6.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+17:55:25.091 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=62, right=0, bottom=0}   /alpha:1.0   /fraction:0.19411765   /allowWhenFinished:false
+17:55:25.092 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+17:55:25.094 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+17:55:25.095 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -10.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+17:55:25.101 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=58, right=0, bottom=0}   /alpha:1.0   /fraction:0.22647059   /allowWhenFinished:false
+17:55:25.103 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+17:55:25.106 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+17:55:25.108 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -14.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+17:55:25.116 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=53, right=0, bottom=0}   /alpha:1.0   /fraction:0.25882354   /allowWhenFinished:false
+17:55:25.117 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+17:55:25.119 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+17:55:25.120 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -19.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+17:55:25.123 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=47, right=0, bottom=0}   /alpha:1.0   /fraction:0.29117647   /allowWhenFinished:false
+17:55:25.125 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+17:55:25.126 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+17:55:25.128 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -25.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+17:55:25.139 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=41, right=0, bottom=0}   /alpha:1.0   /fraction:0.32352942   /allowWhenFinished:false
+17:55:25.142 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+17:55:25.143 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+17:55:25.148 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -31.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+17:55:25.152 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=35, right=0, bottom=0}   /alpha:1.0   /fraction:0.35588235   /allowWhenFinished:false
+17:55:25.153 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+17:55:25.156 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+17:55:25.158 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -37.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+17:55:25.162 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=29, right=0, bottom=0}   /alpha:1.0   /fraction:0.3882353   /allowWhenFinished:false
+17:55:25.168 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+17:55:25.173 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+17:55:25.188 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -43.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+17:55:25.199 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=25, right=0, bottom=0}   /alpha:1.0   /fraction:0.42058823   /allowWhenFinished:false
+17:55:25.208 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+17:55:25.209 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+17:55:25.212 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -47.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+17:55:25.220 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=14, right=0, bottom=0}   /alpha:1.0   /fraction:0.5176471   /allowWhenFinished:false
+17:55:25.224 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+17:55:25.227 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+17:55:25.230 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -58.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+17:55:25.233 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=11, right=0, bottom=0}   /alpha:1.0   /fraction:0.5529412   /allowWhenFinished:false
+17:55:25.235 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+17:55:25.236 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+17:55:25.239 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -61.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+17:55:25.240 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=8, right=0, bottom=0}   /alpha:1.0   /fraction:0.60588235   /allowWhenFinished:false
+17:55:25.241 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+17:55:25.242 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+17:55:25.243 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -64.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+17:55:25.245 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=6, right=0, bottom=0}   /alpha:1.0   /fraction:0.6382353   /allowWhenFinished:false
+17:55:25.247 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+17:55:25.249 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+17:55:25.250 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -66.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+17:55:25.252 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=5, right=0, bottom=0}   /alpha:1.0   /fraction:0.67058825   /allowWhenFinished:false
+17:55:25.253 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+17:55:25.255 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+17:55:25.256 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -67.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+17:55:25.257 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=5, right=0, bottom=0}   /alpha:1.0   /fraction:0.67941177   /allowWhenFinished:false
+17:55:25.259 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+17:55:25.260 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+17:55:25.261 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -67.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+17:55:25.271 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=4, right=0, bottom=0}   /alpha:1.0   /fraction:0.7147059   /allowWhenFinished:false
+17:55:25.275 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+17:55:25.285 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+17:55:25.289 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -68.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+17:55:25.295 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=3, right=0, bottom=0}   /alpha:1.0   /fraction:0.7470588   /allowWhenFinished:false
+17:55:25.303 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+17:55:25.310 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+17:55:25.321 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -69.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+17:55:25.330 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=2, right=0, bottom=0}   /alpha:1.0   /fraction:0.7794118   /allowWhenFinished:false
+17:55:25.331 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+17:55:25.333 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+17:55:25.344 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -70.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+17:55:25.354 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=1, right=0, bottom=0}   /alpha:1.0   /fraction:0.8117647   /allowWhenFinished:false
+17:55:25.368 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+17:55:25.370 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+17:55:25.372 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -71.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+17:55:25.375 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=1, right=0, bottom=0}   /alpha:1.0   /fraction:0.84411764   /allowWhenFinished:false
+17:55:25.378 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+17:55:25.388 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+17:55:25.391 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -71.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+17:55:25.394 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.9117647   /allowWhenFinished:false
+17:55:25.395 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+17:55:25.397 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+17:55:25.401 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -72.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+17:55:25.402 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.94411767   /allowWhenFinished:false
+17:55:25.404 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+17:55:25.406 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+17:55:25.410 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -72.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+17:55:25.411 [D] HTTP: ← [200] https://net52.cc/mobile/hs/search.php?s=Toxic%3A+A+Fairy+Tale+for+Grown-ups&t=1788526524 (881ms)
+17:55:25.413 [D] HTTP: ← [200] https://net52.cc/mobile/hs/search.php?s=Toxic%3A+A+Fairy+Tale+for+Grown-ups&t=1788526524 (890ms)
+17:55:25.416 [D] HTTP: ← [200] https://net52.cc/mobile/pv/search.php?s=Toxic%3A+A+Fairy+Tale+for+Grown-ups&t=1788526524 (869ms)
+17:55:25.419 [D] HTTP: ← [200] https://net52.cc/mobile/search.php?s=Toxic%3A+A+Fairy+Tale+for+Grown-ups&t=1788526524 (898ms)
+17:55:25.423 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.9764706   /allowWhenFinished:false
+17:55:25.424 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+17:55:25.425 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+17:55:25.427 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -72.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+17:55:25.432 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:1.0   /allowWhenFinished:false
+17:55:25.433 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+17:55:25.438 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+17:55:25.441 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -72.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+17:55:25.442 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:1.0   /allowWhenFinished:true
+17:55:25.443 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+17:55:25.445 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+17:55:25.446 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -72.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+17:55:25.447 [D] STREAM_PIPELINE: [NetMirrorSearch] Parsed 0 search results for ott=nf
+17:55:25.448 [D] STREAM_PIPELINE: [NetMirrorSearch] Parsed 0 search results for ott=pv
+17:55:25.449 [D] STREAM_PIPELINE: [NetMirrorSearch] Parsed 0 search results for ott=hs
+17:55:25.455 [D] STREAM_PIPELINE: [NetMirrorSearch] Parsed 0 search results for ott=dp
+17:55:25.604 [I] BLASTBufferQueue: [ViewRootImpl[MainActivity]#2] destructor()
+17:55:25.660 [I] BLASTBufferQueue: releaseBufferCallbackThunk bufferId:80526341832750 framenumber:69 blastBufferQueue is dead
+17:55:25.754 [E] OpenGLRenderer: EglManager::makeCurrent mED = 0xb400007880f70390, surface = 0x0, mEC = 0xb400007820f8cdb0, error = EGL_SUCCESS
+17:56:03.344 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+17:56:03.408 [D] TransactionExecutor: Token :android.os.BinderProxy@5d20c12 has ActivityClientRecord : com.streamflex.app
+17:56:03.563 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+17:56:03.566 [D] TransactionExecutor: Token :android.os.BinderProxy@4dd1c24 has ActivityClientRecord : com.streamflex.app
+17:56:03.573 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+17:56:03.648 [I] BLASTBufferQueue: [ViewRootImpl[MainActivity]#4] constructor()
+17:56:03.829 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+17:56:03.844 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+17:56:04.157 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+17:56:04.166 [E] OpenGLRenderer: EglManager::makeCurrent mED = 0xb400007880f70390, surface = 0x0, mEC = 0xb400007820f8cdb0, error = EGL_SUCCESS
+17:56:04.188 [I] BLASTBufferQueue: [ViewRootImpl[PlayerActivity]#3] destructor()
+17:56:04.192 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+17:56:04.199 [D] ActivityThread: -- comp:com.streamflex.app/com.streamflex.player.PlayerActivity
+17:56:04.220 [I] ExoPlayerImpl: Release 79a46f6 [AndroidXMedia3/1.10.1] [Infinix-X6817, Infinix X6817, INFINIX, 31] [media3.common, media3.exoplayer, media3.decoder]
+17:56:04.243 [D] View: [Warning] assignParent to null: this = DecorView@f396b16[PlayerActivity]
+17:56:04.326 [I] BLASTBufferQueue: releaseBufferCallbackThunk bufferId:80526341832765 framenumber:3442 blastBufferQueue is dead
+17:56:04.420 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+17:56:04.626 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+17:56:04.662 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+17:56:04.684 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+17:56:04.722 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+17:56:04.727 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+17:56:04.740 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+17:56:05.438 [D] TransactionExecutor: Token :android.os.BinderProxy@4dd1c24 has ActivityClientRecord : com.streamflex.app
+17:56:05.503 [E] OpenGLRenderer: EglManager::makeCurrent mED = 0xb400007880f70390, surface = 0x0, mEC = 0xb400007820f8cdb0, error = EGL_SUCCESS
+17:56:05.552 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+17:56:05.565 [I] BLASTBufferQueue: [ViewRootImpl[MainActivity]#4] destructor()
+17:56:05.581 [I] GED: ged_boost_gpu_freq, level 100, eOrigin 2, final_idx 31, oppidx_max 31, oppidx_min 0
+17:56:05.598 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+17:56:05.834 [I] BLASTBufferQueue: releaseBufferCallbackThunk bufferId:80526341832780 framenumber:11 blastBufferQueue is dead
