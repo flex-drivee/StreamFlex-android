@@ -40,7 +40,7 @@ class StreamRepository(
         val baseResults = search(title)
         
         // Fallback searches for titles that have subtitles or extra words (e.g. "Toxic A Fairy Tale" -> "Toxic")
-        val cleanTitle = title.replace(Regex("[^a-zA-Z0-9 ]"), " ").replace(Regex("\s+"), " ").trim()
+        val cleanTitle = title.replace(Regex("[^a-zA-Z0-9 ]"), " ").replace(Regex("\\s+"), " ").trim()
         val shortTitle = cleanTitle.split(" ").take(2).joinToString(" ")
         val shortResults = if (shortTitle.length > 3 && shortTitle.lowercase() != title.lowercase()) {
             search(shortTitle)

@@ -1,5 +1,9 @@
 package com.streamflex.app.ui.movies
 
+import com.streamflex.app.data.bookmarks.BookmarkManager
+import com.streamflex.app.data.bookmarks.BookmarkItem
+
+
 import androidx.compose.ui.draw.blur
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -169,15 +173,14 @@ fun MovieDetailScreen(
                             IconButton(
                                 onClick  = { 
                                     isInMyList = !isInMyList 
+                                    val currentId = state.movie?.id ?: state.show?.id ?: return@IconButton
                                     if (isInMyList) {
-                                        val m = uiState.movie
-                                        val s = uiState.show
-                                        val title = m?.title ?: s?.title ?: "Unknown"
-                                        val poster = m?.poster ?: s?.poster
-                                        val isShow = s != null
-                                        BookmarkManager.addBookmark(BookmarkItem(contentId, title, poster, isShow))
+                                        val title = state.movie?.title ?: state.show?.title ?: "Unknown"
+                                        val poster = state.movie?.poster ?: state.show?.poster
+                                        val isShow = state.show != null
+                                        BookmarkManager.addBookmark(BookmarkItem(currentId, title, poster, isShow))
                                     } else {
-                                        BookmarkManager.removeBookmark(contentId)
+                                        BookmarkManager.removeBookmark(currentId)
                                     }
                                 },
                                 modifier = Modifier
