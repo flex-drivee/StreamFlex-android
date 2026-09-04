@@ -1,70 +1,387 @@
-Run tasks : [:app:assembleDebug]
-
-> Configure project :app
-WARNING: The following problems were found when resolving the SDK location:
-Where: sdk.dir property in local.properties file. Problem: Directory does not exist
 
 
-> Task :app:preBuild UP-TO-DATE
-> Task :app:preDebugBuild UP-TO-DATE
-> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
-> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
-> Task :app:dataBindingMergeDependencyArtifactsDebug UP-TO-DATE
-> Task :app:generateDebugResValues UP-TO-DATE
-> Task :app:generateDebugResources UP-TO-DATE
-> Task :app:mergeDebugResources UP-TO-DATE
-> Task :app:packageDebugResources UP-TO-DATE
-> Task :app:processDebugNavigationResources UP-TO-DATE
-> Task :app:parseDebugLocalResources UP-TO-DATE
-> Task :app:dataBindingGenBaseClassesDebug UP-TO-DATE
-> Task :app:generateDebugBuildConfig UP-TO-DATE
-> Task :app:checkDebugAarMetadata UP-TO-DATE
-> Task :app:compileDebugNavigationResources UP-TO-DATE
-> Task :app:mapDebugSourceSetPaths UP-TO-DATE
-> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
-> Task :app:extractDeepLinksDebug UP-TO-DATE
-> Task :app:processDebugMainManifest UP-TO-DATE
-> Task :app:processDebugManifest UP-TO-DATE
-> Task :app:processDebugManifestForPackage UP-TO-DATE
-> Task :app:processDebugResources UP-TO-DATE
-> Task :app:javaPreCompileDebug UP-TO-DATE
-> Task :app:mergeDebugShaders UP-TO-DATE
-> Task :app:compileDebugShaders NO-SOURCE
-> Task :app:generateDebugAssets UP-TO-DATE
-> Task :app:mergeDebugAssets UP-TO-DATE
-> Task :app:compressDebugAssets UP-TO-DATE
-> Task :app:l8DexDesugarLibDebug UP-TO-DATE
-> Task :app:checkDebugDuplicateClasses UP-TO-DATE
-> Task :app:desugarDebugFileDependencies UP-TO-DATE
-> Task :app:mergeExtDexDebug UP-TO-DATE
-> Task :app:mergeLibDexDebug UP-TO-DATE
-> Task :app:mergeDebugJniLibFolders UP-TO-DATE
-> Task :app:mergeDebugNativeLibs UP-TO-DATE
-> Task :app:stripDebugDebugSymbols UP-TO-DATE
-> Task :app:validateSigningDebug UP-TO-DATE
-> Task :app:writeDebugAppMetadata UP-TO-DATE
-> Task :app:writeDebugSigningConfigVersions UP-TO-DATE
-> Task :app:compileDebugKotlin
-e: file:///storage/emulated/0/AndroidIDEProjects/StreamFlex-android/app/src/main/java/com/streamflex/engine/stream/FinalStreamBuilder.kt:47:36 Unresolved reference 'StreamLogger'.
-e: file:///storage/emulated/0/AndroidIDEProjects/StreamFlex-android/app/src/main/java/com/streamflex/extractors/netmirror/NetMirrorExtractor.kt:193:40 Unresolved reference 'StreamLogger'.
-e: file:///storage/emulated/0/AndroidIDEProjects/StreamFlex-android/app/src/main/java/com/streamflex/player/media3/Media3Player.kt:379:36 Unresolved reference 'StreamLogger'.
-e: file:///storage/emulated/0/AndroidIDEProjects/StreamFlex-android/app/src/main/java/com/streamflex/player/media3/Media3Player.kt:380:36 Unresolved reference 'StreamLogger'.
-e: file:///storage/emulated/0/AndroidIDEProjects/StreamFlex-android/app/src/main/java/com/streamflex/player/media3/Media3Player.kt:382:40 Unresolved reference 'StreamLogger'.
-
-> Task :app:compileDebugKotlin FAILED
-
-FAILURE: Build failed with an exception.
-
-* What went wrong:
-Execution failed for task ':app:compileDebugKotlin'.
-> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
-   > Compilation error. See log for more details
-
-* Try:
-> Run with --stacktrace option to get the stack trace.
-> Run with --info or --debug option to get more log output.
-> Run with --scan to get full insights.
-> Get more help at https://help.gradle.org.
-
-BUILD FAILED in 50s
-34 actionable tasks: 1 executed, 33 up-to-date
+22:51:40.529 [D] STREAM_PIPELINE: 9171_1000.jpg
+22:51:40.529 [D] STREAM_PIPELINE: #EXTINF:9.551844,
+22:51:40.530 [D] STREAM_PIPELINE: 9171_1001.jpg
+22:51:40.530 [D] STREAM_PIPELINE: #EXT-X-ENDLIST
+22:51:40.531 [D] HTTP: ← [200] https://makhi4.top/s23.nm-cdn9.top/files/82048309/1080p/1080p.m3u8?in=a80180c437f89cc1c35e5b76d81bd702::097dedcf70e674d55df8fdba10cb28be::1788457898::kp::myes (1513ms)
+22:51:40.531 [D] SecurityInterceptor: Binary content-type detected: application/vnd.apple.mpegurl — URL: https://makhi4.top/s23.nm-cdn9.top/files/82048309/1080p/1080p.m3u8?in=a80180c437f89cc1c35e5b76d81bd702::097dedcf70e674d55df8fdba10cb28be::1788457898::kp::myes
+22:51:40.538 [W] AudioCapabilities: Unsupported mime audio/x-adpcm-dvi-ima
+22:51:40.539 [W] AudioCapabilities: Unsupported mime audio/x-adpcm-dvi-ima
+22:51:40.539 [W] AudioCapabilities: Unsupported mime audio/x-adpcm-ms
+22:51:40.540 [W] AudioCapabilities: Unsupported mime audio/x-adpcm-ms
+22:51:40.541 [W] AudioCapabilities: Unsupported mime audio/alac
+22:51:40.542 [W] AudioCapabilities: Unsupported mime audio/alac
+22:51:40.543 [W] AudioCapabilities: Unsupported mime audio/ape
+22:51:40.543 [W] AudioCapabilities: Unsupported mime audio/ape
+22:51:40.545 [W] VideoCapabilities: Unrecognized profile/level 32768/256 for video/mp4v-es
+22:51:40.546 [W] VideoCapabilities: Unrecognized profile/level 32768/256 for video/mp4v-es
+22:51:40.549 [D] nativeloader: Load /data/app/~~1-9Renb_GmefC_Z37p6i-w==/com.streamflex.app-dK4s4uOsjyyOTCZROmAoww==/base.apk!/lib/arm64-v8a/libmedia3ext.so using class loader ns clns-4 (caller=/data/app/~~1-9Renb_GmefC_Z37p6i-w==/com.streamflex.app-dK4s4uOsjyyOTCZROmAoww==/base.apk!classes20.dex): ok
+22:51:40.553 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+22:51:40.554 [D] HTTP: → [GET] https://makhi4.top/s23.nm-cdn9.top/files/82048309/720p/720p.m3u8?in=a80180c437f89cc1c35e5b76d81bd702::097dedcf70e674d55df8fdba10cb28be::1788457898::kp::myes
+22:51:40.554 [D] HTTP: → [GET] https://makhi4.top/s23.nm-cdn9.top/files/82048309/a/2/2.m3u8
+22:51:40.569 [D] STREAM_PIPELINE: [Media3Player] Original M3U8:
+22:51:40.570 [D] STREAM_PIPELINE: #EXTM3U
+22:51:40.571 [D] STREAM_PIPELINE: #EXT-X-VERSION:3
+22:51:40.572 [D] STREAM_PIPELINE: #EXT-X-TARGETDURATION:11
+22:51:40.572 [D] STREAM_PIPELINE: #EXT-X-MEDIA-SEQUENCE:0
+22:51:40.573 [D] STREAM_PIPELINE: #EXTINF:3.670578,
+22:51:42.158 [D] STREAM_PIPELINE: 9171_1000.jpg
+22:51:42.158 [D] STREAM_PIPELINE: #EXTINF:9.551844,
+22:51:42.158 [D] STREAM_PIPELINE: 9171_1001.jpg
+22:51:42.159 [D] STREAM_PIPELINE: #EXT-X-ENDLIST
+22:51:42.159 [D] HTTP: ← [200] https://makhi4.top/s23.nm-cdn9.top/files/82048309/720p/720p.m3u8?in=a80180c437f89cc1c35e5b76d81bd702::097dedcf70e674d55df8fdba10cb28be::1788457898::kp::myes (488ms)
+22:51:42.160 [D] SecurityInterceptor: Binary content-type detected: application/vnd.apple.mpegurl — URL: https://makhi4.top/s23.nm-cdn9.top/files/82048309/720p/720p.m3u8?in=a80180c437f89cc1c35e5b76d81bd702::097dedcf70e674d55df8fdba10cb28be::1788457898::kp::myes
+22:51:42.161 [D] STREAM_PIPELINE: [Media3Player] Original M3U8:
+22:51:42.162 [D] STREAM_PIPELINE: #EXTM3U
+22:51:42.162 [D] STREAM_PIPELINE: #EXT-X-VERSION:3
+22:51:42.163 [D] STREAM_PIPELINE: #EXT-X-TARGETDURATION:5
+22:51:42.163 [D] STREAM_PIPELINE: #EXT-X-MEDIA-SEQUENCE:0
+22:51:42.163 [D] STREAM_PIPELINE: #EXTINF:5.013333,
+22:51:42.787 [D] STREAM_PIPELINE: 9171_617.js
+22:51:42.788 [D] STREAM_PIPELINE: #EXTINF:5.013333,
+22:51:42.788 [D] STREAM_PIPELINE: 9171_618.js
+22:51:42.789 [D] STREAM_PIPELINE: #EXTINF:1.706667,
+22:51:42.789 [D] STREAM_PIPELINE: 9171_619.js
+22:51:42.790 [D] STREAM_PIPELINE: #EXT-X-ENDLIST
+22:51:42.791 [D] HTTP: ← [200] https://makhi4.top/s23.nm-cdn9.top/files/82048309/a/2/2.m3u8 (610ms)
+22:51:42.791 [D] SecurityInterceptor: Binary content-type detected: application/vnd.apple.mpegurl — URL: https://makhi4.top/s23.nm-cdn9.top/files/82048309/a/2/2.m3u8
+22:51:42.792 [D] HTTP: → [GET] https://makhi4.top/s23.nm-cdn9.top/files/82048309/720p/9171_000.jpg
+22:51:42.794 [D] HTTP: → [GET] https://makhi4.top/s23.nm-cdn9.top/files/82048309/a/2/9171_000.js
+22:51:42.804 [D] HTTP: ← [200] https://makhi4.top/s23.nm-cdn9.top/files/82048309/720p/9171_000.jpg (622ms)
+22:51:42.806 [I] DMCodecAdapterFactory: Creating an asynchronous MediaCodec adapter for track type video
+22:51:42.807 [D] CCodec: allocate(c2.mtk.avc.decoder)
+22:51:42.808 [I] Codec2Client: Available Codec2 services: "default" "software"
+22:51:42.809 [W] PesReader: Unexpected start code prefix: 3211293
+22:51:42.811 [I] CCodec: setting up 'default' as default (vendor) store
+22:51:42.811 [D] HTTP: ← [200] https://makhi4.top/s23.nm-cdn9.top/files/82048309/a/2/9171_000.js (678ms)
+22:51:42.812 [I] CCodec: Created component [c2.mtk.avc.decoder]
+22:51:42.813 [D] CCodecConfig: read media type: video/avc
+22:51:42.814 [D] ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.max-count.values
+22:51:42.814 [D] ReflectedParamUpdater: extent() != 1 for single value type: output.subscribed-indices.values
+22:51:42.814 [D] ReflectedParamUpdater: extent() != 1 for single value type: input.buffers.allocator-ids.values
+22:51:42.815 [D] ReflectedParamUpdater: extent() != 1 for single value type: output.buffers.allocator-ids.values
+22:51:42.815 [D] ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.allocator-ids.values
+22:51:42.816 [D] ReflectedParamUpdater: extent() != 1 for single value type: output.buffers.pool-ids.values
+22:51:42.816 [D] ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.pool-ids.values
+22:51:42.817 [D] ReflectedParamUpdater: ignored struct field coded.color-format.locations
+22:51:42.818 [D] CCodecConfig: ignoring local param raw.size (0xd2001800) as it is already supported
+22:51:42.819 [D] CCodecConfig: ignoring local param raw.crop (0xd2001801) as it is already supported
+22:51:42.820 [D] CCodecConfig: ignoring local param default.color (0x5200180b) as it is already supported
+22:51:42.820 [D] CCodecConfig: ignoring local param raw.hdr-static-info (0xd200180a) as it is already supported
+22:51:42.821 [I] CCodecConfig: query failed after returning 17 values (BAD_INDEX)
+22:51:42.822 [D] CCodecConfig: c2 config diff is Dict {
+22:51:42.822 [D] CCodecConfig: c2::i32 algo.priority.value = 1
+22:51:42.823 [D] CCodecConfig: c2::float algo.rate.value = 0
+22:51:42.823 [D] CCodecConfig: c2::float coded.frame-rate.value = 30
+22:51:42.824 [D] CCodecConfig: c2::u32 coded.pl.level = 20495
+22:51:42.825 [D] CCodecConfig: c2::u32 coded.pl.profile = 20481
+22:51:42.825 [D] CCodecConfig: c2::u32 coded.vui.color.matrix = 0
+22:51:42.826 [D] CCodecConfig: c2::u32 coded.vui.color.primaries = 0
+22:51:42.826 [D] CCodecConfig: c2::u32 coded.vui.color.range = 2
+22:51:42.827 [D] CCodecConfig: c2::u32 coded.vui.color.transfer = 0
+22:51:42.827 [D] CCodecConfig: c2::u32 default.color.matrix = 0
+22:51:42.827 [D] CCodecConfig: c2::u32 default.color.primaries = 0
+22:51:42.828 [D] CCodecConfig: c2::u32 default.color.range = 0
+22:51:42.829 [D] CCodecConfig: c2::u32 default.color.transfer = 0
+22:51:42.829 [D] CCodecConfig: c2::u32 input.buffers.max-size.value = 2097152
+22:51:42.829 [D] CCodecConfig: c2::u32 input.delay.value = 4
+22:51:42.830 [D] CCodecConfig: string input.media-type.value = "video/avc"
+22:51:42.830 [D] CCodecConfig: c2::u32 output.delay.value = 12
+22:51:42.831 [D] CCodecConfig: string output.media-type.value = "video/raw"
+22:51:42.831 [D] CCodecConfig: c2::u32 raw.color.matrix = 0
+22:51:42.832 [D] CCodecConfig: c2::u32 raw.color.primaries = 0
+22:51:42.833 [D] CCodecConfig: c2::u32 raw.color.range = 2
+22:51:42.834 [D] CCodecConfig: c2::u32 raw.color.transfer = 0
+22:51:42.834 [D] CCodecConfig: c2::u32 raw.crop.height = 239
+22:51:42.835 [D] CCodecConfig: c2::u32 raw.crop.left = 0
+22:51:42.836 [D] CCodecConfig: c2::u32 raw.crop.top = 0
+22:51:42.836 [D] CCodecConfig: c2::u32 raw.crop.width = 319
+22:51:42.836 [D] CCodecConfig: c2::float raw.hdr-static-info.mastering.blue.x = 0
+22:51:42.837 [D] CCodecConfig: c2::float raw.hdr-s
+22:51:42.837 [W] ColorUtils: expected specified color aspects (2:0:0:0)
+22:51:42.838 [I] MediaCodec: MediaCodec will operate in async mode
+22:51:42.839 [D] MediaCodec: flushMediametrics
+22:51:42.839 [D] SurfaceUtils: connecting to surface 0xb4000079310ec250, reason connectToSurface
+22:51:42.840 [I] MediaCodec: [c2.mtk.avc.decoder] setting surface generation to 27141121
+22:51:42.841 [D] SurfaceUtils: disconnecting from surface 0xb4000079310ec250, reason connectToSurface(reconnect)
+22:51:42.842 [D] SurfaceUtils: connecting to surface 0xb4000079310ec250, reason connectToSurface(reconnect)
+22:51:42.842 [D] MediaCodec: [c2.mtk.avc.decoder] current pid: 26505, current process name: com.streamflex.app
+22:51:42.843 [D] CCodec: [c2.mtk.avc.decoder] buffers are bound to CCodec for this session
+22:51:42.843 [D] CCodecConfig: no c2 equivalents for csd-1
+22:51:42.844 [D] CCodecConfig: no c2 equivalents for log-session-id
+22:51:42.844 [D] CCodecConfig: no c2 equivalents for native-window
+22:51:42.845 [D] CCodecConfig: no c2 equivalents for flags
+22:51:42.845 [D] CCodecConfig: c2 config diff is   c2::i32 algo.priority.value = 0
+22:51:42.846 [D] CCodecConfig: c2::u32 input.buffers.max-size.value = 2094080
+22:51:42.846 [D] CCodecConfig: c2::u32 raw.max-size.height = 720
+22:51:42.847 [D] CCodecConfig: c2::u32 raw.max-size.width = 1280
+22:51:42.847 [D] CCodecConfig: c2::u32 raw.pixel-format.value = 34
+22:51:42.848 [D] CCodecConfig: c2::u32 raw.size.height = 720
+22:51:42.848 [D] CCodecConfig: c2::u32 raw.size.width = 1280
+22:51:42.849 [W] Codec2Client: query -- param skipped: index = 1107298332.
+22:51:42.850 [D] CCodec: client requested max input size 691200, which is smaller than what component recommended (2094080); overriding with component recommendation.
+22:51:42.850 [W] CCodec: This behavior is subject to change. It is recommended that app developers double check whether the requested max input size is in reasonable range.
+22:51:42.850 [D] CCodec: setup formats input: AMessage(what = 0x00000000) = {
+22:51:42.851 [D] CCodec: string mime = "video/avc"
+22:51:42.851 [D] CCodec: int32_t width = 1280
+22:51:42.852 [D] CCodec: int32_t profile = 65536
+22:51:42.852 [D] CCodec: int32_t priority = 0
+22:51:42.853 [D] CCodec: int32_t frame-rate = 30
+22:51:42.853 [D] CCodec: int32_t height = 720
+22:51:42.854 [D] CCodec: int32_t level = 32768
+22:51:42.854 [D] CCodec: int32_t max-input-size = 2094080
+22:51:42.855 [D] CCodec: Rect crop(0, 0, 318, 238)
+22:51:42.855 [D] CCodec: }
+22:51:42.856 [D] CCodec: setup formats output: AMessage(what = 0x00000000) = {
+22:51:42.856 [D] CCodec: int32_t android._color-format = 2130708361
+22:51:42.857 [D] CCodec: int32_t android._video-scaling = 1
+22:51:42.857 [D] CCodec: int32_t sar-width = 1
+22:51:42.857 [D] CCodec: int32_t color-standard = 4
+22:51:42.858 [D] CCodec: int32_t color-range = 2
+22:51:42.859 [D] CCodec: int32_t color-transfer = 3
+22:51:42.860 [D] CCodec: int32_t android._dataspace = 259
+22:51:42.861 [D] CCodec: int32_t width = 1280
+22:51:42.861 [D] CCodec: int32_t rotation-degrees = 0
+22:51:42.862 [D] CCodec: int32_t sar-height = 1
+22:51:42.862 [D] CCodec: int32_t max-width = 1280
+22:51:42.862 [D] CCodec: int32_t max-height = 720
+22:51:42.862 [D] CCodec: int32_t priority = 0
+22:51:42.863 [D] CCodec: string mime = "video/raw"
+22:51:42.864 [D] CCodec: Rect crop(0, 0, 318, 238)
+22:51:42.864 [D] CCodec: Buffer hdr-static-info = {
+22:51:42.865 [D] CCodec: 00000000:  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  ................
+22:51:42.865 [D] CCodec: 00000010:  00 00 00 00 00 00 00 00  00                       .........
+22:51:42.866 [D] CCodec: }
+22:51:42.866 [D] CCodec: int32_t frame-rate = 30
+22:51:42.866 [D] CCodec: int32_t height = 720
+22:51:42.867 [D] CCodec: int32_t color-format = 2130708361
+22:51:42.867 [D] CCodec: }
+22:51:42.868 [I] CCodecConfig: query failed after returning 17 values (BAD_INDEX)
+22:51:42.868 [D] MediaCodec: keep callback message for reclaim
+22:51:42.869 [W] Codec2Client: query -- param skipped: index = 1342179345.
+22:51:42.869 [W] Codec2Client: query -- param skipped: index = 2415921170.
+22:51:42.870 [W] Codec2Client: query -- param skipped: index = 1610614798.
+22:51:42.871 [D] C2Store: Using ION
+22:51:42.871 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#976] Created input block pool with allocatorID 16 => poolID 17 - OK (0)
+22:51:42.871 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#976] Query output surface allocator returned 0 params => BAD_INDEX (6)
+22:51:42.872 [I] CCodecBufferChannel: [c2.mtk.avc.decoder#976] Created output block pool with allocatorID 18 => poolID 144 - OK
+22:51:42.872 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#976] Configured output block pool ids 144 => OK
+22:51:42.873 [D] Codec2-OutputBufferQueue: remote graphic buffer migration 0/0
+22:51:42.873 [D] Codec2Client: setOutputSurface -- generation=27141121 consumer usage=0x900
+22:51:42.874 [D] Codec2Client: Surface configure completed
+22:51:42.874 [E] ion: ioctl c0044901 failed with code -1: Invalid argument
+22:51:42.875 [D] HTTP: → [GET] https://makhi4.top/s23.nm-cdn9.top/files/82048309/720p/9171_001.jpg
+22:51:42.875 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+22:51:42.876 [W] PesReader: Unexpected start code prefix: 2162723
+22:51:42.877 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#976] flushed work; ignored.
+22:51:42.877 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#976] Discard frames from previous generation.
+22:51:42.877 [D] PipelineWatcher: onWorkDone: frameIndex not found (18446744073709551615); ignored
+22:51:42.878 [I] DMCodecAdapterFactory: Creating an asynchronous MediaCodec adapter for track type audio
+22:51:42.879 [D] CCodec: allocate(c2.android.aac.decoder)
+22:51:42.879 [D] CCodecConfig: c2 config diff is   c2::u32 output.delay.value = 14
+22:51:42.880 [D] CCodecConfig: c2::u32 raw.color.range = 0
+22:51:42.881 [D] Codec2-OutputBufferQueue: set max dequeue count 21 from update
+22:51:42.881 [I] CCodec: setting up 'default' as default (vendor) store
+22:51:42.883 [I] CCodec: Created component [c2.android.aac.decoder]
+22:51:42.883 [D] CCodecConfig: read media type: audio/mp4a-latm
+22:51:42.884 [D] ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.max-count.values
+22:51:42.884 [D] ReflectedParamUpdater: extent() != 1 for single value type: output.subscribed-indices.values
+22:51:42.885 [D] ReflectedParamUpdater: extent() != 1 for single value type: input.buffers.allocator-ids.values
+22:51:42.886 [D] ReflectedParamUpdater: extent() != 1 for single value type: output.buffers.allocator-ids.values
+22:51:42.886 [D] ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.allocator-ids.values
+22:51:42.886 [D] ReflectedParamUpdater: extent() != 1 for single value type: output.buffers.pool-ids.values
+22:51:42.887 [D] ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.pool-ids.values
+22:51:42.887 [I] CCodecConfig: query failed after returning 19 values (BAD_INDEX)
+22:51:42.888 [D] CCodecConfig: c2 config diff is Dict {
+22:51:42.888 [D] CCodecConfig: c2::u32 coded.aac-packaging.value = 0
+22:51:42.888 [D] CCodecConfig: c2::u32 coded.bitrate.value = 64000
+22:51:42.889 [D] CCodecConfig: c2::u32 coded.pl.level = 0
+22:51:42.889 [D] CCodecConfig: c2::u32 coded.pl.profile = 8192
+22:51:42.889 [D] CCodecConfig: c2::i32 coding.drc.album-mode.value = 0
+22:51:42.890 [D] CCodecConfig: c2::float coding.drc.attenuation-factor.value = 1
+22:51:42.890 [D] CCodecConfig: c2::float coding.drc.boost-factor.value = 1
+22:51:42.891 [D] CCodecConfig: c2::i32 coding.drc.compression-mode.value = 3
+22:51:42.891 [D] CCodecConfig: c2::i32 coding.drc.effect-type.value = 3
+22:51:42.891 [D] CCodecConfig: c2::float coding.drc.encoded-level.value = 0.25
+22:51:42.892 [D] CCodecConfig: c2::float coding.drc.reference-level.value = -16
+22:51:42.892 [D] CCodecConfig: c2::u32 input.buffers.max-size.value = 8192
+22:51:42.892 [D] CCodecConfig: c2::u32 input.delay.value = 0
+22:51:42.893 [D] CCodecConfig: string input.media-type.value = "audio/mp4a-latm"
+22:51:42.893 [D] CCodecConfig: c2::u32 output.delay.value = 2
+22:51:42.893 [D] CCodecConfig: c2::float output.drc.output-loudness.value = 0.25
+22:51:42.894 [D] CCodecConfig: string output.media-type.value = "audio/raw"
+22:51:42.894 [D] CCodecConfig: c2::u32 raw.channel-count.value = 1
+22:51:42.894 [D] CCodecConfig: c2::u32 raw.max-channel-count.value = 8
+22:51:42.895 [D] CCodecConfig: c2::u32 raw.sample-rate.value = 44100
+22:51:42.895 [D] CCodecConfig: }
+22:51:42.895 [I] MediaCodec: MediaCodec will operate in async mode
+22:51:42.896 [D] MediaCodec: flushMediametrics
+22:51:42.896 [D] CCodec: [c2.android.aac.decoder] buffers are bound to CCodec for this session
+22:51:42.896 [D] CCodecConfig: no c2 equivalents for log-session-id
+22:51:42.897 [D] CCodecConfig: no c2 equivalents for flags
+22:51:42.897 [D] CCodecConfig: c2 config diff is   c2::u32 raw.channel-count.value = 2
+22:51:42.897 [D] CCodecConfig: c2::u32 raw.sample-rate.value = 48000
+22:51:42.898 [W] Codec2Client: query -- param skipped: index = 1107298332.
+22:51:42.898 [D] CCodec: setup formats input: AMessage(what = 0x00000000) = {
+22:51:42.898 [D] CCodec: int32_t aac-drc-album-mode = 0
+22:51:42.899 [D] CCodec: int32_t aac-drc-boost-level = 127
+22:51:42.899 [D] CCodec: int32_t aac-drc-cut-level = 127
+22:51:42.900 [D] CCodec: int32_t aac-drc-effect-type = 3
+22:51:42.900 [D] CCodec: int32_t aac-encoded-target-level = -1
+22:51:42.901 [D] CCodec: int32_t aac-max-output-channel_count = 8
+22:51:42.901 [D] CCodec: int32_t aac-target-ref-level = 64
+22:51:42.902 [D] CCodec: int32_t bitrate = 64000
+22:51:42.902 [D] CCodec: int32_t channel-count = 2
+22:51:42.903 [D] CCodec: int32_t level = 0
+22:51:42.903 [D] CCodec: int32_t max-input-size = 8192
+22:51:42.904 [D] CCodec: string mime = "audio/mp4a-latm"
+22:51:42.904 [D] CCodec: int32_t profile = 2
+22:51:42.904 [D] CCodec: int32_t sample-rate = 48000
+22:51:42.906 [D] CCodec: }
+22:51:42.907 [D] CCodec: setup formats output: AMessage(what = 0x00000000) = {
+22:51:42.907 [D] CCodec: int32_t aac-drc-album-mode = 0
+22:51:42.908 [D] CCodec: int32_t aac-drc-boost-level = 127
+22:51:42.908 [D] CCodec: int32_t aac-drc-cut-level = 127
+22:51:42.909 [D] CCodec: int32_t aac-drc-effect-type = 3
+22:51:42.910 [D] CCodec: int32_t aac-drc-output-loudness = -1
+22:51:42.910 [D] CCodec: int32_t aac-encoded-target-level = -1
+22:51:42.911 [D] CCodec: int32_t aac-max-output-channel_count = 8
+22:51:42.912 [D] CCodec: int32_t aac-target-ref-level = 64
+22:51:42.912 [D] CCodec: int32_t channel-count = 2
+22:51:42.913 [D] CCodec: string mime = "audio/raw"
+22:51:42.914 [D] CCodec: int32_t sample-rate = 48000
+22:51:42.914 [D] CCodec: }
+22:51:42.914 [I] CCodecConfig: query failed after returning 19 values (BAD_INDEX)
+22:51:42.915 [D] MediaCodec: keep callback message for reclaim
+22:51:42.916 [W] Codec2Client: query -- param skipped: index = 1342179345.
+22:51:42.916 [W] Codec2Client: query -- param skipped: index = 2415921170.
+22:51:42.917 [W] Codec2Client: query -- param skipped: index = 1610614798.
+22:51:42.917 [D] CCodecBufferChannel: [c2.android.aac.decoder#436] Created input block pool with allocatorID 16 => poolID 18 - OK (0)
+22:51:42.917 [I] CCodecBufferChannel: [c2.android.aac.decoder#436] Created output block pool with allocatorID 16 => poolID 872 - OK
+22:51:42.918 [D] CCodecBufferChannel: [c2.android.aac.decoder#436] Configured output block pool ids 872 => OK
+22:51:42.918 [D] CCodecConfig: c2 config diff is   c2::u32 raw.channel-mask.value = 12
+22:51:42.919 [D] HTTP: → [GET] https://makhi4.top/s23.nm-cdn9.top/files/82048309/a/2/9171_001.js
+22:51:42.919 [D] CCodecConfig: c2 config diff is   c2::u32 raw.crop.height = 720
+22:51:42.920 [D] CCodecConfig: c2::u32 raw.crop.width = 1280
+22:51:42.920 [D] CCodecConfig: c2::u32 raw.pixel-format.value = 2130706433
+22:51:42.920 [D] CCodecBuffers: [c2.mtk.avc.decoder#976:2D-Output] popFromStashAndRegister: at 1000000083422us, output format changed to AMessage(what = 0x00000000) = {
+22:51:42.921 [D] CCodecBuffers: int32_t android._color-format = 2130706433
+22:51:42.921 [D] CCodecBuffers: int32_t android._video-scaling = 1
+22:51:42.921 [D] CCodecBuffers: int32_t sar-width = 1
+22:51:42.922 [D] CCodecBuffers: int32_t color-standard = 1
+22:51:42.922 [D] CCodecBuffers: int32_t color-range = 2
+22:51:42.922 [D] CCodecBuffers: int32_t color-transfer = 3
+22:51:42.922 [D] CCodecBuffers: int32_t android._dataspace = 260
+22:51:42.923 [D] CCodecBuffers: int32_t width = 1280
+22:51:42.923 [D] CCodecBuffers: int32_t rotation-degrees = 0
+22:51:42.924 [D] CCodecBuffers: int32_t sar-height = 1
+22:51:42.924 [D] CCodecBuffers: int32_t max-width = 1280
+22:51:42.924 [D] CCodecBuffers: int32_t max-height = 720
+22:51:42.925 [D] CCodecBuffers: int32_t priority = 0
+22:51:42.925 [D] CCodecBuffers: string mime = "video/raw"
+22:51:42.926 [D] CCodecBuffers: Rect crop(0, 0, 1279, 719)
+22:51:42.927 [D] CCodecBuffers: Buffer hdr-static-info = {
+22:51:42.927 [D] CCodecBuffers: 00000000:  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  ................
+22:51:42.928 [D] CCodecBuffers: 00000010:  00 00 00 00 00 00 00 00  00                       .........
+22:51:42.928 [D] CCodecBuffers: }
+22:51:42.929 [D] CCodecBuffers: int32_t frame-rate = 30
+22:51:42.930 [D] CCodecBuffers: int32_t height = 720
+22:51:42.930 [D] CCodecBuffers: int32_t color-format = 2130708361
+22:51:42.930 [D] CCodecBuffers: }
+22:51:42.931 [D] AudioTrack: INSP: type=audio,case=1,set=0xb4000078c0fb5ef0,stream_type=-1,sample_rate=48000,format=0x1,channel_mask=0x3,frame_count=12000,flags=0x0,notification_frames=0,session_id=6121,transfer_type=3,uid=-1,pid=-1
+22:51:42.931 [D] AudioTrack: INSP: type=audio,case=1,attributes=1,content_type=0,usage=1,source=-1,flags=0xa00
+22:51:42.932 [D] AudioTrack: set(): Building AudioTrack with attributes: usage = 1, content = 0, flags = 0xa00, tags = []
+22:51:42.932 [D] AudioTrack: set(): 0xb4000078c0fb5ef0, Create AudioTrackThread, tid = 29292
+22:51:42.933 [D] AudioTrack: createTrack_l(614): 0xb4000078c0fb5ef0, mCblk = 0x7a4e2dc000, mLatency = 335, mAfLatency = 85, frameCount = 12000, mSampleRate = 48000, mFlags = 0x8, mReqFrameCount = 12000, mNotificationFramesAct = 6000
+22:51:42.935 [D] AudioTrack: setVolume(614): 0xb4000078c0fb5ef0, left = 1.000000, right = 1.000000
+22:51:42.935 [W] MediaCodec: mapFormat: no mediaType information
+22:51:42.936 [D] AudioTrack: start(614): 0xb4000078c0fb5ef0, prior state:STATE_STOPPED
+22:51:42.937 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+22:51:42.938 [W] SpeakerLayoutUtil: Built-in speaker's getSpeakerLayoutChannelMask not usable, defaulting to stereo.
+22:51:42.938 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+22:51:42.943 [D] AudioTrack: getTimestamp_l(614): device stall time corrected using current time 130519525162933
+22:51:42.946 [D] HTTP: ← [200] https://makhi4.top/s23.nm-cdn9.top/files/82048309/720p/9171_001.jpg (620ms)
+22:51:42.967 [D] HTTP: ← [200] https://makhi4.top/s23.nm-cdn9.top/files/82048309/a/2/9171_001.js (1025ms)
+22:51:42.973 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+22:51:42.981 [W] PesReader: Unexpected start code prefix: 3211353
+22:51:42.982 [W] PesReader: Unexpected start code prefix: 2162749
+22:51:42.983 [D] HTTP: → [GET] https://makhi4.top/s23.nm-cdn9.top/files/82048309/a/2/9171_002.js
+22:51:42.984 [D] HTTP: → [GET] https://makhi4.top/s23.nm-cdn9.top/files/82048309/720p/9171_002.jpg
+22:51:42.996 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+22:51:43.135 [D] HTTP: ← [200] https://makhi4.top/s23.nm-cdn9.top/files/82048309/a/2/9171_002.js (495ms)
+22:51:43.296 [W] PesReader: Unexpected start code prefix: 2162777
+22:51:43.306 [D] HTTP: → [GET] https://makhi4.top/s23.nm-cdn9.top/files/82048309/a/2/9171_003.js
+22:51:43.378 [D] HTTP: ← [200] https://makhi4.top/s23.nm-cdn9.top/files/82048309/720p/9171_002.jpg (739ms)
+22:51:43.424 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+22:51:43.515 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+22:51:45.233 [D] HTTP: ← [200] https://makhi4.top/s23.nm-cdn9.top/files/82048309/a/2/9171_003.js (1926ms)
+22:51:45.234 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:1.0   /allowWhenFinished:true
+22:51:45.234 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+22:51:45.637 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+22:51:45.810 [W] PesReader: Unexpected start code prefix: 2162805
+22:51:45.818 [D] HTTP: → [GET] https://makhi4.top/s23.nm-cdn9.top/files/82048309/a/2/9171_004.js
+22:51:45.924 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+22:51:46.025 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+22:51:46.032 [W] PesReader: Unexpected start code prefix: 3211387
+22:51:46.042 [D] HTTP: → [GET] https://makhi4.top/s23.nm-cdn9.top/files/82048309/720p/9171_003.jpg
+22:51:46.327 [D] HTTP: ← [200] https://makhi4.top/s23.nm-cdn9.top/files/82048309/a/2/9171_004.js (509ms)
+22:51:46.393 [D] TransactionExecutor: Token :android.os.BinderProxy@a2731fe has ActivityClientRecord : com.streamflex.app
+22:51:46.396 [D] AudioTrack: pause(614): 0xb4000078c0fb5ef0, prior state:STATE_ACTIVE
+22:51:46.397 [D] AudioTrackShared: this(0xb400007861010110), mCblk(0x7a4e2dc000), front(235520), mIsOut 1, interrupt() FUTEX_WAKE
+22:51:46.409 [W] PesReader: Unexpected start code prefix: 2162833
+22:51:46.421 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+22:51:46.431 [D] TransactionExecutor: Token :android.os.BinderProxy@4dd1c24 has ActivityClientRecord : com.streamflex.app
+22:51:46.435 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+ExoPlayerImpl: Release 2dcf596 [AndroidXMedia3/1.10.1] [Infinix-X6817, Infinix X6817, INFINIX, 31] [media3.common, media3.exoplayer, media3.decoder, media3.ui, media3.exoplayer.hls, media3.datasource, media3.datasource.okhttp, media3.decoder.ffmpeg, media3.extractor]
+22:51:47.100 [D] PipelineWatcher: onWorkDone: frameIndex not found (18446744073709551615); ignored
+22:51:47.101 [D] PipelineWatcher: onWorkDone: frameIndex not found (18446744073709551615); ignored
+22:51:47.103 [D] PipelineWatcher: onWorkDone: frameIndex not found (18446744073709551615); ignored
+22:51:47.104 [D] PipelineWatcher: onWorkDone: frameIndex not found (18446744073709551615); ignored
+22:51:47.105 [D] PipelineWatcher: onWorkDone: frameIndex not found (18446744073709551615); ignored
+22:51:47.108 [D] MediaCodec: keep callback message for reclaim
+22:51:47.108 [I] CCodecConfig: query failed after returning 17 values (BAD_INDEX)
+22:51:47.109 [D] CCodecConfig: c2 config diff is   c2::u32 coded.vui.color.range = 0
+22:51:47.110 [D] CCodecConfig: c2::u32 output.delay.value = 12
+22:51:47.111 [W] Codec2Client: query -- param skipped: index = 1342179345.
+22:51:47.112 [W] Codec2Client: query -- param skipped: index = 2415921170.
+22:51:47.113 [W] Codec2Client: query -- param skipped: index = 1610614798.
+22:51:47.117 [D] CCodecBuffers: [c2.android.aac.decoder#436:1D-Output.Impl[N]] Client returned a buffer it does not own according to our record: 0
+22:51:47.118 [D] CCodecBuffers: [c2.android.aac.decoder#436:1D-Output.Impl[N]] Client returned a buffer it does not own according to our record: 1
+22:51:47.119 [D] CCodecBuffers: [c2.android.aac.decoder#436:1D-Output.Impl[N]] Client returned a buffer it does not own according to our record: 2
+22:51:47.120 [D] CCodecBuffers: [c2.android.aac.decoder#436:1D-Output.Impl[N]] Client returned a buffer it does not own according to our record: 3
+22:51:47.120 [D] MediaCodec: keep callback message for reclaim
+22:51:47.121 [I] CCodecConfig: query failed after returning 19 values (BAD_INDEX)
+22:51:47.123 [W] Codec2Client: query -- param skipped: index = 1342179345.
+22:51:47.124 [W] Codec2Client: query -- param skipped: index = 2415921170.
+22:51:47.126 [W] Codec2Client: query -- param skipped: index = 1610614798.
+22:51:47.129 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#976] MediaCodec discarded an unknown buffer
+22:51:47.130 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#976] MediaCodec discarded an unknown buffer
+22:51:47.131 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#976] MediaCodec discarded an unknown buffer
+22:51:47.132 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#976] MediaCodec discarded an unknown buffer
+22:51:47.133 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#976] MediaCodec discarded an unknown buffer
+22:51:47.134 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#976] MediaCodec discarded an unknown buffer
+22:51:47.135 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#976] MediaCodec discarded an unknown buffer
+22:51:47.137 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#976] MediaCodec discarded an unknown buffer
+22:51:47.137 [D] SurfaceUtils: disconnecting from surface 0xb4000079310ff4e0, reason disconnectFromSurface
+22:51:47.140 [D] CCodecBufferChannel: [c2.android.aac.decoder#436] MediaCodec discarded an unknown buffer
+22:51:47.141 [D] CCodecBufferChannel: [c2.android.aac.decoder#436] MediaCodec discarded an unknown buffer
+22:51:47.142 [D] CCodecBufferChannel: [c2.android.aac.decoder#436] MediaCodec discarded an unknown buffer
+22:51:47.142 [D] CCodecBufferChannel: [c2.android.aac.decoder#436] MediaCodec discarded an unknown buffer
+22:51:47.143 [D] libMEOW: meow delete tls: 0xb4000079b19e5aa0
+22:51:47.144 [D] AudioTrack: flush(614): 0xb4000078c0fb5ef0, prior state:STATE_PAUSED
+22:51:47.145 [D] AudioTrack: stop(614): 0xb4000078c0fb5ef0, prior state:STATE_FLUSHED
+22:51:47.146 [D] AudioTrack: ~AudioTrack(614): 0xb4000078c0fb5ef0
+22:51:47.147 [D] AudioTrack: stop(614): 0xb4000078c0fb5ef0, prior state:STATE_FLUSHED
+22:51:47.147 [D] AudioTrackShared: this(0xb400007861010110), mCblk(0x7a4e2dc000), front(249568), mIsOut 1, interrupt() FUTEX_WAKE
+22:51:47.149 [D] AudioTrack: stopAndJoinCallbacks(614) done
+22:51:47.150 [I] hw-BpHwBinder: onLastStrongRef automatically unlinking death recipients
+22:51:47.150 [D] MediaCodec: flushMediametrics
+22:51:47.151 [D] MediaCodec: flushMediametrics
+22:51:47.152 [I] hw-BpHwBinder: onLastStrongRef automatically unlinking death recipients
+22:51:47.153 [D] MediaCodec: flushMediametrics
+22:51:47.154 [D] MediaCodec: flushMediametrics
+22:51:47.162 [D] View: [Warning] assignParent to null: this = DecorView@c9019a0[PlayerActivity]
+22:51:47.166 [I] BLASTBufferQueue: releaseBufferCallbackThunk bufferId:113838108180739 framenumber:4267 blastBufferQueue is dead
+22:51:47.167 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+22:51:47.663 [I] libPerfCtl: fbcNotifySbeRescue ret=-1

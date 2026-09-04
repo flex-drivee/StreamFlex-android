@@ -376,6 +376,7 @@ class Media3Player(
         }
 
         // 6. Attach external subtitles if present
+        try { java.io.File("/sdcard/subtitle_debug.txt").appendText("Media3Player load()\nURL: ${stream.url}\nSub count: ${stream.subtitles.size}\n") } catch (e: Exception) {}
         com.streamflex.core.utils.StreamLogger.error("SUBTITLE_DEBUG", "Starting player with URL: ${stream.url}")
         com.streamflex.core.utils.StreamLogger.error("SUBTITLE_DEBUG", "Subtitles count: ${stream.subtitles.size}")
         for (sub in stream.subtitles) {
