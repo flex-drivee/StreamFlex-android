@@ -402,28 +402,11 @@ class Media3Player(
         }
 
         val mediaItem = mediaItemBuilder.build()
-        var source: androidx.media3.exoplayer.source.MediaSource = if (mimeType == androidx.media3.common.MimeTypes.APPLICATION_M3U8) {
-            androidx.media3.exoplayer.hls.HlsMediaSource.Factory(dataSourceFactory)
-                .setAllowChunklessPreparation(true)
-                .createMediaSource(mediaItem)
-        } else {
-            mediaSourceFactory.createMediaSource(mediaItem)
-        }
-
-        // Fix: HlsMediaSource.Factory ignores MediaItem.SubtitleConfigurations. 
-        // We must manually wrap it in a MergingMediaSource to inject the soft subtitles!
-        if (mediaItem.localConfiguration?.subtitleConfigurations?.isNotEmpty() == true) {
-            val subtitleSources = mediaItem.localConfiguration!!.subtitleConfigurations.map { subtitleConfig ->
-                val textExtractorFactory = androidx.media3.extractor.text.SubtitleExtractor.Factory(androidx.media3.extractor.text.DefaultSubtitleParserFactory())
-                
-                // If the ExoPlayer version requires the SubtitleExtractor to parse subtitles as Cues rather than letting the renderer decode them legacy-style:
-                androidx.media3.exoplayer.source.SingleSampleMediaSource.Factory(dataSourceFactory)
-                    .createMediaSource(subtitleConfig, androidx.media3.common.C.TIME_UNSET)
-            }
-            val sourcesArray = arrayOf(source) + subtitleSources.toTypedArray()
-            source = androidx.media3.exoplayer.source.MergingMediaSource(*sourcesArray)
-        }
-
+        // Let DefaultMediaSourceFactory handle everything:
+        // It correctly builds HlsMediaSource for M3U8.
+        // It also seamlessly injects SubtitleConfigurations via MergingMediaSource and SubtitleExtractor
+        // without crashing due to legacy decoding being disabled.
+        val source = mediaSourceFactory.createMediaSource(mediaItem)
         exoPlayer.setMediaSource(source)
         exoPlayer.prepare()
     }
