@@ -402,12 +402,23 @@ class Media3Player(
         }
 
         val mediaItem = mediaItemBuilder.build()
-        val source = if (mimeType == androidx.media3.common.MimeTypes.APPLICATION_M3U8) {
+        var source: androidx.media3.exoplayer.source.MediaSource = if (mimeType == androidx.media3.common.MimeTypes.APPLICATION_M3U8) {
             androidx.media3.exoplayer.hls.HlsMediaSource.Factory(dataSourceFactory)
                 .setAllowChunklessPreparation(true)
                 .createMediaSource(mediaItem)
         } else {
             mediaSourceFactory.createMediaSource(mediaItem)
+        }
+
+        // Fix: HlsMediaSource.Factory ignores MediaItem.SubtitleConfigurations. 
+        // We must manually wrap it in a MergingMediaSource to inject the soft subtitles!
+        if (mediaItem.localConfiguration?.subtitleConfigurations?.isNotEmpty() == true) {
+            val subtitleSources = mediaItem.localConfiguration!!.subtitleConfigurations.map { subtitleConfig ->
+                androidx.media3.exoplayer.source.SingleSampleMediaSource.Factory(dataSourceFactory)
+                    .createMediaSource(subtitleConfig, androidx.media3.common.C.TIME_UNSET)
+            }
+            val sourcesArray = arrayOf(source) + subtitleSources.toTypedArray()
+            source = androidx.media3.exoplayer.source.MergingMediaSource(*sourcesArray)
         }
 
         exoPlayer.setMediaSource(source)
