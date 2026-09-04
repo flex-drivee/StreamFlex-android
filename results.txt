@@ -1,0 +1,165 @@
+15:26:15.346 [D] STREAM_PIPELINE: #EXTINF:9.551844,
+15:26:15.347 [D] STREAM_PIPELINE: 1350_1226.jpg
+15:26:15.347 [D] STREAM_PIPELINE: #EXTINF:9.551844,
+15:26:15.348 [D] STREAM_PIPELINE: 1350_1227.jpg
+15:26:15.348 [D] STREAM_PIPELINE: #EXTINF:9.551844,
+15:26:15.349 [D] STREAM_PIPELINE: 1350_1228.jpg
+15:26:15.349 [D] STREAM_PIPELINE: #EXTINF:9.551844,
+15:26:15.349 [D] STREAM_PIPELINE: 1350_1229.jpg
+15:26:15.350 [D] STREAM_PIPELINE: #EXTINF:9.510133,
+15:26:15.351 [D] STREAM_PIPELINE: 1350_1230.jpg
+15:26:15.351 [D] STREAM_PIPELINE: #EXTINF:9.551844,
+15:26:15.352 [D] STREAM_PIPELINE: 1350_1231.jpg
+15:26:15.353 [D] STREAM_PIPELINE: #EXTINF:9.593556,
+15:26:15.353 [D] STREAM_PIPELINE: 1350_1232.jpg
+15:26:15.354 [D] STREAM_PIPELINE: #EXT-X-ENDLIST
+15:26:15.355 [D] HTTP: ← [200] https://makhi2.top/s23.nm-cdn9.top/files/82048310/1080p/1080p.m3u8?in=30e944842b0348e1b6c01d11e505eebf::957222489f85e2a8163de20b97e3fe00::1788517570::kp::myes (531ms)
+15:26:15.356 [D] SecurityInterceptor: Binary content-type detected: application/vnd.apple.mpegurl — URL: https://makhi2.top/s23.nm-cdn9.top/files/82048310/1080p/1080p.m3u8?in=30e944842b0348e1b6c01d11e505eebf::957222489f85e2a8163de20b97e3fe00::1788517570::kp::myes
+15:26:15.356 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+15:26:15.368 [E] ExoPlayerImplInternal: Playback error
+15:26:15.369 [E] ExoPlayerImplInternal: androidx.media3.exoplayer.ExoPlaybackException: Unexpected runtime error
+15:26:15.369 [E] ExoPlayerImplInternal: at androidx.media3.exoplayer.ExoPlayerImplInternal.handleMessage(ExoPlayerImplInternal.java:947)
+15:26:15.370 [E] ExoPlayerImplInternal: at android.os.Handler.dispatchMessage(Handler.java:102)
+15:26:15.371 [E] ExoPlayerImplInternal: at android.os.Looper.loopOnce(Looper.java:241)
+15:26:15.372 [E] ExoPlayerImplInternal: at android.os.Looper.loop(Looper.java:342)
+15:26:15.373 [E] ExoPlayerImplInternal: at android.os.HandlerThread.run(HandlerThread.java:67)
+15:26:15.374 [E] ExoPlayerImplInternal: Caused by: java.lang.IllegalStateException: Legacy decoding is disabled, can't handle application/x-subrip samples (expected application/x-media3-cues).
+15:26:15.375 [E] ExoPlayerImplInternal: at com.google.common.base.Preconditions.checkState(Preconditions.java:836)
+15:26:15.375 [E] ExoPlayerImplInternal: at androidx.media3.exoplayer.text.TextRenderer.assertLegacyDecodingEnabledIfRequired(TextRenderer.java:619)
+15:26:15.376 [E] ExoPlayerImplInternal: at androidx.media3.exoplayer.text.TextRenderer.onStreamChanged(TextRenderer.java:212)
+15:26:15.378 [E] ExoPlayerImplInternal: at androidx.media3.exoplayer.BaseRenderer.replaceStream(BaseRenderer.java:178)
+15:26:15.379 [E] ExoPlayerImplInternal: at androidx.media3.exoplayer.BaseRenderer.enable(BaseRenderer.java:151)
+15:26:15.380 [E] ExoPlayerImplInternal: at io.github.anilbeesetti.nextlib.media3ext.renderer.NextTextRenderer.enable(NextTextRenderer.kt:39)
+15:26:15.381 [E] ExoPlayerImplInternal: at androidx.media3.exoplayer.RendererHolder.enable(RendererHolder.java:504)
+15:26:15.381 [E] ExoPlayerImplInternal: at androidx.media3.exoplayer.ExoPlayerImplInternal.enableRenderer(ExoPlayerImplInternal.java:3367)
+15:26:15.382 [E] ExoPlayerImplInternal: at androidx.media3.exoplayer.ExoPlayerImplInternal.enableRenderers(ExoPlayerImplInternal.java:3336)
+15:26:15.383 [E] ExoPlayerImplInternal: at androidx.media3.exoplayer.ExoPlayerImplInternal.enableRenderers(ExoPlayerImplInternal.java:3317)
+15:26:15.384 [E] ExoPlayerImplInternal: at androidx.media3.exoplayer.ExoPlayerImplInternal.handleLoadingPeriodPrepared(ExoPlayerImplInternal.java:3120)
+15:26:15.386 [E] ExoPlayerImplInternal: at androidx.media3.exoplayer.ExoPlayerImplInternal.handlePeriodPrepared(ExoPlayerImplInternal.java:3088)
+15:26:15.387 [E] ExoPlayerImplInternal: at androidx.media3.exoplayer.ExoPlayerImplInternal.handleMessage(ExoPlayerImplInternal.java:770)
+15:26:15.388 [E] ExoPlayerImplInternal: ... 4 more
+15:26:15.389 [E] ExoPlayerImplInternal: Disable failed.
+15:26:15.390 [E] ExoPlayerImplInternal: java.lang.IllegalStateException
+15:26:15.391 [E] ExoPlayerImplInternal: at com.google.common.base.Preconditions.checkState(Preconditions.java:497)
+15:26:15.393 [E] ExoPlayerImplInternal: at androidx.media3.exoplayer.text.TextRenderer.getPresentationTimeUs(TextRenderer.java:613)
+15:26:15.394 [E] ExoPlayerImplInternal: at androidx.media3.exoplayer.text.TextRenderer.clearOutput(TextRenderer.java:566)
+15:26:15.395 [E] ExoPlayerImplInternal: at androidx.media3.exoplayer.text.TextRenderer.onDisabled(TextRenderer.java:466)
+15:26:15.397 [E] ExoPlayerImplInternal: at androidx.media3.exoplayer.BaseRenderer.disable(BaseRenderer.java:253)
+15:26:15.398 [E] ExoPlayerImplInternal: at io.github.anilbeesetti.nextlib.media3ext.renderer.NextTextRenderer.disable(NextTextRenderer.kt:2)
+15:26:15.399 [E] ExoPlayerImplInternal: at androidx.media3.exoplayer.RendererHolder.disableRenderer(RendererHolder.java:688)
+15:26:15.399 [E] ExoPlayerImplInternal: at androidx.media3.exoplayer.RendererHolder.disable(RendererHolder.java:572)
+15:26:15.400 [E] ExoPlayerImplInternal: at androidx.media3.exoplayer.ExoPlayerImplInternal.disableRenderer(ExoPlayerImplInternal.java:2275)
+15:26:15.402 [E] ExoPlayerImplInternal: at androidx.media3.exoplayer.ExoPlayerImplInternal.disableRenderers(ExoPlayerImplInternal.java:2268)
+15:26:15.403 [E] ExoPlayerImplInternal: at androidx.media3.exoplayer.ExoPlayerImplInternal.resetInternal(ExoPlayerImplInternal.java:2001)
+15:26:15.404 [E] ExoPlayerImplInternal: at androidx.media3.exoplayer.ExoPlayerImplInternal.stopInternal(ExoPlayerImplInternal.java:1955)
+15:26:15.405 [E] ExoPlayerImplInternal: at androidx.media3.exoplayer.ExoPlayerImplInternal.handleMessage(ExoPlayerImplInternal.java:949)
+15:26:15.407 [E] ExoPlayerImplInternal: at android.os.Handler.dispatchMessage(Handler.java:102)
+15:26:15.408 [E] ExoPlayerImplInternal: at android.os.Looper.loopOnce(Looper.java:241)
+15:26:15.409 [E] ExoPlayerImplInternal: at android.os.Looper.loop(Looper.java:342)
+15:26:15.410 [E] ExoPlayerImplInternal: at android.os.HandlerThread.run(HandlerThread.java:67)
+15:26:15.411 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+15:26:15.412 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+15:26:15.418 [E] PlayerController: Stream failed with error: Unexpected runtime error
+15:26:15.419 [E] PlayerController: Unknown/Timeout error, trying fallback as safety measure.
+15:26:15.420 [D] PlayerController: Loading stream 1: https://net52.cc/mobile/hls/82048310.m3u8?q=720p&in=30e944842b0348e1b6c01d11e505eebf::a048a13f1358ab49301c50f73b3e82fe::1788517569::kp::m&lang=eng
+15:26:15.421 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+15:26:15.422 [E] STREAM_PIPELINE: [SUBTITLE_DEBUG] Starting player with URL: https://net52.cc/mobile/hls/82048310.m3u8?q=720p&in=30e944842b0348e1b6c01d11e505eebf::a048a13f1358ab49301c50f73b3e82fe::1788517569::kp::m&lang=eng
+15:26:15.423 [E] STREAM_PIPELINE: [SUBTITLE_DEBUG] Subtitles count: 8
+15:26:15.425 [E] STREAM_PIPELINE: [SUBTITLE_DEBUG] SUB: Arabic -> https://subscdn.top/files/82048310/82048310-ar.srt
+15:26:15.425 [E] STREAM_PIPELINE: [SUBTITLE_DEBUG] SUB: German -> https://subscdn.top/files/82048310/82048310-de.srt
+15:26:15.427 [E] STREAM_PIPELINE: [SUBTITLE_DEBUG] SUB: English [CC] -> https://subscdn.top/files/82048310/82048310-en.[CC].srt
+15:26:15.428 [E] STREAM_PIPELINE: [SUBTITLE_DEBUG] SUB: English -> https://subscdn.top/files/82048310/82048310-en.srt
+15:26:15.429 [E] STREAM_PIPELINE: [SUBTITLE_DEBUG] SUB: Spanish [CC] -> https://subscdn.top/files/82048310/82048310-es.[CC].srt
+15:26:15.430 [E] STREAM_PIPELINE: [SUBTITLE_DEBUG] SUB: Spanish -> https://subscdn.top/files/82048310/82048310-es.srt
+15:26:15.431 [E] STREAM_PIPELINE: [SUBTITLE_DEBUG] SUB: Korean [CC] -> https://subscdn.top/files/82048310/82048310-ko.[CC].srt
+15:26:15.432 [E] STREAM_PIPELINE: [SUBTITLE_DEBUG] SUB: Korean -> https://subscdn.top/files/82048310/82048310-ko.srt
+15:26:15.434 [D] HTTP: → [GET] https://net52.cc/mobile/hls/82048310.m3u8?q=720p&in=30e944842b0348e1b6c01d11e505eebf::a048a13f1358ab49301c50f73b3e82fe::1788517569::kp::m&lang=eng
+15:26:15.437 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+15:26:15.439 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+15:26:15.440 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+15:26:15.441 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+15:26:15.443 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+15:26:15.444 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+15:26:15.449 [D] STREAM_PIPELINE: [Media3Player] Original M3U8:
+15:26:15.451 [D] STREAM_PIPELINE: #EXTM3U
+15:26:15.452 [D] STREAM_PIPELINE: #EXT-X-VERSION:3
+15:26:15.454 [D] STREAM_PIPELINE: #EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aac",LANGUAGE="ces",NAME="1. Czech",DEFAULT=NO,URI="https://makhi1.top/s23.nm-cdn9.top/files/82048310/a/0/0.m3u8"
+15:26:15.456 [D] STREAM_PIPELINE: #EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aac",LANGUAGE="deu",NAME="2. German",DEFAULT=NO,URI="https://makhi1.top/s23.nm-cdn9.top/files/82048310/a/1/1.m3u8"
+15:26:15.457 [D] STREAM_PIPELINE: #EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aac",LANGUAGE="eng",NAME="3. English",DEFAULT=YES,URI="https://makhi1.top/s23.nm-cdn9.top/files/82048310/a/2/2.m3u8"
+15:26:15.458 [D] STREAM_PIPELINE: #EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aac",LANGUAGE="spa",NAME="4. Spanish",DEFAULT=NO,URI="https://makhi1.top/s23.nm-cdn9.top/files/82048310/a/3/3.m3u8"
+15:26:15.459 [D] STREAM_PIPELINE: #EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aac",LANGUAGE="spa",NAME="5. Spanish",DEFAULT=NO,URI="https://makhi1.top/s23.nm-cdn9.top/files/82048310/a/4/4.m3u8"
+15:26:15.460 [D] STREAM_PIPELINE: #EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aac",LANGUAGE="fil",NAME="6. Filipino (Tagalog)",DEFAULT=NO,URI="https://makhi1.top/s23.nm-cdn9.top/files/82048310/a/5/5.m3u8"
+15:26:15.461 [D] STREAM_PIPELINE: #EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aac",LANGUAGE="fra",NAME="7. French",DEFAULT=NO,URI="https://makhi1.top/s23.nm-cdn9.top/files/82048310/a/6/6.m3u8"
+15:26:15.462 [D] STREAM_PIPELINE: #EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aac",LANGUAGE="hin",NAME="8. Hindi",DEFAULT=NO,URI="https://makhi1.top/s23.nm-cdn9.top/files/82048310/a/7/7.m3u8"
+15:26:15.464 [D] STREAM_PIPELINE: #EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aac",LANGUAGE="hun",NAME="9. Hungarian",DEFAULT=NO,URI="https://makhi1.top/s23.nm-cdn9.top/files/82048310/a/8/8.m3u8"
+15:26:15.465 [D] STREAM_PIPELINE: #EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aac",LANGUAGE="ind",NAME="10. Indonesian",DEFAULT=NO,URI="https://makhi1.top/s23.nm-cdn9.top/files/82048310/a/9/9.m3u8"
+15:26:15.466 [D] STREAM_PIPELINE: #EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aac",LANGUAGE="ita",NAME="11. Italian",DEFAULT=NO,URI="https://makhi1.top/s23.nm-cdn9.top/files/82048310/a/10/10.m3u8"
+15:26:15.467 [D] STREAM_PIPELINE: #EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aac",LANGUAGE="jpn",NAME="12. Japanese",DEFAULT=NO,URI="https://makhi1.top/s23.nm-cdn9.top/files/82048310/a/11/11.m3u8"
+15:26:15.468 [D] STREAM_PIPELINE: #EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aac",LANGUAGE="kor",NAME="13. Korean",DEFAULT=NO,URI="https://makhi1.top/s23.nm-cdn9.top/files/82048310/a/12/12.m3u8"
+15:26:15.470 [D] STREAM_PIPELINE: #EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aac",LANGUAGE="pol",NAME="14. Polish",DEFAULT=NO,URI="https://makhi1.top/s23.nm-cdn9.top/files/82048310/a/13/13.m3u8"
+15:26:15.471 [D] STREAM_PIPELINE: #EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aac",LANGUAGE="por",NAME="15. Portuguese",DEFAULT=NO,URI="https://makhi1.top/s23.nm-cdn9.top/files/82048310/a/14/14.m3u8"
+15:26:15.473 [D] STREAM_PIPELINE: #EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aac",LANGUAGE="tha",NAME="16. Thai",DEFAULT=NO,URI="https://makhi1.top/s23.nm-cdn9.top/files/82048310/a/15/15.m3u8"
+15:26:15.474 [D] STREAM_PIPELINE: #EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aac",LANGUAGE="tur",NAME="17. Turkish",DEFAULT=NO,URI="https://makhi1.top/s23.nm-cdn9.top/files/82048310/a/16/16.m3u8"
+15:26:15.476 [D] STREAM_PIPELINE: #EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aac",LANGUAGE="vie",NAME="18. Vietnamese",DEFAULT=NO,URI="https://makhi1.top/s23.nm-cdn9.top/files/82048310/a/17/17.m3u8"
+15:26:15.477 [D] STREAM_PIPELINE: #EXT-X-STREAM-INF:BANDWIDTH=600000,AUDIO="aac",RESOLUTION=1280x720,CLOSED-CAPTIONS=NONE
+15:26:15.478 [D] STREAM_PIPELINE: https://makhi1.top/s23.nm-cdn9.top/files/82048310/720p/720p.m3u8?in=30e944842b0348e1b6c01d11e505eebf::c0f26042c6b6ae9a835cf223131ac2f3::1788517572::kp::myes
+15:26:15.479 [D] HTTP: ← [200] https://net52.cc/mobile/hls/82048310.m3u8?q=720p&in=30e944842b0348e1b6c01d11e505eebf::a048a13f1358ab49301c50f73b3e82fe::1788517569::kp::m&lang=eng (442ms)
+15:26:15.480 [D] SecurityInterceptor: Binary content-type detected: application/vnd.apple.mpegurl — URL: https://net52.cc/mobile/hls/82048310.m3u8?q=720p&in=30e944842b0348e1b6c01d11e505eebf::a048a13f1358ab49301c50f73b3e82fe::1788517569::kp::m&lang=eng
+15:26:15.483 [D] HTTP: → [GET] https://makhi1.top/s23.nm-cdn9.top/files/82048310/720p/720p.m3u8?in=30e944842b0348e1b6c01d11e505eebf::c0f26042c6b6ae9a835cf223131ac2f3::1788517572::kp::myes
+15:26:15.485 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+15:26:15.492 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+15:26:15.502 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+15:26:15.504 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+15:26:15.507 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+15:26:15.509 [D] STREAM_PIPELINE: [Media3Player] Original M3U8:
+15:26:15.510 [D] STREAM_PIPELINE: #EXTM3U
+15:26:15.511 [D] STREAM_PIPELINE: #EXT-X-VERSION:3
+15:26:15.513 [D] STREAM_PIPELINE: #EXT-X-TARGETDURATION:10
+15:26:15.514 [D] STREAM_PIPELINE: #EXT-X-MEDIA-SEQUENCE:0
+15:26:15.515 [D] STREAM_PIPELINE: #EXTINF:3.670578,
+15:26:15.516 [D] STREAM_PIPELINE: 1350_000.jpg
+15:26:15.518 [D] STREAM_PIPELINE: #EXTINF:6.340089,
+15:26:15.519 [D] STREAM_PIPELINE: 1350_001.jpg
+15:26:15.520 [D] STREAM_PIPELINE: #EXTINF:7.007467,
+15:26:15.521 [D] STREAM_PIPELINE: 1350_002.jpg
+15:26:15.523 [D] STREAM_PIPELINE: #EXTINF:3.378600,
+15:26:15.524 [D] STREAM_PIPELINE: 1350_003.jpg
+15:26:15.525 [D] STREAM_PIPELINE: #EXTINF:2.335822,
+15:26:15.526 [D] STREAM_PIPELINE: 1350_004.jpg
+15:26:15.527 [D] STREAM_PIPELINE: #EXTINF:2.711222,
+15:26:15.528 [D] STREAM_PIPELINE: 1350_005.jpg
+15:26:15.530 [D] STREAM_PIPELINE: #EXTINF:2.544378,
+15:26:15.531 [D] STREAM_PIPELINE: 1350_006.jpg
+[D] STREAM_PIPELINE: 1350_1230.jpg
+15:26:21.625 [D] STREAM_PIPELINE: #EXTINF:9.551844,
+15:26:21.625 [D] STREAM_PIPELINE: 1350_1231.jpg
+15:26:21.631 [D] STREAM_PIPELINE: #EXTINF:9.593556,
+15:26:21.632 [D] STREAM_PIPELINE: 1350_1232.jpg
+15:26:21.633 [D] STREAM_PIPELINE: #EXT-X-ENDLIST
+15:26:21.635 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+15:26:21.636 [D] HTTP: ← [200] https://makhi1.top/s23.nm-cdn9.top/files/82048310/720p/720p.m3u8?in=30e944842b0348e1b6c01d11e505eebf::c0f26042c6b6ae9a835cf223131ac2f3::1788517572::kp::myes (1418ms)
+15:26:21.638 [D] SecurityInterceptor: Binary content-type detected: application/vnd.apple.mpegurl — URL: https://makhi1.top/s23.nm-cdn9.top/files/82048310/720p/720p.m3u8?in=30e944842b0348e1b6c01d11e505eebf::c0f26042c6b6ae9a835cf223131ac2f3::1788517572::kp::myes
+15:26:21.642 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+15:26:21.651 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+15:26:21.652 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+15:26:21.655 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+15:26:21.657 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+15:26:21.659 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+15:26:21.661 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+15:26:21.667 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+15:26:21.668 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+15:26:21.670 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+15:26:21.672 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+15:26:21.674 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+15:26:21.682 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+15:26:21.685 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+15:26:21.688 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+15:26:21.690 [E] ExoPlayerImplInternal: Playback error
+15:26:21.691 [E] ExoPlayerImplInternal: androidx.media3.exoplayer.ExoPlaybackException: Unexpected runtime error
+15:26:21.692 [E] ExoPlayerImplInternal: at androidx.media3.exoplayer.ExoPlayerImplInternal.handleMessage(ExoPlayerImplInternal.java:947)
+15:26:21.693 [E] ExoPlayerImplInternal: at android.os.Handler.dispatchMessage(Handler.java:102)
+15:26:21.694 [E] ExoPlayerImplInternal: at android.os.Looper.loopOnce(Looper.java:241)
+15:26:21.696 [E] ExoPlayerImplInternal: at android.os.Looper.loop(Looper.java:342)
+15:26:21.697 [E] ExoPlayerImplInternal: at android.os.HandlerThread.run(HandlerThread.java:67)
+15:26:21.699 [E] ExoPlayerImplInternal: Caused by: java.lang.IllegalStateException: Legacy decoding is disabled, can't handle application/x-subrip samples (expected application/x-media3-cues).
+15:26:21.702 [E] ExoPlayerImplInt

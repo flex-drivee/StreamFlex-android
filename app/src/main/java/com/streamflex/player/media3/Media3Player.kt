@@ -414,6 +414,9 @@ class Media3Player(
         // We must manually wrap it in a MergingMediaSource to inject the soft subtitles!
         if (mediaItem.localConfiguration?.subtitleConfigurations?.isNotEmpty() == true) {
             val subtitleSources = mediaItem.localConfiguration!!.subtitleConfigurations.map { subtitleConfig ->
+                val textExtractorFactory = androidx.media3.extractor.text.SubtitleExtractor.Factory(androidx.media3.extractor.text.DefaultSubtitleParserFactory())
+                
+                // If the ExoPlayer version requires the SubtitleExtractor to parse subtitles as Cues rather than letting the renderer decode them legacy-style:
                 androidx.media3.exoplayer.source.SingleSampleMediaSource.Factory(dataSourceFactory)
                     .createMediaSource(subtitleConfig, androidx.media3.common.C.TIME_UNSET)
             }
