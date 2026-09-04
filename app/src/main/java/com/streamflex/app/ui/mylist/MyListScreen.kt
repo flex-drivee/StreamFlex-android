@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -109,7 +110,7 @@ fun MyListScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                androidx.compose.material.icons.Icons.Default.Close,
+                                Icons.Default.Close,
                                 contentDescription = "Remove Bookmark",
                                 tint = Color.White,
                                 modifier = Modifier.size(16.dp)
