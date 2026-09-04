@@ -129,8 +129,17 @@ class NetMirrorExtractor : BaseExtractor() {
                     if (kind != "captions") continue
                     val file  = JsonParser.string(track, "file")  ?: continue
                     val label = JsonParser.string(track, "label") ?: "Unknown"
-                    val url   = file.replace("\\", "").let {
-                        if (it.startsWith("//")) "https:$it" else it
+                    val fileClean = file.replace("\\", "")
+                    val url = if (fileClean.startsWith("//")) {
+                        "https:$fileClean"
+                    } else if (fileClean.startsWith("/")) {
+                        val base = referer.substringBefore("/mobile")
+                        "$base$fileClean"
+                    } else if (fileClean.startsWith("http")) {
+                        fileClean
+                    } else {
+                        val base = referer.substringBefore("/mobile")
+                        "$base/$fileClean"
                     }
                     subtitles += Subtitle(language = label, url = url, label = label)
                 }
@@ -181,6 +190,8 @@ class NetMirrorExtractor : BaseExtractor() {
                 return emptyResult()
             }
 
+            try { java.io.File("/sdcard/subtitle_debug.txt").appendText("NetMirrorExtractor extracted ${streams.size} streams, ${subtitles.size} subtitles\nJSON: $json\n") } catch (e: Exception) {}
+            android.util.Log.e("SUBTITLE_DEBUG_XYZ", "NetMirrorExtractor Extracted ${streams.size} streams, ${subtitles.size} subtitles")
             StreamLogger.debug(TAG, "Extracted ${streams.size} streams, ${subtitles.size} subtitles")
             result(streams)
         } catch (e: Exception) {

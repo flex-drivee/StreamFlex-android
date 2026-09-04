@@ -37,7 +37,25 @@ class StreamRepository(
     }
 
     suspend fun resolveMovie(title: String, year: Int? = null, onStreamFound: suspend (FinalStreams) -> Unit = {}): FinalStreams = coroutineScope {
-        val results = search(title)
+        val baseResults = search(title)
+        
+        // Fallback searches for titles that have subtitles or extra words (e.g. "Toxic A Fairy Tale" -> "Toxic")
+        val cleanTitle = title.replace(Regex("[^a-zA-Z0-9 ]"), " ").replace(Regex("\\s+"), " ").trim()
+        val shortTitle = cleanTitle.split(" ").take(2).joinToString(" ")
+        val shortResults = if (shortTitle.length > 3 && shortTitle.lowercase() != title.lowercase()) {
+            search(shortTitle)
+        } else {
+            emptyList()
+        }
+        
+        val wordShortTitle = cleanTitle.split(" ").first()
+        val wordShortResults = if (wordShortTitle.length > 3 && wordShortTitle.lowercase() != shortTitle.lowercase() && wordShortTitle.lowercase() != title.lowercase()) {
+            search(wordShortTitle)
+        } else {
+            emptyList()
+        }
+        
+        val results = (baseResults + shortResults + wordShortResults).distinctBy { it.url }
         if (results.isEmpty()) return@coroutineScope FinalStreams.EMPTY
 
         val bestMatches = results.groupBy { it.providerName }.mapNotNull { entry ->

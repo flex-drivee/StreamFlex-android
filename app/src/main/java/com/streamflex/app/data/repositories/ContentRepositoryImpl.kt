@@ -69,7 +69,8 @@ class ContentRepositoryImpl(
                     overview = tmdbEp.overview,
                     airDate = tmdbEp.airDate,
                     runtime = tmdbEp.runtime,
-                    stillPath = tmdbEp.stillPath?.let { "https://image.tmdb.org/t/p/w500$it" }
+                    stillPath = tmdbEp.stillPath?.let { "https://image.tmdb.org/t/p/w500$it" },
+                    rating = tmdbEp.voteAverage
                 )
             } ?: emptyList()
         } catch (e: Exception) {
@@ -95,8 +96,6 @@ class ContentRepositoryImpl(
             "usa_series" -> tmdbApi.discoverTvShows(apiKey, originCountry = "US", page = page)
             "indian_movies" -> tmdbApi.discoverMovies(apiKey, originCountry = "IN", page = page)
             "indian_series" -> tmdbApi.discoverTvShows(apiKey, originCountry = "IN", page = page)
-            "ph_movies" -> tmdbApi.discoverMovies(apiKey, originCountry = "PH", originalLanguage = "tl", page = page)
-            "ph_series" -> tmdbApi.discoverTvShows(apiKey, originCountry = "PH", originalLanguage = "tl", page = page)
             "thai_movies" -> tmdbApi.discoverMovies(apiKey, originCountry = "TH", page = page)
             "thai_series" -> tmdbApi.discoverTvShows(apiKey, originCountry = "TH", page = page)
             "korean_dramas" -> tmdbApi.discoverTvShows(apiKey, originCountry = "KR", page = page)
@@ -111,8 +110,13 @@ class ContentRepositoryImpl(
             // Legacy/Existing ones for HomeViewModel
             "bollywood_movies" -> tmdbApi.discoverMovies(apiKey, originCountry = "IN", originalLanguage = "hi", page = page)
             "indian_web_series" -> tmdbApi.discoverTvShows(apiKey, originCountry = "IN", originalLanguage = "hi", page = page)
-            "netflix_originals" -> tmdbApi.discoverTvShows(apiKey, networks = "213", page = page)
-            "prime_originals" -> tmdbApi.discoverTvShows(apiKey, networks = "1024", page = page)
+            "netflix_originals" -> tmdbApi.discoverTvShows(apiKey, withWatchProviders = "8", watchRegion = "US", page = page)
+            "prime_originals" -> tmdbApi.discoverTvShows(apiKey, withWatchProviders = "119", watchRegion = "US", page = page)
+                        "netflix_anime" -> tmdbApi.discoverTvShows(apiKey, genres = "16", originalLanguage = "ja", withWatchProviders = "8", watchRegion = "US", page = page)
+            "prime_anime" -> tmdbApi.discoverTvShows(apiKey, genres = "16", originalLanguage = "ja", withWatchProviders = "119", watchRegion = "US", page = page)
+            "crunchyroll_anime" -> tmdbApi.discoverTvShows(apiKey, genres = "16", originalLanguage = "ja", withWatchProviders = "283", watchRegion = "US", page = page)
+            "cartoon_network" -> tmdbApi.discoverTvShows(apiKey, genres = "16", networks = "56", page = page)
+            "nickelodeon" -> tmdbApi.discoverTvShows(apiKey, genres = "16", networks = "13", page = page)
             "anime_movies" -> tmdbApi.discoverMovies(apiKey, genres = "16", originalLanguage = "ja", page = page)
             "anime_shows" -> tmdbApi.discoverTvShows(apiKey, genres = "16", originalLanguage = "ja", page = page)
             "top_anime_movies" -> tmdbApi.discoverMovies(apiKey, genres = "16", originalLanguage = "ja", sortBy = "vote_average.desc", voteCountGte = 200, page = page)
@@ -142,7 +146,12 @@ class ContentRepositoryImpl(
             "south_indian" to "South Indian Hits",
             "anime_shows" to "Trending Anime Series",
             "anime_movies" to "Trending Anime Movies",
-            "top_anime_shows" to "Top Rated Anime Series",
+                        "top_anime_shows" to "Top Rated Anime Series",
+            "netflix_anime" to "Netflix Anime",
+            "prime_anime" to "Prime Anime",
+            "crunchyroll_anime" to "Crunchyroll Anime",
+            "cartoon_network" to "Cartoon Network Classics",
+            "nickelodeon" to "Nickelodeon Hits",
             "top_anime_movies" to "Top Rated Anime Movies",
             "action_movies" to "Action & Adventure",
             "comedy_movies" to "Comedy Movies",
@@ -152,7 +161,6 @@ class ContentRepositoryImpl(
             "chinese_series" to "Chinese Series",
             "japan_series" to "Japanese Series",
             "thai_series" to "Thai Series",
-            "ph_movies" to "Philippines Movies",
             "usa_movies" to "USA Movies"
         )
     }

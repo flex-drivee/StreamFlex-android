@@ -50,9 +50,18 @@ object NetMirrorBypassManager {
     // Cookie validity window: 15 hours (same as native app, verified from source)
     private const val COOKIE_TTL_MS = 54_000_000L
 
-    // In-memory cache: token + timestamp
-    @Volatile private var cachedToken: String = ""
-    @Volatile private var cachedTokenTimestamp: Long = 0L
+    // Persistent cache: token + timestamp
+    private val prefs by lazy {
+        com.streamflex.app.StreamFlexApplication.instance.getSharedPreferences("NetMirrorCache", android.content.Context.MODE_PRIVATE)
+    }
+
+    private var cachedToken: String
+        get() = prefs.getString("token", "") ?: ""
+        set(value) = prefs.edit().putString("token", value).apply()
+
+    private var cachedTokenTimestamp: Long
+        get() = prefs.getLong("timestamp", 0L)
+        set(value) = prefs.edit().putLong("timestamp", value).apply()
     private val bypassMutex = Mutex()
 
     /**

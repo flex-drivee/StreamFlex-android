@@ -43,15 +43,20 @@ object FinalStreamBuilder {
                 .let(StreamSorter::sort)
                 .map(::normalizeName)
         )
+        val mergedSubtitles = orderedStreams.flatMap { it.subtitles }.distinctBy { it.url }
+        try { java.io.File("/sdcard/subtitle_debug.txt").appendText("FinalStreamBuilder merged ${mergedSubtitles.size} from ${orderedStreams.size}\n") } catch (e: Exception) {}
+        com.streamflex.core.utils.StreamLogger.error("SUBTITLE_DEBUG", "FinalStreamBuilder merged ${mergedSubtitles.size} subtitles from ${orderedStreams.size} ordered streams")
+        val augmentedStreams = orderedStreams.map { it.copy(subtitles = mergedSubtitles) }
+
         return FinalStreams(
 
-            streams = orderedStreams,
+            streams = augmentedStreams,
 
             defaultStream =
-                StreamFailover.primary(orderedStreams),
+                StreamFailover.primary(augmentedStreams),
 
             fallbackStream =
-                StreamFailover.fallback(orderedStreams)
+                StreamFailover.fallback(augmentedStreams)
         )
     }
 

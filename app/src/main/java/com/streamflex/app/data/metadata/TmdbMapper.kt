@@ -46,7 +46,10 @@ object TmdbMapper {
             runtime = details.runtime,
             genres = details.genres?.map { it.name } ?: emptyList(),
             providerSources = emptyList(),
-            streams = emptyList()
+            streams = emptyList(),
+            cast = mapCast(details.credits),
+            trailers = mapTrailers(details.videos),
+            productionCompanies = mapCompanies(details.productionCompanies)
         )
     }
 
@@ -64,7 +67,10 @@ object TmdbMapper {
             year = year,
             rating = details.voteAverage,
             genres = details.genres?.map { it.name } ?: emptyList(),
-            seasons = details.seasons?.map { toDomain(it) } ?: emptyList()
+            seasons = details.seasons?.map { toDomain(it) } ?: emptyList(),
+            cast = mapCast(details.credits),
+            trailers = mapTrailers(details.videos),
+            productionCompanies = mapCompanies(details.productionCompanies)
         )
     }
 
@@ -74,5 +80,30 @@ object TmdbMapper {
             seasonNumber = season.seasonNumber,
             episodes = emptyList()
         )
+    }
+
+    private fun mapCast(credits: TmdbCredits?): List<CastMember> {
+        return credits?.cast?.map {
+            CastMember(
+                name = it.name,
+                character = it.character,
+                imageUrl = it.profilePath?.let { path -> "${IMAGE_BASE_URL}$path" }
+            )
+        } ?: emptyList()
+    }
+
+    private fun mapTrailers(videos: TmdbVideos?): List<Trailer> {
+        return videos?.results?.filter { it.site == "YouTube" && it.type == "Trailer" }?.map {
+            Trailer(key = it.key, name = it.name)
+        } ?: emptyList()
+    }
+
+    private fun mapCompanies(companies: List<TmdbProductionCompany>?): List<ProductionCompany> {
+        return companies?.map {
+            ProductionCompany(
+                name = it.name,
+                logoUrl = it.logoPath?.let { path -> "${IMAGE_BASE_URL}$path" }
+            )
+        } ?: emptyList()
     }
 }

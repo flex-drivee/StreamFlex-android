@@ -1,10 +1,14 @@
 package com.streamflex.app.ui.search
 
+import com.streamflex.app.data.search.SearchHistoryManager
+
+
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
+import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -169,7 +173,13 @@ fun SearchScreen(
 
                     // No query → show genre browse categories
                     state.query.isEmpty() -> {
-                        SFBrowseCategories(onGenreClick)
+                        SFBrowseCategories(
+                            onGenreClick = onGenreClick,
+                            onHistoryClick = { 
+                                viewModel.onQueryChange(it)
+                                focusRequester.requestFocus()
+                            }
+                        )
                     }
 
                     // No results
@@ -293,7 +303,12 @@ private fun SFSearchCard(
 // ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
-private fun SFBrowseCategories(onGenreClick: (String, String) -> Unit) {
+private fun SFBrowseCategories(
+    onGenreClick: (String, String) -> Unit,
+    onHistoryClick: (String) -> Unit
+) {
+    var history by remember { mutableStateOf(SearchHistoryManager.getHistory()) }
+
     val genres = listOf(
         Triple("Action", "genre_28", MaterialTheme.colorScheme.primary),
         Triple("Drama", "genre_18", Color(0xFF9B59B6)),
@@ -309,43 +324,103 @@ private fun SFBrowseCategories(onGenreClick: (String, String) -> Unit) {
         Triple("History", "genre_36", Color(0xFF8D6E63))
     )
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        Text(
-            "Browse by Genre",
+    LazyColumn(modifier = Modifier.fillMaxSize()) {
+        if (history.isNotEmpty()) {
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        "Recent Searches",
+                        style    = MaterialTheme.typography.headlineMedium.copy(fontSize = 16.sp),
+                        color    = MaterialTheme.colorScheme.onBackground
+                    )
+                    Text(
+                        "Clear",
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.clickable { 
+                            SearchHistoryManager.clearHistory()
+                            history = emptyList()
+                        }.padding(4.dp)
+                    )
+                }
+            }
+            items(history.size) { index ->
+                val query = history[index]
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onHistoryClick(query) }
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(Icons.Outlined.History, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
+                    Spacer(Modifier.width(12.dp))
+                    Text(query, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.weight(1f))
+                    IconButton(
+                        onClick = { 
+                            SearchHistoryManager.removeSearchQuery(query)
+                            history = SearchHistoryManager.getHistory()
+                        },
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(Icons.Default.Close, "Remove", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
+                    }
+                }
+            }
+            item { Spacer(Modifier.height(8.dp)) }
+        }
+
+        item {
+            Text(
+                "Browse by Genre",
             style    = MaterialTheme.typography.headlineMedium.copy(fontSize = 16.sp),
             color    = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)
         )
 
         val cols = 2
-        LazyVerticalGrid(
-            columns               = GridCells.Fixed(cols),
-            contentPadding        = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
-            verticalArrangement   = Arrangement.spacedBy(10.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            items(genres) { (genre, id, color) ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(
-                            Brush.linearGradient(
-                                listOf(color.copy(0.85f), color.copy(0.5f))
-                            )
-                        )
-                        .clickable { onGenreClick(id, genre) },
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    Text(
-                        genre,
-                        style    = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                        color    = Color.White,
-                        modifier = Modifier.padding(horizontal = 14.dp)
-                    )
+            Column(
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                genres.chunked(cols).forEach { rowGenres ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        rowGenres.forEach { (genre, id, color) ->
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(52.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(
+                                        Brush.linearGradient(
+                                            listOf(color.copy(0.85f), color.copy(0.5f))
+                                        )
+                                    )
+                                    .clickable { onGenreClick(id, genre) },
+                                contentAlignment = Alignment.CenterStart
+                            ) {
+                                Text(
+                                    genre,
+                                    style    = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                    color    = Color.White,
+                                    modifier = Modifier.padding(horizontal = 14.dp)
+                                )
+                            }
+                        }
+                        if (rowGenres.size < cols) {
+                            Spacer(Modifier.weight(1f))
+                        }
+                    }
                 }
             }
+            Spacer(Modifier.height(90.dp)) // bottom padding
         }
     }
 }

@@ -34,13 +34,15 @@ interface TmdbApi {
     @GET("movie/{movie_id}")
     suspend fun getMovieDetails(
         @Path("movie_id") movieId: Int,
-        @Query("api_key") apiKey: String
+        @Query("api_key") apiKey: String,
+        @Query("append_to_response") appendToResponse: String = "credits,videos"
     ): TmdbMovieDetails
 
     @GET("tv/{tv_id}")
     suspend fun getTvShowDetails(
         @Path("tv_id") tvId: Int,
-        @Query("api_key") apiKey: String
+        @Query("api_key") apiKey: String,
+        @Query("append_to_response") appendToResponse: String = "credits,videos"
     ): TmdbShowDetails
 
     // --- Recommendations / Similar ---
@@ -97,6 +99,8 @@ interface TmdbApi {
         @Query("with_origin_country") originCountry: String? = null,
         @Query("with_original_language") originalLanguage: String? = null,
         @Query("with_networks") networks: String? = null,
+        @Query("with_watch_providers") withWatchProviders: String? = null,
+        @Query("watch_region") watchRegion: String? = null,
         @Query("with_genres") genres: String? = null,
         @Query("sort_by") sortBy: String? = "popularity.desc",
         @Query("vote_count.gte") voteCountGte: Int? = null,

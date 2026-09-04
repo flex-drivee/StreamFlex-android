@@ -1,5 +1,9 @@
 package com.streamflex.app.ui.home
 
+import com.streamflex.app.data.bookmarks.BookmarkManager
+import com.streamflex.app.data.bookmarks.BookmarkItem
+
+
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
@@ -55,22 +59,21 @@ fun HomeScreen(
     val tabs = listOf("Home", "Movies", "Series", "Anime")
     var selectedTab by remember { mutableIntStateOf(0) }
 
-    LaunchedEffect(selectedTab) {
-        if (selectedTab == 3) {
-            // Automatically switch to an Anime provider when on Anime tab
-            providerRepository.selectedProviderId = "toonstream"
-        } else {
-            // Reset to default (all providers) for other tabs
-            providerRepository.selectedProviderId = null
-        }
-    }
 
     val filteredSections = remember(state.sections, selectedTab) {
         when (selectedTab) {
             1 -> state.sections.filter { it.id.contains("movie", ignoreCase = true) || it.id == "trending_cinema" }
             2 -> state.sections.filter { it.id.contains("series", ignoreCase = true) || it.id.contains("show", ignoreCase = true) || it.id.contains("drama", ignoreCase = true) }
-            3 -> state.sections.filter { it.id.contains("anime", ignoreCase = true) }
-            else -> state.sections // 0 -> Home
+            3 -> state.sections.filter { 
+                it.id.contains("anime", ignoreCase = true) || 
+                it.id.contains("cartoon", ignoreCase = true) || 
+                it.id.contains("nickelodeon", ignoreCase = true) 
+            }
+                        else -> state.sections.filter { 
+                !it.id.contains("anime", ignoreCase = true) && 
+                !it.id.contains("cartoon", ignoreCase = true) && 
+                !it.id.contains("nickelodeon", ignoreCase = true) 
+            } // 0 -> Home
         }
     }
 
@@ -516,16 +519,26 @@ fun SFHeroSection(
                 }
 
                 // My List button
+                var isInMyList by remember(movie.id) { mutableStateOf(BookmarkManager.isBookmarked(movie.id)) }
                 OutlinedButton(
-                    onClick = { /* TODO: Add to list */ },
+                    onClick = {
+                        isInMyList = !isInMyList
+                        if (isInMyList) {
+                            BookmarkManager.addBookmark(BookmarkItem(movie.id, movie.title, movie.poster ?: "", movie.type == com.streamflex.app.domain.models.ContentType.SHOW))
+                        } else {
+                            BookmarkManager.removeBookmark(movie.id)
+                        }
+                    },
                     modifier = Modifier.height(46.dp),
                     shape    = RoundedCornerShape(6.dp),
                     border   = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                     colors   = ButtonDefaults.outlinedButtonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f))
                 ) {
-                    Icon(Icons.Outlined.Add, null, tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(20.dp))
+                    val icon = if (isInMyList) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder
+                    val tint = if (isInMyList) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
+                    Icon(icon, null, tint = tint, modifier = Modifier.size(20.dp))
                     Spacer(Modifier.width(4.dp))
-                    Text("List", color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.bodyMedium)
+                    Text(if (isInMyList) "Added" else "List", color = tint, style = MaterialTheme.typography.bodyMedium)
                 }
 
                 // Info button

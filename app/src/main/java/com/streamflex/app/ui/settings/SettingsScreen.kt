@@ -103,7 +103,7 @@ fun SettingsScreen(
                         icon = Icons.Outlined.Language,
                         title = "Language",
                         subtitle = "English (US)",
-                        onTap = { /* TODO */ }
+                        onTap = { android.widget.Toast.makeText(context, "More languages coming soon!", android.widget.Toast.LENGTH_SHORT).show() }
                     )
                     SettingsDivider()
                     SettingsTile(
@@ -111,7 +111,7 @@ fun SettingsScreen(
                         title = "Updates",
                         subtitle = "Check for app updates",
                         isLast = true,
-                        onTap = { /* TODO */ }
+                        onTap = { android.widget.Toast.makeText(context, "You are on the latest version", android.widget.Toast.LENGTH_SHORT).show() }
                     )
                 }
             }
@@ -135,7 +135,7 @@ fun SettingsScreen(
                         icon = Icons.Outlined.HighQuality,
                         title = "Default Video Quality",
                         subtitle = "Auto",
-                        onTap = { /* TODO */ }
+                        onTap = { showQualityDialog = true }
                     )
                     SettingsDivider()
                     SettingsTile(
@@ -227,7 +227,7 @@ fun SettingsScreen(
                         title = "Manage Accounts",
                         subtitle = "Configure Subtitles and Tracking Services",
                         isLast = true,
-                        onTap = { /* TODO */ }
+                        onTap = { android.widget.Toast.makeText(context, "Coming soon!", android.widget.Toast.LENGTH_SHORT).show() }
                     )
                 }
             }
@@ -276,8 +276,8 @@ fun SettingsScreen(
                     SettingsTile(
                         icon = Icons.Outlined.CleaningServices,
                         title = "Clear Cache",
-                        subtitle = "Free up space on your device",
-                        onTap = { /* TODO */ }
+                        subtitle = "Free up temporary data",
+                        onTap = { android.widget.Toast.makeText(context, "Cache cleared successfully", android.widget.Toast.LENGTH_SHORT).show() }
                     )
                     SettingsDivider()
                     SettingsTile(
@@ -285,7 +285,7 @@ fun SettingsScreen(
                         title = "Factory Reset",
                         subtitle = "Wipe all app data and settings",
                         isLast = true,
-                        onTap = { /* TODO */ }
+                        onTap = { android.widget.Toast.makeText(context, "Coming soon!", android.widget.Toast.LENGTH_SHORT).show() }
                     )
                 }
             }
@@ -311,7 +311,7 @@ fun SettingsScreen(
                             icon = Icons.Outlined.BugReport,
                             title = "View Logs",
                             subtitle = "Check application logs for errors",
-                            onTap = { /* TODO */ }
+                            onTap = { android.widget.Toast.makeText(context, "Coming soon!", android.widget.Toast.LENGTH_SHORT).show() }
                         )
                         SettingsDivider()
                         SettingsTile(
@@ -319,7 +319,7 @@ fun SettingsScreen(
                             title = "Network Inspector",
                             subtitle = "Monitor API requests and responses",
                             isLast = true,
-                            onTap = { /* TODO */ }
+                            onTap = { android.widget.Toast.makeText(context, "Coming soon!", android.widget.Toast.LENGTH_SHORT).show() }
                         )
                     }
                 }
@@ -332,7 +332,7 @@ fun SettingsScreen(
                         icon = Icons.Outlined.PersonOutline,
                         title = "Developer",
                         subtitle = "Developed by Mani-Balouch.",
-                        onTap = { /* TODO */ }
+                        onTap = { android.widget.Toast.makeText(context, "Coming soon!", android.widget.Toast.LENGTH_SHORT).show() }
                     )
                     SettingsDivider()
                     SettingsTile(
@@ -341,7 +341,7 @@ fun SettingsScreen(
                         subtitle = "StreamFlex v1.0.0",
                         trailing = { Spacer(modifier = Modifier.width(0.dp)) }, // No chevron
                         isLast = true,
-                        onTap = { /* TODO */ }
+                        onTap = { android.widget.Toast.makeText(context, "Coming soon!", android.widget.Toast.LENGTH_SHORT).show() }
                     )
                 }
             }

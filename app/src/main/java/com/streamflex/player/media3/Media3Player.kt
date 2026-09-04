@@ -246,7 +246,7 @@ class Media3Player(
         trackSelector.setParameters(
             trackSelector.buildUponParameters()
                 .clearOverrides()
-                .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, true) // Disable subtitles by default initially
+                .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, false) // Enable subtitles so they can be probed and listed
         )
 
         // 1. Resolve User-Agent and default streaming headers
@@ -376,6 +376,14 @@ class Media3Player(
         }
 
         // 6. Attach external subtitles if present
+        android.os.Handler(android.os.Looper.getMainLooper()).post {
+            android.widget.Toast.makeText(context, "Engine Loaded Subtitles: ${stream.subtitles.size}", android.widget.Toast.LENGTH_LONG).show()
+        }
+        com.streamflex.core.utils.StreamLogger.error("SUBTITLE_DEBUG", "Starting player with URL: ${stream.url}")
+        com.streamflex.core.utils.StreamLogger.error("SUBTITLE_DEBUG", "Subtitles count: ${stream.subtitles.size}")
+        for (sub in stream.subtitles) {
+            com.streamflex.core.utils.StreamLogger.error("SUBTITLE_DEBUG", "SUB: ${sub.label} -> ${sub.url}")
+        }
         if (stream.subtitles.isNotEmpty()) {
             val subtitleConfigs = stream.subtitles.map { sub ->
                 val subMime = if (sub.url.endsWith(".vtt", ignoreCase = true)) {
@@ -394,14 +402,11 @@ class Media3Player(
         }
 
         val mediaItem = mediaItemBuilder.build()
-        val source = if (mimeType == androidx.media3.common.MimeTypes.APPLICATION_M3U8) {
-            androidx.media3.exoplayer.hls.HlsMediaSource.Factory(dataSourceFactory)
-                .setAllowChunklessPreparation(true)
-                .createMediaSource(mediaItem)
-        } else {
-            mediaSourceFactory.createMediaSource(mediaItem)
-        }
-
+        // Let DefaultMediaSourceFactory handle everything:
+        // It correctly builds HlsMediaSource for M3U8.
+        // It also seamlessly injects SubtitleConfigurations via MergingMediaSource and SubtitleExtractor
+        // without crashing due to legacy decoding being disabled.
+        val source = mediaSourceFactory.createMediaSource(mediaItem)
         exoPlayer.setMediaSource(source)
         exoPlayer.prepare()
     }
