@@ -2,6 +2,10 @@ package com.streamflex.app.ui.movies
 
 import com.streamflex.app.data.bookmarks.BookmarkManager
 import com.streamflex.app.data.bookmarks.BookmarkItem
+import com.streamflex.player.resume.PlaybackProgressManager
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 
 
 import androidx.compose.ui.draw.blur
@@ -45,7 +49,7 @@ import com.streamflex.app.ui.theme.*
 fun MovieDetailScreen(
     viewModel: MovieDetailViewModel,
     onBackClick: () -> Unit,
-    onMoviePlayClick: () -> Unit,
+    onMainPlayClick: (String?) -> Unit,
     onEpisodePlayClick: (Episode) -> Unit,
     onNavigateToDetail: (String, String) -> Unit = { _, _ -> }
 ) {
@@ -109,7 +113,11 @@ fun MovieDetailScreen(
                         // PLAY button
                         Button(
                             onClick = {
-                                onMoviePlayClick()
+                                if (historyItem != null && historyItem.positionMs > 10000L) {
+                                    showResumeDialog = true
+                                } else {
+                                    onMainPlayClick(null)
+                                }
                             },
                             modifier = Modifier.fillMaxWidth().height(50.dp),
                             shape    = RoundedCornerShape(6.dp),
@@ -119,10 +127,39 @@ fun MovieDetailScreen(
                                 tint = Color.Black, modifier = Modifier.size(24.dp))
                             Spacer(Modifier.width(8.dp))
                             Text(
-                                "Play",
+                                if (historyItem != null && historyItem.positionMs > 10000L) "Resume" else "Play",
                                 color      = Color.Black,
                                 fontWeight = FontWeight.Bold,
                                 style      = MaterialTheme.typography.titleMedium
+                            )
+                        }
+
+                        if (showResumeDialog) {
+                            AlertDialog(
+                                onDismissRequest = { showResumeDialog = false },
+                                title = { Text("Resume Playback", style = MaterialTheme.typography.titleLarge) },
+                                text = { Text("You were already watching this. Do you want to resume from where you left off?", style = MaterialTheme.typography.bodyMedium) },
+                                confirmButton = {
+                                    Button(
+                                        onClick = {
+                                            showResumeDialog = false
+                                            onMainPlayClick(historyItem?.episodeId)
+                                        },
+                                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                                    ) {
+                                        Text("Resume", color = Color.White)
+                                    }
+                                },
+                                dismissButton = {
+                                    TextButton(
+                                        onClick = {
+                                            showResumeDialog = false
+                                            onMainPlayClick(null)
+                                        }
+                                    ) {
+                                        Text("Start Over", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    }
+                                }
                             )
                         }
 

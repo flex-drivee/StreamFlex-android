@@ -73,9 +73,14 @@ class PlayerActivity : ComponentActivity() {
                 episodeNumber = epNumbers.getOrNull(index) ?: (index + 1),
                 stillPath = epStills.getOrNull(index)
             )
-        }
+        }.toMutableList()
         
-        val currentEpisode = episodes.find { it.id == currentEpisodeId }
+        var currentEpisode = episodes.find { it.id == currentEpisodeId }
+        
+        if (currentEpisode == null && currentEpisodeId != null && isShow) {
+            currentEpisode = PlayerEpisode(id = currentEpisodeId, title = "Resumed Episode", seasonNumber = 1, episodeNumber = 1)
+            episodes.add(currentEpisode)
+        }
         
         val session = PlayerSession(
             mediaId = mediaId,
