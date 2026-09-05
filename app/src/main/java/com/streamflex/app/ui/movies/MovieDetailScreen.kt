@@ -56,6 +56,15 @@ fun MovieDetailScreen(
     val state by viewModel.uiState.collectAsState()
     val allDownloads by viewModel.allDownloads.collectAsState()
 
+    val context = LocalContext.current
+    val progressManager = remember { PlaybackProgressManager(context) }
+    
+    val mediaId = state.movie?.id ?: state.show?.id
+    val historyItem = remember(mediaId) {
+        if (mediaId != null) progressManager.getHistory().find { it.id == mediaId } else null
+    }
+    var showResumeDialog by remember { mutableStateOf(false) }
+
     val isShow       = state.show != null
     val title        = state.movie?.title    ?: state.show?.title    ?: ""
     val backdrop     = state.movie?.backdrop ?: state.show?.backdrop
