@@ -25,6 +25,10 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.*
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.platform.LocalFocusManager
 import coil.compose.AsyncImage
 import com.streamflex.app.ui.home.SFBadge
 import com.streamflex.app.ui.theme.*
@@ -44,7 +48,6 @@ fun SearchScreen(
     val state        by viewModel.uiState.collectAsState()
     val focusManager  = LocalFocusManager.current
     val focusRequester = remember { FocusRequester() }
-    val focusManager = LocalFocusManager.current
 
     // Auto-focus the search field on entry
     LaunchedEffect(Unit) { focusRequester.requestFocus() }
