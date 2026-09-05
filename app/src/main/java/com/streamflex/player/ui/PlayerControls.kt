@@ -173,23 +173,23 @@ private fun PlayerBottomBar(
         ) {
             // Left Side: -10, Play, +10, Time
             Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onSeekBackward, modifier = Modifier.size(56.dp)) {
+                IconButton(onClick = onSeekBackward, modifier = Modifier.size(72.dp)) {
                     Box(contentAlignment = Alignment.Center) {
-                        Icon(Icons.Default.Replay, contentDescription = "Rewind", tint = Color.White, modifier = Modifier.size(44.dp))
-                        Text("10", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        Icon(Icons.Default.Replay, contentDescription = "Rewind", tint = Color.White, modifier = Modifier.size(56.dp))
+                        Text("10", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                     }
                 }
                 
                 // Play button is centered between Rewind and Forward and is slightly larger
-                IconButton(onClick = onPlayPauseToggle, modifier = Modifier.size(68.dp)) {
+                IconButton(onClick = onPlayPauseToggle, modifier = Modifier.size(84.dp)) {
                     val icon = if (state.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow
-                    Icon(icon, contentDescription = "Play/Pause", tint = Color.White, modifier = Modifier.size(56.dp))
+                    Icon(icon, contentDescription = "Play/Pause", tint = Color.White, modifier = Modifier.size(72.dp))
                 }
                 
-                IconButton(onClick = onSeekForward, modifier = Modifier.size(56.dp)) {
+                IconButton(onClick = onSeekForward, modifier = Modifier.size(72.dp)) {
                     Box(contentAlignment = Alignment.Center) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Forward", tint = Color.White, modifier = Modifier.size(44.dp))
-                        Text("10", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        Icon(Icons.Default.Refresh, contentDescription = "Forward", tint = Color.White, modifier = Modifier.size(56.dp))
+                        Text("10", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                     }
                 }
                 

@@ -44,6 +44,7 @@ fun SearchScreen(
     val state        by viewModel.uiState.collectAsState()
     val focusManager  = LocalFocusManager.current
     val focusRequester = remember { FocusRequester() }
+    val focusManager = LocalFocusManager.current
 
     // Auto-focus the search field on entry
     LaunchedEffect(Unit) { focusRequester.requestFocus() }
@@ -100,6 +101,13 @@ fun SearchScreen(
                                     color = SFTextDisabled)
                             },
                             singleLine       = true,
+                            keyboardOptions  = KeyboardOptions(imeAction = ImeAction.Search),
+                            keyboardActions  = KeyboardActions(onSearch = {
+                                if (state.query.isNotBlank()) {
+                                    SearchHistoryManager.addSearchQuery(state.query)
+                                }
+                                focusManager.clearFocus()
+                            }),
                             colors           = TextFieldDefaults.colors(
                                 focusedContainerColor   = Color.Transparent,
                                 unfocusedContainerColor = Color.Transparent,

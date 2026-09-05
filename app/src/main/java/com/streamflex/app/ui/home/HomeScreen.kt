@@ -88,6 +88,16 @@ fun HomeScreen(
     var heroIndex by remember { mutableIntStateOf(0) }
     val featuredContent = featuredItems.getOrNull(heroIndex)
 
+    LaunchedEffect(featuredItems) {
+        if (featuredItems.size > 1) {
+            heroIndex = 0
+            while(true) {
+                kotlinx.coroutines.delay(5000L)
+                heroIndex = (heroIndex + 1) % featuredItems.size
+            }
+        }
+    }
+
     // Top bar fades from transparent → semi-opaque as user scrolls
     val isScrolled by remember {
         derivedStateOf {
