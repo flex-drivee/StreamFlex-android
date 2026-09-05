@@ -35,6 +35,7 @@
             android:name="com.streamflex.player.PlayerActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
             android:screenOrientation="sensorLandscape"
+            android:supportsPictureInPicture="true"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
 
         <!-- Download Foreground Service -->
