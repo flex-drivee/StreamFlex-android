@@ -19,6 +19,8 @@ import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -54,6 +56,7 @@ fun PlayerScreen(
     var showEpisodeDrawer by remember { mutableStateOf(false) }
     
     val showNextEpCard by controller.nextEpisodeManager.showNextEpisodeCard.collectAsState()
+    val showResumeDialog by controller.showResumeDialog.collectAsState()
     val countdownSeconds by controller.nextEpisodeManager.countdownSeconds.collectAsState()
 
     var showBuffering by remember { mutableStateOf(false) }
@@ -152,6 +155,27 @@ fun PlayerScreen(
         },
         onDismiss = { showEpisodeDrawer = false }
     )
+
+        if (showResumeDialog) {
+            AlertDialog(
+                onDismissRequest = { controller.resumePlayback(true) },
+                title = { Text("Resume Playback", style = MaterialTheme.typography.titleLarge) },
+                text = { Text("Do you want to resume from where you left off?", style = MaterialTheme.typography.bodyMedium) },
+                confirmButton = {
+                    Button(
+                        onClick = { controller.resumePlayback(true) },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                    ) {
+                        Text("Resume", color = Color.White)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { controller.resumePlayback(false) }) {
+                        Text("Start Over", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+            )
+        }
 
     if (showSettingsDialog) {
         SettingsDialog(

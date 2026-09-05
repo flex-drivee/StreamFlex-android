@@ -63,7 +63,6 @@ fun MovieDetailScreen(
     val historyItem = remember(mediaId) {
         if (mediaId != null) progressManager.getHistory().find { it.id == mediaId } else null
     }
-    var showResumeDialog by remember { mutableStateOf(false) }
 
     val isShow       = state.show != null
     val title        = state.movie?.title    ?: state.show?.title    ?: ""
@@ -122,11 +121,8 @@ fun MovieDetailScreen(
                         // PLAY button
                         Button(
                             onClick = {
-                                if (historyItem != null && historyItem.positionMs > 10000L) {
-                                    showResumeDialog = true
-                                } else {
-                                    onMainPlayClick(null)
-                                }
+                                // Pass the resumed episode ID (if it's a show with history) so it launches the correct episode
+                                onMainPlayClick(historyItem?.episodeId)
                             },
                             modifier = Modifier.fillMaxWidth().height(50.dp),
                             shape    = RoundedCornerShape(6.dp),
@@ -143,34 +139,7 @@ fun MovieDetailScreen(
                             )
                         }
 
-                        if (showResumeDialog) {
-                            AlertDialog(
-                                onDismissRequest = { showResumeDialog = false },
-                                title = { Text("Resume Playback", style = MaterialTheme.typography.titleLarge) },
-                                text = { Text("You were already watching this. Do you want to resume from where you left off?", style = MaterialTheme.typography.bodyMedium) },
-                                confirmButton = {
-                                    Button(
-                                        onClick = {
-                                            showResumeDialog = false
-                                            onMainPlayClick(historyItem?.episodeId)
-                                        },
-                                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                                    ) {
-                                        Text("Resume", color = Color.White)
-                                    }
-                                },
-                                dismissButton = {
-                                    TextButton(
-                                        onClick = {
-                                            showResumeDialog = false
-                                            onMainPlayClick(null)
-                                        }
-                                    ) {
-                                        Text("Start Over", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                    }
-                                }
-                            )
-                        }
+
 
                         // SECONDARY ROW — Download + My List + Share
                         Row(
