@@ -29,10 +29,12 @@ fun PlayerControls(
     title: String,
     subtitle: String?,
     showEpisodesButton: Boolean = false,
+    isMuted: Boolean = false,
     onPlayPauseToggle: () -> Unit,
     onSeekTo: (Long) -> Unit,
     onSeekForward: () -> Unit,
     onSeekBackward: () -> Unit,
+    onMuteToggle: () -> Unit,
     onSettingsClick: (tab: Int) -> Unit,
     onEpisodesClick: () -> Unit,
     onFullscreenToggle: () -> Unit,
@@ -105,20 +107,7 @@ fun PlayerControls(
                         }
                     }
 
-                    // Network Stats (Dummy/Placeholder)
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(Color.Black.copy(alpha = 0.5f))
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
-                        Text(
-                            text = "Ping: 38 ms  |  ServerLoc: H-MCT",
-                            color = Color.White,
-                            fontSize = 11.sp,
-                            fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
-                        )
-                    }
+
 
                     // Close Button
                     IconButton(onClick = onBack) {
@@ -128,26 +117,26 @@ fun PlayerControls(
 
                 // CENTER CONTROLS (-10, Play, +10)
                 Row(
-                    modifier = Modifier.align(Alignment.Center),
+                    modifier = Modifier.align(Alignment.Center).fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    IconButton(onClick = onSeekBackward, modifier = Modifier.size(80.dp)) {
+                    IconButton(onClick = onSeekBackward, modifier = Modifier.size(100.dp)) {
                         Box(contentAlignment = Alignment.Center) {
-                            Icon(Icons.Default.Replay, contentDescription = "Rewind", tint = Color.White, modifier = Modifier.size(64.dp))
-                            Text("10", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                            Icon(Icons.Filled.FastRewind, contentDescription = "Rewind", tint = Color.White, modifier = Modifier.size(72.dp))
+                            Text("10", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 24.dp))
                         }
                     }
-                    Spacer(modifier = Modifier.width(32.dp))
-                    IconButton(onClick = onPlayPauseToggle, modifier = Modifier.size(100.dp)) {
+                    Spacer(modifier = Modifier.width(80.dp)) // Increased spacing
+                    IconButton(onClick = onPlayPauseToggle, modifier = Modifier.size(120.dp)) {
                         val icon = if (state.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow
-                        Icon(icon, contentDescription = "Play/Pause", tint = Color.White, modifier = Modifier.size(80.dp))
+                        Icon(icon, contentDescription = "Play/Pause", tint = Color.White, modifier = Modifier.size(96.dp))
                     }
-                    Spacer(modifier = Modifier.width(32.dp))
-                    IconButton(onClick = onSeekForward, modifier = Modifier.size(80.dp)) {
+                    Spacer(modifier = Modifier.width(80.dp)) // Increased spacing
+                    IconButton(onClick = onSeekForward, modifier = Modifier.size(100.dp)) {
                         Box(contentAlignment = Alignment.Center) {
-                            Icon(Icons.Default.Refresh, contentDescription = "Forward", tint = Color.White, modifier = Modifier.size(64.dp))
-                            Text("10", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                            Icon(Icons.Filled.FastForward, contentDescription = "Forward", tint = Color.White, modifier = Modifier.size(72.dp))
+                            Text("10", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 24.dp))
                         }
                     }
                 }
@@ -178,18 +167,19 @@ fun PlayerControls(
                     ) {
                         // Left: Play, Volume, Time
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            IconButton(onClick = onPlayPauseToggle, modifier = Modifier.size(40.dp)) {
+                            IconButton(onClick = onPlayPauseToggle, modifier = Modifier.size(48.dp)) {
                                 val icon = if (state.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow
-                                Icon(icon, contentDescription = "Play", tint = Color.White, modifier = Modifier.size(24.dp))
+                                Icon(icon, contentDescription = "Play", tint = Color.White, modifier = Modifier.size(28.dp))
                             }
-                            IconButton(onClick = { /* TODO: Volume Toggle */ }, modifier = Modifier.size(40.dp)) {
-                                Icon(Icons.Default.VolumeUp, contentDescription = "Volume", tint = Color.White, modifier = Modifier.size(20.dp))
+                            IconButton(onClick = onMuteToggle, modifier = Modifier.size(48.dp)) {
+                                val volIcon = if (isMuted) Icons.Default.VolumeOff else Icons.Default.VolumeUp
+                                Icon(volIcon, contentDescription = "Volume", tint = Color.White, modifier = Modifier.size(28.dp))
                             }
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = "${formatTime(state.positionMs)} / ${formatTime(state.durationMs)}", 
                                 color = Color.White, 
-                                fontSize = 13.sp,
+                                fontSize = 14.sp,
                                 fontWeight = FontWeight.Medium
                             )
                         }
@@ -198,29 +188,31 @@ fun PlayerControls(
                         Text(
                             text = title,
                             color = Color.White,
-                            fontSize = 16.sp,
+                            fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
                             maxLines = 1,
                             modifier = Modifier.weight(1f).padding(horizontal = 16.dp),
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center
                         )
 
-                        // Right: Comments, PIP, CC, Settings, Fullscreen
+                        // Right: Audio, Comments(Subtitles), PIP, Settings, Fullscreen
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            IconButton(onClick = { /* TODO: Comments */ }, modifier = Modifier.size(40.dp)) {
-                                Icon(Icons.Outlined.ChatBubbleOutline, contentDescription = "Comments", tint = Color.White, modifier = Modifier.size(24.dp))
+                            // Audio Tracks
+                            IconButton(onClick = { onSettingsClick(1) }, modifier = Modifier.size(48.dp)) {
+                                Icon(Icons.Outlined.Audiotrack, contentDescription = "Audio", tint = Color.White, modifier = Modifier.size(28.dp))
                             }
-                            IconButton(onClick = { /* TODO: PIP */ }, modifier = Modifier.size(40.dp)) {
-                                Icon(Icons.Outlined.PictureInPictureAlt, contentDescription = "PIP", tint = Color.White, modifier = Modifier.size(24.dp))
+                            // Comments icon wired to Subtitles (tab 2)
+                            IconButton(onClick = { onSettingsClick(2) }, modifier = Modifier.size(48.dp)) {
+                                Icon(Icons.Outlined.ChatBubbleOutline, contentDescription = "Subtitles/Comments", tint = Color.White, modifier = Modifier.size(28.dp))
                             }
-                            IconButton(onClick = { onSettingsClick(2) }, modifier = Modifier.size(40.dp)) {
-                                Icon(Icons.Outlined.ClosedCaption, contentDescription = "CC", tint = Color.White, modifier = Modifier.size(24.dp))
+                            IconButton(onClick = { /* TODO: PIP */ }, modifier = Modifier.size(48.dp)) {
+                                Icon(Icons.Outlined.PictureInPictureAlt, contentDescription = "PIP", tint = Color.White, modifier = Modifier.size(28.dp))
                             }
-                            IconButton(onClick = { onSettingsClick(0) }, modifier = Modifier.size(40.dp)) {
-                                Icon(Icons.Outlined.Settings, contentDescription = "Settings", tint = Color.White, modifier = Modifier.size(24.dp))
+                            IconButton(onClick = { onSettingsClick(0) }, modifier = Modifier.size(48.dp)) {
+                                Icon(Icons.Outlined.Settings, contentDescription = "Settings", tint = Color.White, modifier = Modifier.size(28.dp))
                             }
-                            IconButton(onClick = onFullscreenToggle, modifier = Modifier.size(40.dp)) {
-                                Icon(Icons.Outlined.Fullscreen, contentDescription = "Fullscreen", tint = Color.White, modifier = Modifier.size(28.dp))
+                            IconButton(onClick = onFullscreenToggle, modifier = Modifier.size(48.dp)) {
+                                Icon(Icons.Outlined.Fullscreen, contentDescription = "Fullscreen", tint = Color.White, modifier = Modifier.size(32.dp))
                             }
                         }
                     }

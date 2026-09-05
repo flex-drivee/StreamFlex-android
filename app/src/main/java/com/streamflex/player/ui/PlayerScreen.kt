@@ -44,6 +44,7 @@ fun PlayerScreen(
     val state by controller.state.collectAsState()
     val allStreams by controller.allStreams.collectAsState()
     val currentStreamIndex by controller.currentStreamIndex.collectAsState()
+    val isMuted by controller.isMuted.collectAsState()
     val activeSkipSegment by controller.activeSkipSegment.collectAsState()
     val context = LocalContext.current
     

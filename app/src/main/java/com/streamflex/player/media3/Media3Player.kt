@@ -419,6 +419,10 @@ class Media3Player(
     }
     override fun seekForward(ms: Long) { seekTo(exoPlayer.currentPosition + ms) }
     override fun seekBackward(ms: Long) { seekTo((exoPlayer.currentPosition - ms).coerceAtLeast(0)) }
+    override fun setVolume(volume: Float) {
+        exoPlayer.volume = volume
+    }
+
     override fun release() {
         stopProgressTracking()
         scope.cancel()
