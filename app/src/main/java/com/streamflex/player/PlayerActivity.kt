@@ -171,6 +171,21 @@ class PlayerActivity : ComponentActivity() {
         }
     }
     
+
+    fun triggerPiP() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            val params = android.app.PictureInPictureParams.Builder()
+                .setAspectRatio(android.util.Rational(16, 9))
+                .build()
+            enterPictureInPictureMode(params)
+        }
+    }
+
+    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: android.content.res.Configuration) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        playerController?.setPiPMode(isInPictureInPictureMode)
+    }
+
     override fun onPause() {
         super.onPause()
         playerController?.pause()

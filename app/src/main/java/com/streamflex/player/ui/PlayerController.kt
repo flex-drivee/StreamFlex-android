@@ -47,6 +47,7 @@ class PlayerController(
     private var savedPosToResume = 0L
     
     val isMuted = MutableStateFlow(false)
+    val isPiPMode = MutableStateFlow(false)
 
     private val progressKey: String
         get() = if (type == "TV" && viewModel.uiState.value.session?.currentEpisode != null) {
@@ -170,6 +171,10 @@ class PlayerController(
     fun seekTo(positionMs: Long) = player.seekTo(positionMs)
     fun seekForward() = player.seekForward()
     fun seekBackward() = player.seekBackward()
+    fun setPiPMode(isPip: Boolean) {
+        isPiPMode.value = isPip
+    }
+
     fun toggleMute() {
         val current = isMuted.value
         isMuted.value = !current

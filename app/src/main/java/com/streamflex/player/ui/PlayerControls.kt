@@ -35,6 +35,7 @@ fun PlayerControls(
     onSeekForward: () -> Unit,
     onSeekBackward: () -> Unit,
     onMuteToggle: () -> Unit,
+    onPipClick: () -> Unit,
     onSettingsClick: (tab: Int) -> Unit,
     onEpisodesClick: () -> Unit,
     onFullscreenToggle: () -> Unit,
@@ -122,10 +123,7 @@ fun PlayerControls(
                     horizontalArrangement = Arrangement.Center
                 ) {
                     IconButton(onClick = onSeekBackward, modifier = Modifier.size(100.dp)) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(Icons.Filled.FastRewind, contentDescription = "Rewind", tint = Color.White, modifier = Modifier.size(72.dp))
-                            Text("10", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 24.dp))
-                        }
+                        Icon(Icons.Filled.Replay10, contentDescription = "Rewind 10s", tint = Color.White, modifier = Modifier.size(72.dp))
                     }
                     Spacer(modifier = Modifier.width(80.dp)) // Increased spacing
                     IconButton(onClick = onPlayPauseToggle, modifier = Modifier.size(120.dp)) {
@@ -134,10 +132,7 @@ fun PlayerControls(
                     }
                     Spacer(modifier = Modifier.width(80.dp)) // Increased spacing
                     IconButton(onClick = onSeekForward, modifier = Modifier.size(100.dp)) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(Icons.Filled.FastForward, contentDescription = "Forward", tint = Color.White, modifier = Modifier.size(72.dp))
-                            Text("10", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 24.dp))
-                        }
+                        Icon(Icons.Filled.Forward10, contentDescription = "Forward 10s", tint = Color.White, modifier = Modifier.size(72.dp))
                     }
                 }
 
@@ -203,9 +198,10 @@ fun PlayerControls(
                             }
                             // Comments icon wired to Subtitles (tab 2)
                             IconButton(onClick = { onSettingsClick(2) }, modifier = Modifier.size(48.dp)) {
-                                Icon(Icons.Outlined.ChatBubbleOutline, contentDescription = "Subtitles/Comments", tint = Color.White, modifier = Modifier.size(28.dp))
+                                Icon(Icons.Outlined.SpeakerNotes, contentDescription = "Subtitles/Comments", tint = Color.White, modifier = Modifier.size(28.dp))
                             }
-                            IconButton(onClick = { /* TODO: PIP */ }, modifier = Modifier.size(48.dp)) {
+                            // Picture in Picture
+                            IconButton(onClick = onPipClick, modifier = Modifier.size(48.dp)) {
                                 Icon(Icons.Outlined.PictureInPictureAlt, contentDescription = "PIP", tint = Color.White, modifier = Modifier.size(28.dp))
                             }
                             IconButton(onClick = { onSettingsClick(0) }, modifier = Modifier.size(48.dp)) {

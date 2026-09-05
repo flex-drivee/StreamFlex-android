@@ -45,6 +45,7 @@ fun PlayerScreen(
     val allStreams by controller.allStreams.collectAsState()
     val currentStreamIndex by controller.currentStreamIndex.collectAsState()
     val isMuted by controller.isMuted.collectAsState()
+    val isPiPMode by controller.isPiPMode.collectAsState()
     val activeSkipSegment by controller.activeSkipSegment.collectAsState()
     val context = LocalContext.current
     
@@ -82,6 +83,7 @@ fun PlayerScreen(
             )
         }
         
+        if (!isPiPMode) {
         PlayerControls(
             state = state,
             title = videoTitle,
@@ -93,6 +95,7 @@ fun PlayerScreen(
             onSeekForward = { controller.seekForward() },
             onSeekBackward = { controller.seekBackward() },
             onMuteToggle = { controller.toggleMute() },
+            onPipClick = { (context as? com.streamflex.player.PlayerActivity)?.triggerPiP() },
             onSettingsClick = { tab ->
                 initialSettingsTab = tab
                 showSettingsDialog = true 
@@ -101,6 +104,7 @@ fun PlayerScreen(
             onFullscreenToggle = { isFullScreen = !isFullScreen },
             onBack = onBack
         )
+        }
 
         // Skip Intro Button
         activeSkipSegment?.let { segment ->
