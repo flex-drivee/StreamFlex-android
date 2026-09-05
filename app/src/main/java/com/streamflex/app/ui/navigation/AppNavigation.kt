@@ -233,9 +233,9 @@ fun AppNavigation(
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = 12.dp)
+                    .padding(bottom = 16.dp)
                     .fillMaxWidth()
-                    .padding(horizontal = 40.dp)
+                    .padding(horizontal = 24.dp) // Make the bar physically wider
             ) {
                 Row(
                     modifier = Modifier
@@ -243,7 +243,7 @@ fun AppNavigation(
                         .shadow(8.dp, RoundedCornerShape(32.dp))
                         .clip(RoundedCornerShape(32.dp))
                         .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.95f))
-                        .padding(vertical = 8.dp, horizontal = 12.dp),
+                        .padding(vertical = 8.dp, horizontal = 16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
