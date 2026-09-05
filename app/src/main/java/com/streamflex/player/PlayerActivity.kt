@@ -188,6 +188,17 @@ class PlayerActivity : ComponentActivity() {
 
     override fun onPause() {
         super.onPause()
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            if (!isInPictureInPictureMode) {
+                playerController?.pause()
+            }
+        } else {
+            playerController?.pause()
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
         playerController?.pause()
     }
     

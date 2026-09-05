@@ -192,6 +192,11 @@ fun PlayerControls(
 
                         // Right: Audio, Comments(Subtitles), PIP, Settings, Fullscreen
                         Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (showEpisodesButton) {
+                                IconButton(onClick = onEpisodesClick, modifier = Modifier.size(48.dp)) {
+                                    Icon(Icons.Default.Menu, contentDescription = "Episodes", tint = Color.White, modifier = Modifier.size(32.dp))
+                                }
+                            }
                             // Audio Tracks
                             IconButton(onClick = { onSettingsClick(1) }, modifier = Modifier.size(48.dp)) {
                                 Icon(Icons.Outlined.Audiotrack, contentDescription = "Audio", tint = Color.White, modifier = Modifier.size(28.dp))
