@@ -1,27 +1,21 @@
 package com.streamflex.player.ui
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Fullscreen
-import androidx.compose.material.icons.filled.ClosedCaption
-import androidx.compose.material.icons.filled.Replay
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -70,29 +64,167 @@ fun PlayerControls(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.5f))
+                    .background(Color.Black.copy(alpha = 0.6f))
             ) {
-                // Top bar (Close button + Multi-line Title)
-                PlayerTopBar(
-                    title = title,
-                    subtitle = subtitle,
-                    onBack = onBack,
-                    modifier = Modifier.align(Alignment.TopStart)
-                )
+                // TOP BAR
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.TopCenter)
+                        .padding(horizontal = 24.dp, vertical = 24.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Left Side: Season / Episode Pills or Empty if Movie
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        if (showEpisodesButton) {
+                            // S1 Pill (Green)
+                            Row(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(20.dp))
+                                    .background(Color(0xFF008000)) // Green
+                                    .clickable { onEpisodesClick() }
+                                    .padding(horizontal = 16.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(Icons.Default.PlayArrow, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(subtitle?.split(" ")?.take(2)?.joinToString(" ") ?: "Episodes", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
+                            // E1 Pill (Dark Grey)
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(20.dp))
+                                    .background(Color(0xFF333333)) // Dark Grey
+                                    .padding(horizontal = 16.dp, vertical = 6.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(subtitle?.split(" ")?.drop(2)?.joinToString(" ") ?: "", color = Color(0xFF00E5FF), fontWeight = FontWeight.Bold, fontSize = 14.sp) // Cyan text
+                            }
+                        }
+                    }
 
-                // Bottom bar
-                PlayerBottomBar(
-                    state = state,
-                    showEpisodesButton = showEpisodesButton,
-                    onPlayPauseToggle = onPlayPauseToggle,
-                    onSeekTo = onSeekTo,
-                    onSeekForward = onSeekForward,
-                    onSeekBackward = onSeekBackward,
-                    onSettingsClick = onSettingsClick,
-                    onEpisodesClick = onEpisodesClick,
-                    onFullscreenToggle = onFullscreenToggle,
-                    modifier = Modifier.align(Alignment.BottomCenter)
-                )
+                    // Network Stats (Dummy/Placeholder)
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(Color.Black.copy(alpha = 0.5f))
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = "Ping: 38 ms  |  ServerLoc: H-MCT",
+                            color = Color.White,
+                            fontSize = 11.sp,
+                            fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
+                        )
+                    }
+
+                    // Close Button
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.White, modifier = Modifier.size(32.dp))
+                    }
+                }
+
+                // CENTER CONTROLS (-10, Play, +10)
+                Row(
+                    modifier = Modifier.align(Alignment.Center),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    IconButton(onClick = onSeekBackward, modifier = Modifier.size(80.dp)) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(Icons.Default.Replay, contentDescription = "Rewind", tint = Color.White, modifier = Modifier.size(64.dp))
+                            Text("10", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                    Spacer(modifier = Modifier.width(32.dp))
+                    IconButton(onClick = onPlayPauseToggle, modifier = Modifier.size(100.dp)) {
+                        val icon = if (state.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow
+                        Icon(icon, contentDescription = "Play/Pause", tint = Color.White, modifier = Modifier.size(80.dp))
+                    }
+                    Spacer(modifier = Modifier.width(32.dp))
+                    IconButton(onClick = onSeekForward, modifier = Modifier.size(80.dp)) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(Icons.Default.Refresh, contentDescription = "Forward", tint = Color.White, modifier = Modifier.size(64.dp))
+                            Text("10", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+
+                // BOTTOM BAR
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter)
+                        .padding(horizontal = 24.dp, vertical = 16.dp)
+                ) {
+                    // Progress Bar
+                    PlayerProgressBar(
+                        positionMs = state.positionMs,
+                        durationMs = state.durationMs,
+                        bufferedPositionMs = state.bufferedPositionMs,
+                        onSeekTo = onSeekTo,
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)
+                    )
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    // Bottom Row
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Left: Play, Volume, Time
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            IconButton(onClick = onPlayPauseToggle, modifier = Modifier.size(40.dp)) {
+                                val icon = if (state.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow
+                                Icon(icon, contentDescription = "Play", tint = Color.White, modifier = Modifier.size(24.dp))
+                            }
+                            IconButton(onClick = { /* TODO: Volume Toggle */ }, modifier = Modifier.size(40.dp)) {
+                                Icon(Icons.Default.VolumeUp, contentDescription = "Volume", tint = Color.White, modifier = Modifier.size(20.dp))
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "${formatTime(state.positionMs)} / ${formatTime(state.durationMs)}", 
+                                color = Color.White, 
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+
+                        // Center: Title
+                        Text(
+                            text = title,
+                            color = Color.White,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            modifier = Modifier.weight(1f).padding(horizontal = 16.dp),
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+
+                        // Right: Comments, PIP, CC, Settings, Fullscreen
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            IconButton(onClick = { /* TODO: Comments */ }, modifier = Modifier.size(40.dp)) {
+                                Icon(Icons.Outlined.ChatBubbleOutline, contentDescription = "Comments", tint = Color.White, modifier = Modifier.size(24.dp))
+                            }
+                            IconButton(onClick = { /* TODO: PIP */ }, modifier = Modifier.size(40.dp)) {
+                                Icon(Icons.Outlined.PictureInPictureAlt, contentDescription = "PIP", tint = Color.White, modifier = Modifier.size(24.dp))
+                            }
+                            IconButton(onClick = { onSettingsClick(2) }, modifier = Modifier.size(40.dp)) {
+                                Icon(Icons.Outlined.ClosedCaption, contentDescription = "CC", tint = Color.White, modifier = Modifier.size(24.dp))
+                            }
+                            IconButton(onClick = { onSettingsClick(0) }, modifier = Modifier.size(40.dp)) {
+                                Icon(Icons.Outlined.Settings, contentDescription = "Settings", tint = Color.White, modifier = Modifier.size(24.dp))
+                            }
+                            IconButton(onClick = onFullscreenToggle, modifier = Modifier.size(40.dp)) {
+                                Icon(Icons.Outlined.Fullscreen, contentDescription = "Fullscreen", tint = Color.White, modifier = Modifier.size(28.dp))
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -101,125 +233,6 @@ fun PlayerControls(
                 modifier = Modifier.align(Alignment.Center),
                 color = Color.Red
             )
-        }
-    }
-}
-
-@Composable
-private fun PlayerTopBar(title: String, subtitle: String?, onBack: () -> Unit, modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(24.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        IconButton(onClick = onBack) {
-            Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.White, modifier = Modifier.size(32.dp))
-        }
-        Spacer(modifier = Modifier.width(16.dp))
-        Column {
-            Text(
-                text = title,
-                color = Color.White,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1
-            )
-            if (!subtitle.isNullOrBlank()) {
-                Text(
-                    text = subtitle,
-                    color = Color.LightGray,
-                    fontSize = 14.sp,
-                    maxLines = 1,
-                    modifier = Modifier.padding(top = 2.dp)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun PlayerBottomBar(
-    state: PlayerState,
-    showEpisodesButton: Boolean,
-    onPlayPauseToggle: () -> Unit,
-    onSeekTo: (Long) -> Unit,
-    onSeekForward: () -> Unit,
-    onSeekBackward: () -> Unit,
-    onSettingsClick: (Int) -> Unit,
-    onEpisodesClick: () -> Unit,
-    onFullscreenToggle: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 16.dp)
-    ) {
-        // Custom Timeline Progress Bar
-        PlayerProgressBar(
-            positionMs = state.positionMs,
-            durationMs = state.durationMs,
-            bufferedPositionMs = state.bufferedPositionMs,
-            onSeekTo = onSeekTo,
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)
-        )
-        
-        // Controls Row
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Left Side: -10, Play, +10, Time
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onSeekBackward, modifier = Modifier.size(72.dp)) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(Icons.Default.Replay, contentDescription = "Rewind", tint = Color.White, modifier = Modifier.size(56.dp))
-                        Text("10", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                    }
-                }
-                
-                // Play button is centered between Rewind and Forward and is slightly larger
-                IconButton(onClick = onPlayPauseToggle, modifier = Modifier.size(84.dp)) {
-                    val icon = if (state.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow
-                    Icon(icon, contentDescription = "Play/Pause", tint = Color.White, modifier = Modifier.size(72.dp))
-                }
-                
-                IconButton(onClick = onSeekForward, modifier = Modifier.size(72.dp)) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Forward", tint = Color.White, modifier = Modifier.size(56.dp))
-                        Text("10", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                    }
-                }
-                
-                Spacer(modifier = Modifier.width(16.dp))
-                
-                Text(
-                    text = "${formatTime(state.positionMs)} / ${formatTime(state.durationMs)}", 
-                    color = Color.White, 
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium
-                )
-            }
-            
-            // Right Side: Episodes, CC, Settings, Fullscreen
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                if (showEpisodesButton) {
-                    IconButton(onClick = onEpisodesClick, modifier = Modifier.size(48.dp)) {
-                        Icon(Icons.Default.Menu, contentDescription = "Episodes", tint = Color.White, modifier = Modifier.size(32.dp))
-                    }
-                }
-                IconButton(onClick = { onSettingsClick(2) }, modifier = Modifier.size(48.dp)) { // 2 = Subtitles Tab
-                    Icon(Icons.Default.ClosedCaption, contentDescription = "CC", tint = Color.White, modifier = Modifier.size(32.dp))
-                }
-                IconButton(onClick = { onSettingsClick(0) }, modifier = Modifier.size(48.dp)) { // 0 = Video Quality Tab
-                    Icon(Icons.Default.Settings, contentDescription = "Settings", tint = Color.White, modifier = Modifier.size(32.dp))
-                }
-                IconButton(onClick = onFullscreenToggle, modifier = Modifier.size(48.dp)) {
-                    Icon(Icons.Default.Fullscreen, contentDescription = "Fullscreen", tint = Color.White, modifier = Modifier.size(32.dp))
-                }
-            }
         }
     }
 }
