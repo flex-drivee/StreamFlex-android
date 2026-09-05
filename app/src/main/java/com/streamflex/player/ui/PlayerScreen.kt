@@ -87,10 +87,12 @@ fun PlayerScreen(
             title = videoTitle,
             subtitle = videoSubtitle,
             showEpisodesButton = episodes.isNotEmpty(),
+            isMuted = isMuted,
             onPlayPauseToggle = { controller.togglePlayPause() },
             onSeekTo = { controller.seekTo(it) },
             onSeekForward = { controller.seekForward() },
             onSeekBackward = { controller.seekBackward() },
+            onMuteToggle = { controller.toggleMute() },
             onSettingsClick = { tab ->
                 initialSettingsTab = tab
                 showSettingsDialog = true 
