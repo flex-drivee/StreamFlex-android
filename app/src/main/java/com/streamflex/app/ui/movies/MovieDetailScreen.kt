@@ -1030,8 +1030,7 @@ fun SFProductionCompanies(companies: List<com.streamflex.app.domain.models.Produ
                                 model = url,
                                 contentDescription = null,
                                 contentScale = ContentScale.Fit,
-                                modifier = Modifier.height(24.dp).padding(end = 8.dp),
-                                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant)
+                                modifier = Modifier.height(24.dp).padding(end = 8.dp)
                             )
                         }
                         Text(

@@ -355,27 +355,27 @@ fun SettingsScreen(
                 text = {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         ThemeOptionRow(
-                            title = "Sky Stream Dark",
+                            title = "Default Dark Mode",
                             isSelected = appTheme == "SKY_DARK",
                             onClick = { viewModel.setAppTheme("SKY_DARK"); showThemeDialog = false }
                         )
                         ThemeOptionRow(
-                            title = "Sky Stream Light",
+                            title = "Default Light Mode",
                             isSelected = appTheme == "SKY_LIGHT",
                             onClick = { viewModel.setAppTheme("SKY_LIGHT"); showThemeDialog = false }
                         )
                         ThemeOptionRow(
-                            title = "Netflix Mode",
+                            title = "Netflix Mode (Dark)",
                             isSelected = appTheme == "NETFLIX",
                             onClick = { viewModel.setAppTheme("NETFLIX"); showThemeDialog = false }
                         )
                         ThemeOptionRow(
-                            title = "Amazon Prime Mode",
+                            title = "Prime Mode (Dark)",
                             isSelected = appTheme == "PRIME",
                             onClick = { viewModel.setAppTheme("PRIME"); showThemeDialog = false }
                         )
                         ThemeOptionRow(
-                            title = "StreamFlex Premium",
+                            title = "Cinematic Mode (Dark OLED)",
                             isSelected = appTheme == "STREAMFLEX",
                             onClick = { viewModel.setAppTheme("STREAMFLEX"); showThemeDialog = false }
                         )
@@ -588,12 +588,12 @@ fun SettingsScreen(
 
 fun getThemeDisplayName(themeId: String): String {
     return when(themeId) {
-        "SKY_DARK" -> "Sky Stream Dark"
-        "SKY_LIGHT" -> "Sky Stream Light"
-        "NETFLIX" -> "Netflix Mode"
-        "PRIME" -> "Amazon Prime Mode"
-        "STREAMFLEX" -> "StreamFlex Premium"
-        else -> "Sky Stream Dark"
+        "SKY_DARK" -> "Default Dark Mode"
+        "SKY_LIGHT" -> "Default Light Mode"
+        "NETFLIX" -> "Netflix Mode (Dark)"
+        "PRIME" -> "Prime Mode (Dark)"
+        "STREAMFLEX" -> "Cinematic Mode (Dark OLED)"
+        else -> "Default Dark Mode"
     }
 }
 
