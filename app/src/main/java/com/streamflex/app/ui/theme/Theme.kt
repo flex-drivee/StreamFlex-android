@@ -42,13 +42,13 @@ private val NetflixColorScheme = darkColorScheme(
     onPrimary          = Color.White,
     background         = Color(0xFF000000), // Pure Netflix Black
     onBackground       = Color(0xFFFFFFFF),
-    surface            = Color(0xFF141414), // Netflix dark grey surface
+    surface            = Color(0xFF222222), // Visible Near-Black/Gray for nav/buttons
     onSurface          = Color(0xFFFFFFFF),
-    surfaceVariant     = Color(0xFF1F1F1F), // Cards
+    surfaceVariant     = Color(0xFF2C2C2C), // Slightly lighter gray for cards
     onSurfaceVariant   = Color(0xFFB3B3B3), // Netflix subtitle gray
-    outline            = Color(0xFF333333), // Subtle outlines
-    outlineVariant     = Color(0xFF333333),
-    surfaceContainerHighest = Color(0xFF1F1F1F)
+    outline            = Color(0xFF444444), // Visible outlines
+    outlineVariant     = Color(0xFF444444),
+    surfaceContainerHighest = Color(0xFF2C2C2C)
 )
 
 // 4. PRIME MODE (Enhanced Contrast)
@@ -72,13 +72,13 @@ private val StreamFlexColorScheme = darkColorScheme(
     onPrimary          = Color.Black,
     background         = Color(0xFF000000), // OLED Pitch Black
     onBackground       = Color(0xFFFFFFFF), // Pure White
-    surface            = Color(0xFF0A0A0A), // Barely visible surface
+    surface            = Color(0xFF141414), // Visible dark gray for nav & floating buttons
     onSurface          = Color(0xFFFFFFFF),
-    surfaceVariant     = Color(0xFF141414), // Slightly elevated cards
-    onSurfaceVariant   = Color(0xFF9BA0A4), // Muted text
-    outline            = Color(0xFF222222), // Minimal outlines
-    outlineVariant     = Color(0xFF222222),
-    surfaceContainerHighest = Color(0xFF141414)
+    surfaceVariant     = Color(0xFF1C1C1E), // Elevated grey for cards to show difference
+    onSurfaceVariant   = Color(0xFFAAAAAA), // Muted text
+    outline            = Color(0xFF333333), // Brighter outline for contrast
+    outlineVariant     = Color(0xFF333333),
+    surfaceContainerHighest = Color(0xFF1C1C1E)
 )
 
 @Composable
