@@ -5,6 +5,7 @@ package com.streamflex.player.media3
 import android.content.Context
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
+import androidx.media3.session.MediaSession
 import androidx.media3.common.Player
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.TrackSelectionOverride
@@ -426,6 +427,7 @@ class Media3Player(
     override fun release() {
         stopProgressTracking()
         scope.cancel()
+        mediaSession.release()
         exoPlayer.release()
     }
 
