@@ -103,6 +103,7 @@ class PlayerActivity : ComponentActivity() {
                 val player = Media3PlayerFactory.create(context)
                 val progressManager = PlaybackProgressManager(context)
                 PlayerController(
+                    context = context,
                     player = player, 
                     progressManager = progressManager, 
                     mediaId = mediaId, 

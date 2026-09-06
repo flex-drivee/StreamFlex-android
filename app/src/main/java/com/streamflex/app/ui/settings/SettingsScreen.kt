@@ -134,8 +134,8 @@ fun SettingsScreen(
                     SettingsTile(
                         icon = Icons.Outlined.HighQuality,
                         title = "Default Video Quality",
-                        subtitle = "Auto",
-                        onTap = { showQualityDialog = true }
+                        subtitle = "Current: $playerVideoQuality",
+                        onTap = { showPlayerQualityDialog = true }
                     )
                     SettingsDivider()
                     SettingsTile(

@@ -52,6 +52,9 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     private val _downloadQuality = MutableStateFlow(prefs.getString("download_quality", "1080p") ?: "1080p")
     val downloadQuality: StateFlow<String> = _downloadQuality.asStateFlow()
+    
+    private val _playerVideoQuality = MutableStateFlow(prefs.getString("player_video_quality", "Auto") ?: "Auto")
+    val playerVideoQuality: StateFlow<String> = _playerVideoQuality.asStateFlow()
 
     private val _smartDownloads = MutableStateFlow(prefs.getBoolean("smart_downloads", true))
     val smartDownloads: StateFlow<Boolean> = _smartDownloads.asStateFlow()
@@ -110,6 +113,11 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun setDownloadQuality(quality: String) {
         prefs.edit().putString("download_quality", quality).apply()
         _downloadQuality.value = quality
+    }
+
+    fun setPlayerVideoQuality(quality: String) {
+        prefs.edit().putString("player_video_quality", quality).apply()
+        _playerVideoQuality.value = quality
     }
 
     fun setSmartDownloads(enabled: Boolean) {

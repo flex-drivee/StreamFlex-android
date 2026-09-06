@@ -268,11 +268,7 @@ fun SettingsDialog(
                         isSelected = currentTab == 3, 
                         onClick = { currentTab = 3 }
                     )
-                    TabButton(
-                        icon = Icons.Default.Memory, // Decoder Mode Tab
-                        isSelected = currentTab == 4, 
-                        onClick = { currentTab = 4 }
-                    )
+
                     // Close button
                     IconButton(onClick = onDismiss) {
                         Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.Gray)
@@ -343,20 +339,7 @@ fun SettingsDialog(
                                 }
                             }
                         }
-                        4 -> { // Decoder Mode
-                            items(com.streamflex.player.core.DecoderMode.entries) { mode ->
-                                val isSelected = currentDecoderMode == mode.key
-                                SettingsRow(
-                                    label = mode.title,
-                                    isSelected = isSelected,
-                                    onClick = {
-                                        prefs.edit().putString(com.streamflex.player.core.DecoderMode.PREF_KEY, mode.key).apply()
-                                        currentDecoderMode = mode.key
-                                        onDismiss()
-                                    }
-                                )
-                            }
-                        }
+                        
                     }
                 }
             }

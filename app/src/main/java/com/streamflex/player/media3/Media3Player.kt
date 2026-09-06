@@ -51,6 +51,22 @@ class Media3Player(
     private val mediaSession: MediaSession = MediaSession.Builder(context, exoPlayer).build()
 
     init {
+        val prefs = context.getSharedPreferences("streamflex_settings", android.content.Context.MODE_PRIVATE)
+        val enableSubtitles = prefs.getBoolean("enable_subtitles", false)
+        val defaultQuality = prefs.getString("player_video_quality", "Auto") ?: "Auto"
+        
+        var builder = trackSelector.buildUponParameters()
+        if (!enableSubtitles) {
+            builder = builder.setTrackTypeDisabled(C.TRACK_TYPE_TEXT, true)
+        }
+        if (defaultQuality != "Auto") {
+            val height = defaultQuality.replace("p", "").toIntOrNull()
+            if (height != null) {
+                builder = builder.setMaxVideoSize(Int.MAX_VALUE, height)
+            }
+        }
+        trackSelector.setParameters(builder)
+
         exoPlayer.addListener(object : Player.Listener {
             override fun onPlaybackStateChanged(playbackState: Int) {
                 updateState()
