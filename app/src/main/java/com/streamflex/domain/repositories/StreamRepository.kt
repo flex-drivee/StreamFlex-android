@@ -95,14 +95,14 @@ class StreamRepository(
             emptyList()
         }
         
-        val combinedResults = (seasonResults + baseResults + shortResults).distinctBy { it.url }
+        val combinedResults = (seasonResults + baseResults + shortResults)
         if (combinedResults.isEmpty()) {
             Logger.w("No search results found for query: $title", "StreamRepository")
             return@coroutineScope FinalStreams.EMPTY
         }
 
         val bestMatches = combinedResults.groupBy { it.providerName }.flatMap { entry ->
-            val matches = EpisodeMatcher.topMatches(title, season, episode, entry.value, limit = 2)
+            val matches = EpisodeMatcher.topMatches(title, season, episode, entry.value, limit = 3).distinctBy { it.url }.take(2)
             if (matches.isNotEmpty()) {
                 matches.forEach { match ->
                     Logger.d("Top match for ${entry.key}: ${match.title} | ${match.url}", "StreamRepository")
