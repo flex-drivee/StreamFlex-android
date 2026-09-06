@@ -41,6 +41,7 @@ fun SettingsScreen(
     val dohProvider by viewModel.dohProvider.collectAsState()
     val wifiOnlyDownloads by viewModel.wifiOnlyDownloads.collectAsState()
     val downloadQuality by viewModel.downloadQuality.collectAsState()
+    val playerVideoQuality by viewModel.playerVideoQuality.collectAsState()
     val smartDownloads by viewModel.smartDownloads.collectAsState()
     val storageStats by viewModel.storageStats.collectAsState()
 
@@ -51,6 +52,7 @@ fun SettingsScreen(
     var showProviderDialog by remember { mutableStateOf(false) }
     var showMovieBoxSettings by remember { mutableStateOf(false) }
     var showQualityDialog by remember { mutableStateOf(false) }
+    var showPlayerQualityDialog by remember { mutableStateOf(false) }
     var showDeleteAllDialog by remember { mutableStateOf(false) }
     
     val providerRepository = com.streamflex.app.di.ProviderModule.repository
@@ -134,8 +136,8 @@ fun SettingsScreen(
                     SettingsTile(
                         icon = Icons.Outlined.HighQuality,
                         title = "Default Video Quality",
-                        subtitle = "Auto",
-                        onTap = { showQualityDialog = true }
+                        subtitle = "Current: $playerVideoQuality",
+                        onTap = { showPlayerQualityDialog = true }
                     )
                     SettingsDivider()
                     SettingsTile(
@@ -469,6 +471,39 @@ fun SettingsScreen(
                 },
                 confirmButton = {
                     TextButton(onClick = { showQualityDialog = false }) {
+                        Text("Cancel", color = MaterialTheme.colorScheme.primary)
+                    }
+                }
+            )
+        }
+
+        if (showPlayerQualityDialog) {
+            val qualities = listOf("Auto", "1080p", "720p", "480p")
+            AlertDialog(
+                onDismissRequest = { showPlayerQualityDialog = false },
+                title = { Text("Default Video Quality", color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold) },
+                containerColor = MaterialTheme.colorScheme.surface,
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        qualities.forEach { q ->
+                            ThemeOptionRow(
+                                title = when (q) {
+                                    "Auto" -> "Auto • Adapts to Network"
+                                    "1080p" -> "High (1080p) • Best Quality"
+                                    "720p" -> "Standard (720p) • Balanced"
+                                    else -> "Data Saver (480p) • Less Data"
+                                },
+                                isSelected = playerVideoQuality == q,
+                                onClick = {
+                                    viewModel.setPlayerVideoQuality(q)
+                                    showPlayerQualityDialog = false
+                                }
+                            )
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showPlayerQualityDialog = false }) {
                         Text("Cancel", color = MaterialTheme.colorScheme.primary)
                     }
                 }

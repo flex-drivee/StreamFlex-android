@@ -178,8 +178,20 @@ class MovieBoxDetails {
                                 val subjectTitle = JsonParser.string(subject, "title") ?: ""
                                 
                                 val baseSubjectTitle = cleanTitle(subjectTitle)
-                                val lang = JsonParser.string(subject, "language") ?: ""
-                                if (baseSubjectTitle.equals(title, ignoreCase = true) && !ids.any { it.first == subjectId }) {
+                                var lang = JsonParser.string(subject, "language") ?: ""
+                                
+                                // Extract [Language] or (Language) from title if present
+                                val bracketMatch = Regex("\\[(.*?)\\]").find(subjectTitle)
+                                if (bracketMatch != null) {
+                                    lang = bracketMatch.groupValues[1]
+                                } else {
+                                    val parenMatch = Regex("\\((.*?)\\)").find(subjectTitle)
+                                    if (parenMatch != null) {
+                                        lang = parenMatch.groupValues[1]
+                                    }
+                                }
+                                
+                                if (baseSubjectTitle.contains(title, ignoreCase = true) && !ids.any { it.first == subjectId }) {
                                     ids.add(Pair(subjectId, lang))
                                 }
                             }

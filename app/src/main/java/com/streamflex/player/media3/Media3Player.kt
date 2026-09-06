@@ -5,6 +5,7 @@ package com.streamflex.player.media3
 import android.content.Context
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
+import androidx.media3.session.MediaSession
 import androidx.media3.common.Player
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.TrackSelectionOverride
@@ -47,7 +48,25 @@ class Media3Player(
         .setTrackSelector(trackSelector)
         .build()
 
+    private val mediaSession: MediaSession = MediaSession.Builder(context, exoPlayer).build()
+
     init {
+        val prefs = context.getSharedPreferences("streamflex_settings", android.content.Context.MODE_PRIVATE)
+        val enableSubtitles = prefs.getBoolean("enable_subtitles", false)
+        val defaultQuality = prefs.getString("player_video_quality", "Auto") ?: "Auto"
+        
+        var builder = trackSelector.buildUponParameters()
+        if (!enableSubtitles) {
+            builder = builder.setTrackTypeDisabled(C.TRACK_TYPE_TEXT, true)
+        }
+        if (defaultQuality != "Auto") {
+            val height = defaultQuality.replace("p", "").toIntOrNull()
+            if (height != null) {
+                builder = builder.setMaxVideoSize(Int.MAX_VALUE, height)
+            }
+        }
+        trackSelector.setParameters(builder)
+
         exoPlayer.addListener(object : Player.Listener {
             override fun onPlaybackStateChanged(playbackState: Int) {
                 updateState()
@@ -426,6 +445,7 @@ class Media3Player(
     override fun release() {
         stopProgressTracking()
         scope.cancel()
+        mediaSession.release()
         exoPlayer.release()
     }
 

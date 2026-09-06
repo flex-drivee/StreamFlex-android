@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 import com.streamflex.player.PlayerViewModel
 
 class PlayerController(
+    val context: android.content.Context,
     val player: StreamPlayer,
     private val progressManager: PlaybackProgressManager,
     private val mediaId: String,
@@ -60,8 +61,10 @@ class PlayerController(
         scope.launch {
             player.events.collect { event ->
                 if (event is PlayerEvent.PlaybackEnded) {
+                    val prefs = context.getSharedPreferences("streamflex_settings", android.content.Context.MODE_PRIVATE)
+                    val autoPlayNext = prefs.getBoolean("autoplay_next", true)
                     val nextEp = viewModel.getNextEpisode()
-                    if (nextEp != null) {
+                    if (nextEp != null && autoPlayNext) {
                         nextEpisodeManager.triggerNextEpisodeCountdown {
                             viewModel.playEpisode(nextEp)
                         }

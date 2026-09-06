@@ -28,9 +28,9 @@ class StreamRepository(
     }
 
     suspend fun resolve(providerResult: ProviderResult, onStreamFound: suspend (FinalStreams) -> Unit = {}): FinalStreams {
-        val sources = if (providerResult.sources.isNotEmpty()) {
+        val sources = if (providerResult.success && providerResult.sources.isNotEmpty()) {
             providerResult.sources
-        } else {
+        } else if (providerResult.success) {
             providerResult.seasons.firstOrNull()?.episodes?.firstOrNull()?.sources ?: emptyList()
         }
         return streamEngine.resolve(sources, onStreamFound)
@@ -58,8 +58,8 @@ class StreamRepository(
         val results = (baseResults + shortResults + wordShortResults).distinctBy { it.url }
         if (results.isEmpty()) return@coroutineScope FinalStreams.EMPTY
 
-        val bestMatches = results.groupBy { it.providerName }.mapNotNull { entry ->
-            MovieMatcher.bestMatch(title, year, entry.value)
+        val bestMatches = results.groupBy { it.providerName }.flatMap { entry ->
+            MovieMatcher.topMatches(title, year, entry.value, limit = 1).take(1)
         }
 
         val deferredResults = bestMatches.map { selected ->
@@ -69,11 +69,11 @@ class StreamRepository(
         val allSources = mutableListOf<com.streamflex.domain.models.ProviderSource>()
         for (deferred in deferredResults) {
             val providerResult = deferred.await() ?: continue
-            val sources = if (providerResult.sources.isNotEmpty()) {
+            val sources = if (providerResult.success && providerResult.sources.isNotEmpty()) {
                 providerResult.sources
-            } else {
+            } else if (providerResult.success) {
                 providerResult.seasons.firstOrNull()?.episodes?.firstOrNull()?.sources ?: emptyList()
-            }
+            } else emptyList()
             allSources.addAll(sources)
         }
 
@@ -95,20 +95,22 @@ class StreamRepository(
             emptyList()
         }
         
-        val combinedResults = (seasonResults + baseResults + shortResults).distinctBy { it.url }
+        val combinedResults = (seasonResults + baseResults + shortResults)
         if (combinedResults.isEmpty()) {
             Logger.w("No search results found for query: $title", "StreamRepository")
             return@coroutineScope FinalStreams.EMPTY
         }
 
-        val bestMatches = combinedResults.groupBy { it.providerName }.mapNotNull { entry ->
-            val match = EpisodeMatcher.bestMatch(title, season, episode, entry.value)
-            if (match != null) {
-                Logger.d("Best match for ${entry.key}: ${match.title} | ${match.url}", "StreamRepository")
+        val bestMatches = combinedResults.groupBy { it.providerName }.flatMap { entry ->
+            val matches = EpisodeMatcher.topMatches(title, season, episode, entry.value, limit = 1).distinctBy { it.url }.take(1)
+            if (matches.isNotEmpty()) {
+                matches.forEach { match ->
+                    Logger.d("Top match for ${entry.key}: ${match.title} | ${match.url}", "StreamRepository")
+                }
             } else {
                 Logger.w("No match passed score threshold for ${entry.key}", "StreamRepository")
             }
-            match
+            matches
         }
 
         val deferredResults = bestMatches.map { selected ->
@@ -150,6 +152,9 @@ class StreamRepository(
 
             val sources = if (targetEpisode != null && targetEpisode.sources.isNotEmpty()) {
                 targetEpisode.sources
+            } else if (providerResult.success && providerResult.sources.isNotEmpty()) {
+                Logger.d("Using root sources from ProviderResult (Fallback for standalone episode/movie format)", "StreamRepository")
+                providerResult.sources
             } else {
                 emptyList()
             }
