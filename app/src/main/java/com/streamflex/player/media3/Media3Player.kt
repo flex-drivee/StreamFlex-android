@@ -48,6 +48,8 @@ class Media3Player(
         .setTrackSelector(trackSelector)
         .build()
 
+    private val mediaSession: MediaSession = MediaSession.Builder(context, exoPlayer).build()
+
     init {
         exoPlayer.addListener(object : Player.Listener {
             override fun onPlaybackStateChanged(playbackState: Int) {
