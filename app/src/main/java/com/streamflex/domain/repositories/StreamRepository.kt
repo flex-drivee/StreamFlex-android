@@ -44,14 +44,14 @@ class StreamRepository(
         val shortTitle = cleanTitle.split(" ").take(2).joinToString(" ")
         val shortResults = if (shortTitle.length > 3 && shortTitle.lowercase() != title.lowercase()) {
             search(shortTitle)
-        } else if (providerResult.success) {
+        } else {
             emptyList()
         }
         
         val wordShortTitle = cleanTitle.split(" ").first()
         val wordShortResults = if (wordShortTitle.length > 3 && wordShortTitle.lowercase() != shortTitle.lowercase() && wordShortTitle.lowercase() != title.lowercase()) {
             search(wordShortTitle)
-        } else if (providerResult.success) {
+        } else {
             emptyList()
         }
         
@@ -91,7 +91,7 @@ class StreamRepository(
         val shortTitle = cleanTitle.split(" ").take(2).joinToString(" ")
         val shortResults = if (shortTitle.length > 3 && shortTitle.lowercase() != title.lowercase()) {
             search(shortTitle)
-        } else if (providerResult.success) {
+        } else {
             emptyList()
         }
         
@@ -107,7 +107,7 @@ class StreamRepository(
                 matches.forEach { match ->
                     Logger.d("Top match for ${entry.key}: ${match.title} | ${match.url}", "StreamRepository")
                 }
-            } else if (providerResult.success) {
+            } else {
                 Logger.w("No match passed score threshold for ${entry.key}", "StreamRepository")
             }
             matches
