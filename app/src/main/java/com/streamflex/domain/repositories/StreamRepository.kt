@@ -28,9 +28,9 @@ class StreamRepository(
     }
 
     suspend fun resolve(providerResult: ProviderResult, onStreamFound: suspend (FinalStreams) -> Unit = {}): FinalStreams {
-        val sources = if (providerResult.sources.isNotEmpty()) {
+        val sources = if (providerResult.success && providerResult.sources.isNotEmpty()) {
             providerResult.sources
-        } else {
+        } else if (providerResult.success) {
             providerResult.seasons.firstOrNull()?.episodes?.firstOrNull()?.sources ?: emptyList()
         }
         return streamEngine.resolve(sources, onStreamFound)
@@ -44,14 +44,14 @@ class StreamRepository(
         val shortTitle = cleanTitle.split(" ").take(2).joinToString(" ")
         val shortResults = if (shortTitle.length > 3 && shortTitle.lowercase() != title.lowercase()) {
             search(shortTitle)
-        } else {
+        } else if (providerResult.success) {
             emptyList()
         }
         
         val wordShortTitle = cleanTitle.split(" ").first()
         val wordShortResults = if (wordShortTitle.length > 3 && wordShortTitle.lowercase() != shortTitle.lowercase() && wordShortTitle.lowercase() != title.lowercase()) {
             search(wordShortTitle)
-        } else {
+        } else if (providerResult.success) {
             emptyList()
         }
         
@@ -69,11 +69,11 @@ class StreamRepository(
         val allSources = mutableListOf<com.streamflex.domain.models.ProviderSource>()
         for (deferred in deferredResults) {
             val providerResult = deferred.await() ?: continue
-            val sources = if (providerResult.sources.isNotEmpty()) {
+            val sources = if (providerResult.success && providerResult.sources.isNotEmpty()) {
                 providerResult.sources
-            } else {
+            } else if (providerResult.success) {
                 providerResult.seasons.firstOrNull()?.episodes?.firstOrNull()?.sources ?: emptyList()
-            }
+            } else emptyList()
             allSources.addAll(sources)
         }
 
@@ -91,7 +91,7 @@ class StreamRepository(
         val shortTitle = cleanTitle.split(" ").take(2).joinToString(" ")
         val shortResults = if (shortTitle.length > 3 && shortTitle.lowercase() != title.lowercase()) {
             search(shortTitle)
-        } else {
+        } else if (providerResult.success) {
             emptyList()
         }
         
@@ -107,7 +107,7 @@ class StreamRepository(
                 matches.forEach { match ->
                     Logger.d("Top match for ${entry.key}: ${match.title} | ${match.url}", "StreamRepository")
                 }
-            } else {
+            } else if (providerResult.success) {
                 Logger.w("No match passed score threshold for ${entry.key}", "StreamRepository")
             }
             matches
@@ -152,7 +152,7 @@ class StreamRepository(
 
             val sources = if (targetEpisode != null && targetEpisode.sources.isNotEmpty()) {
                 targetEpisode.sources
-            } else if (providerResult.sources.isNotEmpty()) {
+            } else if (providerResult.success && providerResult.sources.isNotEmpty()) {
                 Logger.d("Using root sources from ProviderResult (Fallback for standalone episode/movie format)", "StreamRepository")
                 providerResult.sources
             } else {
