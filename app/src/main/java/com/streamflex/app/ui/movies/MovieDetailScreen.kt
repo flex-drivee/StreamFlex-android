@@ -2,6 +2,10 @@ package com.streamflex.app.ui.movies
 
 import com.streamflex.app.data.bookmarks.BookmarkManager
 import com.streamflex.app.data.bookmarks.BookmarkItem
+import com.streamflex.player.resume.PlaybackProgressManager
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 
 
 import androidx.compose.ui.draw.blur
@@ -45,12 +49,20 @@ import com.streamflex.app.ui.theme.*
 fun MovieDetailScreen(
     viewModel: MovieDetailViewModel,
     onBackClick: () -> Unit,
-    onMoviePlayClick: () -> Unit,
+    onMainPlayClick: (String?) -> Unit,
     onEpisodePlayClick: (Episode) -> Unit,
     onNavigateToDetail: (String, String) -> Unit = { _, _ -> }
 ) {
     val state by viewModel.uiState.collectAsState()
     val allDownloads by viewModel.allDownloads.collectAsState()
+
+    val context = LocalContext.current
+    val progressManager = remember { PlaybackProgressManager(context) }
+    
+    val mediaId = state.movie?.id ?: state.show?.id
+    val historyItem = remember(mediaId) {
+        if (mediaId != null) progressManager.getHistory().find { it.id == mediaId } else null
+    }
 
     val isShow       = state.show != null
     val title        = state.movie?.title    ?: state.show?.title    ?: ""
@@ -109,7 +121,8 @@ fun MovieDetailScreen(
                         // PLAY button
                         Button(
                             onClick = {
-                                onMoviePlayClick()
+                                // Pass the resumed episode ID (if it's a show with history) so it launches the correct episode
+                                onMainPlayClick(historyItem?.episodeId)
                             },
                             modifier = Modifier.fillMaxWidth().height(50.dp),
                             shape    = RoundedCornerShape(6.dp),
@@ -119,12 +132,14 @@ fun MovieDetailScreen(
                                 tint = Color.Black, modifier = Modifier.size(24.dp))
                             Spacer(Modifier.width(8.dp))
                             Text(
-                                "Play",
+                                if (historyItem != null && historyItem.positionMs > 10000L) "Resume" else "Play",
                                 color      = Color.Black,
                                 fontWeight = FontWeight.Bold,
                                 style      = MaterialTheme.typography.titleMedium
                             )
                         }
+
+
 
                         // SECONDARY ROW — Download + My List + Share
                         Row(
@@ -1030,8 +1045,7 @@ fun SFProductionCompanies(companies: List<com.streamflex.app.domain.models.Produ
                                 model = url,
                                 contentDescription = null,
                                 contentScale = ContentScale.Fit,
-                                modifier = Modifier.height(24.dp).padding(end = 8.dp),
-                                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant)
+                                modifier = Modifier.height(24.dp).padding(end = 8.dp)
                             )
                         }
                         Text(

@@ -19,6 +19,7 @@ interface StreamPlayer {
     fun seekForward(ms: Long = 10000L)
     fun seekBackward(ms: Long = 10000L)
     fun release()
+    fun setVolume(volume: Float)
     
     // Tracks
     fun setQuality(quality: QualityOption)

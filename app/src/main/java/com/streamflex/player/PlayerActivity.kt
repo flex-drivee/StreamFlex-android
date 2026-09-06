@@ -7,6 +7,19 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,9 +73,14 @@ class PlayerActivity : ComponentActivity() {
                 episodeNumber = epNumbers.getOrNull(index) ?: (index + 1),
                 stillPath = epStills.getOrNull(index)
             )
-        }
+        }.toMutableList()
         
-        val currentEpisode = episodes.find { it.id == currentEpisodeId }
+        var currentEpisode = episodes.find { it.id == currentEpisodeId }
+        
+        if (currentEpisode == null && currentEpisodeId != null && isShow) {
+            currentEpisode = PlayerEpisode(id = currentEpisodeId, title = "Resumed Episode", seasonNumber = 1, episodeNumber = 1)
+            episodes.add(currentEpisode)
+        }
         
         val session = PlayerSession(
             mediaId = mediaId,
@@ -104,8 +122,36 @@ class PlayerActivity : ComponentActivity() {
             }
             
             if (uiState.isLoading && uiState.streams.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
+                Box(modifier = Modifier.fillMaxSize()) {
+                    // Close button at top-left or top-right
+                    IconButton(
+                        onClick = { finish() },
+                        modifier = Modifier.align(Alignment.TopStart).padding(16.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Cancel",
+                            tint = Color.White
+                        )
+                    }
+
+                    // Centered loading content
+                    Column(
+                        modifier = Modifier.align(Alignment.Center),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CircularProgressIndicator(
+                            color = Color(0xFFFF3300), // Red Lava Color
+                            strokeWidth = 4.dp
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "Loading...",
+                            color = Color.White,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
                 }
             } else {
                 val baseTitle = session.title
@@ -125,6 +171,21 @@ class PlayerActivity : ComponentActivity() {
         }
     }
     
+
+    fun triggerPiP() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            val params = android.app.PictureInPictureParams.Builder()
+                .setAspectRatio(android.util.Rational(16, 9))
+                .build()
+            enterPictureInPictureMode(params)
+        }
+    }
+
+    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: android.content.res.Configuration) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        playerController?.setPiPMode(isInPictureInPictureMode)
+    }
+
     override fun onPause() {
         super.onPause()
         playerController?.pause()

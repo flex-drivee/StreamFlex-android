@@ -19,6 +19,8 @@ import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,6 +44,8 @@ fun PlayerScreen(
     val state by controller.state.collectAsState()
     val allStreams by controller.allStreams.collectAsState()
     val currentStreamIndex by controller.currentStreamIndex.collectAsState()
+    val isMuted by controller.isMuted.collectAsState()
+    val isPiPMode by controller.isPiPMode.collectAsState()
     val activeSkipSegment by controller.activeSkipSegment.collectAsState()
     val context = LocalContext.current
     
@@ -54,6 +58,7 @@ fun PlayerScreen(
     var showEpisodeDrawer by remember { mutableStateOf(false) }
     
     val showNextEpCard by controller.nextEpisodeManager.showNextEpisodeCard.collectAsState()
+    val showResumeDialog by controller.showResumeDialog.collectAsState()
     val countdownSeconds by controller.nextEpisodeManager.countdownSeconds.collectAsState()
 
     var showBuffering by remember { mutableStateOf(false) }
@@ -78,15 +83,19 @@ fun PlayerScreen(
             )
         }
         
+        if (!isPiPMode) {
         PlayerControls(
             state = state,
             title = videoTitle,
             subtitle = videoSubtitle,
             showEpisodesButton = episodes.isNotEmpty(),
+            isMuted = isMuted,
             onPlayPauseToggle = { controller.togglePlayPause() },
             onSeekTo = { controller.seekTo(it) },
             onSeekForward = { controller.seekForward() },
             onSeekBackward = { controller.seekBackward() },
+            onMuteToggle = { controller.toggleMute() },
+            onPipClick = { (context as? com.streamflex.player.PlayerActivity)?.triggerPiP() },
             onSettingsClick = { tab ->
                 initialSettingsTab = tab
                 showSettingsDialog = true 
@@ -95,6 +104,7 @@ fun PlayerScreen(
             onFullscreenToggle = { isFullScreen = !isFullScreen },
             onBack = onBack
         )
+        }
 
         // Skip Intro Button
         activeSkipSegment?.let { segment ->
@@ -152,6 +162,27 @@ fun PlayerScreen(
         },
         onDismiss = { showEpisodeDrawer = false }
     )
+
+        if (showResumeDialog) {
+            AlertDialog(
+                onDismissRequest = { controller.resumePlayback(true) },
+                title = { Text("Resume Playback", style = MaterialTheme.typography.titleLarge) },
+                text = { Text("Do you want to resume from where you left off?", style = MaterialTheme.typography.bodyMedium) },
+                confirmButton = {
+                    Button(
+                        onClick = { controller.resumePlayback(true) },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                    ) {
+                        Text("Resume", color = Color.White)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { controller.resumePlayback(false) }) {
+                        Text("Start Over", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+            )
+        }
 
     if (showSettingsDialog) {
         SettingsDialog(

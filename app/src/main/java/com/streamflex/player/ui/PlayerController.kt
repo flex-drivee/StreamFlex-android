@@ -42,6 +42,12 @@ class PlayerController(
     val activeSkipSegment: StateFlow<IntroSegment?> = _activeSkipSegment.asStateFlow()
 
     private var lastSavedPosition = 0L
+    
+    val showResumeDialog = MutableStateFlow(false)
+    private var savedPosToResume = 0L
+    
+    val isMuted = MutableStateFlow(false)
+    val isPiPMode = MutableStateFlow(false)
 
     private val progressKey: String
         get() = if (type == "TV" && viewModel.uiState.value.session?.currentEpisode != null) {
@@ -151,12 +157,12 @@ class PlayerController(
             
             // Restore progress
             val savedPos = progressManager.getProgress(progressKey)
-            if (savedPos > 0) {
-                player.seekTo(savedPos)
-                lastSavedPosition = savedPos
+            if (savedPos > 10000L) {
+                savedPosToResume = savedPos
+                showResumeDialog.value = true
+            } else {
+                player.play()
             }
-            
-            player.play()
         }
     }
 
@@ -165,10 +171,37 @@ class PlayerController(
     fun seekTo(positionMs: Long) = player.seekTo(positionMs)
     fun seekForward() = player.seekForward()
     fun seekBackward() = player.seekBackward()
+    fun setPiPMode(isPip: Boolean) {
+        isPiPMode.value = isPip
+    }
+
+    fun toggleMute() {
+        val current = isMuted.value
+        isMuted.value = !current
+        if (isMuted.value) {
+            player.setVolume(0f)
+        } else {
+            player.setVolume(1f)
+        }
+    }
+
     fun togglePlayPause() {
         if (state.value.isPlaying) pause() else play()
     }
     
+    fun resumePlayback(resume: Boolean) {
+        if (resume) {
+            player.seekTo(savedPosToResume)
+            lastSavedPosition = savedPosToResume
+        } else {
+            player.seekTo(0)
+            lastSavedPosition = 0
+            progressManager.saveProgress(mediaId, progressKey, title, type, posterPath, 0, state.value.durationMs, viewModel.uiState.value.session?.currentEpisode?.id)
+        }
+        showResumeDialog.value = false
+        player.play()
+    }
+
     fun retry() {
         loadCurrentStream()
     }

@@ -26,16 +26,12 @@ object ProviderModule {
     val providers: List<Provider> by lazy {
 
         listOf(
-
             MovieBoxProvider(),
-
-            HDHubProvider(),
-            FourKHDHubProvider(),
-
             NetMirrorProvider(),
-            
             AnimeDekhoProvider(),
-                        ToonStreamProvider()
+            ToonStreamProvider(),
+            HDHubProvider(),
+            FourKHDHubProvider()
         )
     }
 

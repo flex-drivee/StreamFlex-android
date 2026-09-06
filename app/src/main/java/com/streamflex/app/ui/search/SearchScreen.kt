@@ -25,6 +25,10 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.*
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.platform.LocalFocusManager
 import coil.compose.AsyncImage
 import com.streamflex.app.ui.home.SFBadge
 import com.streamflex.app.ui.theme.*
@@ -100,6 +104,13 @@ fun SearchScreen(
                                     color = SFTextDisabled)
                             },
                             singleLine       = true,
+                            keyboardOptions  = KeyboardOptions(imeAction = ImeAction.Search),
+                            keyboardActions  = KeyboardActions(onSearch = {
+                                if (state.query.isNotBlank()) {
+                                    SearchHistoryManager.addSearchQuery(state.query)
+                                }
+                                focusManager.clearFocus()
+                            }),
                             colors           = TextFieldDefaults.colors(
                                 focusedContainerColor   = Color.Transparent,
                                 unfocusedContainerColor = Color.Transparent,
