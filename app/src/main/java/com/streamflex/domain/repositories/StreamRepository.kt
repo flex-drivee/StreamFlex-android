@@ -58,8 +58,8 @@ class StreamRepository(
         val results = (baseResults + shortResults + wordShortResults).distinctBy { it.url }
         if (results.isEmpty()) return@coroutineScope FinalStreams.EMPTY
 
-        val bestMatches = results.groupBy { it.providerName }.mapNotNull { entry ->
-            MovieMatcher.bestMatch(title, year, entry.value)
+        val bestMatches = results.groupBy { it.providerName }.flatMap { entry ->
+            MovieMatcher.topMatches(title, year, entry.value, limit = 10).take(5)
         }
 
         val deferredResults = bestMatches.map { selected ->
@@ -102,7 +102,7 @@ class StreamRepository(
         }
 
         val bestMatches = combinedResults.groupBy { it.providerName }.flatMap { entry ->
-            val matches = EpisodeMatcher.topMatches(title, season, episode, entry.value, limit = 3).distinctBy { it.url }.take(2)
+            val matches = EpisodeMatcher.topMatches(title, season, episode, entry.value, limit = 10).distinctBy { it.url }.take(5)
             if (matches.isNotEmpty()) {
                 matches.forEach { match ->
                     Logger.d("Top match for ${entry.key}: ${match.title} | ${match.url}", "StreamRepository")

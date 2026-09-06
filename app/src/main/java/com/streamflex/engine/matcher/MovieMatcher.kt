@@ -17,6 +17,28 @@ object MovieMatcher {
     /**
      * Returns the highest ranked search result.
      */
+    
+    /**
+     * Returns the highest ranked search results up to a limit.
+     */
+    fun topMatches(
+        title: String,
+        year: Int?,
+        results: List<SearchResult>,
+        limit: Int = 1
+    ): List<SearchResult> {
+        if (results.isEmpty()) {
+            return emptyList()
+        }
+
+        return results
+            .map { it to score(title, year, it) }
+            .filter { it.second >= 0.45 }
+            .sortedByDescending { it.second }
+            .take(limit)
+            .map { it.first }
+    }
+
     fun bestMatch(
         title: String,
         year: Int?,
