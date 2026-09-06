@@ -102,7 +102,7 @@ class StreamRepository(
         }
 
         val bestMatches = combinedResults.groupBy { it.providerName }.flatMap { entry ->
-            val matches = EpisodeMatcher.topMatches(title, season, episode, entry.value, limit = 3).distinctBy { it.url }.take(2)
+            val matches = EpisodeMatcher.topMatches(title, season, episode, entry.value, limit = 1)
             if (matches.isNotEmpty()) {
                 matches.forEach { match ->
                     Logger.d("Top match for ${entry.key}: ${match.title} | ${match.url}", "StreamRepository")
