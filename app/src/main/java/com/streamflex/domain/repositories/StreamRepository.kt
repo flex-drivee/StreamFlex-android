@@ -150,6 +150,9 @@ class StreamRepository(
 
             val sources = if (targetEpisode != null && targetEpisode.sources.isNotEmpty()) {
                 targetEpisode.sources
+            } else if (providerResult.sources.isNotEmpty()) {
+                Logger.d("Using root sources from ProviderResult (Fallback for standalone episode/movie format)", "StreamRepository")
+                providerResult.sources
             } else {
                 emptyList()
             }
