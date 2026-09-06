@@ -10,6 +10,21 @@ import com.streamflex.domain.models.SearchResult
  */
 object EpisodeMatcher {
 
+    fun topMatches(
+        title: String,
+        season: Int,
+        episode: Int,
+        results: List<SearchResult>,
+        limit: Int = 2
+    ): List<SearchResult> {
+        return results
+            .map { it to score(title, season, episode, it) }
+            .filter { it.second >= 45 }
+            .sortedByDescending { it.second }
+            .take(limit)
+            .map { it.first }
+    }
+
     /**
      * Returns the highest scoring episode.
      */

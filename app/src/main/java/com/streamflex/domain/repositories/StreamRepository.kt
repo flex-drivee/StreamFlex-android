@@ -101,14 +101,16 @@ class StreamRepository(
             return@coroutineScope FinalStreams.EMPTY
         }
 
-        val bestMatches = combinedResults.groupBy { it.providerName }.mapNotNull { entry ->
-            val match = EpisodeMatcher.bestMatch(title, season, episode, entry.value)
-            if (match != null) {
-                Logger.d("Best match for ${entry.key}: ${match.title} | ${match.url}", "StreamRepository")
+        val bestMatches = combinedResults.groupBy { it.providerName }.flatMap { entry ->
+            val matches = EpisodeMatcher.topMatches(title, season, episode, entry.value, limit = 2)
+            if (matches.isNotEmpty()) {
+                matches.forEach { match ->
+                    Logger.d("Top match for ${entry.key}: ${match.title} | ${match.url}", "StreamRepository")
+                }
             } else {
                 Logger.w("No match passed score threshold for ${entry.key}", "StreamRepository")
             }
-            match
+            matches
         }
 
         val deferredResults = bestMatches.map { selected ->
