@@ -33,7 +33,7 @@ object MovieMatcher {
 
         return results
             .map { it to score(title, year, it) }
-            .filter { it.second >= 0.45 }
+            .filter { it.second >= 0.80 }
             .sortedByDescending { it.second }
             .take(limit)
             .map { it.first }
@@ -63,7 +63,7 @@ object MovieMatcher {
 
             .maxByOrNull { it.second }
 
-            ?.takeIf { it.second >= 0.45 }?.first
+            ?.takeIf { it.second >= 0.80 }?.first
     }
 
     /**

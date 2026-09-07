@@ -44,8 +44,8 @@ object TitleMatcher {
         second: String
     ): Double {
 
-        val a = normalize(first)
-        val b = normalize(second)
+        var a = normalize(first).replace(Regex("^(the|a|an)\\s+"), "")
+        var b = normalize(second).replace(Regex("^(the|a|an)\\s+"), "")
 
         if (a.isBlank() || b.isBlank()) {
             return 0.0
@@ -62,11 +62,16 @@ object TitleMatcher {
         // We use word boundaries on the original strings to prevent substring bleeding (e.g. reacher in preacher)
         val patternA = Regex("\\b${Regex.escape(a)}\\b")
         val patternB = Regex("\\b${Regex.escape(b)}\\b")
-        if (
-            (patternA.containsMatchIn(b) && b.length > 3) ||
-            (patternB.containsMatchIn(a) && a.length > 3)
-        ) {
-            return 0.90
+        val matchA = patternA.find(b)
+        val matchB = patternB.find(a)
+        if ((matchA != null && b.length > 3) || (matchB != null && a.length > 3)) {
+            val indexA = matchA?.range?.first ?: Int.MAX_VALUE
+            val indexB = matchB?.range?.first ?: Int.MAX_VALUE
+            if (indexA == 0 || indexB == 0) {
+                return 0.90
+            } else {
+                return 0.80
+            }
         }
         
         // Allow exact substring containment IF spaces were just omitted (e.g. spider man vs spiderman)
