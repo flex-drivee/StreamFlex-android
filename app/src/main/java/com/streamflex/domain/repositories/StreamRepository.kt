@@ -30,8 +30,8 @@ class StreamRepository(
     suspend fun resolve(providerResult: ProviderResult, onStreamFound: suspend (FinalStreams) -> Unit = {}): FinalStreams {
         val sources = if (providerResult.success && providerResult.sources.isNotEmpty()) {
             providerResult.sources
-        } else if (providerResult.success) {
-            providerResult.seasons.firstOrNull()?.episodes?.firstOrNull()?.sources ?: emptyList()
+        } else {
+            emptyList()
         }
         return streamEngine.resolve(sources, onStreamFound)
     }
