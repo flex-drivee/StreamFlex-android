@@ -17,15 +17,15 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.StreamFlex"
-        android:name="com.streamflex.app.StreamFlexApplication"
+        android:theme="@style/Theme.CineTheta"
+        android:name="com.cinetheta.app.CineThetaApplication"
         tools:targetApi="31">
 
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.StreamFlex">
+            android:theme="@style/Theme.CineTheta">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -33,7 +33,7 @@
         </activity>
 
         <activity
-            android:name="com.streamflex.player.PlayerActivity"
+            android:name="com.cinetheta.player.PlayerActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
             android:screenOrientation="sensorLandscape"
             android:supportsPictureInPicture="true"
@@ -41,13 +41,13 @@
 
         <!-- Download Foreground Service -->
         <service
-            android:name="com.streamflex.engine.download.service.StreamFlexDownloadService"
+            android:name="com.cinetheta.engine.download.service.CineThetaDownloadService"
             android:foregroundServiceType="dataSync"
             android:exported="false" />
 
         <!-- Download Notification Action Receiver -->
         <receiver
-            android:name="com.streamflex.engine.download.service.DownloadActionReceiver"
+            android:name="com.cinetheta.engine.download.service.DownloadActionReceiver"
             android:exported="false" />
 
         <provider

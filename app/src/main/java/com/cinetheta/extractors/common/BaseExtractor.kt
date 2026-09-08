@@ -1,0 +1,192 @@
+package com.cinetheta.extractors.common
+
+import com.cinetheta.domain.models.ExtractionResult
+import com.cinetheta.core.network.detector.ContentType
+import com.cinetheta.core.network.detector.ContentTypeDetector
+import com.cinetheta.domain.models.HostType
+import com.cinetheta.domain.models.ProviderSource
+import com.cinetheta.domain.models.Quality
+import com.cinetheta.core.network.detector.QualityDetector
+import com.cinetheta.domain.models.StreamLink
+
+/**
+ * Base class for all CineTheta extractors.
+ *
+ * A Provider returns ProviderSource objects.
+ * An Extractor converts those ProviderSources into playable StreamLinks.
+ *
+ * Networking, HTML parsing and JSON parsing are handled by shared
+ * utilities (HttpClient, HtmlParser, JsonParser, ExtractorHelper).
+ */
+abstract class BaseExtractor {
+
+    /**
+     * Host supported by this extractor.
+     */
+    abstract val hostType: HostType
+
+    /**
+     * Resolve a ProviderSource into one or more playable streams.
+     */
+    abstract suspend fun extract(
+        source: ProviderSource
+    ): ExtractionResult
+
+    /**
+     * Creates a StreamLink using the ProviderSource defaults.
+     */
+    /**
+     * Creates a StreamLink using automatic detection wherever possible.
+     */
+    protected fun createStream(
+        source: ProviderSource,
+        url: String,
+        quality: Quality? = null,
+        subtitles: List<com.cinetheta.domain.models.Subtitle> = emptyList(),
+        audioTracks: List<com.cinetheta.domain.models.AudioTrack> = emptyList(),
+        fileSize: Long? = null,
+        requiresAuth: Boolean = false
+    ): StreamLink {
+
+        val detectedQuality = quality
+            ?: if (source.quality != Quality.UNKNOWN) {
+                source.quality
+            } else {
+                QualityDetector.detect(url)
+            }
+
+        val contentType =
+            ContentTypeDetector.detect(url)
+
+        return StreamLink(
+
+            name = buildName(
+                source,
+                detectedQuality
+            ),
+
+            url = url,
+
+            quality = detectedQuality,
+
+            host = source.hostType,
+
+            contentType = contentType,
+
+            headers = source.headers,
+
+            cookies = source.cookies,
+
+            subtitles = subtitles,
+
+            audioTracks = audioTracks,
+
+            fileSize = fileSize,
+
+            adaptive = ContentTypeDetector.isAdaptive(contentType),
+
+            requiresAuth = requiresAuth,
+
+            referer = source.referer
+        )
+    }
+
+    /**
+     * Creates an ExtractionResult containing streams.
+     */
+    protected fun result(
+        vararg streams: StreamLink
+    ): ExtractionResult {
+
+        return ExtractionResult(
+            streams = streams.toList()
+        )
+    }
+
+    /**
+     * Creates an ExtractionResult containing streams.
+     */
+    protected fun result(
+        streams: List<StreamLink>
+    ): ExtractionResult {
+
+        return ExtractionResult(
+            streams = streams
+        )
+    }
+
+    /**
+     * Creates an ExtractionResult containing additional ProviderSources.
+     */
+    protected fun next(
+        vararg sources: ProviderSource
+    ): ExtractionResult {
+
+        return ExtractionResult(
+            sources = sources.toList()
+        )
+    }
+
+    /**
+     * Creates an ExtractionResult containing streams
+     * and additional ProviderSources.
+     */
+    protected fun result(
+        streams: List<StreamLink>,
+        sources: List<ProviderSource>
+    ): ExtractionResult {
+
+        return ExtractionResult(
+            streams = streams,
+            sources = sources
+        )
+    }
+
+    /**
+     * Empty extraction result.
+     */
+    protected fun emptyResult(): ExtractionResult {
+
+        return ExtractionResult.EMPTY
+    }
+
+    /**
+     * Generates a readable stream name.
+     */
+    private fun buildName(
+        source: ProviderSource,
+        quality: Quality
+    ): String {
+
+        return buildString {
+
+            append(source.provider)
+
+            if (quality != Quality.UNKNOWN) {
+                append(" • ")
+                append(quality.label)
+            }
+
+            val codec = source.metadata["codec"]
+            if (codec != null) {
+                append(" • ")
+                append(codec)
+            }
+
+            append(" • ")
+            append(source.hostType.name)
+
+        }
+    }
+
+
+    /**
+     * Checks whether this extractor can handle the given source.
+     */
+    fun supports(
+        source: ProviderSource
+    ): Boolean {
+
+        return source.hostType == hostType
+    }
+}
