@@ -71,10 +71,14 @@ object EpisodeMatcher {
         // Use the highest similarity between the full expected title and the main expected title
         val sim1 = TitleMatcher.similarity(expectedTitle, baseResultTitle)
         val sim2 = TitleMatcher.similarity(expectedToUse, baseResultTitle)
-        val sim = maxOf(sim1, sim2)
+                val sim = maxOf(sim1, sim2)
 
         if (sim < 0.75) {
             return -1 // Title doesn't match closely enough, discard to prevent season/episode bonuses from overpowering it
+        }
+
+        if (result.mediaType == com.cinetheta.domain.models.MediaType.MOVIE) {
+            return -1 // Do not match explicit movies when searching for an episode
         }
 
         var score = (sim * 50).toInt()

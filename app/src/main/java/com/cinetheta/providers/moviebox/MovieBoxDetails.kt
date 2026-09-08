@@ -191,8 +191,14 @@ class MovieBoxDetails {
                                     }
                                 }
                                 
-                                if (baseSubjectTitle.contains(title, ignoreCase = true) && !ids.any { it.first == subjectId }) {
+                                                                if (baseSubjectTitle.equals(title, ignoreCase = true) && !ids.any { it.first == subjectId }) {
                                     ids.add(Pair(subjectId, lang))
+                                } else if (baseSubjectTitle.contains(title, ignoreCase = true) && !ids.any { it.first == subjectId }) {
+                                    // Only add if it's highly similar to avoid grouping unrelated movies
+                                    val sim = com.cinetheta.engine.matcher.TitleMatcher.similarity(title, baseSubjectTitle)
+                                    if (sim > 0.85) {
+                                        ids.add(Pair(subjectId, lang))
+                                    }
                                 }
                             }
                         }
