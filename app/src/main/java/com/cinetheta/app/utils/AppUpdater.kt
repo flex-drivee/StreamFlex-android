@@ -1,21 +1,20 @@
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-
 package com.cinetheta.app.utils
 
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
-import android.widget.Toast
 import androidx.core.content.FileProvider
+import android.widget.Toast
 import com.cinetheta.app.BuildConfig
 import com.cinetheta.core.network.HttpClient
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import okhttp3.OkHttpClient
 import okhttp3.Request
 import okio.buffer
 import okio.sink
@@ -25,7 +24,7 @@ import java.io.File
 data class GithubRelease(
     val tag_name: String,
     val body: String,
-    val assets: List<GithubAsset>
+    val assets: List<GithubAsset> = emptyList()
 )
 
 @Serializable
@@ -42,6 +41,7 @@ object AppUpdater {
     private const val RELEASES_URL = "https://api.github.com/repos/$GITHUB_OWNER/$GITHUB_REPO/releases/latest"
 
     private val json = Json { ignoreUnknownKeys = true }
+    private val client = OkHttpClient()
 
     /**
      * Checks for updates and shows a dialog if one is available.
@@ -50,19 +50,18 @@ object AppUpdater {
     suspend fun checkUpdate(context: Context) = withContext(Dispatchers.IO) {
         try {
             if (GITHUB_OWNER == "YourGithubUsername") {
-                com.cinetheta.core.utils.StreamLogger.error("AppUpdater", "Please configure GITHUB_OWNER and GITHUB_REPO in AppUpdater.kt")
+                com.cinetheta.core.utils.StreamLogger.error("AppUpdater", "Please configure GITHUB_OWNER in AppUpdater.kt")
                 return@withContext
             }
 
             val request = Request.Builder().url(RELEASES_URL).build()
-            val response = HttpClient.client.newCall(request).execute()
+            val response = client.newCall(request).execute()
             
             if (!response.isSuccessful) return@withContext
             
             val responseBody = response.body?.string() ?: return@withContext
             val release = json.decodeFromString<GithubRelease>(responseBody)
             
-            // Assuming tag_name is something like "v1.0.2" and BuildConfig.VERSION_NAME is "1.0.1"
             val latestVersion = release.tag_name.removePrefix("v").replace("-", ".")
             val currentVersion = BuildConfig.VERSION_NAME.removePrefix("v").replace("-", ".")
             
@@ -105,11 +104,12 @@ object AppUpdater {
             .show()
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     private fun downloadAndInstallUpdate(context: Context, url: String) {
-        kotlinx.coroutines.GlobalScope.launch(Dispatchers.IO) {
+        GlobalScope.launch(Dispatchers.IO) {
             try {
                 val request = Request.Builder().url(url).build()
-                val response = HttpClient.client.newCall(request).execute()
+                val response = client.newCall(request).execute()
                 
                 if (!response.isSuccessful || response.body == null) {
                     withContext(Dispatchers.Main) {
@@ -118,7 +118,6 @@ object AppUpdater {
                     return@launch
                 }
                 
-                // Save to cache directory so FileProvider can access it
                 val apkFile = File(context.cacheDir, "update.apk")
                 if (apkFile.exists()) apkFile.delete()
                 
