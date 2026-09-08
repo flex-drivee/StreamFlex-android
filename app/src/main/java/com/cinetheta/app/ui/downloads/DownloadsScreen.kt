@@ -15,6 +15,11 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.rememberSwipeToDismissBoxState
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -410,124 +415,6 @@ fun DownloadListItem(
             }
 
             Spacer(modifier = Modifier.width(8.dp))
-        }
-    }
-}
-
-        Spacer(modifier = Modifier.width(16.dp))
-
-        // Title, Subtitle, Progress
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = item.title,
-                color = MaterialTheme.colorScheme.onBackground,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-
-            val subtext = when (item.status) {
-                DownloadStatus.COMPLETED -> "${item.formattedSize} • ${item.quality.label}"
-                DownloadStatus.DOWNLOADING -> {
-                    val speed = if (item.speedBytesPerSec > 0) {
-                        val mb = item.speedBytesPerSec.toDouble() / (1024 * 1024)
-                        String.format("%.1f MB/s", mb)
-                    } else "Downloading..."
-                    val eta = if (item.etaSeconds > 0) " (${item.etaSeconds / 60}m left)" else ""
-                    "${item.progressPercent}% • $speed$eta"
-                }
-                DownloadStatus.CONNECTING -> "Connecting to mirror..."
-                DownloadStatus.QUEUED -> "Queued..."
-                DownloadStatus.PAUSED -> "Paused (${item.progressPercent}%)"
-                DownloadStatus.FAILED -> "Failed • Tap to retry"
-                DownloadStatus.CANCELLED -> "Cancelled"
-            }
-
-            Text(
-                text = subtext,
-                color = if (item.status.isActive) MaterialTheme.colorScheme.primary else if (item.status == DownloadStatus.FAILED) Color.Red else MaterialTheme.colorScheme.onSurfaceVariant,
-                fontSize = 13.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            
-            if (item.status.isActive) {
-                Spacer(modifier = Modifier.height(6.dp))
-                LinearProgressIndicator(
-                    progress = { item.progress },
-                    modifier = Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)),
-                    color = MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        // Options dropdown
-        if (item.status == DownloadStatus.COMPLETED) {
-            IconButton(onClick = onDelete) {
-                Icon(
-                    imageVector = Icons.Outlined.Delete,
-                    contentDescription = "Delete Download",
-                    tint = Color.Red.copy(alpha = 0.8f)
-                )
-            }
-        } else {
-        Box {
-            IconButton(onClick = { showMenu = true }) {
-                Icon(
-                    imageVector = Icons.Default.MoreVert,
-                    contentDescription = "Options",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            DropdownMenu(
-                expanded = showMenu,
-                onDismissRequest = { showMenu = false }
-            ) {
-                if (item.status == DownloadStatus.DOWNLOADING) {
-                    DropdownMenuItem(
-                        text = { Text("Pause Download") },
-                        leadingIcon = { Icon(Icons.Default.Pause, null) },
-                        onClick = {
-                            showMenu = false
-                            onPause()
-                        }
-                    )
-                } else if (item.status == DownloadStatus.PAUSED) {
-                    DropdownMenuItem(
-                        text = { Text("Resume Download") },
-                        leadingIcon = { Icon(Icons.Default.PlayArrow, null) },
-                        onClick = {
-                            showMenu = false
-                            onResume()
-                        }
-                    )
-                } else if (item.status == DownloadStatus.FAILED) {
-                    DropdownMenuItem(
-                        text = { Text("Retry Download") },
-                        leadingIcon = { Icon(Icons.Default.Refresh, null) },
-                        onClick = {
-                            showMenu = false
-                            onRetry()
-                        }
-                    )
-                }
-
-                DropdownMenuItem(
-                    text = { Text("Delete Download", color = Color.Red) },
-                    leadingIcon = { Icon(Icons.Default.Delete, null, tint = Color.Red) },
-                    onClick = {
-                        showMenu = false
-                        onDelete()
-                    }
-                )
-            }
-        }
         }
     }
 }
