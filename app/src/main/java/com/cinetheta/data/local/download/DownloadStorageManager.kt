@@ -37,7 +37,7 @@ class DownloadStorageManager(private val context: Context) {
      * - Movies: `.../CineTheta/Movies/Deadpool & Wolverine (2024)/Deadpool & Wolverine.1080p.mp4`
      * - Shows:  `.../CineTheta/TV Shows/Stranger Things/Season 4/Stranger Things - S04E01 - Chapter One.1080p.mp4`
      */
-    fun resolveTargetFile(item: DownloadItem, extension: String = "mp4"): File {
+        fun resolveTargetFile(item: DownloadItem, extension: String = "mp4"): File {
         val root = getDownloadsRootDir()
         val safeTitle = sanitizeFilename(item.title)
         val qualityTag = if (item.quality.name.isNotBlank() && item.quality.name != "UNKNOWN") {
@@ -46,35 +46,22 @@ class DownloadStorageManager(private val context: Context) {
 
         val safeExt = if (extension.startsWith(".")) extension else ".$extension"
 
-        return if (item.isShow && item.seasonNumber != null) {
-            val tvDir = File(root, TV_DIR_NAME)
-            val showDir = File(tvDir, safeTitle)
-            val seasonDir = File(showDir, "Season ${item.seasonNumber}")
-            if (!seasonDir.exists()) seasonDir.mkdirs()
-
+        val filename = if (item.isShow && item.seasonNumber != null) {
             val sNum = item.seasonNumber.toString().padStart(2, '0')
             val eNum = (item.episodeNumber ?: 1).toString().padStart(2, '0')
             val epSubtitle = if (!item.subtitle.isNullOrBlank()) {
                 val cleanSub = sanitizeFilename(item.subtitle)
                 " - $cleanSub"
             } else ""
-
-            val filename = "$safeTitle - S${sNum}E${eNum}$epSubtitle$qualityTag$safeExt"
-            File(seasonDir, filename)
+            "$safeTitle - S${sNum}E${eNum}$epSubtitle$qualityTag$safeExt"
         } else {
-            val movieDir = File(root, MOVIES_DIR_NAME)
             val titleWithYear = if (item.year != null && item.year > 0) "$safeTitle (${item.year})" else safeTitle
-            val specificMovieDir = File(movieDir, titleWithYear)
-            if (!specificMovieDir.exists()) specificMovieDir.mkdirs()
-
-            val filename = "$titleWithYear$qualityTag$safeExt"
-            File(specificMovieDir, filename)
+            "$titleWithYear$qualityTag$safeExt"
         }
+        
+        return File(root, filename)
     }
 
-    /**
-     * Resolves the subtitle file destination for a video file.
-     */
     fun resolveSubtitleFile(videoFile: File, languageCode: String = "en", ext: String = "srt"): File {
         val baseName = videoFile.nameWithoutExtension
         val safeExt = if (ext.startsWith(".")) ext else ".$ext"

@@ -3,7 +3,8 @@ package com.cinetheta.app.ui.downloads
 import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -212,6 +213,7 @@ fun StorageIndicator(stats: DownloadStorageManager.StorageStats) {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun DownloadListItem(
     item: DownloadItem,
@@ -221,65 +223,196 @@ fun DownloadListItem(
     onRetry: () -> Unit,
     onDelete: () -> Unit
 ) {
-    var showMenu by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(false) }
+    var showDeleteConfirm by remember { mutableStateOf(false) }
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onPlayClick() }
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // Thumbnail
-        Box(
-            modifier = Modifier
-                .width(120.dp)
-                .height(72.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-        ) {
-            if (!item.posterUrl.isNullOrBlank()) {
-                AsyncImage(
-                    model = item.posterUrl,
-                    contentDescription = item.title,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
-            
-            if (item.status.isActive) {
-                Box(
-                    modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.55f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(
-                        progress = { item.progress },
-                        color = MaterialTheme.colorScheme.primary,
-                        trackColor = Color.White.copy(alpha = 0.3f),
-                        strokeWidth = 3.dp,
-                        modifier = Modifier.size(28.dp)
-                    )
-                }
-            } else if (item.status.isPaused) {
-                Box(
-                    modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.55f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(Icons.Default.Pause, contentDescription = "Paused", tint = Color.White, modifier = Modifier.size(28.dp))
-                }
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = {
+            if (it == SwipeToDismissBoxValue.EndToStart) {
+                showDeleteConfirm = true
+                false
             } else {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(4.dp)
-                        .clip(RoundedCornerShape(4.dp))
-                        .background(Color.Black.copy(alpha = 0.75f))
-                        .padding(horizontal = 4.dp, vertical = 2.dp)
-                ) {
-                    Text(item.formattedSize, color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                }
+                false
             }
         }
+    )
+
+    if (showDeleteConfirm) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirm = false },
+            title = { Text("Delete Video") },
+            text = { Text("Are you sure you want to delete this video?") },
+            confirmButton = {
+                TextButton(onClick = { 
+                    showDeleteConfirm = false
+                    onDelete() 
+                }) {
+                    Text("Yes", color = Color.Red)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirm = false }) {
+                    Text("No")
+                }
+            }
+        )
+    }
+
+    SwipeToDismissBox(
+        state = dismissState,
+        enableDismissFromStartToEnd = false,
+        backgroundContent = {
+            val color = if (dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart) Color.Red.copy(alpha = 0.8f) else Color.Transparent
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(color)
+                    .padding(end = 24.dp),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White)
+            }
+        }
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.background)
+                .combinedClickable(
+                    onClick = {
+                        if (item.status == DownloadStatus.COMPLETED) {
+                            onPlayClick()
+                        } else {
+                            expanded = !expanded
+                        }
+                    },
+                    onLongClick = { showDeleteConfirm = true }
+                )
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.Top
+        ) {
+            // Thumbnail
+            Box(
+                modifier = Modifier
+                    .width(120.dp)
+                    .height(72.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                if (!item.posterUrl.isNullOrBlank()) {
+                    AsyncImage(
+                        model = item.posterUrl,
+                        contentDescription = item.title,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+                
+                if (item.status.isActive) {
+                    Box(
+                        modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.55f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            progress = { item.progress },
+                            color = MaterialTheme.colorScheme.primary,
+                            trackColor = Color.White.copy(alpha = 0.3f),
+                            strokeWidth = 3.dp,
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
+                } else if (item.status.isPaused) {
+                    Box(
+                        modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.55f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(Icons.Default.Pause, contentDescription = "Paused", tint = Color.White, modifier = Modifier.size(28.dp))
+                    }
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(4.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(Color.Black.copy(alpha = 0.75f))
+                            .padding(horizontal = 4.dp, vertical = 2.dp)
+                    ) {
+                        Text(item.formattedSize, color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            // Title, Subtitle, Progress
+            Column(modifier = Modifier.weight(1f)) {
+                val displayTitle = if (item.isShow && item.seasonNumber != null) {
+                    "${item.title} S${item.seasonNumber} Ep${item.episodeNumber ?: 1}"
+                } else {
+                    item.title
+                }
+                Text(
+                    text = displayTitle,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = if (expanded) 3 else 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+
+                val subtext = when (item.status) {
+                    DownloadStatus.COMPLETED -> "${item.formattedSize} • ${item.quality.label}"
+                    DownloadStatus.DOWNLOADING -> {
+                        val speed = if (item.speedBytesPerSec > 0) {
+                            val mb = item.speedBytesPerSec.toDouble() / (1024 * 1024)
+                            String.format("%.1f MB/s", mb)
+                        } else "Downloading..."
+                        val eta = if (item.etaSeconds > 0) " (${item.etaSeconds / 60}m left)" else ""
+                        "${item.progressPercent}% • $speed$eta"
+                    }
+                    DownloadStatus.CONNECTING -> "Connecting to mirror..."
+                    DownloadStatus.QUEUED -> "Queued..."
+                    DownloadStatus.PAUSED -> "Paused (${item.progressPercent}%)"
+                    DownloadStatus.FAILED -> "Failed • Tap to retry"
+                    DownloadStatus.CANCELLED -> "Cancelled"
+                }
+
+                Text(
+                    text = subtext,
+                    color = if (item.status.isActive) MaterialTheme.colorScheme.primary else if (item.status == DownloadStatus.FAILED) Color.Red else MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 13.sp,
+                    maxLines = if (expanded) 2 else 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                
+                if (item.status.isActive) {
+                    Spacer(modifier = Modifier.height(6.dp))
+                    LinearProgressIndicator(
+                        progress = { item.progress },
+                        modifier = Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)),
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                }
+                
+                if (expanded && item.status.isActive) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        TextButton(onClick = { if (item.status == DownloadStatus.DOWNLOADING) onPause() else onResume() }, contentPadding = PaddingValues(0.dp)) {
+                            Text(if (item.status == DownloadStatus.DOWNLOADING) "Pause" else "Resume", fontSize = 12.sp)
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.width(8.dp))
+        }
+    }
+}
 
         Spacer(modifier = Modifier.width(16.dp))
 
