@@ -1,6 +1,9 @@
 package com.streamflex.app
 
 import android.os.Bundle
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+import com.streamflex.app.utils.AppUpdater
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.streamflex.app.di.RepositoryModule
@@ -21,6 +24,11 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Check for updates automatically in the background
+        lifecycleScope.launch {
+            AppUpdater.checkUpdate(this@MainActivity)
+        }
 
         // Restore selected provider before UI dependencies evaluate
         val mainPrefs = getSharedPreferences("streamflex_settings", android.content.Context.MODE_PRIVATE)
