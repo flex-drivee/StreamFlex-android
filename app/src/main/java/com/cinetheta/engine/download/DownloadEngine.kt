@@ -54,7 +54,12 @@ class DownloadEngine(
             if (isCancelled()) return@withContext Result.Cancelled
             if (isPaused()) return@withContext Result.Paused
 
-            val isHls = streamLink.adaptive || streamLink.url.contains(".m3u8", ignoreCase = true)
+            if (streamLink.url.contains(".mpd", ignoreCase = true)) {
+                lastError = IllegalStateException("DASH (.mpd) downloads are not currently supported by the downloader.")
+                continue // Try the next link
+            }
+
+            val isHls = streamLink.url.contains(".m3u8", ignoreCase = true) || streamLink.adaptive
 
             val downloadResult = if (isHls) {
                 hlsDownloader.download(
