@@ -1,77 +1,87 @@
-Run tasks : [:app:assembleDebug]
-
-> Configure project :app
-WARNING: The following problems were found when resolving the SDK location:
-Where: sdk.dir property in local.properties file. Problem: Directory does not exist
-
-
-> Task :app:preBuild UP-TO-DATE
-> Task :app:preDebugBuild UP-TO-DATE
-> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
-> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
-> Task :app:dataBindingMergeDependencyArtifactsDebug UP-TO-DATE
-> Task :app:generateDebugResValues UP-TO-DATE
-> Task :app:generateDebugResources UP-TO-DATE
-> Task :app:mergeDebugResources UP-TO-DATE
-> Task :app:packageDebugResources UP-TO-DATE
-> Task :app:processDebugNavigationResources UP-TO-DATE
-> Task :app:parseDebugLocalResources UP-TO-DATE
-> Task :app:dataBindingGenBaseClassesDebug UP-TO-DATE
-> Task :app:generateDebugBuildConfig UP-TO-DATE
-> Task :app:checkDebugAarMetadata UP-TO-DATE
-> Task :app:compileDebugNavigationResources UP-TO-DATE
-> Task :app:mapDebugSourceSetPaths UP-TO-DATE
-> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
-> Task :app:extractDeepLinksDebug UP-TO-DATE
-> Task :app:processDebugMainManifest UP-TO-DATE
-> Task :app:processDebugManifest UP-TO-DATE
-> Task :app:processDebugManifestForPackage UP-TO-DATE
-> Task :app:processDebugResources UP-TO-DATE
-> Task :app:javaPreCompileDebug UP-TO-DATE
-> Task :app:mergeDebugShaders UP-TO-DATE
-> Task :app:compileDebugShaders NO-SOURCE
-> Task :app:generateDebugAssets UP-TO-DATE
-> Task :app:mergeDebugAssets UP-TO-DATE
-> Task :app:compressDebugAssets UP-TO-DATE
-> Task :app:l8DexDesugarLibDebug UP-TO-DATE
-> Task :app:checkDebugDuplicateClasses UP-TO-DATE
-> Task :app:desugarDebugFileDependencies UP-TO-DATE
-> Task :app:mergeExtDexDebug UP-TO-DATE
-> Task :app:mergeLibDexDebug UP-TO-DATE
-> Task :app:mergeDebugJniLibFolders UP-TO-DATE
-> Task :app:mergeDebugNativeLibs UP-TO-DATE
-> Task :app:stripDebugDebugSymbols UP-TO-DATE
-> Task :app:validateSigningDebug UP-TO-DATE
-> Task :app:writeDebugAppMetadata UP-TO-DATE
-> Task :app:writeDebugSigningConfigVersions UP-TO-DATE
-> Task :app:compileDebugKotlin
-e: file:///storage/emulated/0/AndroidIDEProjects/StreamFlex-android/app/src/main/java/com/streamflex/domain/repositories/StreamRepository.kt:47:20 Unresolved reference 'providerResult'.
-e: file:///storage/emulated/0/AndroidIDEProjects/StreamFlex-android/app/src/main/java/com/streamflex/domain/repositories/StreamRepository.kt:48:13 Unresolved reference 'providerResult'.
-e: file:///storage/emulated/0/AndroidIDEProjects/StreamFlex-android/app/src/main/java/com/streamflex/domain/repositories/StreamRepository.kt:48:51 Unresolved reference 'episodes'.
-e: file:///storage/emulated/0/AndroidIDEProjects/StreamFlex-android/app/src/main/java/com/streamflex/domain/repositories/StreamRepository.kt:48:76 Unresolved reference 'sources'.
-e: file:///storage/emulated/0/AndroidIDEProjects/StreamFlex-android/app/src/main/java/com/streamflex/domain/repositories/StreamRepository.kt:54:20 Unresolved reference 'providerResult'.
-e: file:///storage/emulated/0/AndroidIDEProjects/StreamFlex-android/app/src/main/java/com/streamflex/domain/repositories/StreamRepository.kt:55:13 Unresolved reference 'providerResult'.
-e: file:///storage/emulated/0/AndroidIDEProjects/StreamFlex-android/app/src/main/java/com/streamflex/domain/repositories/StreamRepository.kt:55:51 Unresolved reference 'episodes'.
-e: file:///storage/emulated/0/AndroidIDEProjects/StreamFlex-android/app/src/main/java/com/streamflex/domain/repositories/StreamRepository.kt:55:76 Unresolved reference 'sources'.
-e: file:///storage/emulated/0/AndroidIDEProjects/StreamFlex-android/app/src/main/java/com/streamflex/domain/repositories/StreamRepository.kt:94:20 Unresolved reference 'providerResult'.
-e: file:///storage/emulated/0/AndroidIDEProjects/StreamFlex-android/app/src/main/java/com/streamflex/domain/repositories/StreamRepository.kt:95:13 Unresolved reference 'providerResult'.
-e: file:///storage/emulated/0/AndroidIDEProjects/StreamFlex-android/app/src/main/java/com/streamflex/domain/repositories/StreamRepository.kt:95:51 Unresolved reference 'episodes'.
-e: file:///storage/emulated/0/AndroidIDEProjects/StreamFlex-android/app/src/main/java/com/streamflex/domain/repositories/StreamRepository.kt:95:76 Unresolved reference 'sources'.
-
-> Task :app:compileDebugKotlin FAILED
-
-FAILURE: Build failed with an exception.
-
-* What went wrong:
-Execution failed for task ':app:compileDebugKotlin'.
-> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
-   > Compilation error. See log for more details
-
-* Try:
-> Run with --stacktrace option to get the stack trace.
-> Run with --info or --debug option to get more log output.
-> Run with --scan to get full insights.
-> Get more help at https://help.gradle.org.
-
-BUILD FAILED in 1m 16s
-34 actionable tasks: 1 executed, 33 up-to-date
+21:51:57.246 [D] TransactionExecutor: Token :android.os.BinderProxy@ea62a3b has ActivityClientRecord : com.cinetheta.app
+21:51:57.268 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+21:51:57.273 [I] BLASTBufferQueue: [ViewRootImpl[MainActivity]#43] constructor()
+21:51:57.818 [I] System.out: Token after fetch: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjUxNTQxMzEwNjk0NDQxODI5MjAsImV4cCI6MTc5NjY2MTU0MiwiaWF0IjoxNzg4ODg1MjQyfQ.AieGjLHUK56wPPrphOsr4s_3jTbJQjALeizyz-rg0GQ
+21:51:57.823 [D] HTTP: → [POST] https://api3.aoneroom.com/wefeed-mobile-bff/subject-api/search/v2
+21:51:57.831 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+21:51:59.512 [D] HTTP: ← [200] https://api3.aoneroom.com/wefeed-mobile-bff/subject-api/search/v2 (1689ms)
+21:51:59.517 [I] System.out: Search JSON response: {"code":0, "message":"ok", "data":{"pager":{"hasMore":false, "nextPage":"2", "page":"1", "perPage":15, "totalCount":0}, "results":[{"topicType":"SUBJECT", "subjects":[{"subjectId":"6026412232966389904", "subjectType":1, "title":"Spider-Man: Brand New Day", "description":"", "releaseDate":"2026-07-31", "duration":"2h 25m", "genre":"Action, Adventure, Sci-Fi", "cover":{"url":"https://pbcdn.aoneroom.com/image/2026/08/28/360853aa46ebb8bb6032b7d19adf341c.jpg", "width":600, "height":889, "size":446430, "format":"jpg", "thumbnail":"e9Be,eDNC7%09ZE,-OXnIoNI56tlniI:xu}Z9bSe%1xZD+$gWrS0oy", "gif":null, "averageHueLight":"#572c2d", "averageHueDark":"#573031"}, "preVideoCover":null, "preVideoAddress":[], "countryName":"United States", "language":"English", "imdbRatingValue":"8.0", "staffList":[], "wantToSeeCount":0, "haveSeenCount":0, "seenStatus":0, "mySeeTime":"0", "myScoreValue":0, "myScorePostId":"0", "myScoreTime":"0", "opt":"", "hasResource":true, "resourceDetectors":[], "ops":"{\"trace_id\":\"0a21f8d217888863191910c2e2ff817e\",\"rid\":\"3f3680e2-e9c0-42db-a52a-c9d94d8b81ae\",\"search_abt\":\"3448,3425,3303\",\"q\":\"Spider-Man: Brand New Day\"}", "durationSeconds":8700, "stills":null, "trailer":null, "contentRating":"PG-13", "postTitle":"Spider-Man: Brand New Day-en-1080P", "aka":"", "explains":[], "seNum":0, "viewers":4789, "category":"", "subtitles":"", "dubs":[], "relatedApp":null, "restrictLevel":"", "corner":"", "likeStatus":0, "style":null, "detailUrl":"", "playUrl":{"playUrl":"", "urlType":"PLAY_URL_WEB"}, "restrictKid":0, "season":0, "isCam":false, "cornerBadge":{"type":1, "text":"Free", "iconUrl":"", "textColor":"#FFFFFF", "backgroundColorStart":"#10A84D", "backgroundColorEnd":"#10A84D"}}, {"subjectId":"7092118814179346392", "subjectType":1, "title":"Spider-Man: Brand New Day[Hindi][CAM]", "description":"", "releaseDate":"2026-07-31", "duration":"2h 25m", "genre":"Action, Adventure, Fantasy", "cover":{"url":"https://pbcdn.aoneroom.com/image/2026/08/28/360853aa46ebb8bb6032b7d19adf341c.jpg", "width":600, "height":889, "size":446430, "format":"jpg", "thumbnail":"e9Be,eDNC7%09ZE,-OXnIoNI56tlniI:xu}Z9bSe%1xZD+$gWrS0oy", "gif":null, "averageHueLight":"#572c2d", "averageHueDark":"#573031"}, "preVideoCover":null, "preVideoAddress":[], "countryName":"Also Watched • 3.9M", "language":"English", "imdbRatingValue":"8.0", "staffList":[], "wantToSeeCount":0, "haveSeenCount":0, "seenStatus":0, "mySeeTime":"0", "myScoreValue":0, "myScorePostId":"0", "myScoreTime":"0", "opt":"", "hasResource":true, "resourceDetectors":[], "ops":"{\"trace_id\":\"0a21f8d217888863191910c2e2ff817e\",\"rid\":\"3f3680e2-e9c0-42db-a52a-c9d94d8b81ae\",\"search_abt\":\"3448,3425,3303\",\"q\":\"Spider-Man: Brand New Day\"}", "durationSeconds":8700, "stills":null, "trailer":null, "contentRating":"PG-13", "postTitle":"Spider-Man: Brand New Day[CAM]", "aka":"", "explains":[], "seNum":0, "viewers":2077, "category":"", "subtitles":"", "dubs":[], "relatedApp":null, "restrictLevel":"", "corner":"Hindi", "likeStatus":0, "style":null, "detailUrl":"", "playUrl":{"playUrl":"", "urlType":"PLAY_URL_WEB"}, "restrictKid":0, "season":0, "isCam":false, "cornerBadge":null}, {"subjectId":"6789244640194610000", "subjectType":1, "title":"Spider-Man: Lotus", "description":"", "releaseDate":"2023-08-11", "duration":"2h 0m", "genre":"Drama, Sci-Fi", "cover":{"url":"https://pbcdn.aoneroom.com/image/2025/11/02/bd96caff16752121b76df3f47e213a05.jpg", "width":2953, "height":4062, "size":1428511, "format":"jpg", "thumbnail":"e89QdZ%M9YkWS2r?j]SzkBs:0eM{R5V@%2E1V@$+kCNFR5n%%NWVRj", "gif":null, "averageHueLight":"#3e3e49", "averageHueDark":"#414149"}, "preVideoCover":null, "preVideoAddress":[], "countryName":"United States", "language":"English", "imdbRatingValue":"3.1", "staffList":[], "wantToSeeCount":0, "haveSeenCount":0, "seenStatus":0, "mySeeTime":"0", "myScoreValue":0, "myScorePostId":"0", "myScoreTime":"0", "opt":"", "hasResource":true, "resourceDetectors":[], "ops":"{\"trace_id\":\"0a21f8d217888863191910c2e2ff817e\",\"r
+21:51:59.538 [I] System.out: Token after fetch: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjUxNTQxMzEwNjk0NDQxODI5MjAsImV4cCI6MTc5NjY2MTU0MiwiaWF0IjoxNzg4ODg1MjQyfQ.AieGjLHUK56wPPrphOsr4s_3jTbJQjALeizyz-rg0GQ
+21:51:59.543 [D] HTTP: → [POST] https://api3.aoneroom.com/wefeed-mobile-bff/subject-api/search/v2
+21:52:00.608 [D] HTTP: ← [200] https://api3.aoneroom.com/wefeed-mobile-bff/subject-api/search/v2 (1065ms)
+21:52:00.617 [I] System.out: Search JSON response: {"code":0, "message":"ok", "data":{"pager":{"hasMore":false, "nextPage":"2", "page":"1", "perPage":15, "totalCount":0}, "results":[{"topicType":"SUBJECT", "subjects":[{"subjectId":"6026412232966389904", "subjectType":1, "title":"Spider-Man: Brand New Day", "description":"", "releaseDate":"2026-07-31", "duration":"2h 25m", "genre":"Action, Adventure, Sci-Fi", "cover":{"url":"https://pbcdn.aoneroom.com/image/2026/08/28/360853aa46ebb8bb6032b7d19adf341c.jpg", "width":600, "height":889, "size":446430, "format":"jpg", "thumbnail":"e9Be,eDNC7%09ZE,-OXnIoNI56tlniI:xu}Z9bSe%1xZD+$gWrS0oy", "gif":null, "averageHueLight":"#572c2d", "averageHueDark":"#573031"}, "preVideoCover":null, "preVideoAddress":[], "countryName":"Same Actor • 18M+", "language":"English", "imdbRatingValue":"8.0", "staffList":[], "wantToSeeCount":0, "haveSeenCount":0, "seenStatus":0, "mySeeTime":"0", "myScoreValue":0, "myScorePostId":"0", "myScoreTime":"0", "opt":"", "hasResource":true, "resourceDetectors":[], "ops":"{\"trace_id\":\"0a21f8d017888863209120edb0c68de8\",\"rid\":\"5e4d9e24-407f-45b9-bde3-c3547cec98e8\",\"search_abt\":\"3448,3425,3303\",\"q\":\"Spider Man\"}", "durationSeconds":8700, "stills":null, "trailer":null, "contentRating":"PG-13", "postTitle":"Spider-Man: Brand New Day-en-1080P", "aka":"", "explains":[], "seNum":0, "viewers":4789, "category":"", "subtitles":"", "dubs":[], "relatedApp":null, "restrictLevel":"", "corner":"", "likeStatus":0, "style":null, "detailUrl":"", "playUrl":{"playUrl":"", "urlType":"PLAY_URL_WEB"}, "restrictKid":0, "season":0, "isCam":false, "cornerBadge":{"type":1, "text":"Free", "iconUrl":"", "textColor":"#FFFFFF", "backgroundColorStart":"#10A84D", "backgroundColorEnd":"#10A84D"}}, {"subjectId":"1849769988354101032", "subjectType":1, "title":"Spider-Man", "description":"", "releaseDate":"2002-05-03", "duration":"2h 1m", "genre":"Action, Adventure, Sci-Fi", "cover":{"url":"https://pbcdn.aoneroom.com/image/2026/01/27/d25a6822c60406254b370e2e15913f7d.jpg", "width":511, "height":755, "size":82150, "format":"jpg", "thumbnail":"eRIM}y?a?G^%XT0iIWe.t5a{R$W9IVMyV?E7f+bbM~xFIWjIW=R-t6", "gif":null, "averageHueLight":"#8e5d33", "averageHueDark":"#664528"}, "preVideoCover":null, "preVideoAddress":[], "countryName":"United States", "language":"English", "imdbRatingValue":"7.4", "staffList":[], "wantToSeeCount":0, "haveSeenCount":0, "seenStatus":0, "mySeeTime":"0", "myScoreValue":0, "myScorePostId":"0", "myScoreTime":"0", "opt":"", "hasResource":true, "resourceDetectors":[], "ops":"{\"trace_id\":\"0a21f8d017888863209120edb0c68de8\",\"rid\":\"5e4d9e24-407f-45b9-bde3-c3547cec98e8\",\"search_abt\":\"3448,3425,3303\",\"q\":\"Spider Man\"}", "durationSeconds":7260, "stills":{"url":"https://pbcdn.aoneroom.com/image/2023/04/29/a6e4a54608801f8d8a0917c85d745e57.webp", "width":854, "height":480, "size":39834, "format":"webp", "thumbnail":"eFDJ6R_NTd~C-pVqIUEMxGxuNM-:?GXSX7NLV@nhR%kBRiIVNGIURj", "gif":null, "averageHueLight":"#5d5a50", "averageHueDark":"#5d5a50"}, "trailer":null, "contentRating":"PG-13", "postTitle":"Way better than the recent reboots", "aka":"", "explains":[], "seNum":0, "viewers":169, "category":"", "subtitles":"", "dubs":[], "relatedApp":null, "restrictLevel":"", "corner":"", "likeStatus":0, "style":null, "detailUrl":"", "playUrl":{"playUrl":"", "urlType":"PLAY_URL_WEB"}, "restrictKid":0, "season":0, "isCam":false, "cornerBadge":null}, {"subjectId":"2079383200605818664", "subjectType":1, "title":"Spider-Man 3", "description":"", "releaseDate":"2007-05-04", "duration":"2h 19m", "genre":"Action, Adventure, Sci-Fi", "cover":{"url":"https://pbcdn.aoneroom.com/image/2026/01/27/f152c0b2ef29c1c1a573fc9943ab1015.jpg", "width":750, "height":1115, "size":222887, "format":"jpg", "thumbnail":"eEBDH6IB?GtRR+~BRR-okCX8xZxaV@t6ayT0xrM|xan$E3-.NHaexY", "gif":null, "averageHueLight":"#504b49", "averageHueDark":"#504d4d"}, "preVideoCover":null, "preVideoAddress":[], "countryName":"Also Watched • 583K", "language":"English, French", "imdbRatingValue":"6.3", "staffList":[], "wa
+21:52:00.664 [I] System.out: Token after fetch: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjUxNTQxMzEwNjk0NDQxODI5MjAsImV4cCI6MTc5NjY2MTU0MiwiaWF0IjoxNzg4ODg1MjQyfQ.AieGjLHUK56wPPrphOsr4s_3jTbJQjALeizyz-rg0GQ
+21:52:00.673 [D] HTTP: → [POST] https://api3.aoneroom.com/wefeed-mobile-bff/subject-api/search/v2
+21:52:01.285 [D] HTTP: ← [200] https://api3.aoneroom.com/wefeed-mobile-bff/subject-api/search/v2 (613ms)
+21:52:01.292 [I] System.out: Search JSON response: {"code":0, "message":"ok", "data":{"pager":{"hasMore":false, "nextPage":"2", "page":"1", "perPage":15, "totalCount":0}, "results":[{"topicType":"SUBJECT", "subjects":[{"subjectId":"1136156458397090896", "subjectType":1, "title":"Spider", "description":"", "releaseDate":"2023-05-31", "duration":"", "genre":"Action, Thriller", "cover":{"url":"https://pbcdn.aoneroom.com/image/2023/08/12/2c7f973074a7174768b8e98e90089845.jpg", "width":1080, "height":1600, "size":323571, "format":"jpg", "thumbnail":"eJFhIbNe9bjEa~bwbbWBjFxaJ:oeoea}WV^hR+S5t6Rk0is.xZt6s.", "gif":null, "averageHueLight":"#7e5f35", "averageHueDark":"#664d2b"}, "preVideoCover":null, "preVideoAddress":[], "countryName":"India", "language":"Urdu, English", "imdbRatingValue":"", "staffList":[], "wantToSeeCount":0, "haveSeenCount":0, "seenStatus":0, "mySeeTime":"0", "myScoreValue":0, "myScorePostId":"0", "myScoreTime":"0", "opt":"", "hasResource":false, "resourceDetectors":[], "ops":"{\"trace_id\":\"0a21ca7b17888863220400eb83495e51\",\"rid\":\"2b013a6f-595b-467b-a3b9-5c632ba6ef46\",\"search_abt\":\"3448,3425,3303\",\"q\":\"Spider\"}", "durationSeconds":0, "stills":null, "trailer":null, "contentRating":"", "postTitle":"Trailer-Spider", "aka":"", "explains":[], "seNum":0, "viewers":4747, "category":"", "subtitles":"", "dubs":[], "relatedApp":null, "restrictLevel":"", "corner":"", "likeStatus":0, "style":null, "detailUrl":"", "playUrl":{"playUrl":"", "urlType":"PLAY_URL_WEB"}, "restrictKid":0, "season":0, "isCam":false, "cornerBadge":null}, {"subjectId":"6026412232966389904", "subjectType":1, "title":"Spider-Man: Brand New Day", "description":"", "releaseDate":"2026-07-31", "duration":"2h 25m", "genre":"Action, Adventure, Sci-Fi", "cover":{"url":"https://pbcdn.aoneroom.com/image/2026/08/28/360853aa46ebb8bb6032b7d19adf341c.jpg", "width":600, "height":889, "size":446430, "format":"jpg", "thumbnail":"e9Be,eDNC7%09ZE,-OXnIoNI56tlniI:xu}Z9bSe%1xZD+$gWrS0oy", "gif":null, "averageHueLight":"#572c2d", "averageHueDark":"#573031"}, "preVideoCover":null, "preVideoAddress":[], "countryName":"Also Watched • 18M+", "language":"English", "imdbRatingValue":"8.0", "staffList":[], "wantToSeeCount":0, "haveSeenCount":0, "seenStatus":0, "mySeeTime":"0", "myScoreValue":0, "myScorePostId":"0", "myScoreTime":"0", "opt":"", "hasResource":true, "resourceDetectors":[], "ops":"{\"trace_id\":\"0a21ca7b17888863220400eb83495e51\",\"rid\":\"2b013a6f-595b-467b-a3b9-5c632ba6ef46\",\"search_abt\":\"3448,3425,3303\",\"q\":\"Spider\"}", "durationSeconds":8700, "stills":null, "trailer":null, "contentRating":"PG-13", "postTitle":"Spider-Man: Brand New Day-en-1080P", "aka":"", "explains":[], "seNum":0, "viewers":4789, "category":"", "subtitles":"", "dubs":[], "relatedApp":null, "restrictLevel":"", "corner":"", "likeStatus":0, "style":null, "detailUrl":"", "playUrl":{"playUrl":"", "urlType":"PLAY_URL_WEB"}, "restrictKid":0, "season":0, "isCam":false, "cornerBadge":{"type":1, "text":"Free", "iconUrl":"", "textColor":"#FFFFFF", "backgroundColorStart":"#10A84D", "backgroundColorEnd":"#10A84D"}}, {"subjectId":"8386393003761487664", "subjectType":1, "title":"Spider", "description":"", "releaseDate":"2002-12-13", "duration":"1h 38m", "genre":"Drama, Mystery, Thriller", "cover":{"url":"https://pbcdn.aoneroom.com/image/2026/01/27/e9297d39584c33b5ded66cff74a31dc8.jpg", "width":1529, "height":2265, "size":740261, "format":"jpg", "thumbnail":"e48NqRrf~ot9NF%3?a%Mxtt89Z02R$IV-:M{9FD*NFIVIB%KIVM|Rj", "gif":null, "averageHueLight":"#36362b", "averageHueDark":"#36362e"}, "preVideoCover":null, "preVideoAddress":[], "countryName":"Canada", "language":"English", "imdbRatingValue":"6.7", "staffList":[], "wantToSeeCount":0, "haveSeenCount":0, "seenStatus":0, "mySeeTime":"0", "myScoreValue":0, "myScorePostId":"0", "myScoreTime":"0", "opt":"", "hasResource":true, "resourceDetectors":[], "ops":"{\"trace_id\":\"0a21ca7b17888863220400eb83495e51\",\"rid\":\"2b013a6f-595b-467b-a3b9-5c632ba6ef46\",\"search_abt\":\"3448,3425,3303\",\"q\":\"Spider\"}", "durationSeconds":5880,
+21:52:01.433 [D] HTTP: → [GET] https://api3.aoneroom.com/wefeed-mobile-bff/subject-api/get?subjectId=6026412232966389904
+21:52:01.685 [D] HTTP: ← [200] https://api3.aoneroom.com/wefeed-mobile-bff/subject-api/get?subjectId=6026412232966389904 (252ms)
+21:52:01.706 [D] HTTP: → [POST] https://api3.aoneroom.com/wefeed-mobile-bff/subject-api/search/v2
+21:52:02.780 [D] HTTP: ← [200] https://api3.aoneroom.com/wefeed-mobile-bff/subject-api/search/v2 (1074ms)
+21:52:02.863 [I] STREAM_PIPELINE: [StreamEngine] Starting stream resolution
+21:52:02.864 [D] STREAM_PIPELINE: [StreamEngine] Received 2 provider source(s)
+21:52:02.866 [D] STREAM_PIPELINE: [StreamEngine] Source 1: MovieBox | MOVIEBOX | https://api3.aoneroom.com/wefeed-mobile-bff/subject-api/play-info?subjectId=6026412232966389904
+21:52:02.867 [D] STREAM_PIPELINE: [StreamEngine] Source 2: MovieBox | MOVIEBOX | https://api3.aoneroom.com/wefeed-mobile-bff/subject-api/play-info?subjectId=7092118814179346392
+21:52:02.868 [I] STREAM_PIPELINE: [StreamCollector] Resolving 2 provider source(s) via ResolverEngine
+21:52:02.869 [I] STREAM_PIPELINE: [ResolverEngine] Starting resolver pipeline for 2 source(s)
+21:52:02.870 [D] STREAM_PIPELINE: [ResolverEngine] Hop 0: Resolving [MOVIEBOX] -> https://api3.aoneroom.com/wefeed-mobile-bff/subject-api/play-info?subjectId=6026412232966389904
+21:52:02.870 [I] STREAM_PIPELINE: [ExtractorManager] Starting extraction pipeline
+21:52:02.871 [D] STREAM_PIPELINE: [ResolverEngine] Hop 0: Resolving [MOVIEBOX] -> https://api3.aoneroom.com/wefeed-mobile-bff/subject-api/play-info?subjectId=7092118814179346392
+21:52:02.872 [I] STREAM_PIPELINE: [ExtractorManager] Starting extraction pipeline
+21:52:02.873 [D] STREAM_PIPELINE: [ExtractorManager] Processing MOVIEBOX -> https://api3.aoneroom.com/wefeed-mobile-bff/subject-api/play-info?subjectId=6026412232966389904
+21:52:02.874 [D] STREAM_PIPELINE: [ExtractorManager] Using MovieBoxExtractor
+21:52:02.875 [D] STREAM_PIPELINE: [ExtractorManager] Processing MOVIEBOX -> https://api3.aoneroom.com/wefeed-mobile-bff/subject-api/play-info?subjectId=7092118814179346392
+21:52:02.876 [D] STREAM_PIPELINE: [ExtractorManager] Using MovieBoxExtractor
+21:52:02.876 [D] HTTP: → [GET] https://api3.aoneroom.com/wefeed-mobile-bff/subject-api/play-info?subjectId=7092118814179346392
+21:52:02.878 [D] HTTP: → [GET] https://api3.aoneroom.com/wefeed-mobile-bff/subject-api/play-info?subjectId=6026412232966389904
+21:52:03.085 [D] HTTP: ← [200] https://api3.aoneroom.com/wefeed-mobile-bff/subject-api/play-info?subjectId=6026412232966389904 (213ms)
+21:52:03.096 [D] HTTP: → [GET] https://api3.aoneroom.com/wefeed-mobile-bff/subject-api/get?subjectId=6026412232966389904
+21:52:03.404 [D] HTTP: ← [200] https://api3.aoneroom.com/wefeed-mobile-bff/subject-api/play-info?subjectId=7092118814179346392 (531ms)
+21:52:03.422 [D] HTTP: → [GET] https://api3.aoneroom.com/wefeed-mobile-bff/subject-api/get?subjectId=7092118814179346392
+21:52:03.643 [D] HTTP: ← [200] https://api3.aoneroom.com/wefeed-mobile-bff/subject-api/get?subjectId=6026412232966389904 (547ms)
+21:52:03.655 [D] STREAM_PIPELINE: [ExtractorManager] Streams: 1, Next Sources: 1
+21:52:03.671 [E] STREAM_PIPELINE: [SUBTITLE_DEBUG] FinalStreamBuilder merged 0 subtitles from 1 ordered streams
+21:52:03.676 [I] STREAM_PIPELINE: [ExtractorManager] Extraction finished. Total streams: 1
+21:52:03.677 [D] STREAM_PIPELINE: [ResolverEngine] Extracted 1 stream(s) from MOVIEBOX
+21:52:03.698 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+21:52:03.743 [D] ViewRootImpl[MainActivity]: hardware acceleration = true, sRendererEnabled = true, forceHwAccelerated = false
+21:52:03.803 [E] BLASTBufferQueue: [ViewRootImpl[MainActivity]#43](f:0,a:2) isEGL=1, mPendingRelease.size()=1, mMaxAcquiredBuffers=4, currentMaxAcquiredBufferCount=2
+21:52:03.829 [I] BLASTBufferQueue: [ViewRootImpl[MainActivity]#44] constructor()
+21:52:03.874 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+21:52:04.007 [D] HTTP: ← [200] https://api3.aoneroom.com/wefeed-mobile-bff/subject-api/get?subjectId=7092118814179346392 (586ms)
+21:52:04.014 [D] STREAM_PIPELINE: [ExtractorManager] Streams: 1, Next Sources: 1
+21:52:04.022 [E] STREAM_PIPELINE: [SUBTITLE_DEBUG] FinalStreamBuilder merged 0 subtitles from 2 ordered streams
+21:52:04.025 [I] STREAM_PIPELINE: [ExtractorManager] Extraction finished. Total streams: 1
+21:52:04.026 [D] STREAM_PIPELINE: [ResolverEngine] Extracted 1 stream(s) from MOVIEBOX
+21:52:04.028 [I] STREAM_PIPELINE: [ResolverEngine] Resolver pipeline complete. Produced 2 playable stream(s)
+21:52:04.029 [I] STREAM_PIPELINE: [StreamCollector] Collected 2 total stream(s) across all sources
+21:52:04.030 [D] STREAM_PIPELINE: [StreamEngine] Collected 2 raw stream(s)
+21:52:04.032 [E] STREAM_PIPELINE: [SUBTITLE_DEBUG] FinalStreamBuilder merged 0 subtitles from 2 ordered streams
+21:52:04.033 [I] STREAM_PIPELINE: [StreamEngine] Finished. Final playable streams: 2
+21:52:04.034 [D] STREAM_PIPELINE: [StreamEngine] Playable 1: 1080p | MOVIEBOX | https://sacdn.hakunaymatata.com/dash/6026412232966389904_0_0_1080_h265_24/index_web.mpd
+21:52:04.035 [D] STREAM_PIPELINE: [StreamEngine] Playable 2: 1080p | MOVIEBOX | https://sacdn.hakunaymatata.com/dash/7092118814179346392_0_0_1080_h265_296/index_web.mpd
+21:52:04.039 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+21:52:04.057 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+21:52:05.375 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+21:52:05.387 [E] OpenGLRenderer: EglManager::makeCurrent mED = 0xb400006f04dc0990, surface = 0x0, mEC = 0xb400006ea4dde090, error = EGL_SUCCESS
+21:52:05.389 [D] OpenGLRenderer: endAllActiveAnimators on 0xb400006f44f83090 (UnprojectedRipple) with handle 0xb400006e54e52c40
+21:52:05.390 [D] View: [Warning] assignParent to null: this = DecorView@c954ff4[MainActivity]
+21:52:05.391 [D] HTTP: → [GET] https://sacdn.hakunaymatata.com/dash/7092118814179346392_0_0_1080_h265_296/index_web.mpd
+21:52:05.405 [I] BLASTBufferQueue: [ViewRootImpl[MainActivity]#44] destructor()
+21:52:05.420 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+21:52:05.567 [I] BLASTBufferQueue: releaseBufferCallbackThunk bufferId:94515050317585 framenumber:5 blastBufferQueue is dead
+21:52:09.605 [D] HTTP: ← [200] https://sacdn.hakunaymatata.com/dash/7092118814179346392_0_0_1080_h265_296/index_web.mpd (4214ms)
+21:52:12.022 [D] HTTP: → [GET] https://sacdn.hakunaymatata.com/dash/7092118814179346392_0_0_1080_h265_296/index_web.mpd
+21:52:12.114 [D] HTTP: ← [200] https://sacdn.hakunaymatata.com/dash/7092118814179346392_0_0_1080_h265_296/index_web.mpd (92ms)
+21:52:13.947 [D] HTTP: → [GET] https://sacdn.hakunaymatata.com/dash/6026412232966389904_0_0_1080_h265_24/index_web.mpd
+21:52:16.245 [D] HTTP: ← [200] https://sacdn.hakunaymatata.com/dash/6026412232966389904_0_0_1080_h265_24/index_web.mpd (2299ms)
+21:52:17.644 [D] HTTP: → [GET] https://sacdn.hakunaymatata.com/dash/6026412232966389904_0_0_1080_h265_24/index_web.mpd
+21:52:17.741 [D] HTTP: ← [200] https://sacdn.hakunaymatata.com/dash/6026412232966389904_0_0_1080_h265_24/index_web.mpd (97ms)
+21:52:18.318 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+21:52:18.329 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+21:52:21.095 [D] TransactionExecutor: Token :android.os.BinderProxy@ea62a3b has ActivityClientRecord : com.cinetheta.app
+21:52:21.144 [E] OpenGLRenderer: EglManager::makeCurrent mED = 0xb400006f04dc0990, surface = 0x0, mEC = 0xb400006ea4dde090, error = EGL_SUCCESS
+21:52:21.160 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+21:52:21.169 [I] BLASTBufferQueue: [ViewRootImpl[MainActivity]#43] destructor()
+21:52:21.180 [I] GED: ged_boost_gpu_freq, level 100, eOrigin 2, final_idx 31, oppidx_max 31, oppidx_min 0
+21:52:21.199 [I] BLASTBufferQueue: releaseBufferCallbackThunk bufferId:94515050317574 framenumber:80 blastBufferQueue is dead

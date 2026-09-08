@@ -1,0 +1,989 @@
+package com.cinetheta.app.ui.home
+
+import com.cinetheta.app.data.bookmarks.BookmarkManager
+import com.cinetheta.app.data.bookmarks.BookmarkItem
+
+
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.*
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.*
+import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
+import com.cinetheta.app.domain.models.SearchResult
+import com.cinetheta.domain.repositories.ProviderRepository
+import com.cinetheta.app.ui.theme.*
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HomeScreen — Netflix/Prime-inspired cinematic home
+// ─────────────────────────────────────────────────────────────────────────────
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HomeScreen(
+    viewModel: HomeViewModel,
+    providerRepository: ProviderRepository,
+    onNavigateToDetail: (String, String) -> Unit,
+    onSearchClick: () -> Unit = {},
+    onSettingsClick: () -> Unit = {},
+    onDownloadsClick: () -> Unit = {},
+    onExploreClick: (String, String) -> Unit = { _, _ -> }
+) {
+    val state by viewModel.uiState.collectAsState()
+    val scrollState = rememberLazyListState()
+
+    // Hero auto-cycle through first 5 featured items
+    // Tab state for Home / Movies / Series / Anime
+    val tabs = listOf("Home", "Movies", "Series", "Anime")
+    var selectedTab by remember { mutableIntStateOf(0) }
+
+
+    val filteredSections = remember(state.sections, selectedTab) {
+        when (selectedTab) {
+            1 -> state.sections.filter { it.id.contains("movie", ignoreCase = true) || it.id == "trending_cinema" }
+            2 -> state.sections.filter { it.id.contains("series", ignoreCase = true) || it.id.contains("show", ignoreCase = true) || it.id.contains("drama", ignoreCase = true) }
+            3 -> state.sections.filter { 
+                it.id.contains("anime", ignoreCase = true) || 
+                it.id.contains("cartoon", ignoreCase = true) || 
+                it.id.contains("nickelodeon", ignoreCase = true) 
+            }
+                        else -> state.sections.filter { 
+                !it.id.contains("anime", ignoreCase = true) && 
+                !it.id.contains("cartoon", ignoreCase = true) && 
+                !it.id.contains("nickelodeon", ignoreCase = true) 
+            } // 0 -> Home
+        }
+    }
+
+    val featuredItems = remember(state, selectedTab) {
+        when (selectedTab) {
+            1 -> state.sections.find { it.id == "trending_cinema" }?.items?.take(5) ?: state.popularMovies.take(5)
+            2 -> state.sections.find { it.id == "top_series" }?.items?.take(5) ?: state.popularMovies.take(5)
+            3 -> state.sections.find { it.id == "anime_shows" }?.items?.take(5) ?: state.popularMovies.take(5)
+            else -> state.popularMovies.take(5)
+        }
+    }
+    var heroIndex by remember { mutableIntStateOf(0) }
+    val featuredContent = featuredItems.getOrNull(heroIndex)
+
+    LaunchedEffect(featuredItems) {
+        if (featuredItems.size > 1) {
+            heroIndex = 0
+            while(true) {
+                kotlinx.coroutines.delay(5000L)
+                heroIndex = (heroIndex + 1) % featuredItems.size
+            }
+        }
+    }
+
+    // Top bar fades from transparent → semi-opaque as user scrolls
+    val isScrolled by remember {
+        derivedStateOf {
+            scrollState.firstVisibleItemIndex > 0 || scrollState.firstVisibleItemScrollOffset > 80
+        }
+    }
+    val topBarAlpha by animateFloatAsState(
+        targetValue = if (isScrolled) 1f else 0f,
+        animationSpec = tween(300),
+        label = "topBarAlpha"
+    )
+
+    LaunchedEffect(Unit) {
+        viewModel.reloadHistory()
+    }
+
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .background(MaterialTheme.colorScheme.background)
+    ) {
+        // ── Main Content ─────────────────────────────────────────────────────
+        LazyColumn(
+            state = scrollState,
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(bottom = 90.dp) // nav bar space
+        ) {
+            // ── HERO ─────────────────────────────────────────────────────────
+            item {
+                AnimatedContent(
+                    targetState = featuredContent,
+                    transitionSpec = {
+                        fadeIn(tween(600)) togetherWith fadeOut(tween(400))
+                    },
+                    label = "heroTransition"
+                ) { hero ->
+                    if (hero != null) {
+                        SFHeroSection(
+                            movie        = hero,
+                            heroIndex    = heroIndex,
+                            heroCount    = featuredItems.size,
+                            onPlayClick  = { onNavigateToDetail(hero.type.name, hero.id) },
+                            onInfoClick  = { onNavigateToDetail(hero.type.name, hero.id) },
+                            onDotClick   = { heroIndex = it }
+                        )
+                    } else {
+                        // Shimmer placeholder while loading
+                        SFHeroShimmer()
+                    }
+                }
+            }
+
+            // ── CONTENT ROW — Continue Watching ──────
+            if (state.continueWatching.isNotEmpty()) {
+                item {
+                    SFContinueWatchingRow(
+                        items    = state.continueWatching,
+                        onItemClick = onNavigateToDetail
+                    )
+                }
+            }
+
+            // ── DYNAMIC CONTENT ROWS ──────────────────────────────────────────
+            items(filteredSections) { section ->
+                SFSectionRow(
+                    title    = section.title,
+                    items    = section.items,
+                    onItemClick = onNavigateToDetail,
+                    onSeeAllClick = { onExploreClick(section.id, section.title) }
+                )
+            }
+
+            // ── Loading / Error state ─────────────────────────────────────────
+            if (state.isLoading) {
+                item { SFLoadingRow() }
+            }
+            state.errorMessage?.let { err ->
+                item { SFErrorBanner(message = err, onRetry = viewModel::loadHomeData) }
+            }
+        }
+
+        // ── Floating Top Navigation Bar ───────────────────────────────────────
+        Column(modifier = Modifier.align(Alignment.TopCenter)) {
+            SFTopBar(
+                alpha         = topBarAlpha,
+                selectedTab   = selectedTab,
+                tabs          = tabs,
+                providerRepository = providerRepository,
+                onTabSelected = { selectedTab = it },
+                onSearchClick = onSearchClick,
+                onProfileClick = onSettingsClick,
+                onDownloadsClick = onDownloadsClick
+            )
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TOP BAR — Transparent → frosted on scroll, tab navigation
+// ─────────────────────────────────────────────────────────────────────────────
+
+@Composable
+private fun SFTopBar(
+    alpha: Float,
+    selectedTab: Int,
+    tabs: List<String>,
+    providerRepository: ProviderRepository,
+    onTabSelected: (Int) -> Unit,
+    onSearchClick: () -> Unit,
+    onProfileClick: () -> Unit,
+    onDownloadsClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .drawWithContent {
+                // gradient from black → transparent as we near fully scrolled
+                drawRect(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Black.copy(alpha = 0.85f * alpha),
+                            Color.Transparent
+                        )
+                    )
+                )
+                drawContent()
+            }
+            .statusBarsPadding()
+    ) {
+        Column {
+            // Row 1: Logo + Icons
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                // SF Logo wordmark
+                Text(
+                    text = "CineTheta",
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize   = 22.sp,
+                        brush      = Brush.linearGradient(
+                            colors = listOf(MaterialTheme.colorScheme.primary, Color(0xFF7B8FFF))
+                        )
+                    )
+                )
+
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Search (as per reference image top bar)
+                    IconButton(
+                        onClick = onSearchClick,
+                        modifier = Modifier
+                            .size(36.dp)
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), CircleShape)
+                    ) {
+                        Icon(Icons.Outlined.Search, "Search",
+                            tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(20.dp))
+                    }
+                    
+                    // Provider Selector Chip
+                    var showProviderDropdown by remember { mutableStateOf(false) }
+                    var selectedProviderName by remember { 
+                        mutableStateOf(providerRepository.provider(providerRepository.selectedProviderId ?: "")?.name ?: "All in One") 
+                    }
+                    var showMovieBoxSettings by remember { mutableStateOf(false) }
+                    val context = androidx.compose.ui.platform.LocalContext.current
+                    
+                    if (showMovieBoxSettings) {
+                        MovieBoxSettingsDialog(
+                            onDismiss = { showMovieBoxSettings = false },
+                            context = context
+                        )
+                    }
+
+                    Box {
+                        Row(
+                            modifier = Modifier
+                                .height(36.dp)
+                                .clip(RoundedCornerShape(18.dp))
+                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f))
+                                .clickable { showProviderDropdown = true }
+                                .padding(horizontal = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Extension,
+                                contentDescription = "Provider",
+                                tint = MaterialTheme.colorScheme.onBackground,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Text(
+                                text = selectedProviderName,
+                                color = MaterialTheme.colorScheme.onBackground,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+
+                        DropdownMenu(
+                            expanded = showProviderDropdown,
+                            onDismissRequest = { showProviderDropdown = false },
+                            modifier = Modifier.background(MaterialTheme.colorScheme.surface)
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("All in One", color = MaterialTheme.colorScheme.onSurface) },
+                                onClick = {
+                                    val oldId = providerRepository.selectedProviderId
+                                    providerRepository.selectedProviderId = null
+                                    selectedProviderName = "All in One"
+                                    showProviderDropdown = false
+                                    
+                                    context.getSharedPreferences("cinetheta_settings", android.content.Context.MODE_PRIVATE)
+                                        .edit().putString("selected_provider", null).apply()
+                                        
+                                    if (oldId != null) {
+                                        val intent = android.content.Intent(context, com.cinetheta.app.MainActivity::class.java)
+                                        intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                                        context.startActivity(intent)
+                                    }
+                                }
+                            )
+                            providerRepository.enabledProviders().forEach { provider ->
+                                DropdownMenuItem(
+                                    text = { Text(provider.name, color = MaterialTheme.colorScheme.onSurface) },
+                                    onClick = {
+                                        val oldId = providerRepository.selectedProviderId
+                                        providerRepository.selectedProviderId = provider.id
+                                        selectedProviderName = provider.name
+                                        showProviderDropdown = false
+                                        
+                                        context.getSharedPreferences("cinetheta_settings", android.content.Context.MODE_PRIVATE)
+                                            .edit().putString("selected_provider", provider.id).apply()
+                                            
+                                        if (oldId != provider.id) {
+                                            val intent = android.content.Intent(context, com.cinetheta.app.MainActivity::class.java)
+                                            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                                            context.startActivity(intent)
+                                        }
+                                    },
+                                    trailingIcon = {
+                                        if (provider.id == "moviebox") {
+                                            IconButton(onClick = {
+                                                showProviderDropdown = false
+                                                showMovieBoxSettings = true
+                                            }) {
+                                                Icon(
+                                                    Icons.Default.Settings,
+                                                    contentDescription = "Settings",
+                                                    tint = MaterialTheme.colorScheme.onSurface
+                                                )
+                                            }
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Row 2: Tab navigation
+            ScrollableTabRow(
+                selectedTabIndex = selectedTab,
+                containerColor   = Color.Transparent,
+                contentColor     = MaterialTheme.colorScheme.onBackground,
+                edgePadding      = 16.dp,
+                divider          = {},
+                indicator        = { tabPositions ->
+                    if (selectedTab < tabPositions.size) {
+                        val pos = tabPositions[selectedTab]
+                        Box(
+                            Modifier
+                                .fillMaxWidth()
+                                .wrapContentSize(Alignment.BottomStart)
+                                .offset(x = pos.left + 8.dp)
+                                .width(pos.width - 16.dp)
+                                .height(2.dp)
+                                .background(MaterialTheme.colorScheme.primary, CircleShape)
+                        )
+                    }
+                }
+            ) {
+                tabs.forEachIndexed { index, title ->
+                    Tab(
+                        selected = selectedTab == index,
+                        onClick  = { onTabSelected(index) },
+                        modifier = Modifier.padding(horizontal = 4.dp)
+                    ) {
+                        Text(
+                            text  = title,
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Normal
+                            ),
+                            color = if (selectedTab == index) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(vertical = 10.dp, horizontal = 4.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HERO SECTION — Full-bleed backdrop, cinematic gradient, action buttons
+// ─────────────────────────────────────────────────────────────────────────────
+
+@Composable
+fun SFHeroSection(
+    movie: SearchResult,
+    heroIndex: Int,
+    heroCount: Int,
+    onPlayClick: () -> Unit,
+    onInfoClick: () -> Unit,
+    onDotClick: (Int) -> Unit
+) {
+    val screenH = LocalConfiguration.current.screenHeightDp.dp
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(screenH * 0.70f) // 70% of screen height
+    ) {
+        // ── Backdrop image ────────────────────────────────────────────────
+        SubcomposeAsyncImage(
+            model              = movie.poster,
+            contentDescription = movie.title,
+            contentScale       = ContentScale.Crop,
+            loading            = { SFHeroShimmer() },
+            modifier           = Modifier.fillMaxSize()
+        )
+
+        // ── Multi-stop gradient overlay: dark top (for nav) + dark bottom ─
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colorStops = arrayOf(
+                            0.0f to Color.Black.copy(alpha = 0.55f), // nav bar area
+                            0.3f to Color.Transparent,               // clear in middle
+                            0.7f to MaterialTheme.colorScheme.background.copy(alpha = 0.4f),
+                            1.0f to MaterialTheme.colorScheme.background                     // full bg at bottom
+                        )
+                    )
+                )
+        )
+
+        // ── Side gradient for depth ────────────────────────────────────────
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.horizontalGradient(
+                        colorStops = arrayOf(
+                            0.0f to MaterialTheme.colorScheme.background.copy(alpha = 0.2f),
+                            0.5f to Color.Transparent
+                        )
+                    )
+                )
+        )
+
+        // ── Bottom Content: genres, title, buttons ─────────────────────────
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Genre tags
+            Text(
+                text  = "Action  •  Thriller  •  Sci-Fi",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(bottom = 10.dp)
+            )
+
+            // Movie title
+            Text(
+                text     = movie.title,
+                style    = MaterialTheme.typography.displayLarge.copy(fontSize = 28.sp),
+                color    = MaterialTheme.colorScheme.onBackground,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(bottom = 6.dp)
+            )
+
+            // Year + type badges
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(bottom = 20.dp)
+            ) {
+                movie.year?.let {
+                    Text(it.toString(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    SFDot()
+                }
+                SFBadge("HD", SFHDTag, Color.Black)
+                SFBadge("DUB", SFDubBg, Color.White)
+            }
+
+            // Action buttons row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Play button (primary — white like Netflix)
+                Button(
+                    onClick = onPlayClick,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(46.dp),
+                    shape  = RoundedCornerShape(6.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.White)
+                ) {
+                    Icon(Icons.Default.PlayArrow, null,
+                        tint = Color.Black, modifier = Modifier.size(22.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text("Play", color = Color.Black,
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
+                }
+
+                // My List button
+                var isInMyList by remember(movie.id) { mutableStateOf(BookmarkManager.isBookmarked(movie.id)) }
+                OutlinedButton(
+                    onClick = {
+                        isInMyList = !isInMyList
+                        if (isInMyList) {
+                            BookmarkManager.addBookmark(BookmarkItem(movie.id, movie.title, movie.poster ?: "", movie.type == com.cinetheta.app.domain.models.ContentType.SHOW))
+                        } else {
+                            BookmarkManager.removeBookmark(movie.id)
+                        }
+                    },
+                    modifier = Modifier.height(46.dp),
+                    shape    = RoundedCornerShape(6.dp),
+                    border   = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                    colors   = ButtonDefaults.outlinedButtonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f))
+                ) {
+                    val icon = if (isInMyList) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder
+                    val tint = if (isInMyList) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
+                    Icon(icon, null, tint = tint, modifier = Modifier.size(20.dp))
+                    Spacer(Modifier.width(4.dp))
+                    Text(if (isInMyList) "Added" else "List", color = tint, style = MaterialTheme.typography.bodyMedium)
+                }
+
+                // Info button
+                IconButton(
+                    onClick  = onInfoClick,
+                    modifier = Modifier
+                        .size(46.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f))
+                ) {
+                    Icon(Icons.Outlined.Info, "Info",
+                        tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(22.dp))
+                }
+            }
+
+            // Hero page dots
+            if (heroCount > 1) {
+                Spacer(Modifier.height(16.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    repeat(heroCount) { i ->
+                        val width by animateDpAsState(
+                            targetValue = if (i == heroIndex) 20.dp else 6.dp,
+                            animationSpec = tween(300),
+                            label = "dotWidth"
+                        )
+                        Box(
+                            modifier = Modifier
+                                .height(4.dp)
+                                .width(width)
+                                .clip(CircleShape)
+                                .background(if (i == heroIndex) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f))
+                                .clickable { onDotClick(i) }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SECTION ROW — Horizontal scrolling card row
+// ─────────────────────────────────────────────────────────────────────────────
+
+@Composable
+fun SFSectionRow(
+    title: String,
+    items: List<SearchResult>,
+    onItemClick: (String, String) -> Unit,
+    onSeeAllClick: () -> Unit = {}
+) {
+    if (items.isEmpty()) return
+
+    Column(modifier = Modifier.padding(vertical = 16.dp)) {
+        // Section header
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 0.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text     = title,
+                style    = MaterialTheme.typography.headlineMedium.copy(fontSize = 17.sp),
+                color    = MaterialTheme.colorScheme.onBackground,
+                maxLines = 1
+            )
+            Text(
+                text     = "See All",
+                style    = MaterialTheme.typography.labelMedium,
+                color    = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.clickable { onSeeAllClick() }.padding(4.dp)
+            )
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        // Horizontal card list
+        LazyRow(
+            contentPadding         = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement  = Arrangement.spacedBy(10.dp)
+        ) {
+            items(items) { item ->
+                SFVideoCard(
+                    item    = item,
+                    onClick = { onItemClick(item.type.name, item.id) }
+                )
+            }
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CONTINUE WATCHING ROW — Wider cards with progress bar
+// ─────────────────────────────────────────────────────────────────────────────
+
+@Composable
+private fun SFContinueWatchingRow(
+    items: List<com.cinetheta.player.resume.HistoryItem>,
+    onItemClick: (String, String) -> Unit
+) {
+    if (items.isEmpty()) return
+
+    Column(modifier = Modifier.padding(vertical = 16.dp)) {
+        Text(
+            text     = "▶ Continue Watching",
+            style    = MaterialTheme.typography.headlineMedium.copy(fontSize = 17.sp),
+            color    = MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 0.dp)
+        )
+        Spacer(Modifier.height(12.dp))
+
+        LazyRow(
+            contentPadding        = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(items) { item ->
+                SFContinueCard(item = item, onClick = { onItemClick(item.type, item.id) })
+            }
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CARDS
+// ─────────────────────────────────────────────────────────────────────────────
+
+@Composable
+fun SFVideoCard(
+    item: SearchResult,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val scale by remember { mutableFloatStateOf(1f) }
+
+    Box(
+        modifier = modifier
+            .width(110.dp)
+            .height(165.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .clickable { onClick() }
+    ) {
+        // Poster
+        AsyncImage(
+            model              = item.poster,
+            contentDescription = item.title,
+            contentScale       = ContentScale.Crop,
+            modifier           = Modifier.fillMaxSize()
+        )
+
+        // Bottom gradient + title
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.45f)
+                .align(Alignment.BottomCenter)
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color.Transparent, MaterialTheme.colorScheme.background.copy(alpha = 0.95f))
+                    )
+                )
+        )
+
+        // Year badge (top-left)
+        item.year?.let { yr ->
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(6.dp)
+                    .clip(RoundedCornerShape(3.dp))
+                    .background(MaterialTheme.colorScheme.background.copy(alpha = 0.7f))
+                    .padding(horizontal = 4.dp, vertical = 2.dp)
+            ) {
+                Text(
+                    text  = yr.toString(),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        // Title at bottom
+        Text(
+            text     = item.title,
+            style    = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+            color    = MaterialTheme.colorScheme.onBackground,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(6.dp)
+        )
+    }
+}
+
+@Composable
+private fun SFContinueCard(
+    item: com.cinetheta.player.resume.HistoryItem,
+    onClick: () -> Unit
+) {
+    val progress = if (item.durationMs > 0) {
+        (item.positionMs.toFloat() / item.durationMs.toFloat()).coerceIn(0f, 1f)
+    } else {
+        0f
+    }
+
+    Box(
+        modifier = Modifier
+            .width(170.dp)
+            .height(100.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .clickable { onClick() }
+    ) {
+        AsyncImage(
+            model              = item.posterPath,
+            contentDescription = item.title,
+            contentScale       = ContentScale.Crop,
+            modifier           = Modifier.fillMaxSize()
+        )
+
+        // Gradient
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(0.7f))))
+        )
+
+        // Play icon overlay
+        Box(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .size(36.dp)
+                .clip(CircleShape)
+                .background(Color.Black.copy(alpha = 0.6f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                Icons.Default.PlayArrow,
+                contentDescription = "Play",
+                tint     = Color.White,
+                modifier = Modifier.size(22.dp)
+            )
+        }
+
+        // Real Progress bar at bottom
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(3.dp)
+                .align(Alignment.BottomCenter)
+                .background(SFProgressBg)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(fraction = progress)
+                    .fillMaxHeight()
+                    .background(MaterialTheme.colorScheme.primary)
+            )
+        }
+
+        // Title
+        Text(
+            text     = item.title,
+            style    = MaterialTheme.typography.labelMedium,
+            color    = MaterialTheme.colorScheme.onBackground,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(start = 8.dp, bottom = 8.dp, end = 8.dp)
+        )
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// UTILITY COMPOSABLES
+// ─────────────────────────────────────────────────────────────────────────────
+
+@Composable
+fun SFBadge(text: String, bg: Color, textColor: Color) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(3.dp))
+            .background(bg)
+            .padding(horizontal = 6.dp, vertical = 2.dp)
+    ) {
+        Text(text, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = textColor)
+    }
+}
+
+@Composable
+private fun SFDot() {
+    Box(
+        modifier = Modifier
+            .size(3.dp)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.onSurfaceVariant)
+    )
+}
+
+@Composable
+private fun SFHeroShimmer() {
+    val infiniteTransition = rememberInfiniteTransition(label = "shimmer")
+    val shimmerX by infiniteTransition.animateFloat(
+        initialValue   = -1000f,
+        targetValue    = 1000f,
+        animationSpec  = infiniteRepeatable(tween(1500, easing = LinearEasing)),
+        label          = "shimmerX"
+    )
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(500.dp)
+            .background(
+                Brush.linearGradient(
+                    colors  = listOf(MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.colorScheme.surface),
+                    start   = Offset(shimmerX, 0f),
+                    end     = Offset(shimmerX + 500f, 200f)
+                )
+            )
+    )
+}
+
+@Composable
+fun SFLoadingRow() {
+    Row(
+        modifier              = Modifier.padding(horizontal = 16.dp, vertical = 24.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        repeat(4) {
+            Box(
+                modifier = Modifier
+                    .width(110.dp)
+                    .height(165.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+            )
+        }
+    }
+}
+
+@Composable
+fun SFErrorBanner(message: String, onRetry: () -> Unit) {
+    Column(
+        modifier            = Modifier
+            .fillMaxWidth()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Icon(Icons.Outlined.Info, null, tint = SFError, modifier = Modifier.size(40.dp))
+        Text(message, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        TextButton(onClick = onRetry) {
+            Text("Retry", color = MaterialTheme.colorScheme.primary)
+        }
+    }
+}
+
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+fun MovieBoxSettingsDialog(
+    onDismiss: () -> Unit,
+    context: android.content.Context
+) {
+    val prefs = context.getSharedPreferences("cinetheta_settings", android.content.Context.MODE_PRIVATE)
+    val defaultDomain = com.cinetheta.providers.moviebox.MovieBoxConfig.DEFAULT_DOMAIN
+    val hosts = com.cinetheta.providers.moviebox.MovieBoxConfig.HOST_POOL
+
+    var selectedApi by remember { mutableStateOf(prefs.getString("moviebox_api", defaultDomain) ?: defaultDomain) }
+    var showReloadPrompt by remember { mutableStateOf(false) }
+
+    if (showReloadPrompt) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { androidx.compose.material3.Text("Restart Required") },
+            text = { androidx.compose.material3.Text("App needs to restart to apply the new API settings.") },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = {
+                    val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+                    val componentName = intent?.component
+                    val mainIntent = android.content.Intent.makeRestartActivityTask(componentName)
+                    context.startActivity(mainIntent)
+                    Runtime.getRuntime().exit(0)
+                }) {
+                    androidx.compose.material3.Text("Reload")
+                }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = onDismiss) {
+                    androidx.compose.material3.Text("Cancel")
+                }
+            }
+        )
+    } else {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { androidx.compose.material3.Text("MovieBox Settings") },
+            text = {
+                Column {
+                    androidx.compose.material3.Text("Select API Host:", fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 8.dp))
+                    hosts.forEach { host ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { selectedApi = host }
+                                .padding(vertical = 4.dp)
+                        ) {
+                            androidx.compose.material3.RadioButton(
+                                selected = (selectedApi == host),
+                                onClick = { selectedApi = host }
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            androidx.compose.material3.Text(host)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                androidx.compose.material3.IconButton(onClick = {
+                    prefs.edit().putString("moviebox_api", selectedApi).apply()
+                    com.cinetheta.providers.moviebox.MovieBoxConfig.savedDomain = selectedApi
+                    showReloadPrompt = true
+                }) {
+                    Icon(Icons.Default.Save, contentDescription = "Save")
+                }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = onDismiss) {
+                    androidx.compose.material3.Text("Cancel")
+                }
+            }
+        )
+    }
+}

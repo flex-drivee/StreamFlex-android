@@ -18,11 +18,11 @@ if (localPropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.streamflex.app"
+    namespace = "com.cinetheta.app"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.streamflex.app"
+        applicationId = "com.cinetheta.app"
         minSdk = 24
         targetSdk = 34
         versionCode = 1

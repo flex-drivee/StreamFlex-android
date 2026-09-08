@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "StreamFlex"
+rootProject.name = "CineTheta"
 include(":app")
