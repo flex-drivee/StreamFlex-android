@@ -649,17 +649,28 @@ fun SFSectionRow(
 @Composable
 private fun SFContinueWatchingRow(
     items: List<com.cinetheta.player.resume.HistoryItem>,
-    onItemClick: (String, String) -> Unit
+    onItemClick: (String, String) -> Unit,
+    onSeeAllClick: () -> Unit
 ) {
     if (items.isEmpty()) return
 
     Column(modifier = Modifier.padding(vertical = 16.dp)) {
-        Text(
-            text     = "▶ Continue Watching",
-            style    = MaterialTheme.typography.headlineMedium.copy(fontSize = 17.sp),
-            color    = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 0.dp)
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).clickable { onSeeAllClick() },
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text     = "▶ Continue Watching",
+                style    = MaterialTheme.typography.headlineMedium.copy(fontSize = 17.sp),
+                color    = MaterialTheme.colorScheme.onBackground
+            )
+            androidx.compose.material3.Icon(
+                imageVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = "See All",
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
         Spacer(Modifier.height(12.dp))
 
         LazyRow(

@@ -42,6 +42,7 @@ import com.cinetheta.domain.models.SearchResult as DomainSearchResult
 import com.cinetheta.app.ui.home.HomeScreen
 import com.cinetheta.app.ui.home.HomeViewModel
 import com.cinetheta.app.ui.home.HomeViewModelFactory
+import com.cinetheta.app.ui.home.ContinueWatchingScreen
 import com.cinetheta.app.ui.movies.MovieDetailScreen
 import com.cinetheta.app.ui.movies.MovieDetailViewModel
 import com.cinetheta.app.ui.movies.MovieDetailViewModelFactory

@@ -72,7 +72,7 @@ class PlaybackProgressManager(context: Context) {
         prefs.edit().putString("history_list", Json.encodeToString(limitedList)).apply()
     }
 
-    private fun removeFromHistory(mediaId: String) {
+    fun removeFromHistory(mediaId: String) {
         val currentList = getHistory().toMutableList()
         currentList.removeAll { it.id == mediaId }
         prefs.edit().putString("history_list", Json.encodeToString(currentList)).apply()
