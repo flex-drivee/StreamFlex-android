@@ -119,7 +119,7 @@ fun AppNavigation(
                             putExtra("POSTER_PATH", searchResult.poster)
                             if (episode != null) {
                                 putExtra("IS_SHOW", true)
-                                putExtra("CURRENT_EPISODE_ID", episode.url) // Plugin episodes use URL as ID often, or just pass the link
+                                putExtra("CURRENT_EPISODE_ID", episode.number.toString()) // Plugin episodes use URL as ID often, or just pass the link
                                 // Wait, the StreamRepository resolve logic usually needs the whole ProviderResult.
                                 // But for Plugin direct play, PlayerActivity expects TMDB IDs to resolve!
                                 // We might need to handle this! Let's pass PLUGIN_DIRECT_URL and Provider ID!

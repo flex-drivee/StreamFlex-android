@@ -73,7 +73,7 @@ fun PluginDetailScreen(
                             LazyColumn(modifier = Modifier.fillMaxSize()) {
                                 items(selectedSeason?.episodes ?: emptyList()) { episode ->
                                     ListItem(
-                                        headlineContent = { Text(episode.name ?: "Episode ${episode.number}") },
+                                        headlineContent = { Text(episode.title ?: "Episode ${episode.number}") },
                                         modifier = Modifier.clickable { onPlayClick(episode) }
                                     )
                                 }
