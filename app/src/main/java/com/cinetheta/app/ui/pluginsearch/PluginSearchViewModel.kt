@@ -13,6 +13,9 @@ import kotlinx.coroutines.launch
 
 data class PluginSearchUiState(
     val isLoading: Boolean = false,
+    val isLoadingMore: Boolean = false,
+    val currentPage: Int = 1,
+    val isLastPage: Boolean = false,
     val query: String = "",
     val providers: List<Provider> = emptyList(),
     val selectedProvider: Provider? = null,
@@ -43,21 +46,61 @@ class PluginSearchViewModel(
     }
 
     fun search(query: String) {
-        _uiState.value = _uiState.value.copy(query = query)
+        _uiState.value = _uiState.value.copy(query = query, currentPage = 1, isLastPage = false, results = emptyList())
         val provider = _uiState.value.selectedProvider ?: return
 
         _uiState.value = _uiState.value.copy(isLoading = true, error = null)
 
         viewModelScope.launch {
             try {
-                val results = provider.search(query)
+                val results = provider.search(query, 1)
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    results = results
+                    results = results,
+                    isLastPage = results.isEmpty()
                 )
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
+                    error = e.localizedMessage ?: "Unknown error"
+                )
+            }
+        }
+    }
+
+    fun loadMore() {
+        if (_uiState.value.isLoading || _uiState.value.isLoadingMore || _uiState.value.isLastPage) return
+        val provider = _uiState.value.selectedProvider ?: return
+        val query = _uiState.value.query
+        if (query.isBlank()) return
+        
+        val nextPage = _uiState.value.currentPage + 1
+        _uiState.value = _uiState.value.copy(isLoadingMore = true, error = null)
+
+        viewModelScope.launch {
+            try {
+                val newResults = provider.search(query, nextPage)
+                
+                // If the provider doesn't support pagination, it might return the exact same page 1 results again.
+                // We should filter out duplicates.
+                val currentIds = _uiState.value.results.map { it.id }.toSet()
+                val uniqueNewResults = newResults.filter { it.id !in currentIds }
+                
+                if (uniqueNewResults.isEmpty()) {
+                    _uiState.value = _uiState.value.copy(
+                        isLoadingMore = false,
+                        isLastPage = true
+                    )
+                } else {
+                    _uiState.value = _uiState.value.copy(
+                        isLoadingMore = false,
+                        currentPage = nextPage,
+                        results = _uiState.value.results + uniqueNewResults
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isLoadingMore = false,
                     error = e.localizedMessage ?: "Unknown error"
                 )
             }

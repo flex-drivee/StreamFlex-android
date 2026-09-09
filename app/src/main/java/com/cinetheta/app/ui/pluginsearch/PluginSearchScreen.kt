@@ -96,7 +96,22 @@ fun PluginSearchScreen(
                         onClick = { onResultClick(result) }
                     )
                 }
-                item {
+                
+                if (uiState.results.isNotEmpty() && !uiState.isLastPage) {
+                    item(span = { GridItemSpan(3) }) {
+                        Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+                            if (uiState.isLoadingMore) {
+                                CircularProgressIndicator()
+                            } else {
+                                Button(onClick = { viewModel.loadMore() }) {
+                                    Text("Load More")
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                item(span = { GridItemSpan(3) }) {
                     Spacer(modifier = Modifier.height(80.dp)) // padding for bottom bar
                 }
             }

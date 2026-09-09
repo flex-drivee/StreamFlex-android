@@ -61,10 +61,12 @@ class MovieBoxProvider(
         Logger.i("[$id] Domain reset — will re-resolve on next request", TAG)
     }
 
-    override suspend fun search(query: String): List<SearchResult> {
+    override suspend fun search(query: String): List<SearchResult> = search(query, 1)
+
+    override suspend fun search(query: String, page: Int): List<SearchResult> {
         ensureDomain()
         return runCatching {
-            searchImpl.search(query = query, baseUrl = baseUrl)
+            searchImpl.search(query = query, baseUrl = baseUrl, page = page)
         }.onFailure {
             Logger.e("[$id] Search failed for '$query': ${it.message}", TAG)
         }.getOrDefault(emptyList())
