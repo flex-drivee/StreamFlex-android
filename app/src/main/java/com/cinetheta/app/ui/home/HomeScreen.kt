@@ -46,6 +46,7 @@ fun HomeScreen(
     viewModel: HomeViewModel,
     providerRepository: ProviderRepository,
     onNavigateToDetail: (String, String) -> Unit,
+    onNavigateToContinueWatching: () -> Unit = {},
     onSearchClick: () -> Unit = {},
     onSettingsClick: () -> Unit = {},
     onDownloadsClick: () -> Unit = {},
@@ -154,7 +155,8 @@ fun HomeScreen(
                 item {
                     SFContinueWatchingRow(
                         items    = state.continueWatching,
-                        onItemClick = onNavigateToDetail
+                        onItemClick = onNavigateToDetail,
+                        onSeeAllClick = onNavigateToContinueWatching
                     )
                 }
             }
@@ -666,7 +668,7 @@ private fun SFContinueWatchingRow(
                 color    = MaterialTheme.colorScheme.onBackground
             )
             androidx.compose.material3.Icon(
-                imageVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowForward,
+                imageVector = androidx.compose.material.icons.Icons.Filled.ArrowForward,
                 contentDescription = "See All",
                 tint = MaterialTheme.colorScheme.primary
             )
@@ -758,9 +760,10 @@ fun SFVideoCard(
 }
 
 @Composable
-private fun SFContinueCard(
+fun SFContinueCard(
     item: com.cinetheta.player.resume.HistoryItem,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val progress = if (item.durationMs > 0) {
         (item.positionMs.toFloat() / item.durationMs.toFloat()).coerceIn(0f, 1f)
