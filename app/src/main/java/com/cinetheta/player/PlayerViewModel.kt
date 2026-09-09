@@ -79,7 +79,21 @@ class PlayerViewModel(
                     }
                 }
 
-                // 2. If not downloaded, resolve online streams
+                // 2. Check for Direct Plugin Sources
+                val directSources = com.cinetheta.app.ui.pluginsearch.PluginSharedData.takeSources()
+                if (directSources != null) {
+                    streamRepository.resolveSources(directSources) { currentStreams ->
+                        if (currentStreams.isPlayable) {
+                            _uiState.value = _uiState.value.copy(
+                                isLoading = false,
+                                streams = currentStreams.streams
+                            )
+                        }
+                    }
+                    return@launch
+                }
+
+                // 3. If not downloaded, resolve online streams
                 if (session.isShow && session.currentEpisode != null) {
                     streamRepository.resolveEpisode(
                         title = session.title,

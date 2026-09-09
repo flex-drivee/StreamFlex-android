@@ -111,7 +111,8 @@ fun AppNavigation(
                     searchResult = searchResult,
                     viewModel = viewModel,
                     onBackClick = { navController.popBackStack() },
-                    onPlayClick = { episode ->
+                                        onPlayClick = { sources, episode ->
+                        com.cinetheta.app.ui.pluginsearch.PluginSharedData.directSources = sources
                         val intent = Intent(context, com.cinetheta.player.PlayerActivity::class.java).apply {
                             putExtra("MEDIA_ID", searchResult.id)
                             putExtra("VIDEO_TITLE", searchResult.title)
