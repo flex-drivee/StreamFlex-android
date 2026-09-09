@@ -166,19 +166,42 @@ fun PlayerScreen(
         if (showResumeDialog) {
             AlertDialog(
                 onDismissRequest = { controller.resumePlayback(true) },
-                title = { Text("Resume Playback", style = MaterialTheme.typography.titleLarge) },
-                text = { Text("Do you want to resume from where you left off?", style = MaterialTheme.typography.bodyMedium) },
+                containerColor = Color(0xFF0F1014).copy(alpha = 0.95f),
+                titleContentColor = Color.White,
+                textContentColor = Color.LightGray,
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
+                title = {
+                    androidx.compose.foundation.layout.Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = androidx.compose.material.icons.Icons.Default.PlayArrow,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(28.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Resume Playback", style = MaterialTheme.typography.titleLarge, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                    }
+                },
+                text = { Text("Do you want to resume watching from where you left off?", style = MaterialTheme.typography.bodyLarge) },
                 confirmButton = {
                     Button(
                         onClick = { controller.resumePlayback(true) },
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                     ) {
-                        Text("Resume", color = Color.White)
+                        Text("Resume", color = Color.White, fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold)
                     }
                 },
                 dismissButton = {
-                    TextButton(onClick = { controller.resumePlayback(false) }) {
-                        Text("Start Over", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    OutlinedButton(
+                        onClick = { controller.resumePlayback(false) },
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.2f))
+                    ) {
+                        Text("Start Over", color = Color.White)
                     }
                 }
             )
