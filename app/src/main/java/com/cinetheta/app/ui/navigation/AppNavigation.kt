@@ -30,6 +30,15 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.cinetheta.app.domain.repository.ContentRepository
 import com.cinetheta.domain.repositories.StreamRepository
+
+import com.cinetheta.app.ui.pluginsearch.PluginSearchScreen
+import com.cinetheta.app.ui.pluginsearch.PluginSearchViewModel
+import com.cinetheta.app.ui.pluginsearch.PluginSearchViewModelFactory
+import com.cinetheta.app.ui.pluginsearch.PluginDetailScreen
+import com.cinetheta.app.ui.pluginsearch.PluginDetailViewModel
+import com.cinetheta.app.ui.pluginsearch.PluginDetailViewModelFactory
+import com.cinetheta.domain.models.SearchResult as DomainSearchResult
+
 import com.cinetheta.app.ui.home.HomeScreen
 import com.cinetheta.app.ui.home.HomeViewModel
 import com.cinetheta.app.ui.home.HomeViewModelFactory
@@ -43,11 +52,13 @@ import com.cinetheta.app.ui.search.SearchViewModelFactory
 
 sealed class BottomNavItem(val route: String, val icon: ImageVector, val selectedIcon: ImageVector) {
     object Home : BottomNavItem(Screen.Home.route, Icons.Outlined.Home, Icons.Filled.Home)
-    object Search : BottomNavItem(Screen.Search.route, Icons.Outlined.Search, Icons.Filled.Search)
+    object Search : BottomNavItem(Screen.PluginSearch.route, Icons.Outlined.Search, Icons.Filled.Search)
     object Explore : BottomNavItem("explore", Icons.Outlined.Explore, Icons.Filled.Explore)
     object Library : BottomNavItem("library", Icons.Outlined.VideoLibrary, Icons.Filled.VideoLibrary)
     object Settings : BottomNavItem(Screen.Settings.route, Icons.Outlined.Settings, Icons.Filled.Settings)
 }
+
+var currentPluginSearchResult: DomainSearchResult? = null
 
 @Composable
 fun AppNavigation(
@@ -75,6 +86,56 @@ fun AppNavigation(
             modifier = Modifier.fillMaxSize()
         ) {
             // --- HOME ---
+            
+            composable(Screen.PluginSearch.route) {
+                val viewModelFactory = PluginSearchViewModelFactory(com.cinetheta.app.di.ProviderModule.repository)
+                val viewModel: PluginSearchViewModel = viewModel(factory = viewModelFactory)
+                PluginSearchScreen(
+                    viewModel = viewModel,
+                    onResultClick = { result ->
+                        currentPluginSearchResult = result
+                        navController.navigate(Screen.PluginDetail.route)
+                    }
+                )
+            }
+
+            composable(Screen.PluginDetail.route) {
+                val searchResult = currentPluginSearchResult
+                if (searchResult == null) {
+                    navController.popBackStack()
+                    return@composable
+                }
+                val viewModelFactory = PluginDetailViewModelFactory(streamRepository)
+                val viewModel: PluginDetailViewModel = viewModel(factory = viewModelFactory)
+                PluginDetailScreen(
+                    searchResult = searchResult,
+                    viewModel = viewModel,
+                    onBackClick = { navController.popBackStack() },
+                    onPlayClick = { episode ->
+                        val intent = Intent(context, com.cinetheta.player.PlayerActivity::class.java).apply {
+                            putExtra("MEDIA_ID", searchResult.id)
+                            putExtra("VIDEO_TITLE", searchResult.title)
+                            putExtra("VIDEO_YEAR", searchResult.year ?: 0)
+                            putExtra("POSTER_PATH", searchResult.poster)
+                            if (episode != null) {
+                                putExtra("IS_SHOW", true)
+                                putExtra("CURRENT_EPISODE_ID", episode.url) // Plugin episodes use URL as ID often, or just pass the link
+                                // Wait, the StreamRepository resolve logic usually needs the whole ProviderResult.
+                                // But for Plugin direct play, PlayerActivity expects TMDB IDs to resolve!
+                                // We might need to handle this! Let's pass PLUGIN_DIRECT_URL and Provider ID!
+                            } else {
+                                putExtra("IS_SHOW", false)
+                            }
+                            putExtra("PLUGIN_DIRECT_PLAY", true)
+                            putExtra("PLUGIN_PROVIDER_ID", searchResult.providerId)
+                            putExtra("PLUGIN_RESULT_URL", searchResult.url)
+                            putExtra("PLUGIN_EPISODE_URL", episode?.url)
+                        }
+                        context.startActivity(intent)
+                    }
+                )
+            }
+
             composable(route = Screen.Home.route) {
                 val progressManager = remember { com.cinetheta.player.resume.PlaybackProgressManager(context) }
                 val viewModelFactory = HomeViewModelFactory(repository, progressManager)

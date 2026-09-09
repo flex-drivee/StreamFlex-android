@@ -88,7 +88,8 @@ class PlayerActivity : ComponentActivity() {
             year = videoYear,
             isShow = isShow,
             episodes = episodes,
-            currentEpisode = currentEpisode
+            currentEpisode = currentEpisode,
+            pluginProviderId = intent.getStringExtra("PLUGIN_PROVIDER_ID")
         )
         
         viewModel.initializeSession(session)
