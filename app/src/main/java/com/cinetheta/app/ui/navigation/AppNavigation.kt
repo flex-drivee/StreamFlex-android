@@ -126,11 +126,8 @@ fun AppNavigation(
                             } else {
                                 putExtra("IS_SHOW", false)
                             }
-                            putExtra("PLUGIN_DIRECT_PLAY", true)
-                            putExtra("PLUGIN_PROVIDER_ID", searchResult.providerId)
-                            putExtra("PLUGIN_RESULT_URL", searchResult.url)
-                            putExtra("PLUGIN_EPISODE_URL", episode?.url)
-                        }
+                                                        putExtra("PLUGIN_PROVIDER_ID", searchResult.providerId)
+                                                                                }
                         context.startActivity(intent)
                     }
                 )
