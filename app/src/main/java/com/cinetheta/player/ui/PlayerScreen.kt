@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.HighQuality
 import androidx.compose.material.icons.filled.Audiotrack
 import androidx.compose.material.icons.filled.ClosedCaption
@@ -175,7 +176,7 @@ fun PlayerScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            imageVector = androidx.compose.material.icons.Icons.Filled.PlayArrow,
+                            imageVector = Icons.Filled.PlayArrow,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(28.dp)
