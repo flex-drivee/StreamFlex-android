@@ -44,6 +44,11 @@ class HomeViewModel(
         _uiState.value = _uiState.value.copy(continueWatching = progressManager.getHistory())
     }
 
+    fun removeHistoryItem(mediaId: String) {
+        progressManager.removeFromHistory(mediaId)
+        reloadHistory()
+    }
+
     fun loadHomeData() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)

@@ -83,9 +83,25 @@ object StreamFailover {
     }
 
     /**
-     * Host priority.
+     * Host priority for stream ordering.
      *
-     * Lower value = higher priority.
+     * Lower value = higher priority (shown first / tried first).
+     *
+     * HDHub / 4KHDHub order:
+     *   FSL  (HubCloud / workers.dev)  → priority 0
+     *   FSL2 (HubDrive / HubCdn / HbLinks) → priority 1–3
+     *   PixelDrain                      → priority 4
+     *   Direct media (.mp4/.mkv/.m3u8)  → priority 5–7
+     *   Other streaming hosts           → priority 10–15
+     *   Redirect / BuzzerLinks/download → priority 90 (last)
+     *
+     * Anime order (AnimeDekho / ToonStream):
+     *   StreamRuby                      → priority 0
+     *   Abyss / PlayHydrax              → priority 1
+     *   GDMirrorBot                     → priority 2
+     *   Cloudy / TurboVid               → priority 3–4
+     *   StreamUp / Xerver               → priority 5–6
+     *   Vidmoly                         → priority 80 (always last — drops mid-play)
      */
     private fun hostPriority(
         stream: StreamLink
@@ -93,19 +109,49 @@ object StreamFailover {
         val url = stream.url.lowercase()
 
         return when {
-            url.endsWith(".m3u8") -> 0
-            url.contains("googleusercontent.com") || stream.host == HostType.GOOGLE_VIDEO -> 1
-            url.endsWith(".mp4") || url.endsWith(".mkv") -> 2
-            url.endsWith(".mpd") -> 3
-            url.contains("workers.dev") || stream.host == HostType.HUBCLOUD -> 4
-            stream.host == HostType.HUBDRIVE -> 5
-            stream.host == HostType.HUBCDN -> 6
-            stream.host == HostType.HBLINKS -> 7
-            stream.host == HostType.PIXELDRAIN || url.contains("pixeldrain") -> 8
-            stream.host == HostType.STREAMTAPE -> 9
-            stream.host == HostType.FILEMOON -> 10
-            stream.host == HostType.MIXDROP -> 11
-            else -> 20
+            // ── Anime: StreamRuby first, Abyss second ────────────────────────
+            stream.host == HostType.STREAMRUBY -> 0
+            stream.host == HostType.ABYSS -> 1
+            stream.host == HostType.GDMIRRORBOT -> 2
+            stream.host == HostType.CLOUDY -> 3
+            stream.host == HostType.TURBOVID -> 4
+            stream.host == HostType.STREAMUP -> 5
+            stream.host == HostType.XERVER -> 6
+
+            // ── HDHub / 4KHDHub: Google first ────────────────────────────────
+            url.contains("googleusercontent.com") || stream.host == HostType.GOOGLE_VIDEO -> 7
+
+            // ── FSL (HubCloud / workers.dev) ─────────────────────────────────
+            url.contains("workers.dev") || stream.host == HostType.HUBCLOUD -> 8
+
+            // ── FSL2 (HubDrive → HubCdn → HbLinks) ──────────────────────────
+            stream.host == HostType.HUBDRIVE -> 9
+            stream.host == HostType.HUBCDN -> 10
+            stream.host == HostType.HBLINKS -> 11
+
+            // ── PixelDrain ───────────────────────────────────────────────────
+            stream.host == HostType.PIXELDRAIN || url.contains("pixeldrain") -> 12
+
+            // ── Direct media ─────────────────────────────────────────────────
+            url.endsWith(".m3u8") -> 13
+            url.endsWith(".mpd") -> 14
+            url.endsWith(".mp4") || url.endsWith(".mkv") -> 15
+
+            // ── Other extractors (Streamtape, FileMoon, Mixdrop, Dood) ───────
+            stream.host == HostType.STREAMTAPE -> 20
+            stream.host == HostType.FILEMOON -> 21
+            stream.host == HostType.MIXDROP -> 22
+            stream.host == HostType.DOOD -> 23
+            stream.host == HostType.HDSTREAM4U -> 24
+            stream.host == HostType.VIDSTACK -> 25
+
+            // ── Vidmoly: always last for anime (drops mid-play) ──────────────
+            stream.host == HostType.VIDMOLY -> 80
+
+            // ── BuzzerLinks / download redirects: absolute last ───────────────
+            stream.host == HostType.REDIRECT -> 90
+
+            else -> 50
         }
     }
 }

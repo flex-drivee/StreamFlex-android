@@ -33,6 +33,11 @@ class StreamRepository(
         } else {
             emptyList()
         }
+        return resolveSources(sources, onStreamFound)
+    }
+
+    suspend fun resolveSources(sources: List<com.cinetheta.domain.models.ProviderSource>, onStreamFound: suspend (FinalStreams) -> Unit = {}): FinalStreams {
+        if (sources.isEmpty()) return FinalStreams.EMPTY
         return streamEngine.resolve(sources, onStreamFound)
     }
 

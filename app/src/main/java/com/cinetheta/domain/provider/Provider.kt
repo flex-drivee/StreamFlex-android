@@ -49,6 +49,16 @@ interface Provider {
     ): List<SearchResult>
 
     /**
+     * Search content with pagination.
+     */
+    suspend fun search(
+        query: String,
+        page: Int
+    ): List<SearchResult> {
+        return search(query)
+    }
+
+    /**
      * Load a selected item.
      *
      * Returns provider sources,

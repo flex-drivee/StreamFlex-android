@@ -6,10 +6,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,14 +31,25 @@ fun EpisodeDrawer(
     onEpisodeClick: (PlayerEpisode) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(isVisible) {
+        if (isVisible && currentEpisode != null) {
+            val index = episodes.indexOfFirst { it.id == currentEpisode.id }
+            if (index >= 0) {
+                listState.scrollToItem(index)
+            }
+        }
+    }
+
     AnimatedVisibility(
         visible = isVisible,
         enter = fadeIn(tween(300)) + slideInHorizontally(
-            initialOffsetX = { -it }, 
+            initialOffsetX = { it }, 
             animationSpec = tween(300)
         ),
         exit = slideOutHorizontally(
-            targetOffsetX = { -it }, 
+            targetOffsetX = { it }, 
             animationSpec = tween(300)
         ) + fadeOut(tween(300)),
         modifier = Modifier.fillMaxSize()
@@ -52,12 +67,13 @@ fun EpisodeDrawer(
                     .background(Color.Black.copy(alpha = 0.6f))
             )
             
-            // Drawer Panel on the Left
+            // Drawer Panel on the Right
             Column(
                 modifier = Modifier
+                    .align(Alignment.CenterEnd)
                     .fillMaxHeight()
-                    .width(360.dp)
-                    .background(Color(0xFF161616))
+                    .width(380.dp)
+                    .background(Color(0xFF0F1014).copy(alpha = 0.90f)) // Transparent dark theme
             ) {
                 Text(
                     text = "Episodes",
@@ -67,12 +83,13 @@ fun EpisodeDrawer(
                     modifier = Modifier.padding(horizontal = 24.dp, vertical = 24.dp)
                 )
                 
-                HorizontalDivider(color = Color.DarkGray.copy(alpha = 0.5f))
+                HorizontalDivider(color = Color.White.copy(alpha = 0.1f))
 
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
+                    state = listState
                 ) {
-                    items(episodes) { episode ->
+                    itemsIndexed(episodes) { index, episode ->
                         val isCurrent = episode.id == currentEpisode?.id
                         
                         Row(
@@ -81,7 +98,7 @@ fun EpisodeDrawer(
                                 .clickable { 
                                     if (!isCurrent) onEpisodeClick(episode) 
                                 }
-                                .background(if (isCurrent) Color.White.copy(alpha = 0.1f) else Color.Transparent)
+                                .background(if (isCurrent) Color.White.copy(alpha = 0.05f) else Color.Transparent)
                                 .padding(horizontal = 24.dp, vertical = 16.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -113,10 +130,15 @@ fun EpisodeDrawer(
                                     Box(
                                         modifier = Modifier
                                             .fillMaxSize()
-                                            .background(Color.Black.copy(alpha = 0.6f)), 
+                                            .background(Color.Black.copy(alpha = 0.5f)), 
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        Text("Playing", color = Color.Red, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                                        Icon(
+                                            imageVector = Icons.Default.PlayArrow,
+                                            contentDescription = "Playing",
+                                            tint = Color.White,
+                                            modifier = Modifier.size(36.dp)
+                                        )
                                     }
                                 }
                             }
@@ -134,6 +156,12 @@ fun EpisodeDrawer(
                                 )
                             }
                         }
+                        
+                        // Add a divider after every item except the last one (or even the last one is fine)
+                        HorizontalDivider(
+                            modifier = Modifier.padding(horizontal = 24.dp),
+                            color = Color.White.copy(alpha = 0.05f)
+                        )
                     }
                 }
             }

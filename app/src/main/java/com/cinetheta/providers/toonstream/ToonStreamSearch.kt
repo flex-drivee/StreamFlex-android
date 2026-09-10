@@ -14,15 +14,24 @@ class ToonStreamSearch {
 
     /**
      * Search for anime/content on ToonStream.
-     * Endpoint: https://toon-stream.site/?s={query}
+     * Endpoint: https://toon-stream.site/?s={query}  (standard WordPress search)
+     *
+     * Note: toon-stream.site uses Cloudflare Bot Management. The CloudflareKiller
+     * interceptor handles this automatically via WebView on first request.
      */
     suspend fun search(
         query   : String,
         baseUrl : String = ToonStreamConfig.DEFAULT_DOMAIN
     ): List<SearchResult> = withContext(Dispatchers.IO) {
         val request = RequestBuilder()
-            .url("$baseUrl/s?q=${NetworkUtils.encode(query)}")
+            .url("$baseUrl/?s=${NetworkUtils.encode(query)}")
             .header("Referer", baseUrl)
+            .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8")
+            .header("Accept-Language", "en-US,en;q=0.5")
+            .header("Upgrade-Insecure-Requests", "1")
+            .header("Sec-Fetch-Dest", "document")
+            .header("Sec-Fetch-Mode", "navigate")
+            .header("Sec-Fetch-Site", "same-origin")
             .build()
 
         when (val response = HttpClient.execute(request)) {
@@ -34,7 +43,7 @@ class ToonStreamSearch {
         }
     }
 
-    private fun parse(html: String, baseUrl: String): List<SearchResult> {
+    internal fun parse(html: String, baseUrl: String): List<SearchResult> {
         val document = HtmlParser.parse(html)
         val results  = mutableListOf<SearchResult>()
 

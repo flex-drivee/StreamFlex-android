@@ -37,7 +37,7 @@ import coil.compose.SubcomposeAsyncImage
 import com.cinetheta.app.domain.models.Episode
 import com.cinetheta.app.domain.models.SearchResult
 import com.cinetheta.app.ui.home.SFBadge
-import com.cinetheta.app.ui.home.SFVideoCard
+import com.cinetheta.app.ui.shared.SFTmdbVideoCard
 import com.cinetheta.app.ui.theme.*
 
 // ─────────────────────────────────────────────────────────────────────────────

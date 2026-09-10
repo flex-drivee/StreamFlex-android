@@ -46,6 +46,7 @@ fun HomeScreen(
     viewModel: HomeViewModel,
     providerRepository: ProviderRepository,
     onNavigateToDetail: (String, String) -> Unit,
+    onNavigateToContinueWatching: () -> Unit = {},
     onSearchClick: () -> Unit = {},
     onSettingsClick: () -> Unit = {},
     onDownloadsClick: () -> Unit = {},
@@ -154,7 +155,8 @@ fun HomeScreen(
                 item {
                     SFContinueWatchingRow(
                         items    = state.continueWatching,
-                        onItemClick = onNavigateToDetail
+                        onItemClick = onNavigateToDetail,
+                        onSeeAllClick = onNavigateToContinueWatching
                     )
                 }
             }
@@ -649,17 +651,28 @@ fun SFSectionRow(
 @Composable
 private fun SFContinueWatchingRow(
     items: List<com.cinetheta.player.resume.HistoryItem>,
-    onItemClick: (String, String) -> Unit
+    onItemClick: (String, String) -> Unit,
+    onSeeAllClick: () -> Unit
 ) {
     if (items.isEmpty()) return
 
     Column(modifier = Modifier.padding(vertical = 16.dp)) {
-        Text(
-            text     = "▶ Continue Watching",
-            style    = MaterialTheme.typography.headlineMedium.copy(fontSize = 17.sp),
-            color    = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 0.dp)
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).clickable { onSeeAllClick() },
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text     = "▶ Continue Watching",
+                style    = MaterialTheme.typography.headlineMedium.copy(fontSize = 17.sp),
+                color    = MaterialTheme.colorScheme.onBackground
+            )
+            androidx.compose.material3.Icon(
+                imageVector = androidx.compose.material.icons.Icons.Filled.ArrowForward,
+                contentDescription = "See All",
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
         Spacer(Modifier.height(12.dp))
 
         LazyRow(
@@ -747,9 +760,10 @@ fun SFVideoCard(
 }
 
 @Composable
-private fun SFContinueCard(
+fun SFContinueCard(
     item: com.cinetheta.player.resume.HistoryItem,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val progress = if (item.durationMs > 0) {
         (item.positionMs.toFloat() / item.durationMs.toFloat()).coerceIn(0f, 1f)

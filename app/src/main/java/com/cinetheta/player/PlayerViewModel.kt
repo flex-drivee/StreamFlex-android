@@ -21,7 +21,8 @@ data class PlayerSession(
     val year: Int,
     val isShow: Boolean,
     val episodes: List<PlayerEpisode>,
-    val currentEpisode: PlayerEpisode?
+    val currentEpisode: PlayerEpisode?,
+    val pluginProviderId: String? = null
 )
 
 data class PlayerUiState(
@@ -40,13 +41,18 @@ class PlayerViewModel(
     private val _uiState = MutableStateFlow(PlayerUiState())
     val uiState: StateFlow<PlayerUiState> = _uiState.asStateFlow()
 
+    private var originalProviderId: String? = null
+
     fun initializeSession(session: PlayerSession) {
         if (_uiState.value.session == null) {
             _uiState.value = _uiState.value.copy(session = session)
+            if (session.pluginProviderId != null) {
+                originalProviderId = com.cinetheta.app.di.ProviderModule.repository.selectedProviderId
+                com.cinetheta.app.di.ProviderModule.repository.selectedProviderId = session.pluginProviderId
+            }
             fetchStreamsForCurrentSession()
         }
     }
-
     private fun fetchStreamsForCurrentSession() {
         val session = _uiState.value.session ?: return
         _uiState.value = _uiState.value.copy(isLoading = true, error = null, streams = emptyList(), isOffline = false)
@@ -76,7 +82,21 @@ class PlayerViewModel(
                     }
                 }
 
-                // 2. If not downloaded, resolve online streams
+                // 2. Check for Direct Plugin Sources
+                val directSources = com.cinetheta.app.ui.pluginsearch.PluginSharedData.takeSources()
+                if (directSources != null) {
+                    streamRepository.resolveSources(directSources) { currentStreams ->
+                        if (currentStreams.isPlayable) {
+                            _uiState.value = _uiState.value.copy(
+                                isLoading = false,
+                                streams = currentStreams.streams
+                            )
+                        }
+                    }
+                    return@launch
+                }
+
+                // 3. If not downloaded, resolve online streams
                 if (session.isShow && session.currentEpisode != null) {
                     streamRepository.resolveEpisode(
                         title = session.title,
@@ -137,6 +157,12 @@ class PlayerViewModel(
             return session.episodes[index + 1]
         }
         return null
+    }
+    override fun onCleared() {
+        super.onCleared()
+        if (_uiState.value.session?.pluginProviderId != null) {
+            com.cinetheta.app.di.ProviderModule.repository.selectedProviderId = originalProviderId
+        }
     }
 }
 

@@ -107,6 +107,12 @@ class NetMirrorSearch : SearchResultParser {
         val root = JsonParser.parse(raw.asString()) ?: return emptyList()
         val results = mutableListOf<SearchResult>()
 
+        val head = JsonParser.string(root, "head")
+        if (head?.contains("Top Searches", ignoreCase = true) == true) {
+            StreamLogger.debug(TAG, "Search returned fallback 'Top Searches' (no match), skipping...")
+            return emptyList()
+        }
+
         return try {
             val searchResults = JsonParser.array(root, "searchResult")
             for (item in searchResults) {
@@ -121,8 +127,12 @@ class NetMirrorSearch : SearchResultParser {
                 }
 
                 val rStr           = JsonParser.string(item, "r")
-                val isSeries       = rStr?.equals("Series", ignoreCase = true) == true
-                val resolvedMedia  = if (isSeries) MediaType.TV else MediaType.MOVIE
+                val isSeries       = rStr != null && (rStr.equals("Series", ignoreCase = true) || rStr.contains("Season", ignoreCase = true) || rStr.contains("Episode", ignoreCase = true))
+                // If rStr is null, we can't be sure. Let's look at the title. If the title has "Season" or "Class" or something, maybe it's a TV show.
+                // Actually, a safer fallback is MediaType.TV if we want it to be considered for both, but the app architecture might expect TV or MOVIE.
+                // If it's MOVIE, EpisodeMatcher rejects it. So if we are unsure (r is null), it's better to default to TV so it can be matched for episodes, 
+                // OR we can check if it's missing and set it to TV. Let's just set it to TV if `rStr` is null, because NetMirror mostly has Series without `r`.
+                val resolvedMedia  = if (isSeries || rStr == null) MediaType.TV else MediaType.MOVIE
 
                 // Custom URI scheme consumed by NetMirrorExtractor
                 val detailUrl = "netmirror://$ott/$id"

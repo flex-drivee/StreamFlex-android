@@ -90,7 +90,7 @@ object Constants {
      * This is the remote source of truth for domains, capabilities and extractor IDs.
      */
     const val PROVIDERS_REPO_BASE =
-        "https://raw.githubusercontent.com/flex-drivee/cinetheta-providers/main"
+        "https://raw.githubusercontent.com/flex-drivee/streamflex-providers/main"
 
     const val PROVIDERS_HEALTH_URL  = "$PROVIDERS_REPO_BASE/health/health.json"
     const val EXTRACTORS_REGISTRY_URL = "$PROVIDERS_REPO_BASE/extractors/registry.json"
@@ -102,9 +102,9 @@ object Constants {
     // ─── Domain Resolution ────────────────────────────────────────────────────
     /**
      * SharedPreferences key prefix for cached provider domains.
-     * Full key: "domain_<provider_id>"
+     * Full key: "domain_v2_<provider_id>"
      */
-    const val PREFS_DOMAIN_KEY_PREFIX = "domain_"
+    const val PREFS_DOMAIN_KEY_PREFIX = "domain_v2_"
     const val PREFS_DOMAIN_TS_SUFFIX  = "_ts"
 
     // ─── SharedPreferences Names ─────────────────────────────────────────────

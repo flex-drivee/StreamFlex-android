@@ -61,13 +61,13 @@ object TitleMatcher {
         
         // We use word boundaries on the original strings to prevent substring bleeding (e.g. reacher in preacher)
         val patternA = Regex("\\b${Regex.escape(a)}\\b")
-        val patternB = Regex("\\b${Regex.escape(b)}\\b")
         val matchA = patternA.find(b)
-        val matchB = patternB.find(a)
-        if ((matchA != null && b.length > 3) || (matchB != null && a.length > 3)) {
-            val indexA = matchA?.range?.first ?: Int.MAX_VALUE
-            val indexB = matchB?.range?.first ?: Int.MAX_VALUE
-            if (indexA == 0 || indexB == 0) {
+        
+        // We only check if the Provider title (b) contains the full TMDB title (a).
+        // Checking if the TMDB title contains the Provider title leads to false positives (e.g. "Coyote" matches "Coyote vs. Acme").
+        if (matchA != null && b.length > 3) {
+            val indexA = matchA.range.first
+            if (indexA == 0) {
                 return 0.90
             } else {
                 return 0.80

@@ -3,6 +3,7 @@ package com.cinetheta.app.ui.navigation
 sealed class Screen(val route: String) {
     object Home : Screen("home")
     object Search : Screen("search")
+    object PluginSearch : Screen("plugin_search")
     object MyList : Screen("mylist")
     object Settings : Screen("settings")
     object Downloads : Screen("downloads")
@@ -11,7 +12,6 @@ sealed class Screen(val route: String) {
         fun createRoute(type: String, movieId: String) = "detail/$type/$movieId"
     }
 
-    // We don't need a route for Player if we use a separate Activity,
-    // but if we use a Composable Player, we would add it here.
-    // For this guide, we will use the PlayerActivity you already have structure for.
+    object PluginDetail : Screen("plugin_detail")
+    object ContinueWatching : Screen("continue_watching")
 }

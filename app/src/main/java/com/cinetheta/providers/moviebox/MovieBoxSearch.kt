@@ -12,7 +12,7 @@ import org.json.JSONObject
 
 class MovieBoxSearch {
 
-    suspend fun search(query: String, baseUrl: String): List<SearchResult> {
+    suspend fun search(query: String, baseUrl: String, page: Int = 1): List<SearchResult> {
         val searchUrl = "$baseUrl/wefeed-mobile-bff/subject-api/search/v2"
         val jsonBody = "{\"keyword\":\"$query\",\"page\":1,\"perPage\":20}"
 
