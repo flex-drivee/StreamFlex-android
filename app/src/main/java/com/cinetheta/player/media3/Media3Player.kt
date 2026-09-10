@@ -191,23 +191,22 @@ class Media3Player(
                 C.TRACK_TYPE_TEXT -> {
                     for (i in 0 until group.length) {
                         val format = group.getTrackFormat(i)
-                        if (group.isTrackSupported(i)) {
-                            val lang = format.language?.takeIf { it != "und" }
-                            val readableName = lang?.let { java.util.Locale.forLanguageTag(it).displayLanguage }
-                            val cleanLabel = format.label?.takeIf { it.isNotBlank() && !it.contains(".tv", true) && !it.contains(".com", true) && !it.contains("hdhub4u", true) }
-                            
-                            val finalLabel = readableName ?: cleanLabel ?: lang?.uppercase() ?: "Subtitle ${i + 1}"
-                            
-                            val option = SubtitleTrack(
-                                id = "${group.mediaTrackGroup.hashCode()}_$i",
-                                language = format.language,
-                                label = finalLabel,
-                                mimeType = format.sampleMimeType,
-                                isEmbedded = true
-                            )
-                            subtitles.add(option)
-                            if (group.isTrackSelected(i)) currentSubtitle = option
-                        }
+                        
+                        val lang = format.language?.takeIf { it != "und" }
+                        val readableName = lang?.let { java.util.Locale.forLanguageTag(it).displayLanguage }
+                        val cleanLabel = format.label?.takeIf { it.isNotBlank() && !it.contains(".tv", true) && !it.contains(".com", true) && !it.contains("hdhub4u", true) }
+                        
+                        val finalLabel = readableName ?: cleanLabel ?: lang?.uppercase() ?: "Subtitle ${i + 1}"
+                        
+                        val option = SubtitleTrack(
+                            id = "${group.mediaTrackGroup.hashCode()}_$i",
+                            language = format.language,
+                            label = finalLabel,
+                            mimeType = format.sampleMimeType,
+                            isEmbedded = true
+                        )
+                        subtitles.add(option)
+                        if (group.isTrackSelected(i)) currentSubtitle = option
                     }
                 }
             }
@@ -262,11 +261,28 @@ class Media3Player(
 
     override fun load(stream: StreamLink) {
         _state.value = PlayerState() 
-        trackSelector.setParameters(
-            trackSelector.buildUponParameters()
-                .clearOverrides()
-                .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, false) // Enable subtitles so they can be probed and listed
-        )
+        val prefs = context.getSharedPreferences("cinetheta_settings", android.content.Context.MODE_PRIVATE)
+        val enableSubtitles = prefs.getBoolean("enable_subtitles", false)
+        val defaultQuality = prefs.getString("player_video_quality", "Auto") ?: "Auto"
+        
+        var builder = trackSelector.buildUponParameters().clearOverrides()
+        
+        if (!enableSubtitles) {
+            builder = builder.setTrackTypeDisabled(C.TRACK_TYPE_TEXT, true)
+        } else {
+            builder = builder.setTrackTypeDisabled(C.TRACK_TYPE_TEXT, false)
+        }
+        
+        if (defaultQuality != "Auto") {
+            val height = defaultQuality.replace("p", "").toIntOrNull()
+            if (height != null) {
+                builder = builder.setMaxVideoSize(Int.MAX_VALUE, height)
+            }
+        } else {
+            builder = builder.clearVideoSizeConstraints()
+        }
+        
+        trackSelector.setParameters(builder)
 
         // 1. Resolve User-Agent and default streaming headers
         val userAgent = stream.headers.entries.find { it.key.equals("User-Agent", ignoreCase = true) }?.value

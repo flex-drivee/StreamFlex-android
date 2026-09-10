@@ -63,46 +63,48 @@ class MovieBoxExtractor : BaseExtractor() {
             else -> {}
         }
         
-        // 2. Fetch fallback get endpoint for resourceDetectors
-        try {
-            val uri = Uri.parse(playUrl)
-            val subjectId = uri.getQueryParameter("subjectId")
-            if (!subjectId.isNullOrBlank()) {
-                // Determine base URL from playUrl
-                val baseUrl = "${uri.scheme}://${uri.host}"
-                val getUrl = "$baseUrl/wefeed-mobile-bff/subject-api/get?subjectId=$subjectId"
-                
-                val getHeaders = MovieBoxCrypto.getHeaders(
-                    method = "GET",
-                    url = getUrl,
-                    body = null
-                )
-
-                val getRequest = RequestBuilder()
-                    .url(getUrl)
-                    .get()
-                    .headers(getHeaders)
-                    .build()
+        // 2. Fetch fallback get endpoint for resourceDetectors ONLY if we found no streams
+        if (streams.isEmpty() && nextSources.isEmpty()) {
+            try {
+                val uri = Uri.parse(playUrl)
+                val subjectId = uri.getQueryParameter("subjectId")
+                if (!subjectId.isNullOrBlank()) {
+                    // Determine base URL from playUrl
+                    val baseUrl = "${uri.scheme}://${uri.host}"
+                    val getUrl = "$baseUrl/wefeed-mobile-bff/subject-api/get?subjectId=$subjectId"
                     
-                when (val getResponse = HttpClient.execute(getRequest)) {
-                    is NetworkResult.Success -> {
-                        val getJson = getResponse.data.bodyAsString()
-                        val getRoot = JsonParser.parse(getJson)
-                        if (getRoot != null) {
-                            val getData = JsonParser.objectOf(getRoot, "data")
-                            if (getData != null) {
-                                val globalSignCookie = JsonParser.string(getData, "signCookie") ?: JsonParser.string(getData, "signCookieRaw")
-                                
-                                val resourceDetectors = JsonParser.array(getData, "resourceDetectors")
-                                parseStreamList(resourceDetectors, globalSignCookie, streams, nextSources, baseOrigin, injectedLang)
+                    val getHeaders = MovieBoxCrypto.getHeaders(
+                        method = "GET",
+                        url = getUrl,
+                        body = null
+                    )
+
+                    val getRequest = RequestBuilder()
+                        .url(getUrl)
+                        .get()
+                        .headers(getHeaders)
+                        .build()
+                        
+                    when (val getResponse = HttpClient.execute(getRequest)) {
+                        is NetworkResult.Success -> {
+                            val getJson = getResponse.data.bodyAsString()
+                            val getRoot = JsonParser.parse(getJson)
+                            if (getRoot != null) {
+                                val getData = JsonParser.objectOf(getRoot, "data")
+                                if (getData != null) {
+                                    val globalSignCookie = JsonParser.string(getData, "signCookie") ?: JsonParser.string(getData, "signCookieRaw")
+                                    
+                                    val resourceDetectors = JsonParser.array(getData, "resourceDetectors")
+                                    parseStreamList(resourceDetectors, globalSignCookie, streams, nextSources, baseOrigin, injectedLang)
+                                }
                             }
                         }
+                        else -> {}
                     }
-                    else -> {}
                 }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
         }
 
         return ExtractionResult(

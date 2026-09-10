@@ -15,7 +15,7 @@ class NetMirrorProvider(
 ) : Provider {
 
     override val id = "netmirror"
-    override val name = "NetMirror (All OTTs)"
+    override val name = "All OTTs"
 
     override val supportedMedia = setOf(MediaType.MOVIE, MediaType.TV)
     

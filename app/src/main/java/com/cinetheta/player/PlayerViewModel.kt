@@ -41,10 +41,13 @@ class PlayerViewModel(
     private val _uiState = MutableStateFlow(PlayerUiState())
     val uiState: StateFlow<PlayerUiState> = _uiState.asStateFlow()
 
+    private var originalProviderId: String? = null
+
     fun initializeSession(session: PlayerSession) {
         if (_uiState.value.session == null) {
             _uiState.value = _uiState.value.copy(session = session)
             if (session.pluginProviderId != null) {
+                originalProviderId = com.cinetheta.app.di.ProviderModule.repository.selectedProviderId
                 com.cinetheta.app.di.ProviderModule.repository.selectedProviderId = session.pluginProviderId
             }
             fetchStreamsForCurrentSession()
@@ -157,7 +160,9 @@ class PlayerViewModel(
     }
     override fun onCleared() {
         super.onCleared()
-        com.cinetheta.app.di.ProviderModule.repository.selectedProviderId = null
+        if (_uiState.value.session?.pluginProviderId != null) {
+            com.cinetheta.app.di.ProviderModule.repository.selectedProviderId = originalProviderId
+        }
     }
 }
 

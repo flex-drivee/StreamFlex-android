@@ -56,12 +56,17 @@ class CloudflareKiller : Interceptor {
         if (isCloudflare && response.code in ERROR_CODES) {
             try {
                 val bodyString = response.peekBody(1024 * 50).string()
-                isChallenge = bodyString.contains("cf-browser-verification") || 
-                              bodyString.contains("cf-turnstile") || 
+                isChallenge = bodyString.contains("cf-browser-verification") ||
+                              bodyString.contains("cf-turnstile") ||
                               bodyString.contains("challenges.cloudflare.com") ||
-                              bodyString.contains("just a moment", ignoreCase = true)
+                              bodyString.contains("just a moment", ignoreCase = true) ||
+                              // Cloudflare Bot Management returns a plain 403 with no challenge body
+                              // (e.g. toon-stream.site). Treat any Cloudflare 403/503 as a challenge
+                              // so we can warm up the cookie via WebView.
+                              bodyString.length < 5000
             } catch (e: Exception) {
-                // Ignore
+                // If we can't read the body, assume it's a CF block
+                isChallenge = true
             }
         }
         

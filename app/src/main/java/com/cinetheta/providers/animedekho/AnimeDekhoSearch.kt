@@ -36,7 +36,7 @@ class AnimeDekhoSearch {
         }
     }
 
-    private fun parse(html: String, baseUrl: String): List<SearchResult> {
+    internal fun parse(html: String, baseUrl: String): List<SearchResult> {
         val document = HtmlParser.parse(html)
         val results  = mutableListOf<SearchResult>()
 

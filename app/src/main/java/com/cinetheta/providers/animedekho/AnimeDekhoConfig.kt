@@ -5,7 +5,7 @@ import com.cinetheta.domain.models.HostType
 object AnimeDekhoConfig {
 
     const val PROVIDER_ID   = "animedekho"
-    const val PROVIDER_NAME = "AnimeDekho"
+    const val PROVIDER_NAME = "Anime 1"
 
     /** Hardcoded fallback domain — used if remote manifest cannot be fetched. */
     const val DEFAULT_DOMAIN = "https://animedekho.app"

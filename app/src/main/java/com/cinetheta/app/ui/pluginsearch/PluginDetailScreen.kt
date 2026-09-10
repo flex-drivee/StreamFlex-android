@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -22,6 +23,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
 import com.cinetheta.domain.models.ProviderEpisode
 import com.cinetheta.domain.models.ProviderSource
 import com.cinetheta.domain.models.SearchResult
@@ -70,41 +72,96 @@ fun PluginDetailScreen(
                 val result = uiState.result
                 if (result != null) {
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
-                        // Header
+// Header
                         item {
-                            Box(modifier = Modifier.fillMaxWidth().height(300.dp)) {
-                                if (!result.poster.isNullOrBlank()) {
-                                    AsyncImage(
-                                        model = result.poster,
-                                        contentDescription = null,
-                                        contentScale = ContentScale.Crop,
-                                        modifier = Modifier.fillMaxSize()
-                                    )
-                                    // Gradient overlay
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .background(
-                                                Brush.verticalGradient(
-                                                    colors = listOf(Color.Transparent, MaterialTheme.colorScheme.background),
-                                                    startY = 100f
-                                                )
-                                            )
-                                    )
-                                }
-                                Column(
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(min = 340.dp)
+                            ) {
+                                // Blurred Background
+                                SubcomposeAsyncImage(
+                                    model = result.poster,
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Crop,
                                     modifier = Modifier
-                                        .align(Alignment.BottomStart)
-                                        .padding(16.dp)
+                                        .fillMaxSize()
+                                        .matchParentSize()
+                                        .blur(radiusX = 15.dp, radiusY = 15.dp)
+                                )
+
+                                // Dim Overlay
+                                Box(
+                                    modifier = Modifier
+                                        .matchParentSize()
+                                        .background(Color.Black.copy(alpha = 0.75f))
+                                )
+                                
+                                // Gradient fade to background at the bottom
+                                Box(
+                                    modifier = Modifier
+                                        .matchParentSize()
+                                        .background(
+                                            Brush.verticalGradient(
+                                                colors = listOf(
+                                                    Color.Transparent,
+                                                    MaterialTheme.colorScheme.background.copy(alpha = 0.5f),
+                                                    MaterialTheme.colorScheme.background
+                                                ),
+                                                startY = 400f
+                                            )
+                                        )
+                                )
+
+                                // Content
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(start = 16.dp, end = 16.dp, top = 80.dp, bottom = 20.dp),
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Text(
-                                        text = result.title,
-                                        style = MaterialTheme.typography.headlineLarge,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.White
-                                    )
-                                    if (result.year != null) {
-                                        Text(text = result.year.toString(), style = MaterialTheme.typography.bodyMedium, color = Color.LightGray)
+                                    // Poster Card
+                                    Card(
+                                        modifier = Modifier
+                                            .width(130.dp)
+                                            .aspectRatio(2f / 3f),
+                                        shape = RoundedCornerShape(12.dp),
+                                        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                                    ) {
+                                        SubcomposeAsyncImage(
+                                            model              = result.poster,
+                                            contentDescription = result.title,
+                                            contentScale       = ContentScale.Crop,
+                                            modifier           = Modifier.fillMaxSize(),
+                                            loading            = { Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant)) }
+                                        )
+                                    }
+                                    
+                                    Spacer(modifier = Modifier.width(16.dp))
+                                    
+                                    // Text Details
+                                    Column(
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Text(
+                                            text  = result.title,
+                                            style = MaterialTheme.typography.headlineMedium.copy(
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize   = 22.sp
+                                            ),
+                                            color    = Color.White,
+                                            maxLines = 3,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        
+                                        Row(
+                                            verticalAlignment      = Alignment.CenterVertically,
+                                            horizontalArrangement  = Arrangement.spacedBy(8.dp)
+                                        ) {
+                                            if (result.year != null && result.year != 0) {
+                                                Text(result.year.toString(), style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(0.8f))
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -143,48 +200,61 @@ fun PluginDetailScreen(
                                 Spacer(modifier = Modifier.height(8.dp))
                                 
                                 selectedSeason?.episodes?.forEach { episode ->
-                                    Card(
+Card(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .padding(horizontal = 16.dp, vertical = 4.dp)
+                                            .padding(horizontal = 16.dp, vertical = 6.dp)
                                             .clickable { onPlayClick(episode.sources, episode) },
-                                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                                        shape = RoundedCornerShape(8.dp),
+                                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                                     ) {
                                         Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                                            if (!episode.thumbnail.isNullOrBlank()) {
-                                                AsyncImage(
-                                                    model = episode.thumbnail,
-                                                    contentDescription = null,
-                                                    contentScale = ContentScale.Crop,
-                                                    modifier = Modifier
-                                                        .size(80.dp, 45.dp)
-                                                        .clip(RoundedCornerShape(8.dp))
+                                            Box(modifier = Modifier.size(110.dp, 62.dp).clip(RoundedCornerShape(6.dp)).background(MaterialTheme.colorScheme.surfaceVariant)) {
+                                                if (!episode.thumbnail.isNullOrBlank()) {
+                                                    AsyncImage(
+                                                        model = episode.thumbnail,
+                                                        contentDescription = null,
+                                                        contentScale = ContentScale.Crop,
+                                                        modifier = Modifier.fillMaxSize()
+                                                    )
+                                                }
+                                                Icon(
+                                                    Icons.Filled.PlayArrow,
+                                                    contentDescription = "Play",
+                                                    modifier = Modifier.align(Alignment.Center).size(32.dp),
+                                                    tint = Color.White
                                                 )
-                                                Spacer(modifier = Modifier.width(12.dp))
                                             }
+                                            Spacer(modifier = Modifier.width(12.dp))
                                             Column(modifier = Modifier.weight(1f)) {
                                                 Text(
                                                     text = "${episode.number}. ${episode.title}",
+                                                    style = MaterialTheme.typography.titleMedium,
                                                     fontWeight = FontWeight.SemiBold,
-                                                    maxLines = 1,
+                                                    maxLines = 2,
                                                     overflow = TextOverflow.Ellipsis
                                                 )
+                                                Text(
+                                                    text = "45m", // Placeholder for duration
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
                                             }
-                                            Icon(Icons.Filled.PlayArrow, contentDescription = "Play", tint = MaterialTheme.colorScheme.primary)
                                         }
                                     }
                                 }
                             }
                         } else if (result.sources.isNotEmpty()) {
-                            // Movie
+// Movie
                             item {
-                                Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+                                Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
                                     Button(
                                         onClick = { onPlayClick(result.sources, null) },
-                                        modifier = Modifier.fillMaxWidth().height(50.dp),
-                                        shape = RoundedCornerShape(25.dp)
+                                        modifier = Modifier.fillMaxWidth().height(48.dp),
+                                        shape = RoundedCornerShape(4.dp),
+                                        colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black)
                                     ) {
-                                        Icon(Icons.Filled.PlayArrow, contentDescription = null)
+                                        Icon(Icons.Filled.PlayArrow, contentDescription = null, modifier = Modifier.size(24.dp))
                                         Spacer(modifier = Modifier.width(8.dp))
                                         Text("Play Movie", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                                     }
