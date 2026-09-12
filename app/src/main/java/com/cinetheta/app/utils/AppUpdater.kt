@@ -35,9 +35,8 @@ data class GithubAsset(
 
 object AppUpdater {
     
-    // TODO: Replace with your actual GitHub username and repository name
-    private const val GITHUB_OWNER = "YourGithubUsername"
-    private const val GITHUB_REPO = "CineTheta"
+    private const val GITHUB_OWNER = "flex-drivee"
+    private const val GITHUB_REPO = "StreamFlex-android"
     private const val RELEASES_URL = "https://api.github.com/repos/$GITHUB_OWNER/$GITHUB_REPO/releases/latest"
 
     private val json = Json { ignoreUnknownKeys = true }
