@@ -8,7 +8,7 @@ package com.cinetheta.providers.hdhub4u
  *
  * IMPORTANT: Do NOT update these frequently. They are the last-resort fallback
  * for offline/network-failure scenarios. The live domain is kept in:
- *   cinetheta-providers/providers/hdhub4u.json → domains.primary
+ *   streamflex-providers/providers/hdhub4u.json → domains.primary
  *
  * DomainResolver reads that JSON at runtime and caches it — these constants
  * only activate if GitHub AND all mirrors are unreachable simultaneously.
@@ -52,7 +52,7 @@ object HDHubConfig {
 
     /** GitHub config URL alias */
     const val DOMAIN_CONFIG_URL =
-        "https://raw.githubusercontent.com/flex-drivee/cinetheta-providers/main/providers/hdhub4u.json"
+        "https://raw.githubusercontent.com/flex-drivee/streamflex-providers/main/providers/hdhub4u.json"
 
     /**
      * HDHub4u checks UA for bot detection. Chrome 131 is what the reference extension uses.

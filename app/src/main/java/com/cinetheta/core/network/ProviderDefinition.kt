@@ -4,13 +4,13 @@ package com.cinetheta.core.network
  * ProviderDefinition
  *
  * The Kotlin data model for a CineTheta provider JSON manifest.
- * Maps directly to the frozen v1.json schema in cinetheta-providers.
+ * Maps directly to the frozen v1.json schema in streamflex-providers.
  *
  * Populated by [DomainResolver] when it fetches or reads a manifest.
  * All fields are optional-with-defaults to survive partial/malformed JSON.
  *
  * ─── Schema origin ────────────────────────────────────────────────────────
- * cinetheta-providers/schemas/provider/v1.json (frozen, do not modify here)
+ * streamflex-providers/schemas/provider/v1.json (frozen, do not modify here)
  *
  * ─── DO NOT add non-schema fields here ────────────────────────────────────
  * This class is the contract. Adding extra fields here without updating

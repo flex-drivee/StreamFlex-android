@@ -5,8 +5,8 @@ import org.json.JSONObject
 /**
  * ExtractorDefinition
  *
- * Kotlin data model representing an extractor definition in cinetheta-providers
- * (cinetheta-providers/extractors/registry.json).
+ * Kotlin data model representing an extractor definition in streamflex-providers
+ * (streamflex-providers/extractors/registry.json).
  *
  * All fields match the frozen v1.json / registry.json schema.
  * Built-in Android [JSONObject] is used for parsing — no external JSON library needed.

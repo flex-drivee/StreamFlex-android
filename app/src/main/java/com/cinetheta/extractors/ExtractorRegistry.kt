@@ -13,7 +13,7 @@ import kotlinx.coroutines.sync.withLock
  * ExtractorRegistry
  *
  * Centralized registry for extractor metadata (domains, required headers, priority,
- * output formats, and status) loaded from cinetheta-providers/extractors/registry.json.
+ * output formats, and status) loaded from streamflex-providers/extractors/registry.json.
  *
  * ─── Why This Exists ──────────────────────────────────────────────────────────
  * CloudStream hardcodes extractor domains, priorities, and headers inside each Kotlin
@@ -37,7 +37,7 @@ object ExtractorRegistry {
 
     // ─── Compile-Time Hardcoded Fallback Defaults ─────────────────────────────
     /**
-     * Default compile-time manifest matching cinetheta-providers/extractors/registry.json.
+     * Default compile-time manifest matching streamflex-providers/extractors/registry.json.
      * Ensures 100% offline functionality if remote fetch fails or on clean install offline.
      */
     val DEFAULT_MANIFEST = ExtractorRegistryManifest(

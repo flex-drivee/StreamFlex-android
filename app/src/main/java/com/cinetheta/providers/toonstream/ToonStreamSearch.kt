@@ -14,33 +14,40 @@ class ToonStreamSearch {
 
     /**
      * Search for anime/content on ToonStream.
-     * Endpoint: https://toon-stream.site/?s={query}  (standard WordPress search)
-     *
-     * Note: toon-stream.site uses Cloudflare Bot Management. The CloudflareKiller
-     * interceptor handles this automatically via WebView on first request.
+     * Tries toonstream.vip (no Cloudflare) first, then falls back to toon-stream.site
+     * where the CloudflareKiller interceptor handles the bypass via WebView.
      */
     suspend fun search(
         query   : String,
         baseUrl : String = ToonStreamConfig.DEFAULT_DOMAIN
     ): List<SearchResult> = withContext(Dispatchers.IO) {
-        val request = RequestBuilder()
-            .url("$baseUrl/?s=${NetworkUtils.encode(query)}")
-            .header("Referer", baseUrl)
-            .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8")
-            .header("Accept-Language", "en-US,en;q=0.5")
-            .header("Upgrade-Insecure-Requests", "1")
-            .header("Sec-Fetch-Dest", "document")
-            .header("Sec-Fetch-Mode", "navigate")
-            .header("Sec-Fetch-Site", "same-origin")
-            .build()
-
-        when (val response = HttpClient.execute(request)) {
-            is NetworkResult.Success -> {
-                val html = response.data.body?.toString(Charsets.UTF_8) ?: return@withContext emptyList()
-                parse(html, baseUrl)
-            }
-            else -> emptyList()
+        // Try VIP mirror first (no Cloudflare block), then fallback to original
+        val domainsToTry = if (baseUrl == ToonStreamConfig.DEFAULT_DOMAIN) {
+            listOf(ToonStreamConfig.DEFAULT_DOMAIN, ToonStreamConfig.FALLBACK_DOMAIN)
+        } else {
+            listOf(baseUrl, ToonStreamConfig.DEFAULT_DOMAIN)
         }
+
+        for (domain in domainsToTry) {
+            val request = RequestBuilder()
+                .url("$domain/?s=${NetworkUtils.encode(query)}")
+                .header("Referer", domain)
+                .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8")
+                .header("Accept-Language", "en-US,en;q=0.5")
+                .header("Upgrade-Insecure-Requests", "1")
+                .build()
+
+            when (val response = HttpClient.execute(request)) {
+                is NetworkResult.Success -> {
+                    val html = response.data.body?.toString(Charsets.UTF_8) ?: continue
+                    val results = parse(html, domain)
+                    if (results.isNotEmpty()) return@withContext results
+                }
+                else -> continue
+            }
+        }
+
+        return@withContext emptyList()
     }
 
     internal fun parse(html: String, baseUrl: String): List<SearchResult> {

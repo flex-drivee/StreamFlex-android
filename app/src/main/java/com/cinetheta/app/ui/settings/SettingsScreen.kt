@@ -24,6 +24,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,6 +62,7 @@ fun SettingsScreen(
         mutableStateOf(providerRepository.provider(providerRepository.selectedProviderId ?: "")?.name ?: "All in One") 
     }
     val context = androidx.compose.ui.platform.LocalContext.current
+    val coroutineScope = androidx.compose.runtime.rememberCoroutineScope()
 
     Scaffold(
         topBar = {
@@ -113,7 +116,12 @@ fun SettingsScreen(
                         title = "Updates",
                         subtitle = "Check for app updates",
                         isLast = true,
-                        onTap = { android.widget.Toast.makeText(context, "You are on the latest version", android.widget.Toast.LENGTH_SHORT).show() }
+                        onTap = {
+                            android.widget.Toast.makeText(context, "Checking for updates…", android.widget.Toast.LENGTH_SHORT).show()
+                            coroutineScope.launch(Dispatchers.IO) {
+                                com.cinetheta.app.utils.AppUpdater.checkUpdate(context)
+                            }
+                        }
                     )
                 }
             }
@@ -279,7 +287,11 @@ fun SettingsScreen(
                         icon = Icons.Outlined.CleaningServices,
                         title = "Clear Cache",
                         subtitle = "Free up temporary data",
-                        onTap = { android.widget.Toast.makeText(context, "Cache cleared successfully", android.widget.Toast.LENGTH_SHORT).show() }
+                        onTap = {
+                            val ok = viewModel.clearCache()
+                            val msg = if (ok) "Cache cleared successfully!" else "Failed to clear cache"
+                            android.widget.Toast.makeText(context, msg, android.widget.Toast.LENGTH_SHORT).show()
+                        }
                     )
                     SettingsDivider()
                     SettingsTile(
@@ -334,16 +346,20 @@ fun SettingsScreen(
                         icon = Icons.Outlined.PersonOutline,
                         title = "Developer",
                         subtitle = "Developed by Mani-Balouch.",
-                        onTap = { android.widget.Toast.makeText(context, "Coming soon!", android.widget.Toast.LENGTH_SHORT).show() }
+                        onTap = {
+                            val intent = android.content.Intent(android.content.Intent.ACTION_VIEW,
+                                android.net.Uri.parse("https://github.com/flex-drivee"))
+                            context.startActivity(intent)
+                        }
                     )
                     SettingsDivider()
                     SettingsTile(
                         icon = Icons.Outlined.Info,
                         title = "Version",
-                        subtitle = "CineTheta v1.0.0",
+                        subtitle = "StreamFlex v${com.cinetheta.app.BuildConfig.VERSION_NAME}",
                         trailing = { Spacer(modifier = Modifier.width(0.dp)) }, // No chevron
                         isLast = true,
-                        onTap = { android.widget.Toast.makeText(context, "Coming soon!", android.widget.Toast.LENGTH_SHORT).show() }
+                        onTap = { /* No action needed for version tile */ }
                     )
                 }
             }
