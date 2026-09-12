@@ -126,7 +126,7 @@ class CacheManager(
 
     /**
      * Cache a provider manifest JSON string.
-     * Called after a successful fetch from the cinetheta-providers GitHub repo.
+     * Called after a successful fetch from the streamflex-providers GitHub repo.
      */
     fun putManifest(providerId: String, json: String) {
         Logger.d(message = "Cache: put manifest [$providerId]", tag = TAG)

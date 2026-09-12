@@ -38,7 +38,7 @@ import org.json.JSONObject
  *   Why 6h? Providers rarely change domains more than once per day.
  *
  * Step 3 — GitHub provider manifest (remote source of truth) [NETWORK]
- *   Fetches the provider's JSON from cinetheta-providers on GitHub.
+ *   Fetches the provider's JSON from streamflex-providers on GitHub.
  *   Parses the `domains.primary` field.
  *   This is the canonical source — if a maintainer updates the domain here,
  *   all apps pick it up within 6 hours.
@@ -117,7 +117,7 @@ class DomainResolver(
      *
      * @param providerId    Provider ID (e.g. "hdhub4u"). Used as cache key.
      * @param hardcoded     Compile-time backup URL. Pass provider's constant.
-     * @param manifestPath  Path in cinetheta-providers repo (e.g. "providers/hdhub4u.json").
+     * @param manifestPath  Path in streamflex-providers repo (e.g. "providers/hdhub4u.json").
      *                      Combined with [Constants.PROVIDERS_REPO_BASE] to build the URL.
      * @param forceRefresh  If true, skip Steps 1–2 and re-fetch from GitHub.
      *

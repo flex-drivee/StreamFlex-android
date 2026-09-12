@@ -1,0 +1,126 @@
+# StreamFlex — Pre-Launch Checklist (Sep 15)
+> Today: Sep 12 · Launch: Sep 15 · **3 days remaining**
+
+---
+
+## 🔴 CRITICAL — Must Fix Before Launch
+
+### 1. AppUpdater GitHub repo not configured
+**File**: `AppUpdater.kt`
+```kotlin
+// Currently broken:
+private const val GITHUB_OWNER = "YourGithubUsername"  // ← placeholder!
+private const val GITHUB_REPO  = "CineTheta"           // ← wrong name!
+```
+**Fix**: Replace with `"flex-drivee"` and your actual repo name.
+
+### 2. App ID / versionName
+**File**: `build.gradle.kts`
+- `applicationId = "com.cinetheta.app"` — decide now: keep or rename to `com.streamflex.app`
+- `versionName = "1.0"` — make sure this matches your GitHub release tag
+
+### 3. Old manifest URL in AnimeDekhoConfig
+```kotlin
+const val DOMAIN_CONFIG_URL =
+    "https://raw.githubusercontent.com/flex-drivee/streamflex-providers/..."  // ← old!
+```
+Should match `streamflex-providers` (same fix as Constants.kt).
+
+---
+
+## 🟡 IMPORTANT — Non-Blockers but Affect UX
+
+### 4. ToonStream live test needed
+- Domain changed to `toonstream.vip` — needs one real device test (search → episode → play)
+
+### 5. Factory Reset button still fake
+- Currently shows a toast. Should clear SharedPreferences at minimum.
+
+### 6. HDHub4u live domain fetch verification
+- `Constants.kt` now points to `streamflex-providers` — verify `providers/hdhub4u.json` exists there.
+
+---
+
+## 🟢 Coming Soon Items (Acceptable for v1.0)
+- Manage Accounts (Subtitles/Tracking services)
+- View Logs (Developer)
+- Network Inspector (Developer)
+
+---
+
+## 📦 Repository Structure Recommendation
+
+### Should you move providers/extractors to `streamflex-providers`?
+
+> **For Sep 15 Launch → NO. Keep everything in the main repo.**
+
+**Why NOT now:**
+- Only 3 days left — splitting repos requires a full plugin loader system (APK/DEX loading, version compatibility checks, plugin signing). That's 2+ weeks of work minimum.
+- The `streamflex-providers` repo currently only contains **JSON manifests** (domain configs), not Kotlin code.
+- A broken plugin loader on launch day would be a disaster.
+
+> **After launch → YES, plan it for v2.0**
+
+**What v2.0 structure looks like:**
+```
+streamflex-android/         ← main app (engine, UI, player)
+streamflex-providers/
+  manifests/                ← JSON configs (already here, already working!)
+  plugins/                  ← future: compiled .apk plugins
+    hdhub4u.apk
+    animedekho.apk
+    moviebox.apk
+```
+**Benefits post-launch:**
+- New providers without app update
+- Community can contribute providers
+- Domains already hot-swappable via JSON (already works!)
+
+---
+
+## ✅ What's Working Well
+
+| Feature | Status |
+|---|---|
+| Home Screen (TMDB) | ✅ Working |
+| Search (all providers) | ✅ Working |
+| MovieBox streams | ✅ Working |
+| HDHub4u domain fix | ✅ Fixed → streamflex-providers |
+| AnimeDekho (Anime 1) | ✅ Working — 6 streams confirmed |
+| All OTTs (NetMirror) | ✅ Working |
+| 4KHDHub | ✅ Working |
+| ToonStream (Anime 2) | 🟡 Domain updated, needs live test |
+| Stream priority order | ✅ FSL → FSL2 → PixelDrain → BuzzerLinks |
+| Anime stream order | ✅ StreamRuby → Abyss → others → Vidmoly last |
+| TitleMatcher bug | ✅ Fixed (no wrong link matches) |
+| Cloudflare bypass | ✅ WebView solver working |
+| Settings — Clear Cache | ✅ Real CacheManager.clearAll() |
+| Settings — Updates | ✅ AppUpdater (needs GitHub config!) |
+| Settings — Version | ✅ Real BuildConfig.VERSION_NAME |
+| Settings — DoH | ✅ Wired to OkHttp |
+| Settings — Decoder Mode | ✅ Wired to player |
+| Settings — Subtitles | ✅ Wired to player |
+| Settings — Auto-Play | ✅ Wired to player |
+| Settings — Video Quality | ✅ Wired to player |
+
+---
+
+## 📋 3-Day Plan
+
+### Day 1 — Sep 12 (Today)
+- [ ] Fix `AppUpdater.kt` — set correct GITHUB_OWNER and GITHUB_REPO
+- [ ] Confirm `applicationId` and `versionName` are correct
+- [ ] Fix `AnimeDekhoConfig.DOMAIN_CONFIG_URL` to `streamflex-providers`
+- [ ] Test ToonStream on real device
+
+### Day 2 — Sep 13
+- [ ] Full regression: search each provider, play episode
+- [ ] Fix Factory Reset to clear SharedPreferences
+- [ ] Verify HDHub4u fetches live domain from `streamflex-providers`
+- [ ] Check ProGuard rules don't strip providers/extractors
+
+### Day 3 — Sep 14 (Final)
+- [ ] Build signed release APK
+- [ ] Create GitHub release tag `v1.0` with APK attached
+- [ ] Write release notes / changelog
+- [ ] Final smoke test on fresh install

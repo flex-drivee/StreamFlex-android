@@ -21,7 +21,7 @@ object MovieBoxConfig {
     const val PROVIDER_ID = "moviebox"
     const val MANIFEST_PATH = "providers/moviebox.json"
     const val DOMAIN_CONFIG_URL =
-        "https://raw.githubusercontent.com/flex-drivee/cinetheta-providers/main/providers/moviebox.json"
+        "https://raw.githubusercontent.com/flex-drivee/streamflex-providers/main/providers/moviebox.json"
     
     const val SECRET_KEY_DEFAULT_B64 = "NzZpUmwwN3MweFNOOWpxbUVXQXQ3OUVCSlp1bElRSXNWNjRGWnIyTw=="
     const val SECRET_KEY_ALT_B64 = "WHFuMm5uTzQxL0w5Mm8xaXVYaFNMSFRiWHZZNFo1Wlo2Mm04bVNMQQ=="

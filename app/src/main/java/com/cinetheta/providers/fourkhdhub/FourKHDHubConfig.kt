@@ -12,5 +12,5 @@ object FourKHDHubConfig {
     const val COOKIE = ""
 
     const val DOMAIN_CONFIG_URL =
-        "https://raw.githubusercontent.com/flex-drivee/cinetheta-providers/main/providers/fourkhdhub.json"
+        "https://raw.githubusercontent.com/flex-drivee/streamflex-providers/main/providers/fourkhdhub.json"
 }

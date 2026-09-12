@@ -13,10 +13,10 @@ object AnimeDekhoConfig {
     /** Mirror domain — no Cloudflare on the /?trdekho= stream endpoint. */
     const val MIRROR_DOMAIN  = "https://hindisubanime.co"
 
-    /** Path in cinetheta-providers repo for the remote domain manifest. */
+    /** Path in streamflex-providers repo for the remote domain manifest. */
     const val MANIFEST_PATH    = "providers/animedekho.json"
     const val DOMAIN_CONFIG_URL =
-        "https://raw.githubusercontent.com/flex-drivee/cinetheta-providers/main/providers/animedekho.json"
+        "https://raw.githubusercontent.com/flex-drivee/streamflex-providers/main/providers/animedekho.json"
 
     /** Maximum server index to probe per episode (trdekho=1..MAX_SERVERS). */
     const val MAX_SERVERS = 10

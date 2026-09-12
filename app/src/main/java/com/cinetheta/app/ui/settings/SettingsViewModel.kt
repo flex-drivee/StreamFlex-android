@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.cinetheta.app.di.EngineModule
 import com.cinetheta.app.di.RepositoryModule
+import com.cinetheta.core.cache.CacheManager
 import com.cinetheta.data.local.download.DownloadStorageManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,6 +18,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     private val storageManager = RepositoryModule.downloadStorageManager
     private val downloadRepository = RepositoryModule.downloadRepository
     private val downloadQueueManager = EngineModule.downloadQueueManager
+    private val cacheManager = CacheManager()
 
     private val _appTheme = MutableStateFlow(prefs.getString("app_theme", "SKY_DARK") ?: "SKY_DARK")
     val appTheme: StateFlow<String> = _appTheme.asStateFlow()
@@ -132,6 +134,24 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 downloadQueueManager.cancelDownload(item.id)
             }
             refreshStorageStats()
+        }
+    }
+
+    /**
+     * Clears all app caches: domain manifests, search results, TMDB items,
+     * provider manifests, and Cloudflare cookies.
+     * Returns true if successful.
+     */
+    fun clearCache(): Boolean {
+        return try {
+            cacheManager.clearAll()
+            // Also clear Cloudflare bypass cookies
+            android.webkit.CookieManager.getInstance().removeAllCookies(null)
+            android.webkit.CookieManager.getInstance().flush()
+            refreshStorageStats()
+            true
+        } catch (e: Exception) {
+            false
         }
     }
 }
