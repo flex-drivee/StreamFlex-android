@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 
 data class SearchUiState(
     val query: String = "",
+    val submittedQuery: String = "",          // the last query that was actually searched
     val results: List<SearchResult> = emptyList(),
     val isLoading: Boolean = false,
     val errorMessage: String? = null
@@ -28,24 +29,36 @@ class SearchViewModel(
 
     private var searchJob: Job? = null
 
+    /** Called on every keystroke — only updates the text, does NOT trigger search. */
     fun onQueryChange(newQuery: String) {
         _uiState.value = _uiState.value.copy(query = newQuery)
+        // If user clears the field, also clear results
+        if (newQuery.isBlank()) {
+            searchJob?.cancel()
+            _uiState.value = _uiState.value.copy(
+                results = emptyList(),
+                submittedQuery = "",
+                errorMessage = null
+            )
+        }
+    }
 
-        // Debounce: Cancel previous search if typing continues
+    /** Called when user presses Enter / Search on keyboard — triggers actual search. */
+    fun onSearch() {
+        val query = _uiState.value.query.trim()
+        if (query.isBlank()) return
         searchJob?.cancel()
-
-        if (newQuery.length > 2) {
-            searchJob = viewModelScope.launch {
-                delay(500) // Wait 500ms after user stops typing
-                performSearch(newQuery)
-            }
-        } else {
-            _uiState.value = _uiState.value.copy(results = emptyList())
+        searchJob = viewModelScope.launch {
+            performSearch(query)
         }
     }
 
     private suspend fun performSearch(query: String) {
-        _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
+        _uiState.value = _uiState.value.copy(
+            isLoading = true,
+            submittedQuery = query,
+            errorMessage = null
+        )
         try {
             val results = repository.search(query)
             _uiState.value = _uiState.value.copy(

@@ -60,6 +60,18 @@ class MovieBoxSearch {
                             val isTv = typeStr.equals("tv", ignoreCase = true) || JsonParser.int(item, "subjectType") == 2
                             val mediaType = if (isTv) MediaType.TV else MediaType.MOVIE
 
+                            // Check for adult content
+                            val titleLower = title.lowercase()
+                            val genresArray = JsonParser.array(item, "genres")
+                            val genreNames = genresArray.mapNotNull { JsonParser.string(it, "name")?.lowercase() }.joinToString(" ")
+                            val combinedText = "$titleLower $genreNames"
+                            val adultRegex = Regex("\\b(porn|adult|erotic|18\\+|xxx)\\b", RegexOption.IGNORE_CASE)
+                            val isAdult = adultRegex.containsMatchIn(combinedText)
+                            
+                            if (isAdult) {
+                                continue
+                            }
+
                             // Year is not directly present, we can parse it from releaseDate (e.g. "2002-05-03")
                             val releaseDate = JsonParser.string(item, "releaseDate") ?: ""
                             val year = releaseDate.substringBefore("-").toIntOrNull() ?: 0

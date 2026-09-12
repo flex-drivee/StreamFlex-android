@@ -17,6 +17,7 @@ data class PluginSearchUiState(
     val currentPage: Int = 1,
     val isLastPage: Boolean = false,
     val query: String = "",
+    val submittedQuery: String = "",
     val providers: List<Provider> = emptyList(),
     val selectedProvider: Provider? = null,
     val results: List<SearchResult> = emptyList(),
@@ -40,16 +41,35 @@ class PluginSearchViewModel(
 
     fun selectProvider(provider: Provider) {
         _uiState.value = _uiState.value.copy(selectedProvider = provider)
-        if (_uiState.value.query.isNotBlank()) {
-            search(_uiState.value.query)
+        if (_uiState.value.submittedQuery.isNotBlank()) {
+            search()
         }
     }
 
-    fun search(query: String) {
-        _uiState.value = _uiState.value.copy(query = query, currentPage = 1, isLastPage = false, results = emptyList())
-        val provider = _uiState.value.selectedProvider ?: return
+    fun onQueryChange(newQuery: String) {
+        _uiState.value = _uiState.value.copy(query = newQuery)
+        if (newQuery.isBlank()) {
+            _uiState.value = _uiState.value.copy(
+                results = emptyList(),
+                submittedQuery = "",
+                error = null
+            )
+        }
+    }
 
-        _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+    fun search() {
+        val query = _uiState.value.query.trim()
+        if (query.isBlank()) return
+        
+        _uiState.value = _uiState.value.copy(
+            submittedQuery = query,
+            currentPage = 1, 
+            isLastPage = false, 
+            results = emptyList(),
+            isLoading = true, 
+            error = null
+        )
+        val provider = _uiState.value.selectedProvider ?: return
 
         viewModelScope.launch {
             try {
@@ -71,7 +91,7 @@ class PluginSearchViewModel(
     fun loadMore() {
         if (_uiState.value.isLoading || _uiState.value.isLoadingMore || _uiState.value.isLastPage) return
         val provider = _uiState.value.selectedProvider ?: return
-        val query = _uiState.value.query
+        val query = _uiState.value.submittedQuery
         if (query.isBlank()) return
         
         val nextPage = _uiState.value.currentPage + 1
