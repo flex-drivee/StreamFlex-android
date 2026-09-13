@@ -19,7 +19,6 @@ class MovieBoxSearch {
         if (MovieBoxCrypto.xUserToken == null) {
             fetchXUserToken(baseUrl)
         }
-        println("Token after fetch: ${MovieBoxCrypto.xUserToken}")
 
         val headers = MovieBoxCrypto.getHeaders(
             method = "POST",
@@ -41,7 +40,6 @@ class MovieBoxSearch {
                         MovieBoxCrypto.xUserToken = parseToken(it)
                     }
                     val json = response.data.bodyAsString()
-                    println("Search JSON response: $json")
                     val root = JsonParser.parse(json) ?: return@withContext emptyList()
                     val data = JsonParser.objectOf(root, "data") ?: return@withContext emptyList()
                     val resultsArray = JsonParser.array(data, "results")

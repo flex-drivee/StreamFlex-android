@@ -1,0 +1,275 @@
+# 🚀 CineTheta Publication Roadmap
+
+> **App ID**: `com.cinetheta.app` · **Version**: `1.0-beta` · **Target Date**: Sep 15, 2026
+
+---
+
+## PART 1 — APP PUBLICATION ROADMAP
+
+### PHASE 1: Pre-Build Preparation ✅ / ⚠️
+
+| # | Task | Status | Notes |
+|---|------|--------|-------|
+| 1 | Set `versionName = "1.0-beta"` | ✅ Done | Already set |
+| 2 | Set `versionCode = 1` | ✅ Done | Already set |
+| 3 | Set `applicationId = "com.cinetheta.app"` | ✅ Done | Permanent ID — never change |
+| 4 | Set `minSdk = 24`, `targetSdk = 34` | ✅ Done | Covers Android 7+ |
+| 5 | Remove all debug `Log.*` / `println` calls | ⚠️ Do this | Run `grep -rn "println\|Log\." app/src/main` |
+| 6 | Set `debuggable = false` in release build | ⚠️ Do this | See step below |
+| 7 | Disable unused permissions in `AndroidManifest.xml` | ⚠️ Review | Remove unused RECORD_AUDIO etc. |
+| 8 | Add app icon (all densities) | ⚠️ Required | mdpi/hdpi/xhdpi/xxhdpi/xxxhdpi |
+| 9 | Add splash screen / launcher config | ⚠️ Verify | Check `res/values/themes.xml` |
+| 10 | Add `android:label="CineTheta"` in Manifest | ⚠️ Verify | Should not say StreamFlex |
+
+---
+
+### PHASE 2: Signing the APK / AAB
+
+> [!IMPORTANT]
+> You must sign the app with a **keystore** before publishing. **NEVER lose this keystore file** — you cannot update the app without it.
+
+#### Step 2.1 — Generate a Keystore (do once)
+
+In AndroidIDE terminal:
+```bash
+keytool -genkey -v \
+  -keystore cinetheta-release.jks \
+  -alias cinetheta \
+  -keyalg RSA \
+  -keysize 2048 \
+  -validity 10000
+```
+- Enter a **strong password** (write it down safely)
+- Fill in your name, organization, country
+- **Back up** `cinetheta-release.jks` to Google Drive / cloud
+
+#### Step 2.2 — Configure `build.gradle.kts` for signing
+
+Add inside `android { }`:
+```kotlin
+signingConfigs {
+    create("release") {
+        storeFile = file("cinetheta-release.jks")
+        storePassword = "YOUR_STORE_PASSWORD"
+        keyAlias = "cinetheta"
+        keyPassword = "YOUR_KEY_PASSWORD"
+    }
+}
+
+buildTypes {
+    release {
+        isMinifyEnabled = true
+        isShrinkResources = true
+        proguardFiles(
+            getDefaultProguardFile("proguard-android-optimize.txt"),
+            "proguard-rules.pro"
+        )
+        signingConfig = signingConfigs.getByName("release")
+    }
+}
+```
+
+#### Step 2.3 — Build the release APK/AAB
+
+```bash
+# For APK (direct install / GitHub release)
+sh gradlew assembleRelease
+
+# For AAB (Google Play Store — preferred)
+sh gradlew bundleRelease
+```
+
+Output locations:
+- APK → `app/build/outputs/apk/release/app-release.apk`
+- AAB → `app/build/outputs/bundle/release/app-release.aab`
+
+---
+
+### PHASE 3: Assets Needed for Store Listing
+
+Before uploading, prepare these **store assets**:
+
+| Asset | Size / Format | Required |
+|-------|--------------|---------|
+| App Icon (high-res) | 512×512 PNG | ✅ Required |
+| Feature Graphic | 1024×500 PNG/JPG | ✅ Required |
+| Screenshots (Phone) | Min 2, max 8 · 16:9 or 9:16 | ✅ Required |
+| Screenshots (Tablet 7") | Optional but recommended | ⚠️ Optional |
+| Short Description | Max 80 chars | ✅ Required |
+| Full Description | Max 4000 chars | ✅ Required |
+| Privacy Policy URL | Hosted webpage | ✅ Required |
+
+---
+
+### PHASE 4: Publishing Options
+
+#### Option A — Google Play Store (Best for reach)
+
+> [!NOTE]
+> Requires a one-time $25 USD registration fee
+
+1. Go to [play.google.com/console](https://play.google.com/console)
+2. Pay the $25 developer registration fee
+3. Create a new app → set name "CineTheta"
+4. Fill in store listing (description, screenshots, icon)
+5. Set **Content Rating** → fill out questionnaire → likely get "Everyone"
+6. Set **Target Audience** → 18+ (since it's a streaming app)
+7. Upload the `.aab` file to **Internal Testing** first
+8. Test the internal build on your device
+9. Submit for **Production** review (takes 1–7 days)
+
+> [!CAUTION]
+> Google Play may flag streaming apps that scrape third-party sites. Consider making the app description focus on "plugin-based extensible media player" rather than mentioning specific streaming sites.
+
+#### Option B — GitHub Releases (Free, immediate — Best for Beta)
+
+1. Go to your GitHub repo `flex-drivee/StreamFlex-android`
+2. Click **Releases → Draft a new release**
+3. Tag: `v1.0-beta`
+4. Title: `CineTheta v1.0-beta`
+5. Write release notes (what's included, known issues)
+6. Upload `app-release.apk`
+7. Publish release
+8. Share the direct APK download link
+
+#### Option C — APKPure / APKMirror (Alternative stores)
+
+1. **APKPure**: Register at `developer.apkpure.com`
+2. **APKMirror**: Email `apkmirror-uploads@androidpolice.com` (invite-based, reputable apps only)
+3. **F-Droid**: Only for fully open-source apps (requires no proprietary dependencies)
+
+---
+
+### PHASE 5: Post-Publication
+
+| # | Task |
+|---|------|
+| 1 | Monitor crash reports in Play Console |
+| 2 | Set up GitHub Issues for bug reports |
+| 3 | Update `providers` repo when sites go down |
+| 4 | Plan `1.1-beta` with user feedback |
+
+---
+
+## PART 2 — FREE WEBSITE ROADMAP
+
+> Goal: A beautiful landing page for CineTheta — download links, features, support
+
+### Option A — GitHub Pages (Recommended · 100% Free)
+
+#### Step A.1 — Create the website repo
+
+1. On GitHub, create a new repo: `flex-drivee/cinetheta-website`
+2. Or use existing repo with a `docs/` folder
+
+#### Step A.2 — Enable GitHub Pages
+
+1. Go to repo **Settings → Pages**
+2. Source: **Deploy from branch**
+3. Branch: `main` / folder: `/ (root)` or `/docs`
+4. Your site goes live at: `flex-drivee.github.io/cinetheta-website`
+
+#### Step A.3 — Create website files
+
+Create `index.html` in the repo root:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CineTheta — Stream Everything</title>
+  <style>
+    /* Add your CSS here or link a stylesheet */
+  </style>
+</head>
+<body>
+  <h1>CineTheta</h1>
+  <p>Your all-in-one plugin-based streaming app.</p>
+  <a href="https://github.com/flex-drivee/StreamFlex-android/releases/latest">
+    Download Beta APK
+  </a>
+</body>
+</html>
+```
+
+#### Step A.4 — Use a Jekyll theme (Zero code needed)
+
+In `_config.yml`:
+```yaml
+theme: minima
+title: CineTheta
+description: Stream anything, everywhere.
+```
+
+GitHub Pages automatically renders Jekyll themes for free.
+
+#### Step A.5 — Custom Domain (Optional, still free)
+
+1. Buy a `.com` domain (~$10/year) at Namecheap or Google Domains
+2. Add a `CNAME` file in your repo root with your domain: `cinetheta.app`
+3. In repo Settings → Pages → Custom domain → enter your domain
+4. In your domain registrar DNS, add: `CNAME www → flex-drivee.github.io`
+
+---
+
+### Option B — Netlify (Free Tier · Drag & Drop)
+
+1. Go to [netlify.com](https://netlify.com) → Sign up free
+2. Drag your website folder into Netlify's dashboard
+3. Site goes live instantly at `random-name.netlify.app`
+4. Connect GitHub repo for auto-deploy on push
+5. Add custom domain for free (Netlify manages SSL too)
+
+---
+
+### Option C — Vercel (Free Tier · Best for React/Next.js)
+
+1. Go to [vercel.com](https://vercel.com) → Sign up free
+2. Import GitHub repo
+3. Vercel auto-builds and deploys
+4. Custom domain support included in free tier
+
+---
+
+### Recommended Website Page Structure
+
+```
+cinetheta.app/
+├── 🏠 Home      — Hero, app preview, download button
+├── ✨ Features  — Plugin search, providers, player quality
+├── 📥 Download  — APK link + QR code + version history
+├── 📖 Docs      — How to install, add providers, FAQ
+├── 🔒 Privacy   — Privacy policy (required for Play Store)
+└── 📞 Contact   — GitHub Issues link, Telegram group
+```
+
+---
+
+### Privacy Policy (Required)
+
+> [!IMPORTANT]
+> Google Play **requires** a Privacy Policy URL. Use a free generator.
+
+1. Go to [privacypolicygenerator.info](https://www.privacypolicygenerator.info)
+2. Fill in: App name "CineTheta", developer "flex-drivee", platform Android
+3. Generate → copy the text
+4. Create `privacy.html` on your website with the content
+5. Use that URL in your Play Store listing
+
+---
+
+## TIMELINE SUMMARY
+
+```
+Sep 13 (Today)     → Final testing, remove debug logs, prepare store assets
+Sep 14 (Tomorrow)  → Generate keystore, build signed APK, set up GitHub website
+Sep 15 (Launch)    → Publish GitHub Release (APK), launch website
+Sep 16+            → Submit to Play Store (optional), gather beta feedback
+```
+
+---
+
+> [!TIP]
+> Start with **GitHub Releases + GitHub Pages** — it's 100% free, instant, and perfect for a beta launch. You can always add Play Store later.

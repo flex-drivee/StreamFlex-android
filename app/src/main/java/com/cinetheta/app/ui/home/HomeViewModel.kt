@@ -67,7 +67,6 @@ class HomeViewModel(
                             loadedSections.add(HomeSection(catId, catTitle, items))
                         }
                     } catch (e: Exception) {
-                        Log.e("HomeViewModel", "Failed to load category $catId", e)
                     }
                 }
 

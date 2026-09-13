@@ -5,8 +5,11 @@ import android.util.Log
 object StreamLogger {
 
     private const val TAG = "STREAM_PIPELINE"
+    
+    var enabled = com.cinetheta.app.BuildConfig.DEBUG
 
     fun info(stage: String, message: String) {
+        if (!enabled) return
         runCatching {
             Log.i(TAG, "[$stage] $message")
         }.onFailure {
@@ -15,6 +18,7 @@ object StreamLogger {
     }
 
     fun debug(stage: String, message: String) {
+        if (!enabled) return
         runCatching {
             Log.d(TAG, "[$stage] $message")
         }.onFailure {
@@ -23,6 +27,7 @@ object StreamLogger {
     }
 
     fun warn(stage: String, message: String) {
+        if (!enabled) return
         runCatching {
             Log.w(TAG, "[$stage] $message")
         }.onFailure {
@@ -35,6 +40,7 @@ object StreamLogger {
         message: String,
         throwable: Throwable? = null
     ) {
+        if (!enabled) return
         runCatching {
             Log.e(TAG, "[$stage] $message", throwable)
         }.onFailure {

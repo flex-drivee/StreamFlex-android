@@ -191,7 +191,6 @@ class NetMirrorExtractor : BaseExtractor() {
             }
 
             try { java.io.File("/sdcard/subtitle_debug.txt").appendText("NetMirrorExtractor extracted ${streams.size} streams, ${subtitles.size} subtitles\nJSON: $json\n") } catch (e: Exception) {}
-            android.util.Log.e("SUBTITLE_DEBUG_XYZ", "NetMirrorExtractor Extracted ${streams.size} streams, ${subtitles.size} subtitles")
             StreamLogger.debug(TAG, "Extracted ${streams.size} streams, ${subtitles.size} subtitles")
             result(streams)
         } catch (e: Exception) {

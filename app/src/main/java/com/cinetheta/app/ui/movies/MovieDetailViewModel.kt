@@ -100,7 +100,6 @@ class MovieDetailViewModel(
                     )
                 }
             } catch (e: Exception) {
-                android.util.Log.e("MovieDetailViewModel", "Failed to load season $seasonNumber: ${e.message}")
             }
         }
     }
