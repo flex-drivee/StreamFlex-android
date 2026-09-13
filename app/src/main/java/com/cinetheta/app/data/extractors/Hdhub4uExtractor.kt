@@ -33,16 +33,13 @@ class Hdhub4uExtractor {
             val activeDomain = getActiveDomain()
             val fixedUrl = pageUrl.replace(Regex("https?://[^/]+"), activeDomain)
 
-            android.util.Log.d("HDHub4u_DEBUG", "1. Visiting Movie Page: $fixedUrl")
 
             // Use the new fetchDocument helper
             val document = fetchDocument(fixedUrl)
-            android.util.Log.d("HDHub4u_DEBUG", "Page Title: ${document.title()}")
 
             val targetElements = document.select("h3 a:matches(480|720|1080|2160|4K), h4 a:matches(480|720|1080|2160|4K), .page-body > div a")
             val potentialLinks = targetElements.map { it.attr("abs:href") }.filter { it.isNotBlank() }.distinct()
 
-            android.util.Log.d("HDHub4u_DEBUG", "2. Found ${potentialLinks.size} potential links")
 
             val hostLinks = mutableListOf<String>()
 
@@ -63,7 +60,6 @@ class Hdhub4uExtractor {
 
                 // 🚫 Skip garbage EARLY
                 if (skipPatterns.any { linkLower.contains(it) }) {
-                    android.util.Log.d("HDHub4u_DEBUG", "Skipped useless link: $rawLink")
                     continue
                 }
 
@@ -79,12 +75,10 @@ class Hdhub4uExtractor {
                 ) {
                     if (!hostLinks.contains(realLink)) {
                         hostLinks.add(realLink)
-                        android.util.Log.d("HDHub4u_DEBUG", "Host Link Added: $realLink")
                     }
                 }
             }
 
-            android.util.Log.d("HDHub4u_DEBUG", "3. Decoded to ${hostLinks.size} host links")
 
             val sortedLinks = hostLinks.sortedBy {
                 when {
@@ -97,7 +91,6 @@ class Hdhub4uExtractor {
                 }
             }
 
-            android.util.Log.d("HDHub4u_DEBUG", "Sorted links by priority")
 
             for (hostLink in sortedLinks) {
                 val finalVideoUrl = resolveHostToVideo(hostLink)
@@ -105,16 +98,13 @@ class Hdhub4uExtractor {
                 if (finalVideoUrl.isNotEmpty()) {
                     streamLinks.add(finalVideoUrl)
 
-                    android.util.Log.d("HDHub4u_DEBUG", "Added stream (fallback list): $finalVideoUrl")
                 }
             }
         } catch (e: Exception) {
-            android.util.Log.e("HDHub4u_DEBUG", "Extraction Failed: ${e.message}")
             e.printStackTrace()
         }
 
         if (streamLinks.isEmpty()) {
-            android.util.Log.d("HDHub4u_DEBUG", "No streams found. Falling back to Big Buck Bunny.")
             streamLinks.add("https://storage.googleapis.com/exoplayer-test-media-0/BigBuckBunny_320x180.mp4")
         }
 
@@ -134,7 +124,6 @@ class Hdhub4uExtractor {
     }
 
     private fun resolveHostToVideo(url: String): String {
-        android.util.Log.d("HDHub4u_DEBUG", "Resolving Host: $url")
         try {
             var currentUrl = url
 
@@ -144,7 +133,6 @@ class Hdhub4uExtractor {
                     .firstOrNull { it.contains("hubcloud", true) || it.contains("hubdrive", true) || it.contains("hubcdn", true) }
                 if (hbLink != null) {
                     currentUrl = hbLink
-                    android.util.Log.d("HDHub4u_DEBUG", "Hblinks bypassed to: $currentUrl")
                 }
             }
 
@@ -153,7 +141,6 @@ class Hdhub4uExtractor {
                 val hubCloudLink = driveDoc.select("a.btn, a[class*='btn']").attr("abs:href")
                 if (hubCloudLink.isNotEmpty()) {
                     currentUrl = hubCloudLink
-                    android.util.Log.d("HDHub4u_DEBUG", "Hubdrive bypassed to: $currentUrl")
                 }
             }
 
@@ -196,7 +183,6 @@ class Hdhub4uExtractor {
                         // If Hubcloud is hiding the video behind gamerxyt.com, we must visit the proxy page
                         if (link.contains("gamerxyt.com") || link.contains(".php")) {
                             try {
-                                android.util.Log.d("HDHub4u_DEBUG", "Bypassing Proxy: $link")
                                 val proxyDoc = fetchDocument(link)
 
                                 // Look for the true Google video link inside the proxy page
@@ -209,7 +195,6 @@ class Hdhub4uExtractor {
                                 if (realLink != null) return realLink
 
                             } catch(e: Exception) {
-                                android.util.Log.e("HDHub4u_DEBUG", "Proxy bypass failed: ${e.message}")
                             }
                             continue // Skip to the next button if proxy failed
                         }
@@ -231,7 +216,6 @@ class Hdhub4uExtractor {
             }
 
         } catch (e: Exception) {
-            android.util.Log.e("HDHub4u_DEBUG", "Host Resolution Failed: ${e.message}")
         }
         return ""
     }
@@ -270,7 +254,6 @@ class Hdhub4uExtractor {
 
             if (encodedurl.isNotEmpty()) encodedurl else directlink
         } catch (e: Exception) {
-            android.util.Log.e("HDHub4u_DEBUG", "Error resolving links: $e")
             ""
         }
     }

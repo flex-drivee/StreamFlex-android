@@ -12,7 +12,7 @@ object Logger {
 
     private const val DEFAULT_TAG = "CineTheta"
 
-    var enabled = true
+    var enabled = com.cinetheta.app.BuildConfig.DEBUG
 
     enum class Level { VERBOSE, DEBUG, INFO, WARN, ERROR }
 

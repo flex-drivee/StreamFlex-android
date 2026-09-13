@@ -27,7 +27,6 @@ class ContentRepositoryImpl(
 
     override suspend fun getPopularMovies(): List<SearchResult> = withContext(Dispatchers.IO) {
         // Debug log to check if key is working
-        android.util.Log.d("DEBUG_KEY", "Using Key: '$apiKey'")
         return@withContext tmdbApi.getPopularMovies(apiKey).results.map { TmdbMapper.toDomain(it) }
     }
 
@@ -74,7 +73,6 @@ class ContentRepositoryImpl(
                 )
             } ?: emptyList()
         } catch (e: Exception) {
-            android.util.Log.e("ContentRepository", "Failed to fetch season $seasonNumber for show $showId: ${e.message}")
             emptyList()
         }
     }

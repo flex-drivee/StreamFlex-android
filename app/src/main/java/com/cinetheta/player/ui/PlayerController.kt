@@ -71,23 +71,18 @@ class PlayerController(
                     }
                 } else if (event is PlayerEvent.Error) {
                     val error = event.error
-                    Log.e("PlayerController", "Stream failed with error: ${error.message}")
                     
                     val shouldFallback = when (error) {
                         is com.cinetheta.player.core.PlayerError.UnsupportedCodec -> {
-                            Log.e("PlayerController", "Codec unsupported on this device, immediately skipping to fallback stream.")
                             true
                         }
                         is com.cinetheta.player.core.PlayerError.InvalidSource -> {
-                            Log.e("PlayerController", "Source is dead or invalid, skipping to fallback stream.")
                             true
                         }
                         is com.cinetheta.player.core.PlayerError.Http -> {
-                            Log.e("PlayerController", "HTTP Error ${error.code}, trying fallback.")
                             true
                         }
                         else -> {
-                            Log.e("PlayerController", "Unknown/Timeout error, trying fallback as safety measure.")
                             true
                         }
                     }
@@ -155,7 +150,6 @@ class PlayerController(
         val index = _currentStreamIndex.value
         val streams = _allStreams.value
         if (index in streams.indices) {
-            Log.d("PlayerController", "Loading stream $index: ${streams[index].url}")
             player.load(streams[index])
             
             // Restore progress

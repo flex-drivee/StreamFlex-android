@@ -67,7 +67,6 @@ class Hdhub4uParser {
                 }
             }
         } catch (e: Exception) {
-            android.util.Log.e("HDHub4u_DEBUG", "API Search Failed: ${e.message}")
         }
 
         return@withContext results
@@ -84,14 +83,12 @@ class Hdhub4uParser {
             val results = search(query)
 
             if (results.isEmpty()) {
-                android.util.Log.e("HDHub4u_DEBUG", "No results found for: $query")
                 return@withContext emptyList()
             }
 
             val firstResult = results.first()
             val pageUrl = firstResult.id
 
-            android.util.Log.d("HDHub4u_DEBUG", "Opening page: $pageUrl")
 
             // 2. Extract links
             val extractedLinks = Hdhub4uExtractor().extract(pageUrl)
