@@ -20,7 +20,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     private val downloadQueueManager = EngineModule.downloadQueueManager
     private val cacheManager = CacheManager()
 
-    private val _appTheme = MutableStateFlow(prefs.getString("app_theme", "SKY_DARK") ?: "SKY_DARK")
+    private val _appTheme = MutableStateFlow(prefs.getString("app_theme", "SYSTEM") ?: "SYSTEM")
     val appTheme: StateFlow<String> = _appTheme.asStateFlow()
 
     private val _autoPlayNext = MutableStateFlow(prefs.getBoolean("autoplay_next", true))

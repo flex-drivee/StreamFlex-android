@@ -33,9 +33,16 @@ class PluginSearchViewModel(
 
     init {
         val availableProviders = providerRepository.enabledProviders()
+        val globalSelectedId = providerRepository.selectedProviderId
+        val initialProvider = if (globalSelectedId != null) {
+            availableProviders.find { it.id == globalSelectedId } ?: availableProviders.firstOrNull()
+        } else {
+            availableProviders.firstOrNull()
+        }
+        
         _uiState.value = _uiState.value.copy(
             providers = availableProviders,
-            selectedProvider = availableProviders.firstOrNull()
+            selectedProvider = initialProvider
         )
     }
 

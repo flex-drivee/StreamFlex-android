@@ -17,7 +17,49 @@
 - 🚫 **No Ads:** Completely ad-free, uninterrupted streaming experience.
 
 ## 📸 Screenshots
-*(Coming soon! Feel free to add your own screenshots here)*
+
+<table align="center">
+  <tr>
+    <td align="center"><b>Home Page (Dark)</b></td>
+    <td align="center"><b>Home Page (Light)</b></td>
+  </tr>
+  <tr>
+    <td><img src="Screenshots/home%20page/homepage-dark.jpg" width="280"/></td>
+    <td><img src="Screenshots/home%20page/homepage-light.jpg" width="280"/></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Premium Details (Dark)</b></td>
+    <td align="center"><b>Premium Details (Light)</b></td>
+  </tr>
+  <tr>
+    <td><img src="Screenshots/detail%20card/Screenshot_20260913-123618.jpg" width="280"/></td>
+    <td><img src="Screenshots/detail%20card/Screenshot_20260913-123258.jpg" width="280"/></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Search & Filters (Dark)</b></td>
+    <td align="center"><b>Search & Filters (Light)</b></td>
+  </tr>
+  <tr>
+    <td><img src="Screenshots/Search/Screenshot_20260913-123520.jpg" width="280"/></td>
+    <td><img src="Screenshots/Search/Screenshot_20260913-123452.jpg" width="280"/></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Native Video Player</b></td>
+    <td align="center"><b>Multi-Audio & Subs Selection</b></td>
+  </tr>
+  <tr>
+    <td><img src="Screenshots/player/overall-player.jpg" width="280"/></td>
+    <td><img src="Screenshots/player/multi-audio.jpg" width="280"/></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Downloads (Dark)</b></td>
+    <td align="center"><b>Settings (Light)</b></td>
+  </tr>
+  <tr>
+    <td><img src="Screenshots/download/download-dark.jpg" width="280"/></td>
+    <td><img src="Screenshots/setting/setting-light.jpg" width="280"/></td>
+  </tr>
+</table>
 
 ## 🛠️ Tech Stack
 

@@ -373,6 +373,11 @@ fun SettingsScreen(
                 text = {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         ThemeOptionRow(
+                            title = "System Default",
+                            isSelected = appTheme == "SYSTEM",
+                            onClick = { viewModel.setAppTheme("SYSTEM"); showThemeDialog = false }
+                        )
+                        ThemeOptionRow(
                             title = "Default Dark Mode",
                             isSelected = appTheme == "SKY_DARK",
                             onClick = { viewModel.setAppTheme("SKY_DARK"); showThemeDialog = false }
@@ -639,12 +644,13 @@ fun SettingsScreen(
 
 fun getThemeDisplayName(themeId: String): String {
     return when(themeId) {
+        "SYSTEM" -> "System Default"
         "SKY_DARK" -> "Default Dark Mode"
         "SKY_LIGHT" -> "Default Light Mode"
         "NETFLIX" -> "Netflix Mode (Dark)"
         "PRIME" -> "Prime Mode (Dark)"
         "CINETHETA" -> "Cinematic Mode (Dark OLED)"
-        else -> "Default Dark Mode"
+        else -> "System Default"
     }
 }
 
