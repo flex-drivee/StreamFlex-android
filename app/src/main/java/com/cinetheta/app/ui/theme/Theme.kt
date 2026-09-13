@@ -5,6 +5,7 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.isSystemInDarkTheme
 
 // 1. DEFAULT DARK (Sky Stream Dark)
 private val SkyDarkColorScheme = darkColorScheme(
@@ -84,9 +85,11 @@ private val CineThetaColorScheme = darkColorScheme(
 @Composable
 fun CineThetaTheme(
     appTheme: String = "SKY_DARK",
+    darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
     val colorScheme = when (appTheme) {
+        "SYSTEM" -> if (darkTheme) SkyDarkColorScheme else SkyLightColorScheme
         "SKY_LIGHT" -> SkyLightColorScheme
         "SKY_DARK" -> SkyDarkColorScheme
         "NETFLIX" -> NetflixColorScheme

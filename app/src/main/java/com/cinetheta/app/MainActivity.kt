@@ -56,7 +56,7 @@ class MainActivity : ComponentActivity() {
             androidx.compose.runtime.DisposableEffect(prefs) {
                 val listener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
                     if (key == "app_theme") {
-                        appTheme = sharedPreferences.getString("app_theme", "SKY_DARK") ?: "SKY_DARK"
+                        appTheme = sharedPreferences.getString("app_theme", "SYSTEM") ?: "SYSTEM"
                     }
                 }
                 prefs.registerOnSharedPreferenceChangeListener(listener)
