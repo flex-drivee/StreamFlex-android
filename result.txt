@@ -1,0 +1,88 @@
+.../AndroidIDEProjects/StreamFlex-android $ sh gradlew assembleRelease
+Starting a Gradle Daemon, 14 busy and 1 incompatible Daemons could not be reused, use --status for details
+
+> Configure project :app
+w: file:///storage/emulated/0/AndroidIDEProjects/StreamFlex-android/app/build.gradle.kts:69:9: 'jvmTarget: String' is deprecated. Please migrate to the compilerOptions DSL. More details are here: https://kotl.in/u1r8ln
+WARNING: The following problems were found when resolving the SDK location:
+Where: sdk.dir property in local.properties file. Problem: Directory does not exist
+
+
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preReleaseBuild UP-TO-DATE
+> Task :app:mergeReleaseJniLibFolders
+> Task :app:buildKotlinToolingMetadata UP-TO-DATE
+> Task :app:mergeReleaseNativeLibs
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:checkReleaseDuplicateClasses
+
+> Task :app:stripReleaseDebugSymbols
+Unable to strip the following libraries, packaging them as they are: libavcodec.so, libavutil.so, libmedia3ext.so, libswresample.so, libswscale.so. Run with --info option to learn more.
+
+> Task :app:extractReleaseNativeSymbolTables UP-TO-DATE
+> Task :app:dataBindingMergeDependencyArtifactsRelease
+> Task :app:mergeReleaseNativeDebugMetadata NO-SOURCE
+> Task :app:generateReleaseResValues UP-TO-DATE
+> Task :app:generateReleaseResources
+> Task :app:mergeReleaseResources
+
+AAPT2 aapt2-8.13.2-14304508-linux Daemon #0: Unexpected error output: /data/user/0/com.tom.rv2ide/files/home/.gradle/caches/8.13/transforms/1992e3b35605379226e7ce0a02c44bfa/transformed/aapt2-8.13.2-14304508-linux/aapt2: 1: Syntax error: ")" unexpected
+
+> Task :app:packageReleaseResources
+AAPT2 aapt2-8.13.2-14304508-linux Daemon #1: Unexpected error output: /data/user/0/com.tom.rv2ide/files/home/.gradle/caches/8.13/transforms/1992e3b35605379226e7ce0a02c44bfa/transformed/aapt2-8.13.2-14304508-linux/aapt2: 1: Syntax error: ")" unexpected
+AAPT2 aapt2-8.13.2-14304508-linux Daemon #2: Unexpected error output: /data/user/0/com.tom.rv2ide/files/home/.gradle/caches/8.13/transforms/1992e3b35605379226e7ce0a02c44bfa/transformed/aapt2-8.13.2-14304508-linux/aapt2: 1: Syntax error: ")" unexpected
+AAPT2 aapt2-8.13.2-14304508-linux Daemon #3: Unexpected error output: /data/user/0/com.tom.rv2ide/files/home/.gradle/caches/8.13/transforms/1992e3b35605379226e7ce0a02c44bfa/transformed/aapt2-8.13.2-14304508-linux/aapt2: 1: Syntax error: ")" unexpected
+AAPT2 aapt2-8.13.2-14304508-linux Daemon #4: Unexpected error output: /data/user/0/com.tom.rv2ide/files/home/.gradle/caches/8.13/transforms/1992e3b35605379226e7ce0a02c44bfa/transformed/aapt2-8.13.2-14304508-linux/aapt2: 1: Syntax error: ")" unexpected
+AAPT2 aapt2-8.13.2-14304508-linux Daemon #6: Unexpected error output: /data/user/0/com.tom.rv2ide/files/home/.gradle/caches/8.13/transforms/1992e3b35605379226e7ce0a02c44bfa/transformed/aapt2-8.13.2-14304508-linux/aapt2: 1: Syntax error: ")" unexpected
+AAPT2 aapt2-8.13.2-14304508-linux Daemon #5: Unexpected error output: /data/user/0/com.tom.rv2ide/files/home/.gradle/caches/8.13/transforms/1992e3b35605379226e7ce0a02c44bfa/transformed/aapt2-8.13.2-14304508-linux/aapt2: 1: Syntax error: ")" unexpected
+> Task :app:processReleaseNavigationResources
+> Task :app:generateReleaseBuildConfig
+> Task :app:parseReleaseLocalResources
+> Task :app:compileReleaseNavigationResources
+> Task :app:mapReleaseSourceSetPaths
+> Task :app:createReleaseCompatibleScreenManifests
+> Task :app:extractDeepLinksRelease
+> Task :app:checkReleaseAarMetadata
+> Task :app:processReleaseMainManifest
+> Task :app:processReleaseManifest
+> Task :app:javaPreCompileRelease
+> Task :app:mergeReleaseResources FAILED
+> Task :app:mergeReleaseArtProfile UP-TO-DATE
+> Task :app:extractProguardFiles UP-TO-DATE
+> Task :app:mergeReleaseStartupProfile UP-TO-DATE
+> Task :app:processReleaseManifestForPackage
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:mergeReleaseResources'.
+> Multiple task action failures occurred:
+   > A failure occurred while executing com.android.build.gradle.internal.res.Aapt2CompileRunnable
+      > AAPT2 aapt2-8.13.2-14304508-linux Daemon #0: Daemon startup failed
+        This should not happen under normal circumstances, please file an issue if it does.
+   > A failure occurred while executing com.android.build.gradle.internal.res.Aapt2CompileRunnable
+      > AAPT2 aapt2-8.13.2-14304508-linux Daemon #1: Daemon startup failed
+        This should not happen under normal circumstances, please file an issue if it does.
+   > A failure occurred while executing com.android.build.gradle.internal.res.Aapt2CompileRunnable
+      > AAPT2 aapt2-8.13.2-14304508-linux Daemon #2: Daemon startup failed
+        This should not happen under normal circumstances, please file an issue if it does.
+   > A failure occurred while executing com.android.build.gradle.internal.res.Aapt2CompileRunnable
+      > AAPT2 aapt2-8.13.2-14304508-linux Daemon #3: Daemon startup failed
+        This should not happen under normal circumstances, please file an issue if it does.
+   > A failure occurred while executing com.android.build.gradle.internal.res.Aapt2CompileRunnable
+      > AAPT2 aapt2-8.13.2-14304508-linux Daemon #4: Daemon startup failed
+        This should not happen under normal circumstances, please file an issue if it does.
+   > A failure occurred while executing com.android.build.gradle.internal.res.Aapt2CompileRunnable
+      > AAPT2 aapt2-8.13.2-14304508-linux Daemon #5: Daemon startup failed
+        This should not happen under normal circumstances, please file an issue if it does.
+   > A failure occurred while executing com.android.build.gradle.internal.res.Aapt2CompileRunnable
+      > AAPT2 aapt2-8.13.2-14304508-linux Daemon #6: Daemon startup failed
+        This should not happen under normal circumstances, please file an issue if it does.
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 2m 52s
+26 actionable tasks: 20 executed, 6 up-to-date
