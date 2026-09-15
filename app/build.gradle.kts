@@ -36,17 +36,33 @@ android {
         // IMPORTANT: We must add escaped quotes "\"$tmdbKey\"" 
         // otherwise the app tries to compile it as code variable, not a string.
         buildConfigField("String", "TMDB_API_KEY", "\"$tmdbKey\"")
+
+        // Restrict ABIs to real ARM devices (arm64-v8a & armeabi-v7a).
+        // Drops x86/x86_64 emulator FFmpeg binaries, cutting ~35MB off the APK!
+        ndk {
+            abiFilters.addAll(listOf("arm64-v8a", "armeabi-v7a"))
+        }
     }
     
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("../cinetheta-release.jks")
+            storePassword = "Mani@4312"
+            keyAlias = "cinetheta"
+            keyPassword = "Mani@4312"
+        }
+    }
+
     buildTypes {
         release {
-            isMinifyEnabled = false
-            signingConfig = signingConfigs.getByName("debug")
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 
