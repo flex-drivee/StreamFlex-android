@@ -28,6 +28,7 @@ data class MovieDetailUiState(
     val isResolvingDownload: Boolean = false,
     val downloadStreamsAvailable: List<com.cinetheta.domain.models.StreamLink>? = null,
     val pendingDownloadEpisode: Episode? = null,
+    val showMovieBoxComingSoon: Boolean = false,
     val errorMessage: String? = null
 )
 
@@ -157,6 +158,19 @@ class MovieDetailViewModel(
 
     fun startSelectedDownload(selectedStream: com.cinetheta.domain.models.StreamLink) {
         val state = _uiState.value
+        
+        if (selectedStream.name.contains("MovieBox", ignoreCase = true) ||
+            selectedStream.url.contains("moviebox", ignoreCase = true) ||
+            selectedStream.url.contains("wefeed", ignoreCase = true)
+        ) {
+            _uiState.value = state.copy(
+                downloadStreamsAvailable = null,
+                pendingDownloadEpisode = null,
+                showMovieBoxComingSoon = true
+            )
+            return
+        }
+
         val allStreams = state.downloadStreamsAvailable ?: return
         val fallbacks = allStreams.filter { it.url != selectedStream.url }
 
@@ -175,6 +189,7 @@ class MovieDetailViewModel(
                 quality = selectedStream.quality,
                 streamLink = selectedStream,
                 fallbackLinks = fallbacks,
+                subtitles = selectedStream.subtitles,
                 status = DownloadStatus.QUEUED
             )
             downloadQueueManager.enqueueDownload(downloadItem)
@@ -196,6 +211,7 @@ class MovieDetailViewModel(
                 quality = selectedStream.quality,
                 streamLink = selectedStream,
                 fallbackLinks = fallbacks,
+                subtitles = selectedStream.subtitles,
                 status = DownloadStatus.QUEUED
             )
             downloadQueueManager.enqueueDownload(downloadItem)
@@ -203,6 +219,10 @@ class MovieDetailViewModel(
 
         // Clear dialog state
         _uiState.value = state.copy(downloadStreamsAvailable = null, pendingDownloadEpisode = null)
+    }
+
+    fun dismissMovieBoxNotice() {
+        _uiState.value = _uiState.value.copy(showMovieBoxComingSoon = false)
     }
 
     fun cancelDownloadDialog() {

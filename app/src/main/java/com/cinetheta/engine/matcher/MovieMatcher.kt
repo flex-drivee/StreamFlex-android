@@ -92,37 +92,35 @@ object MovieMatcher {
 
         var score = titleSim
 
+        // Exact title match bonus
+        if (result.title.equals(title, ignoreCase = true) || result.originalTitle?.equals(title, ignoreCase = true) == true) {
+            score += 0.50
+        }
 
+        // Detect sequel numbers (e.g. query is "Spider-Man" but candidate is "Spider-Man 3" or "Spider-Man 2")
+        val sequelRegex = Regex("""\b([2-9]|II|III|IV|V)\b""", RegexOption.IGNORE_CASE)
+        val queryHasSequel = sequelRegex.containsMatchIn(title)
+        val resultHasSequel = sequelRegex.containsMatchIn(result.title)
+        if (!queryHasSequel && resultHasSequel) {
+            score -= 0.60
+        }
 
         //----------------------------------------------------
-        // Year bonus
+        // Year bonus / penalty
         //----------------------------------------------------
-
-        if (
-            year != null &&
-            result.year != null
-        ) {
-
+        if (year != null && result.year != null && result.year > 0) {
+            val diff = kotlin.math.abs(result.year - year)
             when {
-
-                result.year == year ->
-                    score += 0.40
-
-                kotlin.math.abs(
-                    result.year - year
-                ) == 1 ->
-                    score += 0.20
+                diff == 0 -> score += 0.60
+                diff == 1 -> score += 0.30
+                diff > 1 -> score -= 0.60 // Penalize different years
             }
         }
 
         //----------------------------------------------------
         // Prefer movies
         //----------------------------------------------------
-
-        if (
-            result.mediaType == MediaType.MOVIE
-        ) {
-
+        if (result.mediaType == MediaType.MOVIE) {
             score += 0.20
         }
 

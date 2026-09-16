@@ -6,7 +6,6 @@ import android.content.Intent
 import androidx.core.content.FileProvider
 import android.widget.Toast
 import com.cinetheta.app.BuildConfig
-import com.cinetheta.core.network.HttpClient
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -23,7 +22,9 @@ import java.io.File
 @Serializable
 data class GithubRelease(
     val tag_name: String,
-    val body: String,
+    val body: String? = null,
+    val prerelease: Boolean = false,
+    val draft: Boolean = false,
     val assets: List<GithubAsset> = emptyList()
 )
 
@@ -37,48 +38,88 @@ object AppUpdater {
     
     private const val GITHUB_OWNER = "flex-drivee"
     private const val GITHUB_REPO = "StreamFlex-android"
-    private const val RELEASES_URL = "https://api.github.com/repos/$GITHUB_OWNER/$GITHUB_REPO/releases/latest"
+    // Query /releases instead of /releases/latest so pre-releases and beta tags are properly found
+    private const val RELEASES_URL = "https://api.github.com/repos/$GITHUB_OWNER/$GITHUB_REPO/releases"
 
     private val json = Json { ignoreUnknownKeys = true }
     private val client = OkHttpClient()
 
     /**
      * Checks for updates and shows a dialog if one is available.
-     * Call this in your MainActivity's onCreate (wrapped in a coroutine).
+     * @param isManualCheck If true (e.g. from Settings), notifies the user even if up to date or if error occurs.
      */
-    suspend fun checkUpdate(context: Context) = withContext(Dispatchers.IO) {
+    suspend fun checkUpdate(context: Context, isManualCheck: Boolean = false) = withContext(Dispatchers.IO) {
         try {
-            if (GITHUB_OWNER == "YourGithubUsername") {
-                com.cinetheta.core.utils.StreamLogger.error("AppUpdater", "Please configure GITHUB_OWNER in AppUpdater.kt")
+            val request = Request.Builder()
+                .url(RELEASES_URL)
+                .header("User-Agent", "CineTheta-App")
+                .header("Accept", "application/vnd.github.v3+json")
+                .build()
+
+            val response = client.newCall(request).execute()
+            
+            if (!response.isSuccessful) {
+                if (isManualCheck) {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(context, "Unable to check for updates (${response.code})", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                return@withContext
+            }
+            
+            val responseBody = response.body?.string()
+            if (responseBody.isNullOrBlank()) {
+                if (isManualCheck) {
+                    withContext(Dispatchers.Main) {
+                        showUpToDateDialog(context)
+                    }
+                }
                 return@withContext
             }
 
-            val request = Request.Builder().url(RELEASES_URL).build()
-            val response = client.newCall(request).execute()
+            val releases = json.decodeFromString<List<GithubRelease>>(responseBody)
+            val release = releases.firstOrNull { !it.draft }
             
-            if (!response.isSuccessful) return@withContext
-            
-            val responseBody = response.body?.string() ?: return@withContext
-            val release = json.decodeFromString<GithubRelease>(responseBody)
+            if (release == null) {
+                if (isManualCheck) {
+                    withContext(Dispatchers.Main) {
+                        showUpToDateDialog(context)
+                    }
+                }
+                return@withContext
+            }
             
             val latestVersion = release.tag_name.removePrefix("v").replace("-", ".")
             val currentVersion = BuildConfig.VERSION_NAME.removePrefix("v").replace("-", ".")
             
             if (isNewerVersion(currentVersion, latestVersion)) {
-                val apkAsset = release.assets.find { it.name.endsWith(".apk") } ?: return@withContext
+                val apkAsset = release.assets.find { it.name.endsWith(".apk", ignoreCase = true) }
+                val downloadUrl = apkAsset?.browser_download_url ?: "https://github.com/$GITHUB_OWNER/$GITHUB_REPO/releases"
                 
                 withContext(Dispatchers.Main) {
-                    showUpdateDialog(context, release.tag_name, release.body, apkAsset.browser_download_url)
+                    showUpdateDialog(context, release.tag_name, release.body ?: "New release available!", downloadUrl)
+                }
+            } else {
+                if (isManualCheck) {
+                    withContext(Dispatchers.Main) {
+                        showUpToDateDialog(context)
+                    }
                 }
             }
         } catch (e: Exception) {
             com.cinetheta.core.utils.StreamLogger.error("AppUpdater", "Error checking for updates: ${e.message}")
+            if (isManualCheck) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(context, "Could not check for updates. Check internet connection.", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 
     private fun isNewerVersion(current: String, latest: String): Boolean {
-        val currParts = current.split(".").map { it.toIntOrNull() ?: 0 }
-        val latestParts = latest.split(".").map { it.toIntOrNull() ?: 0 }
+        // Clean up any extra tags (e.g. "1.0.beta" -> [1, 0])
+        val currParts = current.split(Regex("[^0-9]+")).filter { it.isNotBlank() }.map { it.toIntOrNull() ?: 0 }
+        val latestParts = latest.split(Regex("[^0-9]+")).filter { it.isNotBlank() }.map { it.toIntOrNull() ?: 0 }
         
         val maxLen = maxOf(currParts.size, latestParts.size)
         for (i in 0 until maxLen) {
@@ -88,6 +129,14 @@ object AppUpdater {
             if (l < c) return false
         }
         return false
+    }
+
+    private fun showUpToDateDialog(context: Context) {
+        AlertDialog.Builder(context)
+            .setTitle("CineTheta is Up to Date")
+            .setMessage("You have the latest version installed (v${BuildConfig.VERSION_NAME}).")
+            .setPositiveButton("OK", null)
+            .show()
     }
 
     private fun showUpdateDialog(context: Context, version: String, changelog: String, downloadUrl: String) {

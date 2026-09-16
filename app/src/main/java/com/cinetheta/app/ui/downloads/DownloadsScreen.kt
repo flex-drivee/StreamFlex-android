@@ -43,6 +43,7 @@ import com.cinetheta.player.PlayerActivity
 @Composable
 fun DownloadsScreen(
     onBackClick: () -> Unit,
+    showTopBar: Boolean = true,
     viewModel: DownloadsViewModel = viewModel(factory = DownloadsViewModelFactory())
 ) {
     val downloads by viewModel.allDownloads.collectAsState()
@@ -52,18 +53,20 @@ fun DownloadsScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Downloads", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground) },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onBackground)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    scrolledContainerColor = MaterialTheme.colorScheme.background
+            if (showTopBar) {
+                TopAppBar(
+                    title = { Text("Downloads", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground) },
+                    navigationIcon = {
+                        IconButton(onClick = onBackClick) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onBackground)
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.background,
+                        scrolledContainerColor = MaterialTheme.colorScheme.background
+                    )
                 )
-            )
+            }
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
@@ -141,8 +144,13 @@ fun DownloadsScreen(
                                     putExtra("VIDEO_YEAR", item.year ?: 0)
                                     putExtra("IS_SHOW", item.isShow)
                                     putExtra("POSTER_PATH", item.posterUrl)
+                                    putExtra("DOWNLOAD_ITEM_ID", item.id)
+                                    putExtra("LOCAL_FILE_PATH", item.localFilePath)
                                     if (item.isShow && item.episodeNumber != null) {
-                                        putExtra("CURRENT_EPISODE_ID", "${item.mediaId}_${item.seasonNumber}_${item.episodeNumber}")
+                                        putExtra("CURRENT_EPISODE_ID", item.id)
+                                        putExtra("CURRENT_EPISODE_SEASON", item.seasonNumber ?: 1)
+                                        putExtra("CURRENT_EPISODE_NUMBER", item.episodeNumber ?: 1)
+                                        putExtra("CURRENT_EPISODE_TITLE", item.subtitle ?: "Episode ${item.episodeNumber}")
                                     }
                                 }
                                 context.startActivity(intent)

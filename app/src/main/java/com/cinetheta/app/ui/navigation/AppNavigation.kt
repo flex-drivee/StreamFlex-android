@@ -68,6 +68,9 @@ fun AppNavigation(
 ) {
     val navController = rememberNavController()
     val context = LocalContext.current
+    val progressManager = remember { com.cinetheta.player.resume.PlaybackProgressManager(context) }
+    val homeViewModelFactory = remember { HomeViewModelFactory(repository, progressManager) }
+    val homeViewModel: HomeViewModel = viewModel(factory = homeViewModelFactory)
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
@@ -87,7 +90,27 @@ fun AppNavigation(
             modifier = Modifier.fillMaxSize()
         ) {
             // --- HOME ---
-            
+            composable(route = Screen.Home.route) {
+                HomeScreen(
+                    viewModel = homeViewModel,
+                    providerRepository = com.cinetheta.app.di.ProviderModule.repository,
+                    onNavigateToDetail = { type, id -> navController.navigate(Screen.Detail.createRoute(type, id)) },
+                    onNavigateToContinueWatching = { navController.navigate(Screen.ContinueWatching.route) },
+                    onSearchClick = { navController.navigate(Screen.Search.route) },
+                    onSettingsClick = { navController.navigate(Screen.Settings.route) },
+                    onDownloadsClick = { navController.navigate(Screen.Downloads.route) },
+                    onExploreClick = { categoryId, title -> navController.navigate("see_all/$categoryId/$title") }
+                )
+            }
+
+            composable(route = Screen.ContinueWatching.route) {
+                ContinueWatchingScreen(
+                    viewModel = homeViewModel,
+                    onBackClick = { navController.popBackStack() },
+                    onItemClick = { type, id -> navController.navigate(Screen.Detail.createRoute(type, id)) }
+                )
+            }
+
             composable(Screen.PluginSearch.route) {
                 val viewModelFactory = PluginSearchViewModelFactory(com.cinetheta.app.di.ProviderModule.repository)
                 val viewModel: PluginSearchViewModel = viewModel(factory = viewModelFactory)
@@ -112,7 +135,7 @@ fun AppNavigation(
                     searchResult = searchResult,
                     viewModel = viewModel,
                     onBackClick = { navController.popBackStack() },
-                                        onPlayClick = { sources, episode ->
+                    onPlayClick = { sources, episode ->
                         com.cinetheta.app.ui.pluginsearch.PluginSharedData.directSources = sources
                         val intent = Intent(context, com.cinetheta.player.PlayerActivity::class.java).apply {
                             putExtra("MEDIA_ID", searchResult.id)
@@ -121,33 +144,14 @@ fun AppNavigation(
                             putExtra("POSTER_PATH", searchResult.poster)
                             if (episode != null) {
                                 putExtra("IS_SHOW", true)
-                                putExtra("CURRENT_EPISODE_ID", episode.number.toString()) // Plugin episodes use URL as ID often, or just pass the link
-                                // Wait, the StreamRepository resolve logic usually needs the whole ProviderResult.
-                                // But for Plugin direct play, PlayerActivity expects TMDB IDs to resolve!
-                                // We might need to handle this! Let's pass PLUGIN_DIRECT_URL and Provider ID!
+                                putExtra("CURRENT_EPISODE_ID", episode.number.toString())
                             } else {
                                 putExtra("IS_SHOW", false)
                             }
-                                                        putExtra("PLUGIN_PROVIDER_ID", searchResult.providerId)
-                                                                                }
+                            putExtra("PLUGIN_PROVIDER_ID", searchResult.providerId)
+                        }
                         context.startActivity(intent)
                     }
-                )
-            }
-
-            composable(route = Screen.Home.route) {
-                val progressManager = remember { com.cinetheta.player.resume.PlaybackProgressManager(context) }
-                val viewModelFactory = HomeViewModelFactory(repository, progressManager)
-                val viewModel: HomeViewModel = viewModel(factory = viewModelFactory)
-
-                HomeScreen(
-                    viewModel = viewModel,
-                    providerRepository = com.cinetheta.app.di.ProviderModule.repository,
-                    onNavigateToDetail = { type, id -> navController.navigate(Screen.Detail.createRoute(type, id)) },
-                    onSearchClick = { navController.navigate(Screen.Search.route) },
-                    onSettingsClick = { navController.navigate(Screen.Settings.route) },
-                    onDownloadsClick = { navController.navigate(Screen.Downloads.route) },
-                    onExploreClick = { categoryId, title -> navController.navigate("see_all/$categoryId/$title") }
                 )
             }
             
@@ -338,12 +342,19 @@ fun AppNavigation(
                                 .clip(CircleShape)
                                 .background(if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else Color.Transparent)
                                 .clickable {
-                                    navController.navigate(item.route) {
-                                        popUpTo(navController.graph.findStartDestination().id) {
-                                            saveState = true
+                                    if (item == BottomNavItem.Home && isSelected) {
+                                        homeViewModel.loadHomeData()
+                                    } else {
+                                        navController.navigate(item.route) {
+                                            popUpTo(navController.graph.findStartDestination().id) {
+                                                saveState = true
+                                            }
+                                            launchSingleTop = true
+                                            restoreState = true
                                         }
-                                        launchSingleTop = true
-                                        restoreState = true
+                                        if (item == BottomNavItem.Home) {
+                                            homeViewModel.reloadHistory()
+                                        }
                                     }
                                 },
                             contentAlignment = Alignment.Center

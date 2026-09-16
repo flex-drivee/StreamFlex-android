@@ -84,7 +84,23 @@ class MovieBoxSearch {
                             ))
                         }
                     }
-                    results
+
+                    val cleanQ = query.trim()
+                    val sequelRegex = Regex("""\b([2-9]|II|III|IV|V)\b""", RegexOption.IGNORE_CASE)
+                    val queryHasSequel = sequelRegex.containsMatchIn(cleanQ)
+
+                    results.sortedByDescending { res ->
+                        var score = 0
+                        val t = res.title.trim()
+                        if (t.equals(cleanQ, ignoreCase = true)) score += 100
+                        else if (t.startsWith(cleanQ, ignoreCase = true)) score += 50
+                        else if (t.contains(cleanQ, ignoreCase = true)) score += 25
+                        
+                        if (!queryHasSequel && sequelRegex.containsMatchIn(t)) {
+                            score -= 40
+                        }
+                        score
+                    }
                 }
                 else -> emptyList()
             }

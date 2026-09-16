@@ -30,37 +30,61 @@ fun ContinueWatchingScreen(
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
+                },
+                actions = {
+                    if (uiState.continueWatching.isNotEmpty()) {
+                        TextButton(onClick = {
+                            uiState.continueWatching.forEach { item ->
+                                viewModel.removeHistoryItem(item.id)
+                            }
+                        }) {
+                            Text("Clear All", color = MaterialTheme.colorScheme.error, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                        }
+                    }
                 }
             )
         }
     ) { padding ->
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            contentPadding = padding,
-            modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            items(uiState.continueWatching) { item ->
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    SFContinueCard(
-                        item = item,
-                        onClick = { onItemClick(item.type, item.id) },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    IconButton(
-                        onClick = { viewModel.removeHistoryItem(item.id) },
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(4.dp)
-                            .size(32.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = "Remove",
-                            tint = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.size(20.dp)
+        if (uiState.continueWatching.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxSize().padding(padding),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "No continue watching history",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        } else {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                contentPadding = padding,
+                modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                items(uiState.continueWatching) { item ->
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        SFContinueCard(
+                            item = item,
+                            onClick = { onItemClick(item.type, item.id) },
+                            modifier = Modifier.fillMaxWidth()
                         )
+                        IconButton(
+                            onClick = { viewModel.removeHistoryItem(item.id) },
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(4.dp)
+                                .size(32.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Remove",
+                                tint = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                     }
                 }
             }

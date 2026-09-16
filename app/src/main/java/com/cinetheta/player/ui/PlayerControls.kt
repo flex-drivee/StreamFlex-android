@@ -42,11 +42,20 @@ fun PlayerControls(
     onBack: () -> Unit
 ) {
     var isVisible by remember { mutableStateOf(true) }
+    var isLocked by remember { mutableStateOf(false) }
+    var isUnlockPromptVisible by remember { mutableStateOf(false) }
 
-    LaunchedEffect(isVisible, state.isPlaying) {
-        if (isVisible && state.isPlaying) {
+    LaunchedEffect(isVisible, state.isPlaying, isLocked) {
+        if (isVisible && state.isPlaying && !isLocked) {
             delay(3000L)
             isVisible = false
+        }
+    }
+
+    LaunchedEffect(isUnlockPromptVisible) {
+        if (isUnlockPromptVisible) {
+            delay(3500L)
+            isUnlockPromptVisible = false
         }
     }
 
@@ -56,10 +65,58 @@ fun PlayerControls(
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null
-            ) { isVisible = !isVisible }
+            ) {
+                if (isLocked) {
+                    isUnlockPromptVisible = !isUnlockPromptVisible
+                } else {
+                    isVisible = !isVisible
+                }
+            }
     ) {
+        // Floating Unlock Banner when screen is locked
         AnimatedVisibility(
-            visible = isVisible,
+            visible = isLocked && isUnlockPromptVisible,
+            enter = fadeIn(animationSpec = tween(200)),
+            exit = fadeOut(animationSpec = tween(200)),
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                .padding(start = 36.dp)
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color.Black.copy(alpha = 0.82f))
+                    .clickable {
+                        isLocked = false
+                        isUnlockPromptVisible = false
+                        isVisible = true
+                    }
+                    .padding(horizontal = 18.dp, vertical = 14.dp)
+            ) {
+                Icon(
+                    Icons.Filled.Lock,
+                    contentDescription = "Unlock Controls",
+                    tint = Color(0xFF00E5FF),
+                    modifier = Modifier.size(32.dp)
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = "Controls Locked",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp
+                )
+                Text(
+                    text = "Tap to unlock",
+                    color = Color.White.copy(alpha = 0.7f),
+                    fontSize = 11.sp
+                )
+            }
+        }
+
+        AnimatedVisibility(
+            visible = isVisible && !isLocked,
             enter = fadeIn(animationSpec = tween(300)),
             exit = fadeOut(animationSpec = tween(300)),
             modifier = Modifier.fillMaxSize()
@@ -74,45 +131,72 @@ fun PlayerControls(
                     modifier = Modifier
                         .fillMaxWidth()
                         .align(Alignment.TopCenter)
-                        .padding(horizontal = 24.dp, vertical = 24.dp),
+                        .padding(horizontal = 24.dp, vertical = 20.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Left Side: Season / Episode Pills or Empty if Movie
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        if (showEpisodesButton) {
-                            // S1 Pill (Green)
-                            Row(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(20.dp))
-                                    .background(Color(0xFF008000)) // Green
-                                    .clickable { onEpisodesClick() }
-                                    .padding(horizontal = 16.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(Icons.Default.PlayArrow, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(subtitle?.split(" ")?.take(2)?.joinToString(" ") ?: "Episodes", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                            }
-                            Spacer(modifier = Modifier.width(12.dp))
-                            // E1 Pill (Dark Grey)
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(20.dp))
-                                    .background(Color(0xFF333333)) // Dark Grey
-                                    .padding(horizontal = 16.dp, vertical = 6.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(subtitle?.split(" ")?.drop(2)?.joinToString(" ") ?: "", color = Color(0xFF00E5FF), fontWeight = FontWeight.Bold, fontSize = 14.sp) // Cyan text
-                            }
+                    // Left Side: Episodes quick button if TV Show
+                    if (showEpisodesButton) {
+                        Row(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(20.dp))
+                                .background(Color(0xFF008000))
+                                .clickable { onEpisodesClick() }
+                                .padding(horizontal = 14.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Default.Menu, contentDescription = "Episodes", tint = Color.White, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Episodes", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        }
+                    } else {
+                        Spacer(modifier = Modifier.size(40.dp))
+                    }
+
+                    // UPPER MID: Movie/Show Name and Episode subtitle
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.weight(1f).padding(horizontal = 16.dp)
+                    ) {
+                        Text(
+                            text = title,
+                            color = Color.White,
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                        )
+                        if (showEpisodesButton && !subtitle.isNullOrBlank()) {
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = subtitle,
+                                color = Color(0xFF00E5FF),
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Medium,
+                                maxLines = 1,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                            )
                         }
                     }
 
-
-
-                    // Close Button
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.White, modifier = Modifier.size(32.dp))
+                    // Right Side: Lock button + Close Button
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(onClick = {
+                            isLocked = true
+                            isVisible = false
+                            isUnlockPromptVisible = true
+                        }) {
+                            Icon(
+                                Icons.Outlined.LockOpen,
+                                contentDescription = "Lock Controls",
+                                tint = Color.White,
+                                modifier = Modifier.size(26.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(4.dp))
+                        IconButton(onClick = onBack) {
+                            Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.White, modifier = Modifier.size(32.dp))
+                        }
                     }
                 }
 
@@ -162,58 +246,50 @@ fun PlayerControls(
                     ) {
                         // Left: Play, Volume, Time
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            IconButton(onClick = onPlayPauseToggle, modifier = Modifier.size(48.dp)) {
+                            IconButton(onClick = onPlayPauseToggle, modifier = Modifier.size(44.dp)) {
                                 val icon = if (state.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow
-                                Icon(icon, contentDescription = "Play", tint = Color.White, modifier = Modifier.size(28.dp))
+                                Icon(icon, contentDescription = "Play", tint = Color.White, modifier = Modifier.size(26.dp))
                             }
-                            IconButton(onClick = onMuteToggle, modifier = Modifier.size(48.dp)) {
+                            IconButton(onClick = onMuteToggle, modifier = Modifier.size(44.dp)) {
                                 val volIcon = if (isMuted) Icons.Default.VolumeOff else Icons.Default.VolumeUp
-                                Icon(volIcon, contentDescription = "Volume", tint = Color.White, modifier = Modifier.size(28.dp))
+                                Icon(volIcon, contentDescription = "Volume", tint = Color.White, modifier = Modifier.size(26.dp))
                             }
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = "${formatTime(state.positionMs)} / ${formatTime(state.durationMs)}", 
                                 color = Color.White, 
-                                fontSize = 14.sp,
+                                fontSize = 13.sp,
                                 fontWeight = FontWeight.Medium
                             )
                         }
 
-                        // Center: Title
-                        Text(
-                            text = title,
-                            color = Color.White,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            maxLines = 1,
-                            modifier = Modifier.weight(1f).padding(horizontal = 16.dp),
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                        )
+                        Spacer(modifier = Modifier.weight(1f))
 
-                        // Right: Audio, Comments(Subtitles), PIP, Settings, Fullscreen
+                        // Right: Server, Quality, Audio, Subtitles, PIP, Fullscreen
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            if (showEpisodesButton) {
-                                IconButton(onClick = onEpisodesClick, modifier = Modifier.size(48.dp)) {
-                                    Icon(Icons.Default.Menu, contentDescription = "Episodes", tint = Color.White, modifier = Modifier.size(32.dp))
-                                }
+                            // Server Icon (tab 3)
+                            IconButton(onClick = { onSettingsClick(3) }, modifier = Modifier.size(44.dp)) {
+                                Icon(Icons.Outlined.Dns, contentDescription = "Servers", tint = Color.White, modifier = Modifier.size(26.dp))
                             }
-                            // Audio Tracks
-                            IconButton(onClick = { onSettingsClick(1) }, modifier = Modifier.size(48.dp)) {
-                                Icon(Icons.Outlined.Audiotrack, contentDescription = "Audio", tint = Color.White, modifier = Modifier.size(28.dp))
+                            // Quality / Multiprint (tab 0)
+                            IconButton(onClick = { onSettingsClick(0) }, modifier = Modifier.size(44.dp)) {
+                                Icon(Icons.Outlined.HighQuality, contentDescription = "Quality", tint = Color.White, modifier = Modifier.size(26.dp))
                             }
-                            // Comments icon wired to Subtitles (tab 2)
-                            IconButton(onClick = { onSettingsClick(2) }, modifier = Modifier.size(48.dp)) {
-                                Icon(Icons.Outlined.SpeakerNotes, contentDescription = "Subtitles/Comments", tint = Color.White, modifier = Modifier.size(28.dp))
+                            // Audio Tracks (tab 1)
+                            IconButton(onClick = { onSettingsClick(1) }, modifier = Modifier.size(44.dp)) {
+                                Icon(Icons.Outlined.Audiotrack, contentDescription = "Audio", tint = Color.White, modifier = Modifier.size(26.dp))
+                            }
+                            // Subtitles (tab 2)
+                            IconButton(onClick = { onSettingsClick(2) }, modifier = Modifier.size(44.dp)) {
+                                Icon(Icons.Outlined.ClosedCaption, contentDescription = "Subtitles", tint = Color.White, modifier = Modifier.size(26.dp))
                             }
                             // Picture in Picture
-                            IconButton(onClick = onPipClick, modifier = Modifier.size(48.dp)) {
-                                Icon(Icons.Outlined.PictureInPictureAlt, contentDescription = "PIP", tint = Color.White, modifier = Modifier.size(28.dp))
+                            IconButton(onClick = onPipClick, modifier = Modifier.size(44.dp)) {
+                                Icon(Icons.Outlined.PictureInPictureAlt, contentDescription = "PIP", tint = Color.White, modifier = Modifier.size(26.dp))
                             }
-                            IconButton(onClick = { onSettingsClick(0) }, modifier = Modifier.size(48.dp)) {
-                                Icon(Icons.Outlined.Settings, contentDescription = "Settings", tint = Color.White, modifier = Modifier.size(28.dp))
-                            }
-                            IconButton(onClick = onFullscreenToggle, modifier = Modifier.size(48.dp)) {
-                                Icon(Icons.Outlined.Fullscreen, contentDescription = "Fullscreen", tint = Color.White, modifier = Modifier.size(32.dp))
+                            // Fullscreen
+                            IconButton(onClick = onFullscreenToggle, modifier = Modifier.size(44.dp)) {
+                                Icon(Icons.Outlined.Fullscreen, contentDescription = "Fullscreen", tint = Color.White, modifier = Modifier.size(30.dp))
                             }
                         }
                     }

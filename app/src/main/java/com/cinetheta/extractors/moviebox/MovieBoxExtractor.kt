@@ -50,13 +50,25 @@ class MovieBoxExtractor : BaseExtractor() {
                     if (data != null) {
                         val globalSignCookie = JsonParser.string(data, "signCookie") ?: JsonParser.string(data, "signCookieRaw")
                         
+                        // Parse subtitles/captions
+                        val subtitlesList = mutableListOf<com.cinetheta.domain.models.Subtitle>()
+                        val captions = JsonParser.array(data, "captions")
+                        if (captions != null) {
+                            for (cap in captions) {
+                                val subUrl = JsonParser.string(cap, "url") ?: continue
+                                val lang = JsonParser.string(cap, "lan") ?: JsonParser.string(cap, "language") ?: "en"
+                                val label = JsonParser.string(cap, "lanName") ?: JsonParser.string(cap, "name") ?: lang.uppercase()
+                                subtitlesList.add(com.cinetheta.domain.models.Subtitle(language = lang, label = label, url = subUrl))
+                            }
+                        }
+
                         // Parse streams
                         val list = JsonParser.array(data, "streams")
-                        parseStreamList(list, globalSignCookie, streams, nextSources, baseOrigin, injectedLang)
+                        parseStreamList(list, globalSignCookie, streams, nextSources, baseOrigin, injectedLang, subtitlesList)
                         
                         // Parse detectors
                         val detectors = JsonParser.array(data, "detectors")
-                        parseStreamList(detectors, globalSignCookie, streams, nextSources, baseOrigin, injectedLang)
+                        parseStreamList(detectors, globalSignCookie, streams, nextSources, baseOrigin, injectedLang, subtitlesList)
                     }
                 }
             }
@@ -113,7 +125,7 @@ class MovieBoxExtractor : BaseExtractor() {
         )
     }
     
-    private fun parseStreamList(list: List<JsonElement>?, globalSignCookie: String?, streams: MutableList<StreamLink>, nextSources: MutableList<ProviderSource>, baseOrigin: String, injectedLang: String) {
+    private fun parseStreamList(list: List<JsonElement>?, globalSignCookie: String?, streams: MutableList<StreamLink>, nextSources: MutableList<ProviderSource>, baseOrigin: String, injectedLang: String, subtitles: List<com.cinetheta.domain.models.Subtitle> = emptyList()) {
         if (list == null) return
         for (item in list) {
             val path = JsonParser.string(item, "url") ?: JsonParser.string(item, "resourceLink") ?: continue
@@ -205,7 +217,8 @@ class MovieBoxExtractor : BaseExtractor() {
                         pathLower.contains(".mpd") -> com.cinetheta.core.network.detector.ContentType.DASH
                         else -> com.cinetheta.core.network.detector.ContentType.VIDEO
                     },
-                    adaptive = pathLower.contains(".m3u8") || pathLower.contains(".mpd")
+                    adaptive = pathLower.contains(".m3u8") || pathLower.contains(".mpd"),
+                    subtitles = subtitles
                 )
             )
         }

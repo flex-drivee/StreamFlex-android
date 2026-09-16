@@ -76,9 +76,19 @@ class PlayerActivity : ComponentActivity() {
         }.toMutableList()
         
         var currentEpisode = episodes.find { it.id == currentEpisodeId }
+        val epSeasonNum = intent.getIntExtra("CURRENT_EPISODE_SEASON", 1)
+        val epEpisodeNum = intent.getIntExtra("CURRENT_EPISODE_NUMBER", 1)
+        val epTitle = intent.getStringExtra("CURRENT_EPISODE_TITLE") ?: "Episode $epEpisodeNum"
+        val localFilePath = intent.getStringExtra("LOCAL_FILE_PATH")
+        val downloadItemId = intent.getStringExtra("DOWNLOAD_ITEM_ID")
         
         if (currentEpisode == null && currentEpisodeId != null && isShow) {
-            currentEpisode = PlayerEpisode(id = currentEpisodeId, title = "Resumed Episode", seasonNumber = 1, episodeNumber = 1)
+            currentEpisode = PlayerEpisode(
+                id = currentEpisodeId, 
+                title = epTitle, 
+                seasonNumber = epSeasonNum, 
+                episodeNumber = epEpisodeNum
+            )
             episodes.add(currentEpisode)
         }
         
@@ -89,7 +99,9 @@ class PlayerActivity : ComponentActivity() {
             isShow = isShow,
             episodes = episodes,
             currentEpisode = currentEpisode,
-            pluginProviderId = intent.getStringExtra("PLUGIN_PROVIDER_ID")
+            pluginProviderId = intent.getStringExtra("PLUGIN_PROVIDER_ID"),
+            localFilePath = localFilePath,
+            downloadItemId = downloadItemId
         )
         
         viewModel.initializeSession(session)

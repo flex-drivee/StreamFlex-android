@@ -38,12 +38,19 @@ class NetMirrorProvider(
         val deferredResults = OTT_LIST.map { ott ->
             async {
                 runCatching {
+                    val displayName = when (ott.lowercase()) {
+                        NetMirrorConfig.OTT_NETFLIX -> "Netflix"
+                        NetMirrorConfig.OTT_PRIME -> "Amazon Prime"
+                        NetMirrorConfig.OTT_HOTSTAR -> "Hotstar"
+                        NetMirrorConfig.OTT_DISNEY -> "Disney+"
+                        else -> ott.uppercase()
+                    }
                     searchImpl.search(
                         query = query, 
                         baseUrl = baseUrl, 
                         ott = ott, 
                         providerId = id, 
-                        providerName = "NetMirror (${ott.uppercase()})"
+                        providerName = displayName
                     )
                 }.onFailure {
                     Logger.e("[$id] Search failed for '$query' on OTT '$ott': ${it.message}", TAG)

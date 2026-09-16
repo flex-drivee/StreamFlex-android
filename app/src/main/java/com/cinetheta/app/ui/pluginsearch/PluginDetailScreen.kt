@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.compose.SubcomposeAsyncImage
+import androidx.compose.material.icons.outlined.FileDownload
 import com.cinetheta.app.ui.home.SFBadge
 import com.cinetheta.app.ui.theme.SFDubBg
 import com.cinetheta.app.ui.theme.SFHDTag
@@ -50,6 +51,7 @@ fun PluginDetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val isShow = searchResult.mediaType.name == "TV" || searchResult.mediaType.name == "ANIME"
+    var showComingSoonDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(searchResult) {
         viewModel.loadContent(searchResult)
@@ -118,20 +120,38 @@ fun PluginDetailScreen(
                                         .padding(horizontal = 16.dp, vertical = 4.dp),
                                     verticalArrangement = Arrangement.spacedBy(10.dp)
                                 ) {
-                                    Button(
-                                        onClick = { onPlayClick(result.sources, null) },
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(50.dp),
-                                        shape = RoundedCornerShape(8.dp),
-                                        colors = ButtonDefaults.buttonColors(
-                                            containerColor = MaterialTheme.colorScheme.primary,
-                                            contentColor = Color.White
-                                        )
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                                     ) {
-                                        Icon(Icons.Filled.PlayArrow, contentDescription = null, modifier = Modifier.size(24.dp))
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        Text("Play Movie", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                                        Button(
+                                            onClick = { onPlayClick(result.sources, null) },
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .height(50.dp),
+                                            shape = RoundedCornerShape(8.dp),
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = MaterialTheme.colorScheme.primary,
+                                                contentColor = Color.White
+                                            )
+                                        ) {
+                                            Icon(Icons.Filled.PlayArrow, contentDescription = null, modifier = Modifier.size(24.dp))
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Text("Play Movie", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                                        }
+
+                                        OutlinedButton(
+                                            onClick = { showComingSoonDialog = true },
+                                            modifier = Modifier.height(50.dp),
+                                            shape = RoundedCornerShape(8.dp),
+                                            colors = ButtonDefaults.outlinedButtonColors(
+                                                contentColor = MaterialTheme.colorScheme.primary
+                                            )
+                                        ) {
+                                            Icon(Icons.Outlined.FileDownload, contentDescription = "Download", modifier = Modifier.size(22.dp))
+                                            Spacer(modifier = Modifier.width(6.dp))
+                                            Text("Download", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                                        }
                                     }
                                 }
                             }
@@ -227,7 +247,8 @@ fun PluginDetailScreen(
                                 selectedSeason?.episodes?.forEach { episode ->
                                     PluginEpisodeItem(
                                         episode = episode,
-                                        onClick = { onPlayClick(episode.sources, episode) }
+                                        onClick = { onPlayClick(episode.sources, episode) },
+                                        onDownloadClick = { showComingSoonDialog = true }
                                     )
                                 }
                                 
@@ -245,6 +266,20 @@ fun PluginDetailScreen(
                         }
                     }
                 }
+            }
+
+            if (showComingSoonDialog) {
+                AlertDialog(
+                    onDismissRequest = { showComingSoonDialog = false },
+                    title = { Text("Coming Soon", fontWeight = FontWeight.Bold) },
+                    text = { Text("Downloads from this provider are currently not supported and will be available in an upcoming update.") },
+                    confirmButton = {
+                        TextButton(onClick = { showComingSoonDialog = false }) {
+                            Text("OK", color = MaterialTheme.colorScheme.primary)
+                        }
+                    },
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
             }
         }
     }
@@ -389,7 +424,8 @@ private fun PluginDetailHero(
 @Composable
 fun PluginEpisodeItem(
     episode: ProviderEpisode,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onDownloadClick: (() -> Unit)? = null
 ) {
     Row(
         modifier = Modifier
@@ -434,6 +470,16 @@ fun PluginEpisodeItem(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
+        }
+
+        if (onDownloadClick != null) {
+            IconButton(onClick = onDownloadClick) {
+                Icon(
+                    imageVector = Icons.Outlined.FileDownload,
+                    contentDescription = "Download Episode",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }

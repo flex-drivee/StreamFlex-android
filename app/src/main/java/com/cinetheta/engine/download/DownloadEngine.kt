@@ -82,12 +82,14 @@ class DownloadEngine(
             when (downloadResult) {
                 is MultiChunkDownloader.Result.Success -> {
                     // Download subtitles if any
-                    subtitleDownloader.downloadSubtitles(item.subtitles, downloadResult.file, storageManager)
+                    val allSubs = (item.subtitles + streamLink.subtitles).distinctBy { it.url }
+                    subtitleDownloader.downloadSubtitles(allSubs, streamLink.headers, downloadResult.file, storageManager)
                     return@withContext Result.Success(downloadResult.file, downloadResult.totalBytes)
                 }
                 is HlsDownloader.Result.Success -> {
-                    // Download subtitles if any
-                    subtitleDownloader.downloadSubtitles(item.subtitles, downloadResult.file, storageManager)
+                    // Download subtitles if any (from item, streamLink, or discovered in HLS manifest)
+                    val allSubs = (item.subtitles + streamLink.subtitles + downloadResult.extraSubtitles).distinctBy { it.url }
+                    subtitleDownloader.downloadSubtitles(allSubs, streamLink.headers, downloadResult.file, storageManager)
                     return@withContext Result.Success(downloadResult.file, downloadResult.totalBytes)
                 }
                 is MultiChunkDownloader.Result.Paused,

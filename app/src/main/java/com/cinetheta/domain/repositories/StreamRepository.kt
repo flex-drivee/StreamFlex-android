@@ -44,23 +44,19 @@ class StreamRepository(
     suspend fun resolveMovie(title: String, year: Int? = null, onStreamFound: suspend (FinalStreams) -> Unit = {}): FinalStreams = coroutineScope {
         val baseResults = search(title)
         
-        // Fallback searches for titles that have subtitles or extra words (e.g. "Toxic A Fairy Tale" -> "Toxic")
-        val cleanTitle = title.replace(Regex("[^a-zA-Z0-9 ]"), " ").replace(Regex("\\s+"), " ").trim()
-        val shortTitle = cleanTitle.split(" ").take(2).joinToString(" ")
-        val shortResults = if (shortTitle.length > 3 && shortTitle.lowercase() != title.lowercase()) {
-            search(shortTitle)
+        val results = if (baseResults.isNotEmpty()) {
+            baseResults
         } else {
-            emptyList()
-        }
-        
-        val wordShortTitle = cleanTitle.split(" ").first()
-        val wordShortResults = if (wordShortTitle.length > 3 && wordShortTitle.lowercase() != shortTitle.lowercase() && wordShortTitle.lowercase() != title.lowercase()) {
-            search(wordShortTitle)
-        } else {
-            emptyList()
-        }
-        
-        val results = (baseResults + shortResults + wordShortResults).distinctBy { it.url }
+            // Only search fallback if base title search returned no results
+            val cleanTitle = title.replace(Regex("[^a-zA-Z0-9 ]"), " ").replace(Regex("\\s+"), " ").trim()
+            val shortTitle = cleanTitle.split(" ").take(2).joinToString(" ")
+            if (shortTitle.length > 3 && shortTitle.lowercase() != title.lowercase()) {
+                search(shortTitle)
+            } else {
+                emptyList()
+            }
+        }.distinctBy { it.url }
+
         if (results.isEmpty()) return@coroutineScope FinalStreams.EMPTY
 
         val bestMatches = results.groupBy { it.providerName }.flatMap { entry ->
@@ -92,15 +88,18 @@ class StreamRepository(
         val baseResults = search(title)
         val seasonResults = search("$title Season $season")
         
-        val cleanTitle = title.replace(Regex("[^a-zA-Z0-9 ]"), " ").replace(Regex("\\s+"), " ").trim()
-        val shortTitle = cleanTitle.split(" ").take(2).joinToString(" ")
-        val shortResults = if (shortTitle.length > 3 && shortTitle.lowercase() != title.lowercase()) {
-            search(shortTitle)
+        val directResults = (seasonResults + baseResults).distinctBy { it.url }
+        val combinedResults = if (directResults.isNotEmpty()) {
+            directResults
         } else {
-            emptyList()
+            val cleanTitle = title.replace(Regex("[^a-zA-Z0-9 ]"), " ").replace(Regex("\\s+"), " ").trim()
+            val shortTitle = cleanTitle.split(" ").take(2).joinToString(" ")
+            if (shortTitle.length > 3 && shortTitle.lowercase() != title.lowercase()) {
+                search(shortTitle)
+            } else {
+                emptyList()
+            }
         }
-        
-        val combinedResults = (seasonResults + baseResults + shortResults)
         if (combinedResults.isEmpty()) {
             Logger.w("No search results found for query: $title", "StreamRepository")
             return@coroutineScope FinalStreams.EMPTY

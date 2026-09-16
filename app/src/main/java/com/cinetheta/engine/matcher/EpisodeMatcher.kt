@@ -69,11 +69,21 @@ object EpisodeMatcher {
         if (baseResultTitle.isEmpty()) baseResultTitle = result.title
         
         // Use the highest similarity between the full expected title and the main expected title
-        val sim1 = TitleMatcher.similarity(expectedTitle, baseResultTitle)
-        val sim2 = TitleMatcher.similarity(expectedToUse, baseResultTitle)
-                val sim = maxOf(sim1, sim2)
+        var sim1 = TitleMatcher.similarity(expectedTitle, baseResultTitle)
+        var sim2 = TitleMatcher.similarity(expectedToUse, baseResultTitle)
+        result.originalTitle?.let { orig ->
+            sim1 = maxOf(sim1, TitleMatcher.similarity(expectedTitle, orig))
+            sim2 = maxOf(sim2, TitleMatcher.similarity(expectedToUse, orig))
+        }
+        val sim = maxOf(sim1, sim2)
 
-        if (sim < 0.75) {
+        val containsMatch = (baseResultTitle.length >= 4 && expectedTitle.contains(baseResultTitle, ignoreCase = true)) ||
+                            (expectedToUse.length >= 4 && baseResultTitle.contains(expectedToUse, ignoreCase = true)) ||
+                            (expectedTitle.length >= 4 && baseResultTitle.contains(expectedTitle, ignoreCase = true))
+
+        val effectiveSim = if (containsMatch) maxOf(sim, 0.85) else sim
+
+        if (effectiveSim < 0.70) {
             return -1 // Title doesn't match closely enough, discard to prevent season/episode bonuses from overpowering it
         }
 
@@ -81,7 +91,7 @@ object EpisodeMatcher {
             return -1 // Do not match explicit movies when searching for an episode
         }
 
-        var score = (sim * 50).toInt()
+        var score = (effectiveSim * 50).toInt()
         val title = SearchNormalizer.normalize(result.title)
 
         val seasonStr = season.toString()

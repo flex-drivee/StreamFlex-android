@@ -58,14 +58,42 @@ object WebViewResolver {
                         setBackgroundColor(Color.parseColor("#121212"))
                         setPadding(32, 32, 32, 32)
                     }
+
+                    var isFinished = false
+                    var dialog: Dialog? = null
+
+                    val headerLayout = LinearLayout(activity).apply {
+                        orientation = LinearLayout.HORIZONTAL
+                        gravity = android.view.Gravity.CENTER_VERTICAL
+                        layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+                        setPadding(0, 0, 0, 16)
+                    }
                     
                     val titleView = TextView(activity).apply {
                         text = "Bypassing Security Check..."
                         setTextColor(Color.WHITE)
                         textSize = 18f
                         setTypeface(null, android.graphics.Typeface.BOLD)
-                        setPadding(0, 0, 0, 16)
+                        layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
                     }
+
+                    val closeButton = TextView(activity).apply {
+                        text = "✕"
+                        setTextColor(Color.parseColor("#BBBBBB"))
+                        textSize = 20f
+                        setPadding(16, 4, 16, 4)
+                        isClickable = true
+                        setOnClickListener {
+                            if (!isFinished) {
+                                isFinished = true
+                                dialog?.dismiss()
+                                continuation.resume(false)
+                            }
+                        }
+                    }
+
+                    headerLayout.addView(titleView)
+                    headerLayout.addView(closeButton)
                     
                     val progressBar = ProgressBar(activity, null, android.R.attr.progressBarStyleHorizontal).apply {
                         isIndeterminate = true
@@ -81,22 +109,25 @@ object WebViewResolver {
                         addView(webView)
                     }
 
-                    layout.addView(titleView)
+                    layout.addView(headerLayout)
                     layout.addView(progressBar)
                     layout.addView(webViewContainer)
 
-                    var dialog: Dialog? = null
                     if (activity is android.app.Activity && !activity.isFinishing) {
                         dialog = AlertDialog.Builder(activity)
                             .setView(layout)
-                            .setCancelable(false) // Force user to solve it or wait
+                            .setCancelable(true)
+                            .setOnCancelListener {
+                                if (!isFinished) {
+                                    isFinished = true
+                                    continuation.resume(false)
+                                }
+                            }
                             .create()
                             
                         dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
                         dialog.show()
                     }
-
-                    var isFinished = false
 
                     fun finishWithResult(success: Boolean) {
                         if (isFinished) return
