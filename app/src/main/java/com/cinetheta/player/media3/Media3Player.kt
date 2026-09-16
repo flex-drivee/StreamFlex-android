@@ -403,25 +403,42 @@ class Media3Player(
             }
         }
 
-        val mediaItemBuilder = MediaItem.Builder()
-            .setUri(stream.url)
+        val isLocalFile = stream.url.startsWith("/") || stream.url.startsWith("file:")
+        val mediaUri = if (isLocalFile) {
+            val cleanPath = stream.url.removePrefix("file://")
+            android.net.Uri.fromFile(java.io.File(cleanPath))
+        } else {
+            android.net.Uri.parse(stream.url)
+        }
 
-        if (mimeType != null) {
+        val mediaItemBuilder = MediaItem.Builder()
+            .setUri(mediaUri)
+
+        // For local files, NEVER force a MIME type!
+        // Allow ExoPlayer's DefaultExtractorsFactory to sniff and auto-detect whether the file is MP4, TS, MKV, etc.
+        // For remote streams, attach mimeType if detected.
+        if (!isLocalFile && mimeType != null) {
             mediaItemBuilder.setMimeType(mimeType)
         }
 
+        // Reset track selector overrides from previous stream/server
+        trackSelector.setParameters(
+            trackSelector.buildUponParameters()
+                .clearOverrides()
+        )
+        _state.value = _state.value.copy(
+            subtitleTracks = emptyList(),
+            selectedSubtitle = null,
+            audioTracks = emptyList(),
+            selectedAudio = null,
+            availableQualities = emptyList()
+        )
+
         // 6. Attach external subtitles if present
-        android.os.Handler(android.os.Looper.getMainLooper()).post {
-            android.widget.Toast.makeText(context, "Engine Loaded Subtitles: ${stream.subtitles.size}", android.widget.Toast.LENGTH_LONG).show()
-        }
-        com.cinetheta.core.utils.StreamLogger.error("SUBTITLE_DEBUG", "Starting player with URL: ${stream.url}")
-        com.cinetheta.core.utils.StreamLogger.error("SUBTITLE_DEBUG", "Subtitles count: ${stream.subtitles.size}")
-        for (sub in stream.subtitles) {
-            com.cinetheta.core.utils.StreamLogger.error("SUBTITLE_DEBUG", "SUB: ${sub.label} -> ${sub.url}")
-        }
         if (stream.subtitles.isNotEmpty()) {
             val subtitleConfigs = stream.subtitles.map { sub ->
-                val subMime = if (sub.url.endsWith(".vtt", ignoreCase = true)) {
+                val subCleanUrl = sub.url.substringBefore('?')
+                val subMime = if (subCleanUrl.endsWith(".vtt", ignoreCase = true) || sub.url.contains(".vtt", ignoreCase = true)) {
                     androidx.media3.common.MimeTypes.TEXT_VTT
                 } else {
                     androidx.media3.common.MimeTypes.APPLICATION_SUBRIP
@@ -430,7 +447,7 @@ class Media3Player(
                     .setMimeType(subMime)
                     .setLanguage(sub.language)
                     .setLabel(sub.label)
-                    .setSelectionFlags(androidx.media3.common.C.SELECTION_FLAG_DEFAULT)
+                    .setSelectionFlags(0)
                     .build()
             }
             mediaItemBuilder.setSubtitleConfigurations(subtitleConfigs)

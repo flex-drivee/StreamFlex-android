@@ -36,8 +36,6 @@ class MainActivity : ComponentActivity() {
         com.cinetheta.app.di.ProviderModule.repository.selectedProviderId = spId
 
         val contentRepository = RepositoryModule.contentRepository
-        
-        android.widget.Toast.makeText(this, "Loaded Provider: $spId | Repo: ${contentRepository::class.java.simpleName}", android.widget.Toast.LENGTH_LONG).show()
         val streamRepository = RepositoryModule.streamRepository
 
         setContent {

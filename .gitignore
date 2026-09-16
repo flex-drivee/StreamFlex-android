@@ -14,4 +14,5 @@
 .cxx
 /base/
 base.apk
+*.apk
 .acside/

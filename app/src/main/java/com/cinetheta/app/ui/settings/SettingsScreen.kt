@@ -119,7 +119,7 @@ fun SettingsScreen(
                         onTap = {
                             android.widget.Toast.makeText(context, "Checking for updates…", android.widget.Toast.LENGTH_SHORT).show()
                             coroutineScope.launch(Dispatchers.IO) {
-                                com.cinetheta.app.utils.AppUpdater.checkUpdate(context)
+                                com.cinetheta.app.utils.AppUpdater.checkUpdate(context, isManualCheck = true)
                             }
                         }
                     )

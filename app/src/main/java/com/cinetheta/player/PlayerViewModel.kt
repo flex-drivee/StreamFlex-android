@@ -22,7 +22,9 @@ data class PlayerSession(
     val isShow: Boolean,
     val episodes: List<PlayerEpisode>,
     val currentEpisode: PlayerEpisode?,
-    val pluginProviderId: String? = null
+    val pluginProviderId: String? = null,
+    val localFilePath: String? = null,
+    val downloadItemId: String? = null
 )
 
 data class PlayerUiState(
@@ -44,14 +46,18 @@ class PlayerViewModel(
     private var originalProviderId: String? = null
 
     fun initializeSession(session: PlayerSession) {
-        if (_uiState.value.session == null) {
-            _uiState.value = _uiState.value.copy(session = session)
-            if (session.pluginProviderId != null) {
-                originalProviderId = com.cinetheta.app.di.ProviderModule.repository.selectedProviderId
-                com.cinetheta.app.di.ProviderModule.repository.selectedProviderId = session.pluginProviderId
-            }
-            fetchStreamsForCurrentSession()
+        _uiState.value = _uiState.value.copy(
+            isLoading = true,
+            session = session,
+            streams = emptyList(),
+            isOffline = false,
+            error = null
+        )
+        if (session.pluginProviderId != null) {
+            originalProviderId = com.cinetheta.app.di.ProviderModule.repository.selectedProviderId
+            com.cinetheta.app.di.ProviderModule.repository.selectedProviderId = session.pluginProviderId
         }
+        fetchStreamsForCurrentSession()
     }
     private fun fetchStreamsForCurrentSession() {
         val session = _uiState.value.session ?: return
@@ -63,15 +69,51 @@ class PlayerViewModel(
                 val sNum = if (session.isShow) session.currentEpisode?.seasonNumber else null
                 val eNum = if (session.isShow) session.currentEpisode?.episodeNumber else null
                 
-                val downloadedItem = downloadRepository.getDownloadForMedia(session.mediaId, sNum, eNum)
-                if (downloadedItem != null && downloadedItem.status == DownloadStatus.COMPLETED && !downloadedItem.localFilePath.isNullOrBlank()) {
-                    val localFile = File(downloadedItem.localFilePath)
+                val downloadedItem = if (!session.downloadItemId.isNullOrBlank()) {
+                    downloadRepository.getDownloadById(session.downloadItemId)
+                } else {
+                    downloadRepository.getDownloadForMedia(session.mediaId, sNum, eNum)
+                }
+                val filePath = if (downloadedItem != null && downloadedItem.status == DownloadStatus.COMPLETED && !downloadedItem.localFilePath.isNullOrBlank()) {
+                    downloadedItem.localFilePath
+                } else if (!session.localFilePath.isNullOrBlank()) {
+                    session.localFilePath
+                } else null
+
+                if (!filePath.isNullOrBlank()) {
+                    val localFile = File(filePath)
                     if (localFile.exists() && localFile.length() > 0) {
+                        val localSubtitles = mutableListOf<com.cinetheta.domain.models.Subtitle>()
+                        val parentDir = localFile.parentFile
+                        if (parentDir != null && parentDir.exists()) {
+                            val baseName = localFile.nameWithoutExtension
+                            parentDir.listFiles()?.filter { f ->
+                                f.isFile && f.name.startsWith(baseName) && (f.name.endsWith(".srt", ignoreCase = true) || f.name.endsWith(".vtt", ignoreCase = true))
+                            }?.forEach { subFile ->
+                                val subName = subFile.nameWithoutExtension.removePrefix(baseName).removePrefix(".")
+                                val label = if (subName.isNotBlank()) subName.replaceFirstChar { it.uppercase() } else "Subtitles"
+                                localSubtitles.add(
+                                    com.cinetheta.domain.models.Subtitle(
+                                        language = subName.lowercase().take(3),
+                                        label = label,
+                                        url = android.net.Uri.fromFile(subFile).toString()
+                                    )
+                                )
+                            }
+                        }
+
+                        if (localSubtitles.isEmpty() && downloadedItem?.subtitles?.isNotEmpty() == true) {
+                            localSubtitles.addAll(downloadedItem.subtitles)
+                        }
+
+                        val quality = downloadedItem?.quality ?: com.cinetheta.domain.models.Quality.P1080
                         val offlineStream = StreamLink(
-                            name = "Offline Download • ${downloadedItem.quality.label}",
+                            name = "Offline Download • ${quality.label}",
                             url = localFile.absolutePath,
-                            quality = downloadedItem.quality,
-                            host = HostType.DIRECT
+                            quality = quality,
+                            host = HostType.DIRECT,
+                            contentType = com.cinetheta.core.network.detector.ContentType.VIDEO,
+                            subtitles = localSubtitles
                         )
                         _uiState.value = _uiState.value.copy(
                             isLoading = false,

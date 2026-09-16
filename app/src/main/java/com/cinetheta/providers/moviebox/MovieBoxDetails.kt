@@ -59,12 +59,13 @@ class MovieBoxDetails {
                     val poster   = coverObj?.let { JsonParser.string(it, "url") }
 
                     val isTV = subjectType == 2 || result.mediaType == MediaType.TV
+                    val year = JsonParser.int(data, "year") ?: result.year
 
                     if (!isTV) {
                         // For movies, fetch alternative subjectIds to get all languages
                         val baseTitle = cleanTitle(title)
                         val currentLang = JsonParser.string(data, "language") ?: ""
-                        val relatedIds = fetchRelatedMovieIds(baseTitle, result.id, currentLang, baseUrl)
+                        val relatedIds = fetchRelatedMovieIds(baseTitle, result.id, currentLang, baseUrl, expectedYear = year, isTV = false)
                         
                         val sources = relatedIds.map { (id, lang) ->
                             val source = MovieBoxMapper.toProviderSource(url = "$baseUrl/wefeed-mobile-bff/subject-api/play-info?subjectId=$id")
@@ -83,7 +84,7 @@ class MovieBoxDetails {
                     } else {
                         val baseTitle = cleanTitle(title)
                         val currentLang = JsonParser.string(data, "language") ?: ""
-                        val relatedIds = fetchRelatedMovieIds(baseTitle, result.id, currentLang, baseUrl)
+                        val relatedIds = fetchRelatedMovieIds(baseTitle, result.id, currentLang, baseUrl, expectedYear = null, isTV = true)
 
                         val allSeasons = mutableListOf<ProviderSeason>()
                         for ((id, lang) in relatedIds) {
@@ -115,12 +116,20 @@ class MovieBoxDetails {
                             )
                         }
 
+                        val fallbackSources = if (mergedSeasons.isEmpty()) {
+                            relatedIds.map { (id, lang) ->
+                                val source = MovieBoxMapper.toProviderSource(url = "$baseUrl/wefeed-mobile-bff/subject-api/play-info?subjectId=$id")
+                                source.copy(metadata = mapOf("language" to lang))
+                            }
+                        } else emptyList()
+
                         MovieBoxMapper.toProviderResult(
                             providerId = MovieBoxConfig.PROVIDER_NAME.lowercase(),
                             title      = title,
                             detailUrl  = result.url,
                             mediaType  = MediaType.TV,
                             seasons    = mergedSeasons,
+                            sources    = fallbackSources,
                             overview   = overview,
                             poster     = poster
                         )
@@ -143,7 +152,19 @@ class MovieBoxDetails {
         return clean.replace(Regex("\\s+"), " ").trim()
     }
 
-    private suspend fun fetchRelatedMovieIds(title: String, currentId: String, currentLang: String, baseUrl: String): List<Pair<String, String>> {
+    private fun extractSequelToken(text: String): String? {
+        val match = Regex("""(?i)\b(?:part\s*(\d+)|(\d+)|(ii|iii|iv|v|vi))\b""").find(text)
+        return match?.value?.lowercase()?.trim()
+    }
+
+    private suspend fun fetchRelatedMovieIds(
+        title: String, 
+        currentId: String, 
+        currentLang: String, 
+        baseUrl: String,
+        expectedYear: Int? = null,
+        isTV: Boolean = false
+    ): List<Pair<String, String>> {
         val searchUrl = "$baseUrl/wefeed-mobile-bff/subject-api/search/v2"
         val payload = """{"keyword":"$title","page":1,"perPage":20}"""
         
@@ -161,6 +182,7 @@ class MovieBoxDetails {
             .build()
             
         val ids = mutableListOf(Pair(currentId, currentLang))
+        val targetSequelToken = extractSequelToken(title)
         
         try {
             when (val resp = HttpClient.execute(request)) {
@@ -175,12 +197,11 @@ class MovieBoxDetails {
                             val subjects = JsonParser.array(resultItem, "subjects") ?: continue
                             for (subject in subjects) {
                                 val subjectId = JsonParser.string(subject, "subjectId") ?: continue
+                                if (ids.any { it.first == subjectId }) continue
                                 val subjectTitle = JsonParser.string(subject, "title") ?: ""
+                                val subjectYear = JsonParser.int(subject, "year")
                                 
-                                val baseSubjectTitle = cleanTitle(subjectTitle)
                                 var lang = JsonParser.string(subject, "language") ?: ""
-                                
-                                // Extract [Language] or (Language) from title if present
                                 val bracketMatch = Regex("\\[(.*?)\\]").find(subjectTitle)
                                 if (bracketMatch != null) {
                                     lang = bracketMatch.groupValues[1]
@@ -190,13 +211,34 @@ class MovieBoxDetails {
                                         lang = parenMatch.groupValues[1]
                                     }
                                 }
-                                
-                                                                if (baseSubjectTitle.equals(title, ignoreCase = true) && !ids.any { it.first == subjectId }) {
-                                    ids.add(Pair(subjectId, lang))
-                                } else if (baseSubjectTitle.contains(title, ignoreCase = true) && !ids.any { it.first == subjectId }) {
-                                    // Only add if it's highly similar to avoid grouping unrelated movies
+
+                                val baseSubjectTitle = cleanTitle(subjectTitle)
+
+                                if (!isTV) {
+                                    // MOVIES: Strict sequel and year checks so Spider-Man 1 never mixes sequels
+                                    if (expectedYear != null && expectedYear > 0 && subjectYear != null && subjectYear > 0) {
+                                        if (kotlin.math.abs(expectedYear - subjectYear) > 1) {
+                                            continue
+                                        }
+                                    }
+
+                                    val candidateSequelToken = extractSequelToken(baseSubjectTitle)
+                                    if (targetSequelToken != candidateSequelToken) {
+                                        continue
+                                    }
+                                    
+                                    if (baseSubjectTitle.equals(title, ignoreCase = true)) {
+                                        ids.add(Pair(subjectId, lang))
+                                    }
+                                } else {
+                                    // TV SHOWS: Allow seasons, classes, parts (e.g. Breaking Bad Season 2/3/4/5, Weak Hero Class 1)
                                     val sim = com.cinetheta.engine.matcher.TitleMatcher.similarity(title, baseSubjectTitle)
-                                    if (sim > 0.85) {
+                                    val isMatch = baseSubjectTitle.equals(title, ignoreCase = true) ||
+                                            baseSubjectTitle.contains(title, ignoreCase = true) ||
+                                            title.contains(baseSubjectTitle, ignoreCase = true) ||
+                                            sim >= 0.70
+
+                                    if (isMatch) {
                                         ids.add(Pair(subjectId, lang))
                                     }
                                 }

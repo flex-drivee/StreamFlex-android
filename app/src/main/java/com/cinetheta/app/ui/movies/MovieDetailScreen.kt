@@ -426,6 +426,20 @@ fun MovieDetailScreen(
                 }
             )
         }
+
+        if (state.showMovieBoxComingSoon) {
+            AlertDialog(
+                onDismissRequest = { viewModel.dismissMovieBoxNotice() },
+                title = { Text("Coming Soon", fontWeight = FontWeight.Bold) },
+                text = { Text("MovieBox downloads are currently not supported and will be available in an upcoming update.") },
+                confirmButton = {
+                    TextButton(onClick = { viewModel.dismissMovieBoxNotice() }) {
+                        Text("OK", color = MaterialTheme.colorScheme.primary)
+                    }
+                },
+                containerColor = MaterialTheme.colorScheme.surface
+            )
+        }
     }
 }
 
