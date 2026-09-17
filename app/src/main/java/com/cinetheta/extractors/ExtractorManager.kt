@@ -62,6 +62,7 @@ object ExtractorManager {
 
         com.cinetheta.extractors.hdstream4u.HdStream4uExtractor(),
         com.cinetheta.extractors.hdstream4u.HubStreamExtractor(),
+        com.cinetheta.extractors.filemoon.FileMoonExtractor(),
 
         // Phase 3 — NetMirror complete extractors
         NetMirrorExtractor(),
@@ -82,7 +83,9 @@ object ExtractorManager {
         com.cinetheta.extractors.gdmirrorbot.GDMirrorBotExtractor(),
         com.cinetheta.extractors.cloudy.CloudyExtractor(),
         com.cinetheta.extractors.streamup.StreamUpExtractor(),
-        com.cinetheta.extractors.xerver.XerverExtractor()
+        com.cinetheta.extractors.xerver.XerverExtractor(),
+        com.cinetheta.extractors.awsstream.AWSStreamExtractor(),
+        com.cinetheta.extractors.blakite.BlakiteExtractor()
     )
 
     /**

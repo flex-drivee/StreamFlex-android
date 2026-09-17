@@ -52,7 +52,7 @@ class AbyssPlayerExtractor : BaseExtractor() {
         Logger.d("[$TAG] Extracting from $playerUrl")
 
         // Step 1: Fetch the player page
-        val pageHtml = fetchPage(playerUrl) ?: run {
+        val pageHtml = fetchPage(playerUrl, source.referer) ?: run {
             Logger.w("[$TAG] Failed to fetch player page: $playerUrl")
             return emptyResult()
         }
@@ -71,18 +71,20 @@ class AbyssPlayerExtractor : BaseExtractor() {
             return emptyResult()
         }
 
-        // Step 4: Parse sources
-        val streams = parseStreams(decryptedJson, source)
+        // Step 4: Parse sources and subtitles
+        val streams = parseStreams(decryptedJson, source, pageHtml)
         Logger.i("[$TAG] Extracted ${streams.size} streams from $playerUrl")
 
         return result(streams)
     }
 
     /** Fetches the AbyssPlayer embed page HTML. */
-    private suspend fun fetchPage(url: String): String? {
+    private suspend fun fetchPage(url: String, referer: String?): String? {
         val req = RequestBuilder()
             .url(url)
-            .header("Referer", "https://animedekho.app/")
+            .header("Referer", referer ?: "https://playhydrax.com/")
+            .header("Origin", "https://playhydrax.com")
+            .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36")
             .build()
         return when (val res = HttpClient.execute(req)) {
             is NetworkResult.Success -> res.data.body?.toString(Charsets.UTF_8)
@@ -117,7 +119,7 @@ class AbyssPlayerExtractor : BaseExtractor() {
      * Expected structure:
      * { "status": 200, "result": { "sources": [ { "url", "type", "codec", "size", "status" } ] } }
      */
-    private fun parseStreams(json: String, source: ProviderSource): List<StreamLink> {
+    private fun parseStreams(json: String, source: ProviderSource, pageHtml: String? = null): List<StreamLink> {
         return try {
             val root    = JSONObject(json)
             val status  = root.optInt("status", 0)
@@ -128,6 +130,27 @@ class AbyssPlayerExtractor : BaseExtractor() {
 
             val result  = root.optJSONObject("result") ?: return emptyList()
             val sources = result.optJSONArray("sources")   ?: return emptyList()
+
+            val subtitles = mutableListOf<com.cinetheta.domain.models.Subtitle>()
+            val tracks = result.optJSONArray("tracks") ?: root.optJSONArray("tracks") ?: result.optJSONArray("subtitles")
+            if (tracks != null) {
+                for (j in 0 until tracks.length()) {
+                    val track = tracks.optJSONObject(j) ?: continue
+                    val trackUrl = track.optString("file").ifBlank { track.optString("url") }
+                    val trackLabel = track.optString("label").ifBlank { track.optString("language", "Subtitle") }
+                    if (trackUrl.isNotBlank()) {
+                        subtitles.add(com.cinetheta.domain.models.Subtitle(language = trackLabel, url = trackUrl, label = trackLabel))
+                    }
+                }
+            }
+            if (pageHtml != null) {
+                val trackRegex = Regex("""<track[^>]+src=["']([^"']+)["'][^>]*>""")
+                for (m in trackRegex.findAll(pageHtml)) {
+                    val trackUrl = m.groupValues[1]
+                    val labelMatch = Regex("""label=["']([^"']+)["']""").find(m.value)?.groupValues?.get(1) ?: "Subtitle"
+                    subtitles.add(com.cinetheta.domain.models.Subtitle(language = labelMatch, url = trackUrl, label = labelMatch))
+                }
+            }
 
             val streams = mutableListOf<StreamLink>()
 
@@ -146,19 +169,20 @@ class AbyssPlayerExtractor : BaseExtractor() {
 
                 // Extract the base domain from the player URL (e.g. https://abyssplayer.com/)
                 val playerBaseUrl = source.url.substringBeforeLast("/") + "/"
-                // Build a provider source with the codec metadata and correct Referer
+                // Build a provider source with the codec metadata and correct Referer and hostType
                 val sourceWithMeta = source.copy(
                     metadata = source.metadata + mapOf("codec" to codecMeta),
-                    hostType = HostType.DIRECT,
+                    hostType = HostType.ABYSS,
                     headers = mapOf("Referer" to playerBaseUrl),
                     referer = playerBaseUrl
                 )
 
                 streams += createStream(
-                    source   = sourceWithMeta,
-                    url      = url,
-                    quality  = quality,
-                    fileSize = size
+                    source    = sourceWithMeta,
+                    url       = url,
+                    quality   = quality,
+                    fileSize  = size,
+                    subtitles = subtitles.distinctBy { it.url }
                 )
             }
 

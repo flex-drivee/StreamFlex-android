@@ -46,6 +46,10 @@ class MovieBoxSearch {
                     
                     val results = mutableListOf<SearchResult>()
                     for (resultBlock in resultsArray) {
+                        val blockType = JsonParser.string(resultBlock, "type") ?: ""
+                        val blockSubjectType = JsonParser.int(resultBlock, "subjectType") ?: 0
+                        val blockTitle = JsonParser.string(resultBlock, "title")?.lowercase() ?: ""
+
                         val subjects = JsonParser.array(resultBlock, "subjects")
                         for (item in subjects) {
                             val id = JsonParser.string(item, "subjectId") ?: continue
@@ -54,8 +58,20 @@ class MovieBoxSearch {
                             val coverObj = JsonParser.objectOf(item, "cover")
                             val poster = coverObj?.let { JsonParser.string(it, "url") }
                             
-                            val typeStr = JsonParser.string(item, "type") ?: "movie"
-                            val isTv = typeStr.equals("tv", ignoreCase = true) || JsonParser.int(item, "subjectType") == 2
+                            val itemType = JsonParser.string(item, "type") ?: ""
+                            val itemSubjectType = JsonParser.int(item, "subjectType") ?: 0
+                            val titleHasTvMarkers = Regex("(?i)\\b(?:season|series|s\\d+|ep\\.?\\s*\\d+|complete)\\b").containsMatchIn(title)
+
+                            val isTv = itemType.equals("tv", ignoreCase = true) ||
+                                       itemType.equals("series", ignoreCase = true) ||
+                                       itemSubjectType == 2 ||
+                                       blockType.equals("tv", ignoreCase = true) ||
+                                       blockType.equals("series", ignoreCase = true) ||
+                                       blockSubjectType == 2 ||
+                                       blockTitle.contains("tv") ||
+                                       blockTitle.contains("series") ||
+                                       titleHasTvMarkers
+
                             val mediaType = if (isTv) MediaType.TV else MediaType.MOVIE
 
                             // Check for adult content

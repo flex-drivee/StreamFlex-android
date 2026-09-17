@@ -111,10 +111,25 @@ class StreamRepository(
                 matches.forEach { match ->
                     Logger.d("Top match for ${entry.key}: ${match.title} | ${match.url}", "StreamRepository")
                 }
+                matches
             } else {
-                Logger.w("No match passed score threshold for ${entry.key}", "StreamRepository")
+                Logger.w("No match passed score threshold for ${entry.key}, attempting title similarity fallback", "StreamRepository")
+                val fallback = entry.value.maxByOrNull { res ->
+                    val sim = com.cinetheta.engine.matcher.TitleMatcher.similarity(title, res.title)
+                    res.originalTitle?.let { orig -> maxOf(sim, com.cinetheta.engine.matcher.TitleMatcher.similarity(title, orig)) } ?: sim
+                }
+                val fallbackSim = fallback?.let { res ->
+                    val sim = com.cinetheta.engine.matcher.TitleMatcher.similarity(title, res.title)
+                    res.originalTitle?.let { orig -> maxOf(sim, com.cinetheta.engine.matcher.TitleMatcher.similarity(title, orig)) } ?: sim
+                } ?: 0.0
+
+                if (fallback != null && fallbackSim >= 0.70) {
+                    Logger.d("Top match for ${entry.key} (via fallback): ${fallback.title} | ${fallback.url} (sim=$fallbackSim)", "StreamRepository")
+                    listOf(fallback)
+                } else {
+                    emptyList()
+                }
             }
-            matches
         }
 
         val deferredResults = bestMatches.map { selected ->

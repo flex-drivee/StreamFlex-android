@@ -12,6 +12,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -40,7 +44,7 @@ import com.cinetheta.app.ui.theme.*
 // HomeScreen — Netflix/Prime-inspired cinematic home
 // ─────────────────────────────────────────────────────────────────────────────
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
@@ -55,11 +59,10 @@ fun HomeScreen(
     val state by viewModel.uiState.collectAsState()
     val scrollState = rememberLazyListState()
 
-    // Hero auto-cycle through first 5 featured items
-    // Tab state for Home / Movies / Series / Anime
-    val tabs = listOf("Home", "Movies", "Series", "Anime")
+    // Tab state for Home / Movies / Shows / Anime
+    val tabs = listOf("Home", "Movies", "Shows", "Anime")
     var selectedTab by remember { mutableIntStateOf(0) }
-
+    val coroutineScope = rememberCoroutineScope()
 
     val filteredSections = remember(state.sections, selectedTab) {
         when (selectedTab) {
@@ -70,7 +73,7 @@ fun HomeScreen(
                 it.id.contains("cartoon", ignoreCase = true) || 
                 it.id.contains("nickelodeon", ignoreCase = true) 
             }
-                        else -> state.sections.filter { 
+            else -> state.sections.filter { 
                 !it.id.contains("anime", ignoreCase = true) && 
                 !it.id.contains("cartoon", ignoreCase = true) && 
                 !it.id.contains("nickelodeon", ignoreCase = true) 
@@ -86,15 +89,25 @@ fun HomeScreen(
             else -> state.popularMovies.take(5)
         }
     }
-    var heroIndex by remember { mutableIntStateOf(0) }
-    val featuredContent = featuredItems.getOrNull(heroIndex)
 
-    LaunchedEffect(featuredItems) {
+    val pagerState = rememberPagerState(initialPage = 0) { featuredItems.size }
+
+    // Reset hero carousel to page 0 whenever the selected category tab changes
+    LaunchedEffect(selectedTab) {
+        if (featuredItems.isNotEmpty()) {
+            pagerState.scrollToPage(0)
+        }
+    }
+
+    // Auto-advance hero every 5 seconds when user is not actively swiping
+    LaunchedEffect(pagerState, featuredItems.size) {
         if (featuredItems.size > 1) {
-            heroIndex = 0
-            while(true) {
+            while (true) {
                 kotlinx.coroutines.delay(5000L)
-                heroIndex = (heroIndex + 1) % featuredItems.size
+                if (!pagerState.isScrollInProgress) {
+                    val nextPage = (pagerState.currentPage + 1) % featuredItems.size
+                    pagerState.animateScrollToPage(nextPage)
+                }
             }
         }
     }
@@ -125,28 +138,34 @@ fun HomeScreen(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(bottom = 90.dp) // nav bar space
         ) {
-            // ── HERO ─────────────────────────────────────────────────────────
+            // ── HERO (Swipeable Carousel) ─────────────────────────────────────
             item {
-                AnimatedContent(
-                    targetState = featuredContent,
-                    transitionSpec = {
-                        fadeIn(tween(600)) togetherWith fadeOut(tween(400))
-                    },
-                    label = "heroTransition"
-                ) { hero ->
-                    if (hero != null) {
-                        SFHeroSection(
-                            movie        = hero,
-                            heroIndex    = heroIndex,
-                            heroCount    = featuredItems.size,
-                            onPlayClick  = { onNavigateToDetail(hero.type.name, hero.id) },
-                            onInfoClick  = { onNavigateToDetail(hero.type.name, hero.id) },
-                            onDotClick   = { heroIndex = it }
-                        )
-                    } else {
-                        // Shimmer placeholder while loading
-                        SFHeroShimmer()
+                if (featuredItems.isNotEmpty()) {
+                    HorizontalPager(
+                        state = pagerState,
+                        modifier = Modifier.fillMaxWidth()
+                    ) { page ->
+                        val hero = featuredItems.getOrNull(page)
+                        if (hero != null) {
+                            SFHeroSection(
+                                movie        = hero,
+                                heroIndex    = pagerState.currentPage,
+                                heroCount    = featuredItems.size,
+                                onPlayClick  = { onNavigateToDetail(hero.type.name, hero.id) },
+                                onInfoClick  = { onNavigateToDetail(hero.type.name, hero.id) },
+                                onDotClick   = { targetIndex ->
+                                    coroutineScope.launch {
+                                        pagerState.animateScrollToPage(targetIndex)
+                                    }
+                                }
+                            )
+                        } else {
+                            SFHeroShimmer()
+                        }
                     }
+                } else {
+                    // Shimmer placeholder while loading
+                    SFHeroShimmer()
                 }
             }
 
@@ -366,41 +385,54 @@ private fun SFTopBar(
                 }
             }
 
-            // Row 2: Tab navigation
-            ScrollableTabRow(
+            // Row 2: Tab navigation (fixed full-width alignment, never clips or shifts sideways)
+            TabRow(
                 selectedTabIndex = selectedTab,
                 containerColor   = Color.Transparent,
                 contentColor     = MaterialTheme.colorScheme.onBackground,
-                edgePadding      = 16.dp,
                 divider          = {},
                 indicator        = { tabPositions ->
                     if (selectedTab < tabPositions.size) {
                         val pos = tabPositions[selectedTab]
+                        val indicatorWidth = 28.dp
+                        val currentTabLeft = pos.left
+                        val currentTabWidth = pos.width
+                        val offsetAnim by animateDpAsState(
+                            targetValue = currentTabLeft + (currentTabWidth - indicatorWidth) / 2,
+                            animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing),
+                            label = "tabIndicatorOffset"
+                        )
                         Box(
                             Modifier
                                 .fillMaxWidth()
                                 .wrapContentSize(Alignment.BottomStart)
-                                .offset(x = pos.left + 8.dp)
-                                .width(pos.width - 16.dp)
-                                .height(2.dp)
-                                .background(MaterialTheme.colorScheme.primary, CircleShape)
+                                .offset(x = offsetAnim)
+                                .width(indicatorWidth)
+                                .height(3.dp)
+                                .clip(RoundedCornerShape(1.5.dp))
+                                .background(MaterialTheme.colorScheme.primary)
                         )
                     }
-                }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp)
             ) {
                 tabs.forEachIndexed { index, title ->
                     Tab(
                         selected = selectedTab == index,
                         onClick  = { onTabSelected(index) },
-                        modifier = Modifier.padding(horizontal = 4.dp)
+                        selectedContentColor = MaterialTheme.colorScheme.primary,
+                        unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant
                     ) {
                         Text(
                             text  = title,
                             style = MaterialTheme.typography.bodyMedium.copy(
-                                fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Normal
+                                fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Medium,
+                                fontSize   = 15.sp
                             ),
                             color = if (selectedTab == index) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(vertical = 10.dp, horizontal = 4.dp)
+                            modifier = Modifier.padding(vertical = 10.dp)
                         )
                     }
                 }

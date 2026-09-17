@@ -52,7 +52,7 @@ class Media3Player(
 
     init {
         val prefs = context.getSharedPreferences("cinetheta_settings", android.content.Context.MODE_PRIVATE)
-        val enableSubtitles = prefs.getBoolean("enable_subtitles", false)
+        val enableSubtitles = prefs.getBoolean("enable_subtitles", true)
         val defaultQuality = prefs.getString("player_video_quality", "Auto") ?: "Auto"
         
         var builder = trackSelector.buildUponParameters()
@@ -262,7 +262,7 @@ class Media3Player(
     override fun load(stream: StreamLink) {
         _state.value = PlayerState() 
         val prefs = context.getSharedPreferences("cinetheta_settings", android.content.Context.MODE_PRIVATE)
-        val enableSubtitles = prefs.getBoolean("enable_subtitles", false)
+        val enableSubtitles = prefs.getBoolean("enable_subtitles", true)
         val defaultQuality = prefs.getString("player_video_quality", "Auto") ?: "Auto"
         
         var builder = trackSelector.buildUponParameters().clearOverrides()

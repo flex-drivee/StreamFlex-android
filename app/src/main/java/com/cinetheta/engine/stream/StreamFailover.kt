@@ -22,42 +22,18 @@ object StreamFailover {
             return emptyList()
         }
 
-        val primary = streams.first()
+        // Deduplicate URLs while preserving the strict prioritized order from StreamSorter:
+        // 1st: StreamRuby (if available)
+        // 2nd: Abyss (1080p -> 720p -> 360p)
+        // 3rd: Others (AWSStream, GDMirrorBot, etc.)
+        val usedUrls = mutableSetOf<String>()
+        val result = mutableListOf<StreamLink>()
 
-        val result = mutableListOf(primary)
-
-        val usedHosts = mutableSetOf(primary.host)
-        val usedUrls = mutableSetOf(primary.url)
-
-        // STEP 1
-        // Same quality, different host.
-        streams.forEach { stream ->
-
-            if (stream.url in usedUrls) return@forEach
-
-            if (
-                stream.host !in usedHosts &&
-                stream.quality == primary.quality
-            ) {
-
+        for (stream in streams) {
+            if (usedUrls.add(stream.url)) {
                 result += stream
-
-                usedHosts += stream.host
-                usedUrls += stream.url
             }
         }
-
-        // STEP 2
-        // Remaining streams ordered by preference.
-        streams
-            .filter { it.url !in usedUrls }
-            .sortedBy(::hostPriority)
-            .forEach {
-
-                result += it
-
-                usedUrls += it.url
-            }
 
         return result
     }
@@ -109,14 +85,16 @@ object StreamFailover {
         val url = stream.url.lowercase()
 
         return when {
-            // ── Anime: StreamRuby first, Abyss second ────────────────────────
+            // ── Anime: StreamRuby first (0), AWSStream second (1), Abyss third (2) ─
             stream.host == HostType.STREAMRUBY -> 0
-            stream.host == HostType.ABYSS -> 1
-            stream.host == HostType.GDMIRRORBOT -> 2
-            stream.host == HostType.CLOUDY -> 3
-            stream.host == HostType.TURBOVID -> 4
-            stream.host == HostType.STREAMUP -> 5
-            stream.host == HostType.XERVER -> 6
+            stream.host == HostType.AWS_STREAM -> 1
+            stream.host == HostType.ABYSS -> 2
+            stream.host == HostType.GDMIRRORBOT -> 3
+            stream.host == HostType.CLOUDY -> 4
+            stream.host == HostType.TURBOVID -> 5
+            stream.host == HostType.STREAMUP -> 6
+            stream.host == HostType.XERVER -> 7
+            stream.host == HostType.BLAKITE -> 8
 
             // ── HDHub / 4KHDHub: Google first ────────────────────────────────
             url.contains("googleusercontent.com") || stream.host == HostType.GOOGLE_VIDEO -> 7

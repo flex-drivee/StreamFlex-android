@@ -53,7 +53,7 @@ import com.cinetheta.app.ui.search.SearchViewModelFactory
 
 sealed class BottomNavItem(val route: String, val icon: ImageVector, val selectedIcon: ImageVector) {
     object Home : BottomNavItem(Screen.Home.route, Icons.Outlined.Home, Icons.Filled.Home)
-    object Search : BottomNavItem(Screen.PluginSearch.route, Icons.Outlined.Search, Icons.Filled.Search)
+    object Search : BottomNavItem(Screen.Search.route, Icons.Outlined.Search, Icons.Filled.Search)
     object Explore : BottomNavItem("explore", Icons.Outlined.Explore, Icons.Filled.Explore)
     object Library : BottomNavItem("library", Icons.Outlined.VideoLibrary, Icons.Filled.VideoLibrary)
     object Settings : BottomNavItem(Screen.Settings.route, Icons.Outlined.Settings, Icons.Filled.Settings)
@@ -96,7 +96,7 @@ fun AppNavigation(
                     providerRepository = com.cinetheta.app.di.ProviderModule.repository,
                     onNavigateToDetail = { type, id -> navController.navigate(Screen.Detail.createRoute(type, id)) },
                     onNavigateToContinueWatching = { navController.navigate(Screen.ContinueWatching.route) },
-                    onSearchClick = { navController.navigate(Screen.Search.route) },
+                    onSearchClick = { navController.navigate(Screen.PluginSearch.route) },
                     onSettingsClick = { navController.navigate(Screen.Settings.route) },
                     onDownloadsClick = { navController.navigate(Screen.Downloads.route) },
                     onExploreClick = { categoryId, title -> navController.navigate("see_all/$categoryId/$title") }
@@ -116,6 +116,7 @@ fun AppNavigation(
                 val viewModel: PluginSearchViewModel = viewModel(factory = viewModelFactory)
                 PluginSearchScreen(
                     viewModel = viewModel,
+                    onBackClick = { navController.popBackStack() },
                     onResultClick = { result ->
                         currentPluginSearchResult = result
                         navController.navigate(Screen.PluginDetail.route)
@@ -177,7 +178,17 @@ fun AppNavigation(
 
                 SearchScreen(
                     viewModel = viewModel,
-                    onBackClick = { navController.popBackStack() },
+                    onBackClick = {
+                        if (!navController.popBackStack()) {
+                            navController.navigate(Screen.Home.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                    },
                     onItemClick = { type, id -> navController.navigate(Screen.Detail.createRoute(type, id)) },
                     onGenreClick = { id, title -> navController.navigate("see_all/$id/$title") }
                 )

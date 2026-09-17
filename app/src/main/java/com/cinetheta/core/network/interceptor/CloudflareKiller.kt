@@ -49,24 +49,36 @@ class CloudflareKiller : Interceptor {
 
         var response = chain.proceed(request)
 
-        // 1. Check if we hit a Cloudflare 403/503 block
+        // 1. Check if we hit a Cloudflare 403/503 block or 200 OK challenge page
         val isCloudflare = response.header("Server")?.contains("cloudflare", ignoreCase = true) == true
         
         var isChallenge = false
-        if (isCloudflare && response.code in ERROR_CODES) {
-            try {
-                val bodyString = response.peekBody(1024 * 50).string()
-                isChallenge = bodyString.contains("cf-browser-verification") ||
-                              bodyString.contains("cf-turnstile") ||
-                              bodyString.contains("challenges.cloudflare.com") ||
-                              bodyString.contains("just a moment", ignoreCase = true) ||
-                              // Cloudflare Bot Management returns a plain 403 with no challenge body
-                              // (e.g. toon-stream.site). Treat any Cloudflare 403/503 as a challenge
-                              // so we can warm up the cookie via WebView.
-                              bodyString.length < 5000
-            } catch (e: Exception) {
-                // If we can't read the body, assume it's a CF block
-                isChallenge = true
+        if (isCloudflare) {
+            if (response.code in ERROR_CODES) {
+                try {
+                    val bodyString = response.peekBody(1024 * 50).string()
+                    isChallenge = bodyString.contains("cf-browser-verification") ||
+                                  bodyString.contains("cf-turnstile") ||
+                                  bodyString.contains("challenges.cloudflare.com") ||
+                                  bodyString.contains("just a moment", ignoreCase = true) ||
+                                  // Cloudflare Bot Management returns a plain 403 with no challenge body
+                                  // (e.g. toon-stream.site). Treat any Cloudflare 403/503 as a challenge
+                                  // so we can warm up the cookie via WebView.
+                                  bodyString.length < 5000
+                } catch (e: Exception) {
+                    // If we can't read the body, assume it's a CF block
+                    isChallenge = true
+                }
+            } else if (response.code == 200) {
+                try {
+                    val bodyString = response.peekBody(1024 * 30).string()
+                    isChallenge = bodyString.contains("cf-turnstile") ||
+                                  bodyString.contains("cf-browser-verification") ||
+                                  (bodyString.contains("challenges.cloudflare.com") && bodyString.contains("turnstile")) ||
+                                  (bodyString.contains("just a moment", ignoreCase = true) && bodyString.contains("cloudflare", ignoreCase = true))
+                } catch (_: Exception) {
+                    isChallenge = false
+                }
             }
         }
         

@@ -45,7 +45,17 @@ object HostDetector {
             host.contains("hdstream4u") ||
                     host.contains("hdstream") ||
                     host.contains("vidhide") ||
-                    host.contains("filelions") ->
+                    host.contains("streamhide") ||
+                    host.contains("guccihide") ||
+                    host.contains("streamvid") ||
+                    host.contains("earnvid") ||
+                    host.contains("streamhg") ||
+                    host.contains("streamwish") ||
+                    host.contains("cdnwish") ||
+                    host.contains("filelions") ||
+                    host.contains("wishfast") ||
+                    host.contains("wishembed") ||
+                    (host.contains("wish") && (lowerUrl.contains("/e/") || lowerUrl.contains("/v/") || lowerUrl.contains("/f/"))) ->
                 return HostType.HDSTREAM4U
 
             host.contains("hubstream") ->
@@ -60,7 +70,7 @@ object HostDetector {
             host.contains("mixdrop") ->
                 return HostType.MIXDROP
 
-            host.contains("filemoon") ->
+            host.contains("filemoon") || host.contains("moonplayer") ->
                 return HostType.FILEMOON
 
             host.contains("dood") ->
@@ -85,8 +95,17 @@ object HostDetector {
             host.contains("rubystm") || host.contains("streamruby") ->
                 return HostType.STREAMRUBY
 
-            host.contains("gdmirrorbot") ->
+            host.contains("gdmirrorbot") ||
+                    host.contains("techinmind") ||
+                    host.contains("filesforever") ||
+                    host.contains("iqsmartgames") ->
                 return HostType.GDMIRRORBOT
+
+            host.contains("as-cdn") || host.contains("awstream") ->
+                return HostType.AWS_STREAM
+
+            host.contains("blakiteapi") ->
+                return HostType.BLAKITE
 
             host.contains("cloudy.upns") || host.contains("vidcloud.upns") ->
                 return HostType.CLOUDY

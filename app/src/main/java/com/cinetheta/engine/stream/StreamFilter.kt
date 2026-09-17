@@ -49,17 +49,27 @@ object StreamFilter {
             return false
         }
 
+        if (stream.host == com.cinetheta.domain.models.HostType.REDIRECT) {
+            return false
+        }
+
         if (
-            stream.host == com.cinetheta.domain.models.HostType.GOOGLE_VIDEO ||
-            stream.host == com.cinetheta.domain.models.HostType.M3U8 ||
-            stream.host == com.cinetheta.domain.models.HostType.DASH ||
-            stream.host == com.cinetheta.domain.models.HostType.DIRECT
+            stream.contentType == com.cinetheta.core.network.detector.ContentType.HTML ||
+            stream.contentType == com.cinetheta.core.network.detector.ContentType.IMAGE ||
+            stream.contentType == com.cinetheta.core.network.detector.ContentType.JAVASCRIPT ||
+            stream.contentType == com.cinetheta.core.network.detector.ContentType.JSON
         ) {
+            return false
+        }
+
+        if (stream.host != com.cinetheta.domain.models.HostType.UNKNOWN) {
             return true
         }
 
-        return ContentDetector.isVideo(
-            stream.contentType
-        )
+        return ContentDetector.isVideo(stream.contentType) ||
+                url.contains(".m3u8", ignoreCase = true) ||
+                url.contains(".mp4", ignoreCase = true) ||
+                url.contains(".mpd", ignoreCase = true) ||
+                url.contains(".mkv", ignoreCase = true)
     }
 }
