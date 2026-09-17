@@ -539,6 +539,7 @@ class Media3Player(
                 androidx.media3.ui.PlayerView(ctx).apply {
                     player = exoPlayer
                     useController = false
+                    setShowBuffering(androidx.media3.ui.PlayerView.SHOW_BUFFERING_NEVER)
                     resizeMode = if (isFullScreen) androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_ZOOM else androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FIT
                 }
             },

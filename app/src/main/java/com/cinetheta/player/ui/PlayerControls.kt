@@ -296,13 +296,6 @@ fun PlayerControls(
                 }
             }
         }
-
-        if (state.isBuffering) {
-            CircularProgressIndicator(
-                modifier = Modifier.align(Alignment.Center),
-                color = Color.Red
-            )
-        }
     }
 }
 
