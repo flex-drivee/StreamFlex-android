@@ -34,6 +34,8 @@ enum class HostType {
     TURBOVID,
     STREAMUP,
     XERVER,
+    AWS_STREAM,
+    BLAKITE,
 
     UNKNOWN,
 }

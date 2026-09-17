@@ -87,11 +87,12 @@ object EpisodeMatcher {
             return -1 // Title doesn't match closely enough, discard to prevent season/episode bonuses from overpowering it
         }
 
-        if (result.mediaType == com.cinetheta.domain.models.MediaType.MOVIE) {
-            return -1 // Do not match explicit movies when searching for an episode
-        }
+        var score = (effectiveSim * 80).toInt()
 
-        var score = (effectiveSim * 50).toInt()
+        // Bonus for explicit TV media type
+        if (result.mediaType == com.cinetheta.domain.models.MediaType.TV) {
+            score += 25
+        }
         val title = SearchNormalizer.normalize(result.title)
 
         val seasonStr = season.toString()

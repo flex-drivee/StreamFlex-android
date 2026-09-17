@@ -20,7 +20,7 @@ object StreamSorter {
 
             compareBy<StreamLink>
 
-            { contentPriority(it) }
+            { hostPriority(it.host) }
 
                 .thenBy {
 
@@ -30,7 +30,7 @@ object StreamSorter {
 
                 .thenBy {
 
-                    hostPriority(it.host)
+                    contentPriority(it)
 
                 }
 
@@ -53,7 +53,7 @@ object StreamSorter {
         val url = stream.url.lowercase()
 
         return when {
-            stream.contentType == ContentType.M3U8 || url.endsWith(".m3u8") -> 0
+            stream.adaptive || stream.contentType == ContentType.HLS || stream.contentType == ContentType.M3U8 || url.contains(".m3u8") -> 0
             url.contains("googleusercontent.com") || stream.host == HostType.GOOGLE_VIDEO -> 1
             url.endsWith(".mp4") || url.endsWith(".mkv") -> 2
             stream.contentType == ContentType.DASH || url.endsWith(".mpd") -> 3
@@ -74,27 +74,55 @@ object StreamSorter {
             Quality.P720 -> 3
             Quality.P480 -> 4
             Quality.P360 -> 5
-            else -> 100
+            else -> 10
         }
     }
 
     /**
      * Preferred hosting services.
+     *
+     * Strict User & Architecture Priority:
+     * 1. StreamRuby (always 1st if available - multi-audio/quality)
+     * 2. AWSStream (2nd option - master.m3u8 with multiple prints and audios in one link)
+     * 3. Abyss (3rd option - separate quality links)
+     * 4. GDMirrorBot and other fast mirrors
+     * 5. Google Video / HubCloud / HubDrive (HDHub4u)
+     * 6. Fallback extractors
+     * 7. Vidmoly (unstable - last)
      */
-    private fun hostPriority(
+    fun hostPriority(
         host: HostType
     ): Int {
         return when (host) {
-            HostType.GOOGLE_VIDEO -> 0
-            HostType.HUBCLOUD -> 1
-            HostType.HUBDRIVE -> 2
-            HostType.HUBCDN -> 3
-            HostType.DIRECT -> 4
-            HostType.PIXELDRAIN -> 5
-            HostType.HBLINKS -> 6
-            HostType.STREAMTAPE -> 7
-            HostType.MIXDROP -> 8
-            else -> 10
+            HostType.STREAMRUBY -> 0
+            HostType.AWS_STREAM -> 1
+            HostType.ABYSS -> 2
+            HostType.GDMIRRORBOT -> 3
+            HostType.CLOUDY -> 4
+            HostType.TURBOVID -> 5
+            HostType.STREAMUP -> 6
+            HostType.XERVER -> 7
+            HostType.BLAKITE -> 8
+
+            HostType.GOOGLE_VIDEO -> 9
+            HostType.HUBCLOUD -> 10
+            HostType.HUBDRIVE -> 11
+            HostType.HUBCDN -> 12
+            HostType.HBLINKS -> 13
+            HostType.PIXELDRAIN -> 14
+            HostType.DIRECT -> 15
+            HostType.M3U8 -> 16
+            HostType.DASH -> 17
+            HostType.STREAMTAPE -> 18
+            HostType.FILEMOON -> 19
+            HostType.MIXDROP -> 20
+            HostType.DOOD -> 21
+            HostType.HDSTREAM4U -> 22
+            HostType.VIDSTACK -> 23
+
+            HostType.VIDMOLY -> 80
+            HostType.REDIRECT -> 90
+            else -> 50
         }
     }
 }

@@ -58,7 +58,13 @@ class MovieBoxDetails {
                     val coverObj = JsonParser.objectOf(data, "cover")
                     val poster   = coverObj?.let { JsonParser.string(it, "url") }
 
-                    val isTV = subjectType == 2 || result.mediaType == MediaType.TV
+                    val typeStr = JsonParser.string(data, "type") ?: ""
+                    val titleHasTvMarkers = Regex("(?i)\\b(?:season|series|s\\d+|ep\\.?\\s*\\d+|complete)\\b").containsMatchIn(title)
+                    val isTV = subjectType == 2 || 
+                               result.mediaType == MediaType.TV || 
+                               typeStr.equals("tv", ignoreCase = true) || 
+                               typeStr.equals("series", ignoreCase = true) || 
+                               titleHasTvMarkers
                     val year = JsonParser.int(data, "year") ?: result.year
 
                     if (!isTV) {

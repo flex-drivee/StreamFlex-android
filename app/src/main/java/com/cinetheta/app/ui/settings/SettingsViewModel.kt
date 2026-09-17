@@ -26,7 +26,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     private val _autoPlayNext = MutableStateFlow(prefs.getBoolean("autoplay_next", true))
     val autoPlayNext: StateFlow<Boolean> = _autoPlayNext.asStateFlow()
 
-    private val _enableSubtitles = MutableStateFlow(prefs.getBoolean("enable_subtitles", false))
+    private val _enableSubtitles = MutableStateFlow(prefs.getBoolean("enable_subtitles", true))
     val enableSubtitles: StateFlow<Boolean> = _enableSubtitles.asStateFlow()
     
     private val _cellularData = MutableStateFlow(prefs.getBoolean("cellular_data", true))

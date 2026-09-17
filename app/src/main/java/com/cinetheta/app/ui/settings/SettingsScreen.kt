@@ -356,7 +356,7 @@ fun SettingsScreen(
                     SettingsTile(
                         icon = Icons.Outlined.Info,
                         title = "Version",
-                        subtitle = "StreamFlex v${com.cinetheta.app.BuildConfig.VERSION_NAME}",
+                        subtitle = "CineTheta v${com.cinetheta.app.BuildConfig.VERSION_NAME}",
                         trailing = { Spacer(modifier = Modifier.width(0.dp)) }, // No chevron
                         isLast = true,
                         onTap = { /* No action needed for version tile */ }

@@ -18,14 +18,18 @@ class JsUnpacker(private val packedJS: String?) {
         return try {
             val match = Regex(
                 """(?s)\}\s*\('(.*)',\s*(.*?),\s*(\d+),\s*'(.*?)'\.split\('\|'\)"""
+            ).find(js) ?: Regex(
+                """(?s)\}\s*\("(.*)",\s*(.*?),\s*(\d+),\s*"(.*?)"\.split\("\|"\)"""
+            ).find(js) ?: Regex(
+                """(?s)\}\s*\((['"])(.*?)\1,\s*(.*?),\s*(\d+),\s*(['"])(.*?)\5\.split\(\5\|\5\)"""
             ).find(js) ?: return null
 
-            if (match.groupValues.size < 5) return null
-
-            val payload = match.groupValues[1].replace("\\'", "'")
-            val radixStr = match.groupValues[2]
-            val countStr = match.groupValues[3]
-            val symtab = match.groupValues[4].split("|").toTypedArray()
+            val payload = (if (match.groupValues.size >= 7) match.groupValues[2] else match.groupValues[1])
+                .replace("\\'", "'").replace("\\\"", "\"")
+            val radixStr = if (match.groupValues.size >= 7) match.groupValues[3] else match.groupValues[2]
+            val countStr = if (match.groupValues.size >= 7) match.groupValues[4] else match.groupValues[3]
+            val symtabRaw = if (match.groupValues.size >= 7) match.groupValues[6] else match.groupValues[4]
+            val symtab = symtabRaw.split("|").toTypedArray()
 
             var radix = radixStr.toIntOrNull() ?: 36
             val count = countStr.toIntOrNull() ?: 0
@@ -99,7 +103,7 @@ class JsUnpacker(private val packedJS: String?) {
     companion object {
         fun unpack(script: String): String? {
             val unpacker = JsUnpacker(script)
-            return if (unpacker.detect()) unpacker.unpack() else script
+            return if (unpacker.detect()) unpacker.unpack() ?: script else script
         }
     }
 }
