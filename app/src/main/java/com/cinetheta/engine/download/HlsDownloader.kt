@@ -195,9 +195,11 @@ class HlsDownloader(
             }
 
             // 2. Download each selected Audio stream
+            val audioTracksWithFiles = mutableListOf<Pair<HlsAudioTrack, File>>()
             for ((trackIndex, entry) in audioSegmentsMap.entries.withIndex()) {
                 val audioFile = File(targetFile.parentFile, "${targetFile.name}.temp_audio_${trackIndex}.ts")
                 tempAudioFiles.add(audioFile)
+                audioTracksWithFiles.add(entry.key to audioFile)
 
                 val audioOk = downloadSegmentsToFile(
                     segments = entry.value,
@@ -223,7 +225,7 @@ class HlsDownloader(
             }
 
             // 3. Mux Video + Audio(s) into final compliant MP4 container
-            val muxOk = muxVideoAndAudio(tempVideoFile, tempAudioFiles, targetFile)
+            val muxOk = muxVideoAndAudio(tempVideoFile, audioTracksWithFiles, targetFile)
 
             if (!muxOk) {
                 // If muxing failed, fallback to tempVideoFile (which contains full video in MPEG-TS)
@@ -287,20 +289,24 @@ class HlsDownloader(
     private fun selectAudioTracks(audioTracks: List<HlsAudioTrack>): List<HlsAudioTrack> {
         if (audioTracks.isEmpty()) return emptyList()
 
-        // Prioritize default audio tracks and distinct languages (up to 3 tracks to keep download fast and complete)
+        // Prioritize default audio tracks and preserve all distinct audio languages / tracks
         val sorted = audioTracks.sortedWith(
             compareByDescending<HlsAudioTrack> { it.isDefault }
                 .thenBy { it.language.lowercase() }
+                .thenBy { it.name.lowercase() }
         )
 
         val selected = mutableListOf<HlsAudioTrack>()
         val seenLangs = mutableSetOf<String>()
 
         for (track in sorted) {
-            val key = track.language.ifBlank { track.name }.lowercase()
+            val key = if (track.language.isNotBlank()) {
+                track.language.lowercase()
+            } else {
+                track.name.lowercase()
+            }
             if (seenLangs.add(key)) {
                 selected.add(track)
-                if (selected.size >= 3) break
             }
         }
 
@@ -320,8 +326,7 @@ class HlsDownloader(
 
         val audioTracks = mutableListOf<HlsAudioTrack>()
         val subtitles = mutableListOf<Subtitle>()
-        val videoVariants = mutableListOf<Pair<Long, String>>() // (bandwidth, url)
-        var selectedAudioGroupId: String? = null
+        val videoVariants = mutableListOf<Triple<Long, String, String?>>() // (bandwidth, url, audioGroup)
 
         val lines = content.lines()
         for (i in lines.indices) {
@@ -371,15 +376,14 @@ class HlsDownloader(
                 val nextLine = lines.getOrNull(i + 1)?.trim() ?: ""
                 if (nextLine.isNotBlank() && !nextLine.startsWith("#")) {
                     val resolvedUrl = resolveUrl(m3u8Url, nextLine)
-                    videoVariants.add(bw to resolvedUrl)
-                    if (audioGrp != null && selectedAudioGroupId == null) {
-                        selectedAudioGroupId = audioGrp
-                    }
+                    videoVariants.add(Triple(bw, resolvedUrl, audioGrp))
                 }
             }
         }
 
-        val bestVideo = videoVariants.maxByOrNull { it.first }?.second ?: m3u8Url
+        val bestVariant = videoVariants.maxByOrNull { it.first }
+        val bestVideo = bestVariant?.second ?: m3u8Url
+        val selectedAudioGroupId = bestVariant?.third
         val relevantAudio = if (selectedAudioGroupId != null) {
             audioTracks.filter { it.groupId == selectedAudioGroupId }.ifEmpty { audioTracks }
         } else {
@@ -467,7 +471,7 @@ class HlsDownloader(
 
     private fun muxVideoAndAudio(
         videoFile: File,
-        audioFiles: List<File>,
+        audioTracksWithFiles: List<Pair<HlsAudioTrack, File>>,
         outputFile: File
     ): Boolean {
         var muxer: MediaMuxer? = null
@@ -496,12 +500,15 @@ class HlsDownloader(
                 return false
             }
 
+            // 1. Ensure Codec-Specific Data (csd-0 / csd-1) for Hardware Decoder compatibility
+            ensureCodecSpecificData(videoFormat, videoFile, videoTrackIndex)
+
             muxer = MediaMuxer(outputFile.absolutePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4)
             val muxerVideoTrack = muxer.addTrack(videoFormat)
 
-            // Add audio tracks
+            // 2. Add audio tracks with explicit language tagging so players display "Hindi", "English", etc.
             val activeAudioTracks = mutableListOf<Pair<MediaExtractor, Int>>()
-            for (audioFile in audioFiles) {
+            for ((trackMeta, audioFile) in audioTracksWithFiles) {
                 if (!audioFile.exists() || audioFile.length() == 0L) continue
                 try {
                     val aExtractor = MediaExtractor()
@@ -521,6 +528,8 @@ class HlsDownloader(
                     }
 
                     if (aTrackIndex != -1 && aFormat != null) {
+                        val lang = trackMeta.language.ifBlank { "und" }
+                        aFormat.setString(MediaFormat.KEY_LANGUAGE, lang)
                         val muxerAudioTrack = muxer.addTrack(aFormat)
                         audioExtractors.add(aExtractor)
                         activeAudioTracks.add(aExtractor to muxerAudioTrack)
@@ -534,58 +543,97 @@ class HlsDownloader(
 
             muxer.start()
 
+            // 3. Discard non-keyframes at the start of video to prevent decoder artifacts
+            while (true) {
+                val flags = videoExtractor.sampleFlags
+                if ((flags and MediaExtractor.SAMPLE_FLAG_SYNC) != 0) {
+                    break
+                }
+                if (!videoExtractor.advance()) {
+                    return false
+                }
+            }
+
+            // 4. Calculate a unified global base time to keep audio and video strictly synchronized
+            val videoFirstSt = videoExtractor.sampleTime
+            val audioFirstTimes = audioExtractors.map { it.sampleTime }.filter { it >= 0L }
+            val minAudioFirstSt = audioFirstTimes.minOrNull() ?: Long.MAX_VALUE
+            val globalBaseTimeUs = if (videoFirstSt >= 0L && minAudioFirstSt != Long.MAX_VALUE) {
+                minOf(videoFirstSt, minAudioFirstSt)
+            } else if (videoFirstSt >= 0L) {
+                videoFirstSt
+            } else if (minAudioFirstSt != Long.MAX_VALUE) {
+                minAudioFirstSt
+            } else {
+                0L
+            }
+
+            val frameDurationUs = estimateFrameDuration(videoFormat, videoFile, videoTrackIndex)
+
             class TrackChannel(
                 val extractor: MediaExtractor,
                 val muxerTrackIndex: Int,
                 val isVideo: Boolean,
-                var hasStartedWithKeyFrame: Boolean = !isVideo,
-                var trackBaseTimeUs: Long = -1L,
                 var lastPtsUs: Long = -1L,
                 var isDone: Boolean = false
             )
 
-            val channels = mutableListOf<TrackChannel>()
-            channels.add(TrackChannel(videoExtractor, muxerVideoTrack, isVideo = true))
-            for ((aExtractor, muxerAudioTrack) in activeAudioTracks) {
-                channels.add(TrackChannel(aExtractor, muxerAudioTrack, isVideo = false))
+            val videoChannel = TrackChannel(videoExtractor, muxerVideoTrack, isVideo = true)
+            val audioChannels = activeAudioTracks.map { (ext, trackIdx) ->
+                TrackChannel(ext, trackIdx, isVideo = false)
             }
+            val channels = mutableListOf<TrackChannel>().apply {
+                add(videoChannel)
+                addAll(audioChannels)
+            }
+
+            var videoTimelineUs = if (videoFirstSt >= 0L) {
+                (videoFirstSt - globalBaseTimeUs).coerceAtLeast(0L)
+            } else {
+                0L
+            }
+            var videoSampleCount = 0L
 
             val buffer = ByteBuffer.allocateDirect(2 * 1024 * 1024)
             val bufferInfo = MediaCodec.BufferInfo()
 
             while (channels.any { !it.isDone }) {
                 var minChannel: TrackChannel? = null
-                var minTime = Long.MAX_VALUE
+                var minNextTime = Long.MAX_VALUE
 
                 for (ch in channels) {
                     if (ch.isDone) continue
-
-                    // Discard non-keyframes at the start of video to prevent decoder stalling
-                    while (!ch.hasStartedWithKeyFrame) {
-                        val flags = ch.extractor.sampleFlags
-                        if ((flags and MediaExtractor.SAMPLE_FLAG_SYNC) != 0) {
-                            ch.hasStartedWithKeyFrame = true
-                            break
-                        }
-                        if (!ch.extractor.advance()) {
-                            ch.isDone = true
-                            break
-                        }
-                    }
-                    if (ch.isDone) continue
-
                     val st = ch.extractor.sampleTime
                     if (st < 0) {
                         ch.isDone = true
                         continue
                     }
-                    if (st < minTime) {
-                        minTime = st
+
+                    val nextTime = if (ch.isVideo) {
+                        if (videoSampleCount == 0L) videoTimelineUs else videoTimelineUs + frameDurationUs
+                    } else {
+                        val rawPts = (st - globalBaseTimeUs).coerceAtLeast(0L)
+                        if (ch.lastPtsUs < 0L) rawPts else maxOf(rawPts, ch.lastPtsUs + 1000L)
+                    }
+
+                    if (nextTime < minNextTime) {
+                        minNextTime = nextTime
                         minChannel = ch
                     }
                 }
 
                 if (minChannel == null) break
+
+                buffer.clear()
+                val flags = minChannel.extractor.sampleFlags
+
+                // Skip standalone codec config buffers from sample stream (already written via addTrack)
+                if ((flags and 2 /* BUFFER_FLAG_CODEC_CONFIG */) != 0) {
+                    if (!minChannel.extractor.advance()) {
+                        minChannel.isDone = true
+                    }
+                    continue
+                }
 
                 bufferInfo.offset = 0
                 bufferInfo.size = minChannel.extractor.readSampleData(buffer, 0)
@@ -594,20 +642,38 @@ class HlsDownloader(
                     continue
                 }
 
-                if (minChannel.trackBaseTimeUs < 0) {
-                    minChannel.trackBaseTimeUs = minTime
+                val pts: Long
+                if (minChannel.isVideo) {
+                    val rawPts = (minChannel.extractor.sampleTime - globalBaseTimeUs).coerceAtLeast(0L)
+                    pts = if (videoSampleCount == 0L) {
+                        videoTimelineUs
+                    } else {
+                        // Re-sync video timeline if upstream stream has a timestamp gap/discontinuity > 500ms
+                        if (rawPts > videoTimelineUs + 500_000L) {
+                            videoTimelineUs = rawPts
+                        } else {
+                            videoTimelineUs += frameDurationUs
+                        }
+                        videoTimelineUs
+                    }
+                    videoSampleCount++
+                    minChannel.lastPtsUs = pts
+                } else {
+                    val rawPts = (minChannel.extractor.sampleTime - globalBaseTimeUs).coerceAtLeast(0L)
+                    pts = if (minChannel.lastPtsUs < 0L) {
+                        rawPts
+                    } else if (rawPts <= minChannel.lastPtsUs) {
+                        minChannel.lastPtsUs + 1000L
+                    } else {
+                        rawPts
+                    }
+                    minChannel.lastPtsUs = pts
                 }
 
-                var pts = (minTime - minChannel.trackBaseTimeUs).coerceAtLeast(0L)
-                if (pts <= minChannel.lastPtsUs) {
-                    pts = minChannel.lastPtsUs + 1000L
-                }
-                minChannel.lastPtsUs = pts
-
-                val flags = minChannel.extractor.sampleFlags
                 bufferInfo.presentationTimeUs = pts
                 bufferInfo.flags = if ((flags and MediaExtractor.SAMPLE_FLAG_SYNC) != 0) MediaCodec.BUFFER_FLAG_KEY_FRAME else 0
                 muxer.writeSampleData(minChannel.muxerTrackIndex, buffer, bufferInfo)
+
                 if (!minChannel.extractor.advance()) {
                     minChannel.isDone = true
                 }
@@ -625,6 +691,211 @@ class HlsDownloader(
             }
             try { muxer?.release() } catch (_: Exception) {}
         }
+    }
+
+    private fun ensureCodecSpecificData(videoFormat: MediaFormat, videoFile: File, videoTrackIndex: Int) {
+        if (videoFormat.containsKey("csd-0")) return
+
+        val probeExtractor = MediaExtractor()
+        try {
+            probeExtractor.setDataSource(videoFile.absolutePath)
+            probeExtractor.selectTrack(videoTrackIndex)
+            val mime = videoFormat.getString(MediaFormat.KEY_MIME) ?: ""
+            val isHevc = mime.contains("hevc", ignoreCase = true) || mime.contains("h265", ignoreCase = true)
+
+            val probeBuffer = ByteBuffer.allocateDirect(1024 * 1024)
+            var spsBytes: ByteArray? = null
+            var ppsBytes: ByteArray? = null
+            var vpsBytes: ByteArray? = null
+
+            var framesScanned = 0
+            while (framesScanned < 100) {
+                probeBuffer.clear()
+                val size = probeExtractor.readSampleData(probeBuffer, 0)
+                if (size <= 0) break
+
+                val sampleBytes = ByteArray(size)
+                probeBuffer.get(sampleBytes)
+
+                val nals = extractNalUnits(sampleBytes)
+                for (nal in nals) {
+                    if (isHevc) {
+                        if (nal.size >= 2) {
+                            val nalType = (nal[0].toInt() and 0x7E) ushr 1
+                            if (nalType == 32 && vpsBytes == null) vpsBytes = nal
+                            else if (nalType == 33 && spsBytes == null) spsBytes = nal
+                            else if (nalType == 34 && ppsBytes == null) ppsBytes = nal
+                        }
+                    } else {
+                        if (nal.isNotEmpty()) {
+                            val nalType = nal[0].toInt() and 0x1F
+                            if (nalType == 7 && spsBytes == null) spsBytes = nal
+                            else if (nalType == 8 && ppsBytes == null) ppsBytes = nal
+                        }
+                    }
+                }
+
+                if (isHevc && vpsBytes != null && spsBytes != null && ppsBytes != null) break
+                if (!isHevc && spsBytes != null && ppsBytes != null) break
+
+                framesScanned++
+                if (!probeExtractor.advance()) break
+            }
+
+            // Fallback: If not found in samples, scan the raw bytes of videoFile (first 2MB)
+            if (spsBytes == null || ppsBytes == null) {
+                try {
+                    val rawScanSize = minOf(videoFile.length(), 2L * 1024 * 1024).toInt()
+                    if (rawScanSize > 0) {
+                        val rawBytes = ByteArray(rawScanSize)
+                        videoFile.inputStream().use { it.read(rawBytes) }
+                        val rawNals = extractNalUnits(rawBytes)
+                        for (nal in rawNals) {
+                            if (isHevc) {
+                                if (nal.size >= 2) {
+                                    val nalType = (nal[0].toInt() and 0x7E) ushr 1
+                                    if (nalType == 32 && vpsBytes == null) vpsBytes = nal
+                                    else if (nalType == 33 && spsBytes == null) spsBytes = nal
+                                    else if (nalType == 34 && ppsBytes == null) ppsBytes = nal
+                                }
+                            } else {
+                                if (nal.isNotEmpty()) {
+                                    val nalType = nal[0].toInt() and 0x1F
+                                    if (nalType == 7 && spsBytes == null) spsBytes = nal
+                                    else if (nalType == 8 && ppsBytes == null) ppsBytes = nal
+                                }
+                            }
+                        }
+                    }
+                } catch (_: Exception) {}
+            }
+
+            val startCode = byteArrayOf(0x00, 0x00, 0x00, 0x01)
+            if (!isHevc && spsBytes != null && ppsBytes != null) {
+                val spsBuf = ByteBuffer.allocate(4 + spsBytes.size).apply {
+                    put(startCode)
+                    put(spsBytes)
+                    flip()
+                }
+                val ppsBuf = ByteBuffer.allocate(4 + ppsBytes.size).apply {
+                    put(startCode)
+                    put(ppsBytes)
+                    flip()
+                }
+                videoFormat.setByteBuffer("csd-0", spsBuf)
+                videoFormat.setByteBuffer("csd-1", ppsBuf)
+            } else if (isHevc && spsBytes != null && ppsBytes != null) {
+                val vps = vpsBytes ?: byteArrayOf()
+                val totalLen = (if (vps.isNotEmpty()) 4 + vps.size else 0) + (4 + spsBytes.size) + (4 + ppsBytes.size)
+                val hevcCsd = ByteBuffer.allocate(totalLen).apply {
+                    if (vps.isNotEmpty()) {
+                        put(startCode)
+                        put(vps)
+                    }
+                    put(startCode)
+                    put(spsBytes)
+                    put(startCode)
+                    put(ppsBytes)
+                    flip()
+                }
+                videoFormat.setByteBuffer("csd-0", hevcCsd)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            try { probeExtractor.release() } catch (_: Exception) {}
+        }
+    }
+
+    private fun estimateFrameDuration(
+        videoFormat: MediaFormat,
+        videoFile: File,
+        videoTrackIndex: Int
+    ): Long {
+        if (videoFormat.containsKey(MediaFormat.KEY_FRAME_RATE)) {
+            try {
+                val fps = videoFormat.getInteger(MediaFormat.KEY_FRAME_RATE)
+                if (fps in 10..120) {
+                    return 1_000_000L / fps
+                }
+            } catch (_: Exception) {
+                try {
+                    val fps = videoFormat.getFloat(MediaFormat.KEY_FRAME_RATE)
+                    if (fps in 10f..120f) {
+                        return (1_000_000.0 / fps).toLong()
+                    }
+                } catch (_: Exception) {}
+            }
+        }
+
+        val probe = MediaExtractor()
+        try {
+            probe.setDataSource(videoFile.absolutePath)
+            probe.selectTrack(videoTrackIndex)
+            val ptsList = mutableListOf<Long>()
+            var count = 0
+            while (count < 40) {
+                val st = probe.sampleTime
+                if (st >= 0L) ptsList.add(st)
+                count++
+                if (!probe.advance()) break
+            }
+            if (ptsList.size >= 10) {
+                ptsList.sort()
+                val diffs = ptsList.zipWithNext { a, b -> b - a }.filter { it in 10_000L..100_000L }.sorted()
+                if (diffs.isNotEmpty()) {
+                    val median = diffs[diffs.size / 2]
+                    if (median in 15_000L..50_000L) {
+                        return median
+                    }
+                }
+            }
+        } catch (_: Exception) {
+        } finally {
+            try { probe.release() } catch (_: Exception) {}
+        }
+
+        return 41708L // Default ~23.976 fps
+    }
+
+    private fun extractNalUnits(data: ByteArray): List<ByteArray> {
+        val nalUnits = mutableListOf<ByteArray>()
+        var i = 0
+        val len = data.size
+
+        val startIndices = mutableListOf<Int>()
+        val prefixLengths = mutableListOf<Int>()
+
+        while (i < len - 3) {
+            if (data[i] == 0.toByte() && data[i + 1] == 0.toByte()) {
+                if (data[i + 2] == 1.toByte()) {
+                    startIndices.add(i + 3)
+                    prefixLengths.add(3)
+                    i += 3
+                    continue
+                } else if (data[i + 2] == 0.toByte() && i < len - 4 && data[i + 3] == 1.toByte()) {
+                    startIndices.add(i + 4)
+                    prefixLengths.add(4)
+                    i += 4
+                    continue
+                }
+            }
+            i++
+        }
+
+        for (k in 0 until startIndices.size) {
+            val start = startIndices[k]
+            val end = if (k + 1 < startIndices.size) {
+                startIndices[k + 1] - prefixLengths[k + 1]
+            } else {
+                len
+            }
+            if (end > start) {
+                nalUnits.add(data.copyOfRange(start, end))
+            }
+        }
+
+        return nalUnits
     }
 
     private fun decryptSegment(

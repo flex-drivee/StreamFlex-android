@@ -67,7 +67,9 @@ fun PlayerScreen(
 
     LaunchedEffect(state.isBuffering) {
         if (state.isBuffering) {
-            kotlinx.coroutines.delay(400L) // 400ms debounce
+            if (state.positionMs > 0L) {
+                kotlinx.coroutines.delay(300L) // debounce short buffer blips during playback
+            }
             showBuffering = true
         } else {
             showBuffering = false
@@ -77,34 +79,36 @@ fun PlayerScreen(
     Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
         controller.player.Surface(modifier = Modifier.fillMaxSize(), isFullScreen = isFullScreen)
         
-        if (showBuffering) {
+        if (isPiPMode && showBuffering) {
             CircularProgressIndicator(
-                modifier = Modifier.align(Alignment.Center),
-                color = Color.Red
+                modifier = Modifier.align(Alignment.Center).size(48.dp),
+                color = Color(0xFFFF3300),
+                strokeWidth = 4.dp
             )
         }
         
         if (!isPiPMode) {
-        PlayerControls(
-            state = state,
-            title = videoTitle,
-            subtitle = videoSubtitle,
-            showEpisodesButton = episodes.isNotEmpty(),
-            isMuted = isMuted,
-            onPlayPauseToggle = { controller.togglePlayPause() },
-            onSeekTo = { controller.seekTo(it) },
-            onSeekForward = { controller.seekForward() },
-            onSeekBackward = { controller.seekBackward() },
-            onMuteToggle = { controller.toggleMute() },
-            onPipClick = { (context as? com.cinetheta.player.PlayerActivity)?.triggerPiP() },
-            onSettingsClick = { tab ->
-                initialSettingsTab = tab
-                showSettingsDialog = true 
-            },
-            onEpisodesClick = { showEpisodeDrawer = true },
-            onFullscreenToggle = { isFullScreen = !isFullScreen },
-            onBack = onBack
-        )
+            PlayerControls(
+                state = state,
+                title = videoTitle,
+                subtitle = videoSubtitle,
+                isBuffering = showBuffering,
+                showEpisodesButton = episodes.isNotEmpty(),
+                isMuted = isMuted,
+                onPlayPauseToggle = { controller.togglePlayPause() },
+                onSeekTo = { controller.seekTo(it) },
+                onSeekForward = { controller.seekForward() },
+                onSeekBackward = { controller.seekBackward() },
+                onMuteToggle = { controller.toggleMute() },
+                onPipClick = { (context as? com.cinetheta.player.PlayerActivity)?.triggerPiP() },
+                onSettingsClick = { tab ->
+                    initialSettingsTab = tab
+                    showSettingsDialog = true 
+                },
+                onEpisodesClick = { showEpisodeDrawer = true },
+                onFullscreenToggle = { isFullScreen = !isFullScreen },
+                onBack = onBack
+            )
         }
 
         // Skip Intro Button

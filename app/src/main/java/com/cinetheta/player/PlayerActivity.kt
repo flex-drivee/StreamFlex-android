@@ -4,11 +4,18 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -135,8 +142,63 @@ class PlayerActivity : ComponentActivity() {
                 }
             }
             
-            if (uiState.isLoading && uiState.streams.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize()) {
+            val isUnavailable = uiState.error != null || (!uiState.isLoading && uiState.streams.isEmpty())
+
+            if (isUnavailable) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color(0xFF0F1014)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    androidx.compose.material3.AlertDialog(
+                        onDismissRequest = { finish() },
+                        containerColor = Color(0xFF1E1F24),
+                        titleContentColor = Color.White,
+                        textContentColor = Color.LightGray,
+                        shape = RoundedCornerShape(16.dp),
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Default.Warning,
+                                contentDescription = null,
+                                tint = Color(0xFFFF3300),
+                                modifier = Modifier.size(36.dp)
+                            )
+                        },
+                        title = {
+                            Text(
+                                text = "Video Not Available",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                        },
+                        text = {
+                            Text(
+                                text = "No playable stream links were found for this title. Please check back later or try another server/provider.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color(0xFFCCCCCC)
+                            )
+                        },
+                        confirmButton = {
+                            Button(
+                                onClick = { finish() },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFFFF3300)
+                                ),
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Text("OK", color = Color.White, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    )
+                }
+            } else if (uiState.isLoading && uiState.streams.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color(0xFF0F1014))
+                ) {
                     // Close button at top-left or top-right
                     IconButton(
                         onClick = { finish() },

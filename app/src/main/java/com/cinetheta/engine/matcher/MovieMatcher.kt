@@ -27,16 +27,15 @@ object MovieMatcher {
         results: List<SearchResult>,
         limit: Int = 1
     ): List<SearchResult> {
-        if (results.isEmpty()) {
-            return emptyList()
-        }
-
-        return results
-            .map { it to score(title, year, it) }
-            .filter { it.second >= 0.80 }
-            .sortedByDescending { it.second }
-            .take(limit)
-            .map { it.first }
+        if (results.isEmpty()) return emptyList()
+        val providerId = results.first().providerId
+        return com.cinetheta.engine.matcher.providers.MatcherDispatcher.matchMovie(
+            providerIdentifier = providerId,
+            expectedTitle = title,
+            year = year,
+            results = results,
+            limit = limit
+        )
     }
 
     fun bestMatch(
@@ -44,26 +43,7 @@ object MovieMatcher {
         year: Int?,
         results: List<SearchResult>
     ): SearchResult? {
-
-        if (results.isEmpty()) {
-            return null
-        }
-
-        return results
-
-            .map {
-
-                it to score(
-                    title = title,
-                    year = year,
-                    result = it
-                )
-
-            }
-
-            .maxByOrNull { it.second }
-
-            ?.takeIf { it.second >= 0.80 }?.first
+        return topMatches(title, year, results, limit = 1).firstOrNull()
     }
 
     /**

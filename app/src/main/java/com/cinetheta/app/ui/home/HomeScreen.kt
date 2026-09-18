@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.shape.CircleShape
@@ -23,6 +24,8 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -61,7 +64,7 @@ fun HomeScreen(
 
     // Tab state for Home / Movies / Shows / Anime
     val tabs = listOf("Home", "Movies", "Shows", "Anime")
-    var selectedTab by remember { mutableIntStateOf(0) }
+    var selectedTab by rememberSaveable { mutableIntStateOf(viewModel.selectedTabIndex) }
     val coroutineScope = rememberCoroutineScope()
 
     val filteredSections = remember(state.sections, selectedTab) {
@@ -90,12 +93,14 @@ fun HomeScreen(
         }
     }
 
-    val pagerState = rememberPagerState(initialPage = 0) { featuredItems.size }
+    val pagerState = rememberSafePagerState(initialPage = 0) { featuredItems.size }
 
     // Reset hero carousel to page 0 whenever the selected category tab changes
     LaunchedEffect(selectedTab) {
         if (featuredItems.isNotEmpty()) {
-            pagerState.scrollToPage(0)
+            try {
+                pagerState.scrollToPage(0)
+            } catch (_: Exception) {}
         }
     }
 
@@ -105,8 +110,13 @@ fun HomeScreen(
             while (true) {
                 kotlinx.coroutines.delay(5000L)
                 if (!pagerState.isScrollInProgress) {
-                    val nextPage = (pagerState.currentPage + 1) % featuredItems.size
-                    pagerState.animateScrollToPage(nextPage)
+                    val count = featuredItems.size
+                    if (count > 1) {
+                        val nextPage = (pagerState.currentPage + 1) % count
+                        try {
+                            pagerState.animateScrollToPage(nextPage)
+                        } catch (_: Exception) {}
+                    }
                 }
             }
         }
@@ -206,7 +216,10 @@ fun HomeScreen(
                 selectedTab   = selectedTab,
                 tabs          = tabs,
                 providerRepository = providerRepository,
-                onTabSelected = { selectedTab = it },
+                onTabSelected = { 
+                    selectedTab = it
+                    viewModel.selectedTabIndex = it
+                },
                 onSearchClick = onSearchClick,
                 onProfileClick = onSettingsClick,
                 onDownloadsClick = onDownloadsClick
@@ -1033,3 +1046,44 @@ fun MovieBoxSettingsDialog(
         )
     }
 }
+
+/**
+ * Crash-proof PagerState remember function.
+ * 
+ * Compose Foundation's default rememberPagerState has a known bug where currentPageOffsetFraction
+ * during animation can be serialized outside the valid [-0.5, 0.5] range (e.g. 1.0000001).
+ * When navigating back from another screen, PagerStateImpl's restore constructor throws
+ * IllegalArgumentException: initialPageOffsetFraction is not within the range -0.5 to 0.5.
+ * 
+ * SafePagerState stores only the currentPage index and clamps offset to 0f on restore,
+ * guaranteeing immunity from crash on navigation back.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun rememberSafePagerState(
+    initialPage: Int = 0,
+    pageCount: () -> Int
+): PagerState {
+    val pageCountState = rememberUpdatedState(pageCount)
+    return rememberSaveable(
+        saver = Saver(
+            save = { listOf(it.currentPage) },
+            restore = { saved ->
+                val list = saved as? List<*>
+                val page = (list?.getOrNull(0) as? Int) ?: initialPage
+                SafePagerState(page) { pageCountState.value() }
+            }
+        )
+    ) {
+        SafePagerState(initialPage) { pageCountState.value() }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+private class SafePagerState(
+    currentPage: Int = 0,
+    private val pageCountProvider: () -> Int
+) : PagerState(currentPage, 0f) {
+    override val pageCount: Int get() = pageCountProvider()
+}
+

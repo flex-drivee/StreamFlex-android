@@ -49,9 +49,9 @@ class Media3Player(
         .build()
 
     private val mediaSession: MediaSession = MediaSession.Builder(context, exoPlayer).build()
+    private val prefs by lazy { context.getSharedPreferences("cinetheta_settings", android.content.Context.MODE_PRIVATE) }
 
     init {
-        val prefs = context.getSharedPreferences("cinetheta_settings", android.content.Context.MODE_PRIVATE)
         val enableSubtitles = prefs.getBoolean("enable_subtitles", true)
         val defaultQuality = prefs.getString("player_video_quality", "Auto") ?: "Auto"
         
@@ -64,6 +64,10 @@ class Media3Player(
             if (height != null) {
                 builder = builder.setMaxVideoSize(Int.MAX_VALUE, height)
             }
+        }
+        val preferredAudioLang = prefs.getString("preferred_audio_language", null)
+        if (!preferredAudioLang.isNullOrBlank()) {
+            builder = builder.setPreferredAudioLanguage(preferredAudioLang)
         }
         trackSelector.setParameters(builder)
 
@@ -215,11 +219,21 @@ class Media3Player(
         val distinctQualities = qualities.groupBy { it.resolution }.map { entry ->
             entry.value.maxByOrNull { it.bitrate } ?: entry.value.first()
         }.sortedByDescending { it.resolution }
-        
+
+        val distinctAudios = audios.distinctBy { it.id }
+        val preferredLang = prefs.getString("preferred_audio_language", null)
+        if (!preferredLang.isNullOrBlank() && distinctAudios.isNotEmpty()) {
+            val matched = findMatchingAudio(distinctAudios, preferredLang)
+            if (matched != null && (currentAudio == null || matched.id != currentAudio.id)) {
+                currentAudio = matched
+                applyTrackOverride(C.TRACK_TYPE_AUDIO, matched.id)
+            }
+        }
+
         _state.value = _state.value.copy(
             availableQualities = distinctQualities,
             currentQuality = currentQuality,
-            audioTracks = audios.distinctBy { it.id },
+            audioTracks = distinctAudios,
             selectedAudio = currentAudio,
             subtitleTracks = subtitles.distinctBy { it.id },
             selectedSubtitle = currentSubtitle
@@ -260,7 +274,7 @@ class Media3Player(
     }
 
     override fun load(stream: StreamLink) {
-        _state.value = PlayerState() 
+        _state.value = PlayerState(isBuffering = true) 
         val prefs = context.getSharedPreferences("cinetheta_settings", android.content.Context.MODE_PRIVATE)
         val enableSubtitles = prefs.getBoolean("enable_subtitles", true)
         val defaultQuality = prefs.getString("player_video_quality", "Auto") ?: "Auto"
@@ -495,6 +509,31 @@ class Media3Player(
 
     override fun setAudioTrack(track: AudioTrack) {
         applyTrackOverride(C.TRACK_TYPE_AUDIO, track.id)
+        val lang = track.language?.takeIf { it.isNotBlank() && it != "und" } ?: track.label
+        if (!lang.isNullOrBlank()) {
+            prefs.edit().putString("preferred_audio_language", lang).apply()
+            com.cinetheta.core.utils.StreamLogger.debug("Media3Player", "Saved preferred audio language: $lang")
+        }
+    }
+
+    private fun findMatchingAudio(tracks: List<AudioTrack>, preferred: String): AudioTrack? {
+        val p = preferred.trim().lowercase()
+        return tracks.find { track ->
+            val lang = (track.language ?: "").trim().lowercase()
+            val label = (track.label ?: "").trim().lowercase()
+
+            if (lang == p || label == p) return@find true
+            if (p.startsWith("hin") || p.contains("hindi")) {
+                return@find lang.startsWith("hi") || lang.startsWith("hin") || label.contains("hindi")
+            }
+            if (p.startsWith("eng") || p.contains("english")) {
+                return@find lang.startsWith("en") || lang.startsWith("eng") || label.contains("english")
+            }
+            if (p.startsWith("jap") || p.contains("japanese")) {
+                return@find lang.startsWith("ja") || lang.startsWith("jp") || label.contains("japanese")
+            }
+            (lang.isNotBlank() && (lang.startsWith(p) || p.startsWith(lang))) || label.contains(p)
+        }
     }
 
     override fun setSubtitleTrack(track: SubtitleTrack?) {

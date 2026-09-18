@@ -17,12 +17,17 @@ object EpisodeMatcher {
         results: List<SearchResult>,
         limit: Int = 2
     ): List<SearchResult> {
-        return results
-            .map { it to score(title, season, episode, it) }
-            .filter { it.second >= 45 }
-            .sortedByDescending { it.second }
-            .take(limit)
-            .map { it.first }
+        if (results.isEmpty()) return emptyList()
+        val providerId = results.first().providerId
+        return com.cinetheta.engine.matcher.providers.MatcherDispatcher.matchEpisode(
+            providerIdentifier = providerId,
+            expectedTitle = title,
+            season = season,
+            episode = episode,
+            year = null,
+            results = results,
+            limit = limit
+        )
     }
 
     /**
@@ -34,14 +39,7 @@ object EpisodeMatcher {
         episode: Int,
         results: List<SearchResult>
     ): SearchResult? {
-
-        return results
-            .maxByOrNull {
-                score(title, season, episode, it)
-            }
-            ?.takeIf {
-                score(title, season, episode, it) >= 45
-            }
+        return topMatches(title, season, episode, results, limit = 1).firstOrNull()
     }
 
     /**
