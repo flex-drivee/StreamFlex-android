@@ -36,6 +36,8 @@ class HomeViewModel(
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
+    var selectedTabIndex: Int = 0
+
     init {
         loadHomeData()
     }

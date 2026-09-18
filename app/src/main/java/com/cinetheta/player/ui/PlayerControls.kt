@@ -28,6 +28,7 @@ fun PlayerControls(
     state: PlayerState,
     title: String,
     subtitle: String?,
+    isBuffering: Boolean = state.isBuffering,
     showEpisodesButton: Boolean = false,
     isMuted: Boolean = false,
     onPlayPauseToggle: () -> Unit,
@@ -73,6 +74,15 @@ fun PlayerControls(
                 }
             }
     ) {
+        // Centered loading indicator when controls are hidden/locked but video is buffering
+        if (isBuffering && (!isVisible || isLocked)) {
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.Center).size(72.dp),
+                color = Color(0xFFFF3300),
+                strokeWidth = 5.dp
+            )
+        }
+
         // Floating Unlock Banner when screen is locked
         AnimatedVisibility(
             visible = isLocked && isUnlockPromptVisible,
@@ -200,7 +210,7 @@ fun PlayerControls(
                     }
                 }
 
-                // CENTER CONTROLS (-10, Play, +10)
+                // CENTER CONTROLS (-10, Play/Buffer, +10)
                 Row(
                     modifier = Modifier.align(Alignment.Center).fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
@@ -210,10 +220,26 @@ fun PlayerControls(
                         Icon(Icons.Filled.Replay10, contentDescription = "Rewind 10s", tint = Color.White, modifier = Modifier.size(72.dp))
                     }
                     Spacer(modifier = Modifier.width(80.dp)) // Increased spacing
-                    IconButton(onClick = onPlayPauseToggle, modifier = Modifier.size(120.dp)) {
-                        val icon = if (state.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow
-                        Icon(icon, contentDescription = "Play/Pause", tint = Color.White, modifier = Modifier.size(96.dp))
+                    
+                    // Middle slot: If buffering/loading, show CircularProgressIndicator; otherwise show Play/Pause!
+                    Box(
+                        modifier = Modifier.size(120.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (isBuffering) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(72.dp),
+                                color = Color(0xFFFF3300),
+                                strokeWidth = 5.dp
+                            )
+                        } else {
+                            IconButton(onClick = onPlayPauseToggle, modifier = Modifier.fillMaxSize()) {
+                                val icon = if (state.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow
+                                Icon(icon, contentDescription = "Play/Pause", tint = Color.White, modifier = Modifier.size(96.dp))
+                            }
+                        }
                     }
+
                     Spacer(modifier = Modifier.width(80.dp)) // Increased spacing
                     IconButton(onClick = onSeekForward, modifier = Modifier.size(100.dp)) {
                         Icon(Icons.Filled.Forward10, contentDescription = "Forward 10s", tint = Color.White, modifier = Modifier.size(72.dp))
@@ -246,9 +272,13 @@ fun PlayerControls(
                     ) {
                         // Left: Play, Volume, Time
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            IconButton(onClick = onPlayPauseToggle, modifier = Modifier.size(44.dp)) {
+                            IconButton(
+                                onClick = onPlayPauseToggle, 
+                                enabled = !isBuffering,
+                                modifier = Modifier.size(44.dp)
+                            ) {
                                 val icon = if (state.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow
-                                Icon(icon, contentDescription = "Play", tint = Color.White, modifier = Modifier.size(26.dp))
+                                Icon(icon, contentDescription = "Play", tint = if (isBuffering) Color.Gray else Color.White, modifier = Modifier.size(26.dp))
                             }
                             IconButton(onClick = onMuteToggle, modifier = Modifier.size(44.dp)) {
                                 val volIcon = if (isMuted) Icons.Default.VolumeOff else Icons.Default.VolumeUp

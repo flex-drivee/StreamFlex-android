@@ -64,7 +64,8 @@ class NetMirrorSearch : SearchResultParser {
             NetMirrorConfig.OTT_HOTSTAR, NetMirrorConfig.OTT_DISNEY -> "/mobile/hs/search.php"
             else                        -> "/mobile/search.php"
         }
-        val searchUrl = "$base$searchPath?s=${NetworkUtils.encode(query)}&t=$unixTs"
+        val cleanQuery = query.replace(Regex("[:\\-–—_.'!?()]+"), " ").replace(Regex("\\s+"), " ").trim()
+        val searchUrl = "$base$searchPath?s=${NetworkUtils.encode(cleanQuery)}&t=$unixTs"
         StreamLogger.debug(TAG, "GET $searchUrl")
 
         val request = RequestBuilder()
@@ -127,12 +128,24 @@ class NetMirrorSearch : SearchResultParser {
                 }
 
                 val rStr           = JsonParser.string(item, "r")
-                val isSeries       = rStr != null && (rStr.equals("Series", ignoreCase = true) || rStr.contains("Season", ignoreCase = true) || rStr.contains("Episode", ignoreCase = true))
-                // If rStr is null, we can't be sure. Let's look at the title. If the title has "Season" or "Class" or something, maybe it's a TV show.
-                // Actually, a safer fallback is MediaType.TV if we want it to be considered for both, but the app architecture might expect TV or MOVIE.
-                // If it's MOVIE, EpisodeMatcher rejects it. So if we are unsure (r is null), it's better to default to TV so it can be matched for episodes, 
-                // OR we can check if it's missing and set it to TV. Let's just set it to TV if `rStr` is null, because NetMirror mostly has Series without `r`.
-                val resolvedMedia  = if (isSeries || rStr == null) MediaType.TV else MediaType.MOVIE
+                val isSeries       = rStr != null && (
+                    rStr.equals("Series", ignoreCase = true) ||
+                    rStr.equals("TV", ignoreCase = true) ||
+                    rStr.contains("Season", ignoreCase = true) ||
+                    rStr.contains("Episode", ignoreCase = true) ||
+                    rStr.contains("Show", ignoreCase = true) ||
+                    rStr.contains("Anime", ignoreCase = true) ||
+                    rStr.contains("Animation", ignoreCase = true)
+                )
+                val hasSeriesKeywords = Regex("(?i)\\b(?:season|s\\d+|series|episodes?|cour\\s*\\d+|part\\s*\\d+)\\b").containsMatchIn(title)
+                val hasRuntime = rStr != null && Regex("(?i)\\b\\d+\\s*(?:h|hr|m|min)\\b").containsMatchIn(rStr)
+                val isExplicitMovie = hasRuntime || (rStr != null && (rStr.equals("Movie", ignoreCase = true) || rStr.contains("Film", ignoreCase = true)))
+
+                val resolvedMedia  = when {
+                    isSeries || hasSeriesKeywords -> MediaType.TV
+                    isExplicitMovie -> MediaType.MOVIE
+                    else -> MediaType.MOVIE
+                }
 
                 // Custom URI scheme consumed by NetMirrorExtractor
                 val detailUrl = "netmirror://$ott/$id"

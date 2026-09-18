@@ -127,11 +127,25 @@ class PlayerViewModel(
                 // 2. Check for Direct Plugin Sources
                 val directSources = com.cinetheta.app.ui.pluginsearch.PluginSharedData.takeSources()
                 if (directSources != null) {
-                    streamRepository.resolveSources(directSources) { currentStreams ->
-                        if (currentStreams.isPlayable) {
+                    val resolved = streamRepository.resolveSources(directSources) { currentStreams ->
+                        if (currentStreams.isPlayable && currentStreams.streams.isNotEmpty()) {
                             _uiState.value = _uiState.value.copy(
                                 isLoading = false,
                                 streams = currentStreams.streams
+                            )
+                        }
+                    }
+                    if (_uiState.value.streams.isEmpty()) {
+                        if (resolved.isPlayable && resolved.streams.isNotEmpty()) {
+                            _uiState.value = _uiState.value.copy(
+                                isLoading = false,
+                                streams = resolved.streams
+                            )
+                        } else {
+                            _uiState.value = _uiState.value.copy(
+                                isLoading = false,
+                                streams = emptyList(),
+                                error = "Video not Available"
                             )
                         }
                     }
@@ -139,14 +153,14 @@ class PlayerViewModel(
                 }
 
                 // 3. If not downloaded, resolve online streams
-                if (session.isShow && session.currentEpisode != null) {
+                val resolved = if (session.isShow && session.currentEpisode != null) {
                     streamRepository.resolveEpisode(
                         title = session.title,
                         season = session.currentEpisode.seasonNumber,
                         episode = session.currentEpisode.episodeNumber,
                         year = session.year
                     ) { currentStreams ->
-                        if (currentStreams.isPlayable) {
+                        if (currentStreams.isPlayable && currentStreams.streams.isNotEmpty()) {
                             _uiState.value = _uiState.value.copy(
                                 isLoading = false,
                                 streams = currentStreams.streams,
@@ -159,7 +173,7 @@ class PlayerViewModel(
                         title = session.title,
                         year = session.year
                     ) { currentStreams ->
-                        if (currentStreams.isPlayable) {
+                        if (currentStreams.isPlayable && currentStreams.streams.isNotEmpty()) {
                             _uiState.value = _uiState.value.copy(
                                 isLoading = false,
                                 streams = currentStreams.streams,
@@ -168,13 +182,37 @@ class PlayerViewModel(
                         }
                     }
                 }
+
+                if (_uiState.value.streams.isEmpty()) {
+                    if (resolved.isPlayable && resolved.streams.isNotEmpty()) {
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            streams = resolved.streams,
+                            isOffline = false
+                        )
+                    } else {
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            streams = emptyList(),
+                            error = "Video not Available"
+                        )
+                    }
+                }
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    error = e.message
+                    streams = emptyList(),
+                    error = e.message ?: "Video not Available"
                 )
             }
         }
+    }
+
+    fun setError(message: String) {
+        _uiState.value = _uiState.value.copy(
+            isLoading = false,
+            error = message
+        )
     }
 
     fun playEpisode(episode: PlayerEpisode) {

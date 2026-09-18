@@ -28,7 +28,7 @@ import kotlinx.coroutines.delay
  * This tricks the NetMirror CDN into treating us as their native Android app,
  * bypassing Cloudflare Turnstile entirely.
  *
- * Cookie TTL: The `t_hash_t` cookie is valid for ~15 hours (54,000,000 ms).
+ * Cookie TTL: The `t_hash_t` cookie is valid for ~20 hours (72,000,000 ms).
  * We cache it and reuse it until it expires.
  */
 object NetMirrorBypassManager {
@@ -47,8 +47,8 @@ object NetMirrorBypassManager {
     private const val POLL_INTERVAL_MS = 3_000L
     private const val MAX_VERIFY_LOOPS = 25
 
-    // Cookie validity window: 15 hours (same as native app, verified from source)
-    private const val COOKIE_TTL_MS = 54_000_000L
+    // Cookie validity window: 20 hours (72,000,000 ms)
+    private const val COOKIE_TTL_MS = 72_000_000L
 
     // Persistent cache: token + timestamp
     private val prefs by lazy {

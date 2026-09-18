@@ -92,6 +92,8 @@ class PlayerController(
                         if (nextIndex < _allStreams.value.size) {
                             _currentStreamIndex.value = nextIndex
                             loadCurrentStream()
+                        } else {
+                            viewModel.setError("Video not Available")
                         }
                     }
                 }
