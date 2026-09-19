@@ -20,7 +20,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -56,6 +58,7 @@ fun SettingsScreen(
     var showQualityDialog by remember { mutableStateOf(false) }
     var showPlayerQualityDialog by remember { mutableStateOf(false) }
     var showDeleteAllDialog by remember { mutableStateOf(false) }
+    var showSupportDialog by remember { mutableStateOf(false) }
     
     val providerRepository = com.cinetheta.app.di.ProviderModule.repository
     var selectedProviderName by remember { 
@@ -354,6 +357,13 @@ fun SettingsScreen(
                     )
                     SettingsDivider()
                     SettingsTile(
+                        icon = Icons.Filled.Favorite,
+                        title = "Support CineTheta",
+                        subtitle = "Donate via Binance Pay or USDT",
+                        onTap = { showSupportDialog = true }
+                    )
+                    SettingsDivider()
+                    SettingsTile(
                         icon = Icons.Outlined.Info,
                         title = "Version",
                         subtitle = "CineTheta v${com.cinetheta.app.BuildConfig.VERSION_NAME}",
@@ -639,6 +649,13 @@ fun SettingsScreen(
                 context = context
             )
         }
+
+        if (showSupportDialog) {
+            SupportCineThetaDialog(
+                onDismiss = { showSupportDialog = false },
+                context = context
+            )
+        }
     }
 }
 
@@ -826,3 +843,199 @@ fun appSwitchColors(): SwitchColors {
         uncheckedBorderColor = Color.Transparent
     )
 }
+
+@Composable
+fun SupportCineThetaDialog(
+    onDismiss: () -> Unit,
+    context: android.content.Context
+) {
+    val binancePayId = "1041683310"
+    val usdtAddress = "TJEbUfurBzdNhFARk6STdzNKAKpuQR5g6j"
+
+    fun copyToClipboard(label: String, value: String) {
+        val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as? android.content.ClipboardManager
+        val clip = android.content.ClipData.newPlainText(label, value)
+        clipboard?.setPrimaryClip(clip)
+        android.widget.Toast.makeText(context, "$label copied to clipboard!", android.widget.Toast.LENGTH_SHORT).show()
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = Color(0xFF1E1E22),
+        icon = {
+            Box(
+                modifier = Modifier
+                    .size(54.dp)
+                    .background(Color(0xFFE50914).copy(alpha = 0.15f), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Favorite,
+                    contentDescription = null,
+                    tint = Color(0xFFE50914),
+                    modifier = Modifier.size(28.dp)
+                )
+            }
+        },
+        title = {
+            Text(
+                text = "Support CineTheta",
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                Text(
+                    text = "CineTheta is free and open-source. Your support helps maintain scraping servers, API limits, and continuous feature updates!",
+                    fontSize = 13.sp,
+                    color = Color.White.copy(alpha = 0.75f),
+                    textAlign = TextAlign.Center,
+                    lineHeight = 18.sp
+                )
+
+                // --- Binance Pay ID Card ---
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color(0xFF28282D))
+                        .border(1.dp, Color(0xFFF3BA2F).copy(alpha = 0.35f), RoundedCornerShape(12.dp))
+                        .clickable { copyToClipboard("Binance Pay ID", binancePayId) }
+                        .padding(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .background(Color(0xFFF3BA2F), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text("B", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Binance Pay ID",
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 14.sp,
+                                color = Color(0xFFF3BA2F)
+                            )
+                        }
+
+                        IconButton(
+                            onClick = { copyToClipboard("Binance Pay ID", binancePayId) },
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ContentCopy,
+                                contentDescription = "Copy Binance Pay ID",
+                                tint = Color.White.copy(alpha = 0.8f),
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = binancePayId,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 17.sp,
+                        color = Color.White
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "Instant 0% fee transfer • Tap to copy",
+                        fontSize = 11.sp,
+                        color = Color.White.copy(alpha = 0.5f)
+                    )
+                }
+
+                // --- USDT (TRC-20) Card ---
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color(0xFF28282D))
+                        .border(1.dp, Color(0xFF26A17B).copy(alpha = 0.35f), RoundedCornerShape(12.dp))
+                        .clickable { copyToClipboard("USDT TRC-20 Address", usdtAddress) }
+                        .padding(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .background(Color(0xFF26A17B), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text("₮", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "USDT (Tron / TRC-20)",
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 14.sp,
+                                color = Color(0xFF26A17B)
+                            )
+                        }
+
+                        IconButton(
+                            onClick = { copyToClipboard("USDT TRC-20 Address", usdtAddress) },
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ContentCopy,
+                                contentDescription = "Copy USDT Address",
+                                tint = Color.White.copy(alpha = 0.8f),
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = usdtAddress,
+                        fontWeight = FontWeight.Medium,
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 12.sp,
+                        color = Color.White,
+                        lineHeight = 16.sp
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "Trust Wallet, MetaMask, or any exchange • Tap to copy",
+                        fontSize = 11.sp,
+                        color = Color.White.copy(alpha = 0.5f)
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onDismiss,
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE50914)),
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Close", color = Color.White, fontWeight = FontWeight.SemiBold)
+            }
+        }
+    )
+}
+

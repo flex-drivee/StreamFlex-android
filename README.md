@@ -84,6 +84,17 @@
 2. Open the project in Android Studio.
 3. Sync Gradle and hit **Run** (`Shift + F10`).
 
+## 💖 Support the Project
+
+If you love **CineTheta** and want to support ongoing server maintenance, provider scraping fixes, and new features, consider donating:
+
+| Method | Details | Network / Note |
+| :--- | :--- | :--- |
+| 🟡 **Binance Pay** | `1041683310` | Instant, 0% fees |
+| 🟢 **USDT** | `TJEbUfurBzdNhFARk6STdzNKAKpuQR5g6j` | **Tron (TRC-20)** |
+
+*Every bit of support helps keep CineTheta active, open-source, and ad-free!*
+
 ## ⚖️ Disclaimer
 
 **CineTheta** is purely a client-side application. It does not host, store, or distribute any copyrighted media files. The app acts merely as a search tool and media player that scrapes public websites. The developers of CineTheta have no affiliation with the content providers and take no responsibility for the content accessed through the application. Use this software responsibly and in accordance with your local laws.
