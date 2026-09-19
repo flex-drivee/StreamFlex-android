@@ -40,6 +40,9 @@ import com.cinetheta.player.ui.PlayerController
 import com.cinetheta.player.ui.PlayerScreen
 import com.cinetheta.player.media3.Media3PlayerFactory
 import com.cinetheta.player.resume.PlaybackProgressManager
+import com.cinetheta.extractors.netmirror.NetMirrorBypassManager
+import com.cinetheta.app.utils.SupportManager
+import com.cinetheta.app.utils.NetMirrorBypassAdDialog
 
 class PlayerActivity : ComponentActivity() {
     
@@ -141,6 +144,15 @@ class PlayerActivity : ComponentActivity() {
                     controller.setStreams(uiState.streams)
                 }
             }
+
+            val isNetMirrorBypassing by NetMirrorBypassManager.isBypassing.collectAsState()
+            var bypassAdDismissed by remember { mutableStateOf(false) }
+
+            LaunchedEffect(isNetMirrorBypassing) {
+                if (!isNetMirrorBypassing) {
+                    bypassAdDismissed = false
+                }
+            }
             
             val isUnavailable = uiState.error != null || (!uiState.isLoading && uiState.streams.isEmpty())
 
@@ -222,7 +234,7 @@ class PlayerActivity : ComponentActivity() {
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "Loading...",
+                            text = if (isNetMirrorBypassing) "Fetching OTT security tokens (~37s)..." else "Loading...",
                             color = Color.White,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Medium
@@ -242,6 +254,18 @@ class PlayerActivity : ComponentActivity() {
                     videoTitle = baseTitle,
                     videoSubtitle = videoSubtitle,
                     onBack = { finish() }
+                )
+            }
+
+            if (isNetMirrorBypassing && !bypassAdDismissed) {
+                NetMirrorBypassAdDialog(
+                    onWatchAd = {
+                        bypassAdDismissed = true
+                        SupportManager.openAd(context)
+                    },
+                    onDismiss = {
+                        bypassAdDismissed = true
+                    }
                 )
             }
         }

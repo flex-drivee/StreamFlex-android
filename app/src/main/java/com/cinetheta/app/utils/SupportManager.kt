@@ -15,9 +15,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.outlined.OpenInNew
+import androidx.compose.material.icons.automirrored.outlined.OpenInNew
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import kotlinx.coroutines.delay
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,7 +39,7 @@ object SupportManager {
     private const val PREFS_NAME = "cinetheta_support_prefs"
     private const val KEY_APP_OPEN_COUNT = "app_open_count"
     private const val KEY_LAST_SHOWN_TIME = "last_support_prompt_time"
-    private const val COOLDOWN_MILLIS = 72L * 60L * 60L * 1000L // 72 hours (3 days)
+    private const val COOLDOWN_MILLIS = 6L * 60L * 60L * 1000L // 6 hours
 
     /**
      * Alternates 50/50 between Monetag and Adsterra to balance earnings across both ad networks.
@@ -57,7 +58,7 @@ object SupportManager {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
             context.startActivity(intent)
-            Toast.makeText(context, "Opening sponsor ad… Thank you for your support!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Please stay on the sponsor page for at least 20s to support CineTheta! Thank you!", Toast.LENGTH_LONG).show()
         } catch (e: Exception) {
             Toast.makeText(context, "Unable to open browser", Toast.LENGTH_SHORT).show()
         }
@@ -139,7 +140,7 @@ fun HomeSupportDialog(
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 Text(
-                    text = "Help keep CineTheta free, ad-free during playback, and actively maintained! If you can't donate money, watching a 10-second sponsor ad is free and directly supports server maintenance.",
+                    text = "Help keep CineTheta free, ad-free during playback, and actively maintained! If you can't donate money, browsing a sponsor ad for at least 20 seconds is completely free and directly supports server maintenance.",
                     fontSize = 13.sp,
                     color = Color.White.copy(alpha = 0.8f),
                     textAlign = TextAlign.Center,
@@ -154,13 +155,13 @@ fun HomeSupportDialog(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Icon(
-                        imageVector = Icons.Outlined.OpenInNew,
+                        imageVector = Icons.AutoMirrored.Outlined.OpenInNew,
                         contentDescription = null,
                         tint = Color.White,
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("🎬 Watch Ad to Support (Free)", fontWeight = FontWeight.Bold, color = Color.White)
+                    Text("🎬 Watch Ad (Browse 20s+ to Support)", fontWeight = FontWeight.Bold, color = Color.White)
                 }
 
                 // ── Option 2: Donate (Crypto / Binance) ─────────────────────────
@@ -267,7 +268,7 @@ fun FullSupportCineThetaDialog(
                             modifier = Modifier.size(32.dp)
                         ) {
                             Icon(
-                                imageVector = Icons.Outlined.OpenInNew,
+                                imageVector = Icons.AutoMirrored.Outlined.OpenInNew,
                                 contentDescription = "Watch Ad",
                                 tint = Color.White.copy(alpha = 0.8f),
                                 modifier = Modifier.size(18.dp)
@@ -277,7 +278,7 @@ fun FullSupportCineThetaDialog(
 
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "100% Free • Takes only 10s • Opens in browser",
+                        text = "100% Free • Please browse the page for at least 20s • Opens in browser",
                         fontSize = 11.sp,
                         color = Color.White.copy(alpha = 0.6f)
                     )
@@ -415,6 +416,148 @@ fun FullSupportCineThetaDialog(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Close", color = Color.White, fontWeight = FontWeight.SemiBold)
+            }
+        }
+    )
+}
+
+/**
+ * Ad countdown dialog shown when NetMirror t_hash_t security token is expired or missing.
+ * The NetMirror headless bypass takes ~37 seconds.
+ * Gives the user a 5-second countdown to open a sponsor ad for 20 seconds to support server costs,
+ * while the bypass continues concurrently in the background.
+ */
+@Composable
+fun NetMirrorBypassAdDialog(
+    onWatchAd: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    var countdown by remember { mutableIntStateOf(5) }
+
+    LaunchedEffect(Unit) {
+        while (countdown > 0) {
+            delay(1000L)
+            countdown--
+        }
+        onWatchAd()
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = Color(0xFF1E1E22),
+        shape = RoundedCornerShape(16.dp),
+        icon = {
+            Box(
+                modifier = Modifier
+                    .size(54.dp)
+                    .background(Color(0xFFE50914).copy(alpha = 0.15f), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Favorite,
+                    contentDescription = null,
+                    tint = Color(0xFFE50914),
+                    modifier = Modifier.size(28.dp)
+                )
+            }
+        },
+        title = {
+            Text(
+                text = "Fetching OTT Stream Tokens",
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Background status banner
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color(0xFF28282D))
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(14.dp),
+                        strokeWidth = 2.dp,
+                        color = Color(0xFFFF5252)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "OTT Security Bypass running (~37s)",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color(0xFFFF8A80)
+                    )
+                }
+
+                Text(
+                    text = "NetMirror / OTT stream security tokens (t_hash_t) are being generated in the background. This process takes ~37 seconds to complete.\n\nWhile we prepare your streams, please browse our sponsor page for at least 20 seconds to help cover app maintenance & server costs!",
+                    fontSize = 13.sp,
+                    color = Color.White.copy(alpha = 0.8f),
+                    textAlign = TextAlign.Center,
+                    lineHeight = 18.sp
+                )
+
+                // Countdown badge
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color(0xFFE50914).copy(alpha = 0.12f))
+                        .padding(vertical = 6.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = if (countdown > 0) "Opening sponsor ad in ${countdown}s..." else "Opening sponsor ad...",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color(0xFFFF5252)
+                    )
+                }
+
+                // Primary Action Button
+                Button(
+                    onClick = onWatchAd,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE50914)),
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Outlined.OpenInNew,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = if (countdown > 0) "🎬 Watch Ad in ${countdown}s (or Tap Now)" else "🎬 Watch Ad Now",
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Wait Here (Skip Ad)",
+                    color = Color.White.copy(alpha = 0.6f),
+                    fontWeight = FontWeight.Normal
+                )
             }
         }
     )

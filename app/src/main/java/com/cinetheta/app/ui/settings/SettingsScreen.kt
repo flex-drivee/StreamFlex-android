@@ -349,9 +349,17 @@ fun SettingsScreen(
                         icon = Icons.Outlined.PersonOutline,
                         title = "Developer",
                         subtitle = "Developed by Mani-Balouch.",
+                        trailing = { Spacer(modifier = Modifier.width(0.dp)) },
+                        onTap = { /* No external link */ }
+                    )
+                    SettingsDivider()
+                    SettingsTile(
+                        icon = Icons.Outlined.Language,
+                        title = "Official Website",
+                        subtitle = "cinetheta.github.io",
                         onTap = {
                             val intent = android.content.Intent(android.content.Intent.ACTION_VIEW,
-                                android.net.Uri.parse("https://github.com/flex-drivee"))
+                                android.net.Uri.parse("https://cinetheta.github.io"))
                             context.startActivity(intent)
                         }
                     )

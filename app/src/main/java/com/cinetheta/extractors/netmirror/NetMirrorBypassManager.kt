@@ -1,5 +1,8 @@
 package com.cinetheta.extractors.netmirror
 
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -64,6 +67,17 @@ object NetMirrorBypassManager {
         set(value) = prefs.edit().putLong("timestamp", value).apply()
     private val bypassMutex = Mutex()
 
+    private val _isBypassing = MutableStateFlow(false)
+    val isBypassing: StateFlow<Boolean> = _isBypassing.asStateFlow()
+
+    /**
+     * Checks whether a valid cached t_hash_t token exists and is within TTL.
+     */
+    fun hasValidToken(): Boolean {
+        val now = System.currentTimeMillis()
+        return cachedToken.isNotBlank() && (now - cachedTokenTimestamp) < COOKIE_TTL_MS
+    }
+
     /**
      * Returns a valid `t_hash_t` session token.
      * Uses cached token if still within TTL, otherwise runs full bypass.
@@ -79,7 +93,12 @@ object NetMirrorBypassManager {
         }
 
         StreamLogger.debug(TAG, "No valid cached token. Starting silent bypass on $baseUrl ...")
-        val token = runBypass(baseUrl)
+        _isBypassing.value = true
+        val token = try {
+            runBypass(baseUrl)
+        } finally {
+            _isBypassing.value = false
+        }
         if (!token.isNullOrBlank()) {
             cachedToken = token
             cachedTokenTimestamp = System.currentTimeMillis()
