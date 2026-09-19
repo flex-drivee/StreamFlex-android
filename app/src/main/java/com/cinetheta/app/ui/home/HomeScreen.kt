@@ -66,6 +66,9 @@ fun HomeScreen(
     val tabs = listOf("Home", "Movies", "Shows", "Anime")
     var selectedTab by rememberSaveable { mutableIntStateOf(viewModel.selectedTabIndex) }
     val coroutineScope = rememberCoroutineScope()
+    val context = androidx.compose.ui.platform.LocalContext.current
+    var showHomeSupportDialog by remember { mutableStateOf(false) }
+    var showFullDonationDialog by remember { mutableStateOf(false) }
 
     val filteredSections = remember(state.sections, selectedTab) {
         when (selectedTab) {
@@ -136,6 +139,10 @@ fun HomeScreen(
 
     LaunchedEffect(Unit) {
         viewModel.reloadHistory()
+        if (com.cinetheta.app.utils.SupportManager.shouldShowHomeSupportPrompt(context)) {
+            kotlinx.coroutines.delay(2000L)
+            showHomeSupportDialog = true
+        }
     }
 
     Box(modifier = Modifier
@@ -223,6 +230,32 @@ fun HomeScreen(
                 onSearchClick = onSearchClick,
                 onProfileClick = onSettingsClick,
                 onDownloadsClick = onDownloadsClick
+            )
+        }
+
+        if (showHomeSupportDialog) {
+            com.cinetheta.app.utils.HomeSupportDialog(
+                onWatchAd = {
+                    showHomeSupportDialog = false
+                    com.cinetheta.app.utils.SupportManager.markSupportPromptShown(context)
+                    com.cinetheta.app.utils.SupportManager.openAd(context)
+                },
+                onOpenDonations = {
+                    showHomeSupportDialog = false
+                    com.cinetheta.app.utils.SupportManager.markSupportPromptShown(context)
+                    showFullDonationDialog = true
+                },
+                onDismiss = {
+                    showHomeSupportDialog = false
+                    com.cinetheta.app.utils.SupportManager.markSupportPromptShown(context)
+                }
+            )
+        }
+
+        if (showFullDonationDialog) {
+            com.cinetheta.app.utils.FullSupportCineThetaDialog(
+                onDismiss = { showFullDonationDialog = false },
+                context = context
             )
         }
     }
