@@ -97,10 +97,13 @@ data class GithubAsset(
 
 object AppUpdater {
 
-    private const val GITHUB_OWNER = "flex-drivee"
-    private const val GITHUB_REPO = "StreamFlex-android"
+    private const val GITHUB_OWNER = "cinetheta"
+    private const val GITHUB_REPO = "cinetheta.github.io"
+    private const val GITHUB_REPO_ALT = "cinetheta"
+
     // Query /releases instead of /releases/latest so pre-releases and beta tags are properly found
     private const val RELEASES_URL = "https://api.github.com/repos/$GITHUB_OWNER/$GITHUB_REPO/releases"
+    private const val RELEASES_URL_ALT = "https://api.github.com/repos/$GITHUB_OWNER/$GITHUB_REPO_ALT/releases"
 
     private val json = Json { ignoreUnknownKeys = true }
     private val client = OkHttpClient()
@@ -111,18 +114,29 @@ object AppUpdater {
      */
     suspend fun checkUpdate(context: Context, isManualCheck: Boolean = false) = withContext(Dispatchers.IO) {
         try {
-            val request = Request.Builder()
+            var request = Request.Builder()
                 .url(RELEASES_URL)
                 .header("User-Agent", "CineTheta-App")
                 .header("Accept", "application/vnd.github.v3+json")
                 .build()
 
-            val response = client.newCall(request).execute()
+            var response = client.newCall(request).execute()
+
+            // If cinetheta.github.io returns 404 or fails, fallback to checking cinetheta repo
+            if (!response.isSuccessful || response.code == 404) {
+                response.close()
+                request = Request.Builder()
+                    .url(RELEASES_URL_ALT)
+                    .header("User-Agent", "CineTheta-App")
+                    .header("Accept", "application/vnd.github.v3+json")
+                    .build()
+                response = client.newCall(request).execute()
+            }
 
             if (!response.isSuccessful) {
                 if (isManualCheck) {
                     withContext(Dispatchers.Main) {
-                        Toast.makeText(context, "Unable to check for updates (${response.code})", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "No updates found or repository not yet published (${response.code})", Toast.LENGTH_SHORT).show()
                     }
                 }
                 return@withContext
