@@ -69,6 +69,7 @@ fun HomeScreen(
     val context = androidx.compose.ui.platform.LocalContext.current
     var showHomeSupportDialog by remember { mutableStateOf(false) }
     var showFullDonationDialog by remember { mutableStateOf(false) }
+    var showThankYouDialog by remember { mutableStateOf(false) }
 
     val filteredSections = remember(state.sections, selectedTab) {
         when (selectedTab) {
@@ -255,7 +256,26 @@ fun HomeScreen(
         if (showFullDonationDialog) {
             com.cinetheta.app.utils.FullSupportCineThetaDialog(
                 onDismiss = { showFullDonationDialog = false },
-                context = context
+                context = context,
+                onWatchAdSuccess = {
+                    showFullDonationDialog = false
+                }
+            )
+        }
+
+        // Listens for return from ad: shows big ThankYouSupportDialog if >= 20s, or Toast if < 20s
+        com.cinetheta.app.utils.AdReturnLifecycleTracker(
+            context = context,
+            onShowThankYouDialog = { showThankYouDialog = true }
+        )
+
+        if (showThankYouDialog) {
+            com.cinetheta.app.utils.ThankYouSupportDialog(
+                onDismiss = { showThankYouDialog = false },
+                onOpenAdAgain = {
+                    showThankYouDialog = false
+                    com.cinetheta.app.utils.SupportManager.openAd(context)
+                }
             )
         }
     }
@@ -332,7 +352,7 @@ private fun SFTopBar(
                     // Provider Selector Chip
                     var showProviderDropdown by remember { mutableStateOf(false) }
                     var selectedProviderName by remember { 
-                        mutableStateOf(providerRepository.provider(providerRepository.selectedProviderId ?: "")?.name ?: "All in One") 
+                        mutableStateOf(providerRepository.provider(providerRepository.selectedProviderId ?: "")?.name ?: "None") 
                     }
                     var showMovieBoxSettings by remember { mutableStateOf(false) }
                     val context = androidx.compose.ui.platform.LocalContext.current
@@ -375,11 +395,11 @@ private fun SFTopBar(
                             modifier = Modifier.background(MaterialTheme.colorScheme.surface)
                         ) {
                             DropdownMenuItem(
-                                text = { Text("All in One", color = MaterialTheme.colorScheme.onSurface) },
+                                text = { Text("None", color = MaterialTheme.colorScheme.onSurface) },
                                 onClick = {
                                     val oldId = providerRepository.selectedProviderId
                                     providerRepository.selectedProviderId = null
-                                    selectedProviderName = "All in One"
+                                    selectedProviderName = "None"
                                     showProviderDropdown = false
                                     
                                     context.getSharedPreferences("cinetheta_settings", android.content.Context.MODE_PRIVATE)

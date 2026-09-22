@@ -6,39 +6,62 @@ import com.cinetheta.domain.models.Quality
 import com.cinetheta.domain.models.StreamLink
 
 /**
- * Sorts streams by reliability and quality.
+ * Sorts streams by reliability, quota resilience, and quality.
  *
- * The goal is to place the best playable stream first.
+ * The goal is to place the best playable stream first while pushing
+ * quota-limited streams (Google links, Buzzer links) to the very end
+ * of the server list.
  */
 object StreamSorter {
+
+    fun isGoogleStream(stream: StreamLink): Boolean {
+        val url = stream.url.lowercase()
+        val name = stream.name.lowercase()
+        return stream.host == HostType.GOOGLE_VIDEO ||
+                url.contains("googleusercontent.com") ||
+                url.contains("drive.google.com") ||
+                url.contains("docs.google.com") ||
+                url.contains("googlevideo.com") ||
+                name.contains("google")
+    }
+
+    fun isBuzzStream(stream: StreamLink): Boolean {
+        val url = stream.url.lowercase()
+        val name = stream.name.lowercase()
+        return stream.host == HostType.REDIRECT ||
+                url.contains("buzzheavier.com") ||
+                url.contains(".buzz/") ||
+                url.contains("buzzserver") ||
+                url.contains("buzzer") ||
+                name.contains("buzz") ||
+                name.contains("buzzer")
+    }
+
+    /**
+     * Tier classification to ensure quota-limited servers come LAST:
+     * 0 -> Normal high-speed / CDN streams (HubCloud, HubDrive, PixelDrain, StreamRuby, etc.)
+     * 1 -> Google Video / Drive (strict download quotas)
+     * 2 -> Buzzer / BuzzServer / Redirects (fast quota limit exhaustion)
+     */
+    fun quotaTier(stream: StreamLink): Int {
+        return when {
+            isBuzzStream(stream) -> 2
+            isGoogleStream(stream) -> 1
+            else -> 0
+        }
+    }
 
     fun sort(
         streams: List<StreamLink>
     ): List<StreamLink> {
 
         return streams.sortedWith(
-
             compareBy<StreamLink>
-
-            { hostPriority(it.host) }
-
-                .thenBy {
-
-                    qualityPriority(it.quality)
-
-                }
-
-                .thenBy {
-
-                    contentPriority(it)
-
-                }
-
-                .thenBy {
-
-                    it.name.lowercase()
-
-                }
+            { quotaTier(it) }
+                .thenBy { hostPriority(it) }
+                .thenBy { qualityPriority(it.quality) }
+                .thenBy { contentPriority(it) }
+                .thenBy { it.name.lowercase() }
         )
     }
 
@@ -54,9 +77,8 @@ object StreamSorter {
 
         return when {
             stream.adaptive || stream.contentType == ContentType.HLS || stream.contentType == ContentType.M3U8 || url.contains(".m3u8") -> 0
-            url.contains("googleusercontent.com") || stream.host == HostType.GOOGLE_VIDEO -> 1
-            url.endsWith(".mp4") || url.endsWith(".mkv") -> 2
-            stream.contentType == ContentType.DASH || url.endsWith(".mpd") -> 3
+            url.endsWith(".mp4") || url.endsWith(".mkv") -> 1
+            stream.contentType == ContentType.DASH || url.endsWith(".mpd") -> 2
             else -> 5
         }
     }
@@ -86,10 +108,21 @@ object StreamSorter {
      * 2. AWSStream (2nd option - master.m3u8 with multiple prints and audios in one link)
      * 3. Abyss (3rd option - separate quality links)
      * 4. GDMirrorBot and other fast mirrors
-     * 5. Google Video / HubCloud / HubDrive (HDHub4u)
-     * 6. Fallback extractors
-     * 7. Vidmoly (unstable - last)
+     * 5. HubCloud / HubDrive / HubCDN / HbLinks / PixelDrain (HDHub4u)
+     * 6. Direct media (.mp4/.mkv)
+     * 7. Fallback extractors
+     * 8. Vidmoly (unstable - last among regular)
+     * 9. Google & Buzzer (quota limited - sorted last via quotaTier)
      */
+    fun hostPriority(
+        stream: StreamLink
+    ): Int {
+        if (isBuzzStream(stream)) return 95
+        if (isGoogleStream(stream)) return 90
+
+        return hostPriority(stream.host)
+    }
+
     fun hostPriority(
         host: HostType
     ): Int {
@@ -104,7 +137,6 @@ object StreamSorter {
             HostType.XERVER -> 7
             HostType.BLAKITE -> 8
 
-            HostType.GOOGLE_VIDEO -> 9
             HostType.HUBCLOUD -> 10
             HostType.HUBDRIVE -> 11
             HostType.HUBCDN -> 12
@@ -121,7 +153,8 @@ object StreamSorter {
             HostType.VIDSTACK -> 23
 
             HostType.VIDMOLY -> 80
-            HostType.REDIRECT -> 90
+            HostType.GOOGLE_VIDEO -> 90
+            HostType.REDIRECT -> 95
             else -> 50
         }
     }

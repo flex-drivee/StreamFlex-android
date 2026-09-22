@@ -44,7 +44,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     val decoderMode: StateFlow<String> = _decoderMode.asStateFlow()
 
     private val _dohProvider = MutableStateFlow(
-        prefs.getString("doh_provider", com.cinetheta.core.network.DohProvider.NONE.name) ?: com.cinetheta.core.network.DohProvider.NONE.name
+        prefs.getString("doh_provider", com.cinetheta.core.network.DohProvider.GOOGLE.name) ?: com.cinetheta.core.network.DohProvider.GOOGLE.name
     )
     val dohProvider: StateFlow<String> = _dohProvider.asStateFlow()
 

@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -15,13 +16,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.res.painterResource
 import kotlinx.coroutines.delay
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -33,34 +37,74 @@ object SupportManager {
     const val BINANCE_PAY_ID = "1041683310"
     const val USDT_TRC20_ADDRESS = "TJEbUfurBzdNhFARk6STdzNKAKpuQR5g6j"
 
+    const val ADSTERRA_URL = "https://ensueddenied.com/jg7gcgvu?key=a0919ba886af754e302a4630d7efcf1f"
     const val MONETAG_URL = "https://omg10.com/4/11839109"
-    const val ADSTERRA_URL = "https://www.profitableratecpmnetwork.com/jg7gcgvu?key=a0919ba886af754e302a4630d7efcf1f"
 
     private const val PREFS_NAME = "cinetheta_support_prefs"
     private const val KEY_APP_OPEN_COUNT = "app_open_count"
     private const val KEY_LAST_SHOWN_TIME = "last_support_prompt_time"
+    private const val KEY_AD_ROTATION_INDEX = "ad_rotation_index"
     private const val COOLDOWN_MILLIS = 6L * 60L * 60L * 1000L // 6 hours
 
-    /**
-     * Alternates 50/50 between Monetag and Adsterra to balance earnings across both ad networks.
-     */
-    fun getRotatedAdUrl(): String {
-        return if (System.currentTimeMillis() % 2L == 0L) MONETAG_URL else ADSTERRA_URL
+    // Track when user tapped to watch an ad
+    private var adClickTimestamp: Long = 0L
+    private var inMemoryAdCounter: Int = 0
+    const val MIN_AD_WATCH_DURATION_MS = 20_000L
+
+    fun recordAdClick() {
+        adClickTimestamp = System.currentTimeMillis()
     }
 
     /**
-     * Opens the ad URL in the user's browser.
+     * Alternates between Adsterra and Monetag, ensuring Adsterra comes 1st, then Monetag.
+     */
+    fun getRotatedAdUrl(context: Context? = null): String {
+        val index = if (context != null) {
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val current = prefs.getInt(KEY_AD_ROTATION_INDEX, 0)
+            prefs.edit().putInt(KEY_AD_ROTATION_INDEX, current + 1).apply()
+            current
+        } else {
+            inMemoryAdCounter++
+        }
+        return if (index % 2 == 0) ADSTERRA_URL else MONETAG_URL
+    }
+
+    /**
+     * Opens the ad URL in the user's browser and records click timestamp.
      */
     fun openAd(context: Context) {
+        recordAdClick()
         try {
-            val url = getRotatedAdUrl()
+            val url = getRotatedAdUrl(context)
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
             context.startActivity(intent)
-            Toast.makeText(context, "Please stay on the sponsor page for at least 20s to support CineTheta! Thank you!", Toast.LENGTH_LONG).show()
         } catch (e: Exception) {
             Toast.makeText(context, "Unable to open browser", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    /**
+     * Called when the app is resumed (ON_RESUME) to check if the user returned from an ad.
+     * - If user stayed for at least 20s: triggers [onQualifiesForDialog] to show the big popup.
+     * - If user returned before 20s: shows a Toast message with heart.
+     */
+    fun onAppResumeFromAd(context: Context, onQualifiesForDialog: () -> Unit) {
+        val clickTime = adClickTimestamp
+        if (clickTime <= 0L) return
+        adClickTimestamp = 0L // Consume the click so it only fires once
+
+        val elapsedMillis = System.currentTimeMillis() - clickTime
+        if (elapsedMillis >= MIN_AD_WATCH_DURATION_MS) {
+            onQualifiesForDialog()
+        } else {
+            Toast.makeText(
+                context,
+                "You came back earlier than 20s, but Thanks! ❤️",
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
 
@@ -73,7 +117,7 @@ object SupportManager {
 
     /**
      * Checks whether the non-forceful homepage support prompt should be shown.
-     * Shows only if the app has been launched at least 2 times and 72 hours have passed since last shown.
+     * Shows only if the app has been launched at least 2 times and 6 hours have passed since last shown.
      */
     fun shouldShowHomeSupportPrompt(context: Context): Boolean {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -86,12 +130,163 @@ object SupportManager {
     }
 
     /**
-     * Marks the prompt as shown/dismissed, resetting the 72-hour cooldown.
+     * Marks the prompt as shown/dismissed, resetting the cooldown.
      */
     fun markSupportPromptShown(context: Context) {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         prefs.edit().putLong(KEY_LAST_SHOWN_TIME, System.currentTimeMillis()).apply()
     }
+}
+
+/**
+ * CineTheta branded Logo Badge with rounded corners, subtle glowing border, and dark backdrop.
+ */
+@Composable
+fun CineThetaLogoBadge(
+    modifier: Modifier = Modifier,
+    size: androidx.compose.ui.unit.Dp = 64.dp
+) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val logoResId = remember(context) {
+        val id = context.resources.getIdentifier("ic_launcher_foreground_logo", "drawable", context.packageName)
+        if (id != 0) id else context.applicationInfo.icon
+    }
+
+    Box(
+        modifier = modifier
+            .size(size)
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color(0xFF141419))
+            .border(
+                width = 1.5.dp,
+                brush = Brush.linearGradient(
+                    listOf(Color(0xFFE50914), Color(0xFFB81D24), Color(0xFF331114))
+                ),
+                shape = RoundedCornerShape(16.dp)
+            )
+            .padding(4.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        if (logoResId != 0) {
+            Image(
+                painter = painterResource(id = logoResId),
+                contentDescription = "CineTheta Logo",
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(12.dp))
+            )
+        }
+    }
+}
+
+/**
+ * Observes lifecycle ON_RESUME to detect when the user returns from viewing an ad.
+ * Automatically checks whether 20 seconds have passed:
+ * - If >= 20s: triggers [onShowThankYouDialog]
+ * - If < 20s: shows a Toast message with heart
+ */
+@Composable
+fun AdReturnLifecycleTracker(
+    context: Context,
+    onShowThankYouDialog: () -> Unit
+) {
+    val lifecycleOwner = androidx.compose.ui.platform.LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+                SupportManager.onAppResumeFromAd(context, onShowThankYouDialog)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+}
+
+/**
+ * Beautiful in-app popup shown when user returns to the app after viewing an ad for at least 20 seconds.
+ * Features official CineTheta app logo, gratitude message, and confirmation badge.
+ */
+@Composable
+fun ThankYouSupportDialog(
+    onDismiss: () -> Unit,
+    onOpenAdAgain: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = Color(0xFF18181E),
+        shape = RoundedCornerShape(22.dp),
+        icon = {
+            CineThetaLogoBadge(size = 68.dp)
+        },
+        title = {
+            Text(
+                text = "Thank You for Supporting CineTheta!",
+                fontWeight = FontWeight.Bold,
+                fontSize = 19.sp,
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(14.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Thank you so much for taking the time to browse our sponsor for 20+ seconds! ✨\n\nYour support directly covers API servers, provider scrapers, and app maintenance with zero in-video interruptions!",
+                    fontSize = 13.5.sp,
+                    color = Color.White.copy(alpha = 0.85f),
+                    textAlign = TextAlign.Center,
+                    lineHeight = 19.sp
+                )
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color(0xFF26A17B).copy(alpha = 0.12f))
+                        .border(1.dp, Color(0xFF26A17B).copy(alpha = 0.45f), RoundedCornerShape(12.dp))
+                        .padding(vertical = 10.dp, horizontal = 12.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text("❤️ ", fontSize = 14.sp)
+                        Text(
+                            text = "20s+ Browsing Complete — Thank You!",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color(0xFF4ADE80)
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onDismiss,
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE50914)),
+                shape = RoundedCornerShape(10.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Awesome, Got It! ❤️", fontWeight = FontWeight.Bold, color = Color.White)
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onOpenAdAgain,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Open Sponsor Page Again 🔗", color = Color.White.copy(alpha = 0.65f), fontSize = 12.sp)
+            }
+        }
+    )
 }
 
 /**
@@ -108,21 +303,10 @@ fun HomeSupportDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = Color(0xFF1E1E22),
+        containerColor = Color(0xFF18181E),
+        shape = RoundedCornerShape(22.dp),
         icon = {
-            Box(
-                modifier = Modifier
-                    .size(54.dp)
-                    .background(Color(0xFFE50914).copy(alpha = 0.15f), CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Favorite,
-                    contentDescription = null,
-                    tint = Color(0xFFE50914),
-                    modifier = Modifier.size(28.dp)
-                )
-            }
+            CineThetaLogoBadge(size = 64.dp)
         },
         title = {
             Text(
@@ -194,25 +378,15 @@ fun HomeSupportDialog(
 @Composable
 fun FullSupportCineThetaDialog(
     onDismiss: () -> Unit,
-    context: Context
+    context: Context,
+    onWatchAdSuccess: (() -> Unit)? = null
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = Color(0xFF1E1E22),
+        containerColor = Color(0xFF18181E),
+        shape = RoundedCornerShape(22.dp),
         icon = {
-            Box(
-                modifier = Modifier
-                    .size(54.dp)
-                    .background(Color(0xFFE50914).copy(alpha = 0.15f), CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Favorite,
-                    contentDescription = null,
-                    tint = Color(0xFFE50914),
-                    modifier = Modifier.size(28.dp)
-                )
-            }
+            CineThetaLogoBadge(size = 64.dp)
         },
         title = {
             Text(
@@ -242,9 +416,12 @@ fun FullSupportCineThetaDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFF28282D))
-                        .border(1.dp, Color(0xFFE50914).copy(alpha = 0.35f), RoundedCornerShape(12.dp))
-                        .clickable { SupportManager.openAd(context) }
+                        .background(Color(0xFF23232A))
+                        .border(1.dp, Color(0xFFE50914).copy(alpha = 0.45f), RoundedCornerShape(12.dp))
+                        .clickable {
+                            SupportManager.openAd(context)
+                            onWatchAdSuccess?.invoke()
+                        }
                         .padding(12.dp)
                 ) {
                     Row(
@@ -264,7 +441,10 @@ fun FullSupportCineThetaDialog(
                         }
 
                         IconButton(
-                            onClick = { SupportManager.openAd(context) },
+                            onClick = {
+                                SupportManager.openAd(context)
+                                onWatchAdSuccess?.invoke()
+                            },
                             modifier = Modifier.size(32.dp)
                         ) {
                             Icon(
@@ -289,7 +469,7 @@ fun FullSupportCineThetaDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFF28282D))
+                        .background(Color(0xFF23232A))
                         .border(1.dp, Color(0xFFF3BA2F).copy(alpha = 0.35f), RoundedCornerShape(12.dp))
                         .clickable { SupportManager.copyToClipboard(context, "Binance Pay ID", SupportManager.BINANCE_PAY_ID) }
                         .padding(12.dp)
@@ -350,7 +530,7 @@ fun FullSupportCineThetaDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color(0xFF28282D))
+                        .background(Color(0xFF23232A))
                         .border(1.dp, Color(0xFF26A17B).copy(alpha = 0.35f), RoundedCornerShape(12.dp))
                         .clickable { SupportManager.copyToClipboard(context, "USDT TRC-20 Address", SupportManager.USDT_TRC20_ADDRESS) }
                         .padding(12.dp)
@@ -444,22 +624,10 @@ fun NetMirrorBypassAdDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = Color(0xFF1E1E22),
-        shape = RoundedCornerShape(16.dp),
+        containerColor = Color(0xFF18181E),
+        shape = RoundedCornerShape(20.dp),
         icon = {
-            Box(
-                modifier = Modifier
-                    .size(54.dp)
-                    .background(Color(0xFFE50914).copy(alpha = 0.15f), CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Favorite,
-                    contentDescription = null,
-                    tint = Color(0xFFE50914),
-                    modifier = Modifier.size(28.dp)
-                )
-            }
+            CineThetaLogoBadge(size = 60.dp)
         },
         title = {
             Text(
@@ -481,7 +649,7 @@ fun NetMirrorBypassAdDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(8.dp))
-                        .background(Color(0xFF28282D))
+                        .background(Color(0xFF23232A))
                         .padding(horizontal = 12.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center

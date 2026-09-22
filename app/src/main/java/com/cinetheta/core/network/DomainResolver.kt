@@ -99,8 +99,8 @@ class DomainResolver(
     companion object {
         private const val TAG = "DomainResolver"
 
-        // HEAD request timeout — short, we just want to know if the server responds
-        private const val PROBE_TIMEOUT_MS = 6_000L
+        // HEAD request timeout — fast fail so mirrors are tested quickly before parent coroutine cancels
+        private const val PROBE_TIMEOUT_MS = 3_500L
     }
 
     // Per-provider session cache (in-memory, fastest path)
@@ -314,7 +314,11 @@ class DomainResolver(
     private suspend fun probeUrl(url: String): Boolean {
         if (url.isBlank()) return false
         return try {
-            val result = http.head(url = url, headers = emptyMap())
+            val result = http.head(
+                url = url,
+                headers = mapOf("X-No-Retry" to "true"),
+                timeout = PROBE_TIMEOUT_MS
+            )
             when (result) {
                 is NetworkResult.Success    -> result.data.code < 500
                 is NetworkResult.Error      -> result.code < 500   // 4xx is ok, means server is up

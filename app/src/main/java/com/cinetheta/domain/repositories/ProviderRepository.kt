@@ -22,12 +22,16 @@ class ProviderRepository(
 
     /**
      * Currently selected provider ID.
-     * If set, only this provider will be searched.
+     * If null, "None" is selected and no provider will be searched.
      */
     var selectedProviderId: String? = null
 
+    val isNoneSelected: Boolean
+        get() = selectedProviderId == null
+
     /**
-     * Search all enabled providers.
+     * Search currently selected provider.
+     * If "None" is selected, returns emptyList without searching.
      */
     suspend fun search(
         query: String
@@ -36,7 +40,7 @@ class ProviderRepository(
         val targetProviders = if (selectedProviderId != null) {
             providers.filter { it.enabled && it.id == selectedProviderId }
         } else {
-            providers.filter { it.enabled }
+            emptyList()
         }
 
         return targetProviders

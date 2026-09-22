@@ -49,6 +49,15 @@ class CloudflareKiller : Interceptor {
 
         var response = chain.proceed(request)
 
+        // Do not attempt WebView challenge solving for HEAD probes, JSON APIs, or manifests
+        if (request.method.equals("HEAD", ignoreCase = true) ||
+            urlString.contains("/collections/post/documents/search") ||
+            urlString.contains("raw.githubusercontent.com") ||
+            urlString.endsWith(".json") ||
+            request.header("Accept")?.contains("application/json") == true) {
+            return@runBlocking response
+        }
+
         // 1. Check if we hit a Cloudflare 403/503 block or 200 OK challenge page
         val isCloudflare = response.header("Server")?.contains("cloudflare", ignoreCase = true) == true
         

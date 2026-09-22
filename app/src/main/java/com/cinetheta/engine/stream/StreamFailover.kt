@@ -96,9 +96,6 @@ object StreamFailover {
             stream.host == HostType.XERVER -> 7
             stream.host == HostType.BLAKITE -> 8
 
-            // ── HDHub / 4KHDHub: Google first ────────────────────────────────
-            url.contains("googleusercontent.com") || stream.host == HostType.GOOGLE_VIDEO -> 7
-
             // ── FSL (HubCloud / workers.dev) ─────────────────────────────────
             url.contains("workers.dev") || stream.host == HostType.HUBCLOUD -> 8
 
@@ -126,8 +123,12 @@ object StreamFailover {
             // ── Vidmoly: always last for anime (drops mid-play) ──────────────
             stream.host == HostType.VIDMOLY -> 80
 
-            // ── BuzzerLinks / download redirects: absolute last ───────────────
-            stream.host == HostType.REDIRECT -> 90
+            // ── Google Video / Drive: quota limit, comes in last ────────────
+            StreamSorter.isGoogleStream(stream) -> 90
+
+            // ── BuzzerLinks / BuzzServer / download redirects: absolute last ──
+            StreamSorter.isBuzzStream(stream) -> 95
+            stream.host == HostType.REDIRECT -> 95
 
             else -> 50
         }

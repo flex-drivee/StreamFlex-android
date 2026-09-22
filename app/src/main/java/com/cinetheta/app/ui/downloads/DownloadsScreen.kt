@@ -293,18 +293,19 @@ fun DownloadListItem(
                 .background(MaterialTheme.colorScheme.background)
                 .combinedClickable(
                     onClick = {
-                        if (item.status == DownloadStatus.COMPLETED) {
-                            onPlayClick()
-                        } else {
-                            expanded = !expanded
+                        when (item.status) {
+                            DownloadStatus.COMPLETED -> onPlayClick()
+                            DownloadStatus.PAUSED -> onResume()
+                            DownloadStatus.FAILED -> onRetry()
+                            else -> expanded = !expanded
                         }
                     },
                     onLongClick = { showDeleteConfirm = true }
                 )
                 .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.Top
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // Thumbnail
+            // Thumbnail with Interactive Play/Pause/Resume overlay
             Box(
                 modifier = Modifier
                     .width(120.dp)
@@ -333,13 +334,52 @@ fun DownloadListItem(
                             strokeWidth = 3.dp,
                             modifier = Modifier.size(28.dp)
                         )
+                        Icon(
+                            Icons.Default.Pause,
+                            contentDescription = "Pause",
+                            tint = Color.White,
+                            modifier = Modifier.size(13.dp)
+                        )
                     }
                 } else if (item.status.isPaused) {
                     Box(
-                        modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.55f)),
+                        modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.60f)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(Icons.Default.Pause, contentDescription = "Paused", tint = Color.White, modifier = Modifier.size(28.dp))
+                        Box(
+                            modifier = Modifier
+                                .size(34.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                Icons.Default.PlayArrow,
+                                contentDescription = "Resume",
+                                tint = Color.White,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
+                    }
+                } else if (item.status == DownloadStatus.FAILED) {
+                    Box(
+                        modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.60f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(34.dp)
+                                .clip(CircleShape)
+                                .background(Color.Red.copy(alpha = 0.85f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                Icons.Default.Refresh,
+                                contentDescription = "Retry",
+                                tint = Color.White,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
                     }
                 } else {
                     Box(
@@ -355,7 +395,7 @@ fun DownloadListItem(
                 }
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(14.dp))
 
             // Title, Subtitle, Progress
             Column(modifier = Modifier.weight(1f)) {
@@ -386,43 +426,109 @@ fun DownloadListItem(
                     }
                     DownloadStatus.CONNECTING -> "Connecting to mirror..."
                     DownloadStatus.QUEUED -> "Queued..."
-                    DownloadStatus.PAUSED -> "Paused (${item.progressPercent}%)"
+                    DownloadStatus.PAUSED -> "Paused (${item.progressPercent}%) • Tap to resume"
                     DownloadStatus.FAILED -> "Failed • Tap to retry"
                     DownloadStatus.CANCELLED -> "Cancelled"
                 }
 
                 Text(
                     text = subtext,
-                    color = if (item.status.isActive) MaterialTheme.colorScheme.primary else if (item.status == DownloadStatus.FAILED) Color.Red else MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = when {
+                        item.status.isActive -> MaterialTheme.colorScheme.primary
+                        item.status.isPaused -> MaterialTheme.colorScheme.tertiary
+                        item.status == DownloadStatus.FAILED -> Color.Red
+                        else -> MaterialTheme.colorScheme.onSurfaceVariant
+                    },
                     fontSize = 13.sp,
                     maxLines = if (expanded) 2 else 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 
-                if (item.status.isActive) {
+                if (item.status.isActive || item.status.isPaused) {
                     Spacer(modifier = Modifier.height(6.dp))
                     LinearProgressIndicator(
                         progress = { item.progress },
                         modifier = Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)),
-                        color = MaterialTheme.colorScheme.primary,
+                        color = if (item.status.isPaused) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
                         trackColor = MaterialTheme.colorScheme.surfaceVariant
                     )
-                }
-                
-                if (expanded && item.status.isActive) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        TextButton(onClick = { if (item.status == DownloadStatus.DOWNLOADING) onPause() else onResume() }, contentPadding = PaddingValues(0.dp)) {
-                            Text(if (item.status == DownloadStatus.DOWNLOADING) "Pause" else "Resume", fontSize = 12.sp)
-                        }
-                    }
                 }
             }
 
             Spacer(modifier = Modifier.width(8.dp))
+
+            // Dedicated Action Button on the right
+            Box(
+                modifier = Modifier.align(Alignment.CenterVertically),
+                contentAlignment = Alignment.Center
+            ) {
+                when {
+                    item.status.isActive -> {
+                        IconButton(
+                            onClick = onPause,
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.surfaceVariant)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Pause,
+                                contentDescription = "Pause",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+                    item.status.isPaused -> {
+                        IconButton(
+                            onClick = onResume,
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.PlayArrow,
+                                contentDescription = "Resume",
+                                tint = Color.White,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+                    item.status == DownloadStatus.FAILED -> {
+                        IconButton(
+                            onClick = onRetry,
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(Color.Red.copy(alpha = 0.15f))
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = "Retry",
+                                tint = Color.Red,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+                    item.status == DownloadStatus.COMPLETED -> {
+                        IconButton(
+                            onClick = onPlayClick,
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.PlayArrow,
+                                contentDescription = "Play",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }

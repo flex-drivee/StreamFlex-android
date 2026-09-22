@@ -1,7 +1,10 @@
 package com.cinetheta.app
 
 import android.app.Application
+import coil.ImageLoader
+import coil.ImageLoaderFactory
 import com.cinetheta.app.di.AppModule
+import com.cinetheta.app.di.NetworkModule
 
 /**
  * Application entry point for CineTheta.
@@ -9,7 +12,7 @@ import com.cinetheta.app.di.AppModule
  * Responsible for initializing global application
  * dependencies.
  */
-class CineThetaApplication : Application() {
+class CineThetaApplication : Application(), ImageLoaderFactory {
 
     companion object {
         lateinit var instance: CineThetaApplication
@@ -17,6 +20,15 @@ class CineThetaApplication : Application() {
             
         var topActivity: android.app.Activity? = null
             private set
+    }
+
+    override fun newImageLoader(): ImageLoader {
+        return ImageLoader.Builder(this)
+            .okHttpClient {
+                NetworkModule.okHttpClient
+            }
+            .crossfade(true)
+            .build()
     }
 
     override fun onCreate() {

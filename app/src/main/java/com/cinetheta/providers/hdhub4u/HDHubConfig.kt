@@ -28,10 +28,10 @@ object HDHubConfig {
      * Compile-time fallback — used ONLY if DomainResolver Steps 1-4 all fail.
      * Mirrors are ordered by reliability (most stable first).
      */
-    const val DEFAULT_DOMAIN = "https://new1.hdhub4u.af"
-    const val MIRROR_1       = "https://hdhub4u.fyi"
-    const val MIRROR_2       = "https://hdhub4u.mom"
-    const val MIRROR_3       = "https://hdhub4u.med"
+    const val DEFAULT_DOMAIN = "https://new6.hdhub4u.cl"
+    const val MIRROR_1       = "https://new5.hdhub4u.cl"
+    const val MIRROR_2       = "https://new1.hdhub4u.af"
+    const val MIRROR_3       = "https://hdhub4u.fyi"
 
     // ─── Search API ───────────────────────────────────────────────────────────
     /**

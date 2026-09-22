@@ -77,6 +77,11 @@ fun MovieDetailScreen(
     var areAllEpisodesVisible by remember { mutableStateOf(false) }
     var isInMyList            by remember { mutableStateOf(false) }
     var isStreamLoading       by remember { mutableStateOf(false) }
+    
+    val providerRepository = com.cinetheta.app.di.ProviderModule.repository
+    var showNoProviderDialog by remember { mutableStateOf(false) }
+    var showProviderSelectorDialog by remember { mutableStateOf(false) }
+    var pendingPlayAction by remember { mutableStateOf<(() -> Unit)?>(null) }
 
     LaunchedEffect(state.selectedSeason) { areAllEpisodesVisible = false }
 
@@ -121,8 +126,13 @@ fun MovieDetailScreen(
                         // PLAY button
                         Button(
                             onClick = {
-                                // Pass the resumed episode ID (if it's a show with history) so it launches the correct episode
-                                onMainPlayClick(historyItem?.episodeId)
+                                if (providerRepository.isNoneSelected) {
+                                    pendingPlayAction = { onMainPlayClick(historyItem?.episodeId) }
+                                    showNoProviderDialog = true
+                                } else {
+                                    // Pass the resumed episode ID (if it's a show with history) so it launches the correct episode
+                                    onMainPlayClick(historyItem?.episodeId)
+                                }
                             },
                             modifier = Modifier.fillMaxWidth().height(50.dp),
                             shape    = RoundedCornerShape(6.dp),
@@ -150,8 +160,13 @@ fun MovieDetailScreen(
                             // Download Button (Netflix Style)
                             OutlinedButton(
                                 onClick = {
-                                    if (movieDownloadItem == null || movieDownloadItem.status == com.cinetheta.domain.models.download.DownloadStatus.FAILED) {
-                                        viewModel.downloadMovie()
+                                    if (providerRepository.isNoneSelected) {
+                                        pendingPlayAction = { viewModel.downloadMovie() }
+                                        showNoProviderDialog = true
+                                    } else {
+                                        if (movieDownloadItem == null || movieDownloadItem.status == com.cinetheta.domain.models.download.DownloadStatus.FAILED) {
+                                            viewModel.downloadMovie()
+                                        }
                                     }
                                 },
                                 modifier = Modifier.weight(1f).height(46.dp),
@@ -303,10 +318,20 @@ fun MovieDetailScreen(
                             episode = ep,
                             downloadItem = epDownloadItem,
                             onDownloadClick = {
-                                viewModel.downloadEpisode(ep)
+                                if (providerRepository.isNoneSelected) {
+                                    pendingPlayAction = { viewModel.downloadEpisode(ep) }
+                                    showNoProviderDialog = true
+                                } else {
+                                    viewModel.downloadEpisode(ep)
+                                }
                             },
                             onClick = { 
-                                onEpisodePlayClick(ep) 
+                                if (providerRepository.isNoneSelected) {
+                                    pendingPlayAction = { onEpisodePlayClick(ep) }
+                                    showNoProviderDialog = true
+                                } else {
+                                    onEpisodePlayClick(ep) 
+                                }
                             }
                         )
                     }
@@ -421,6 +446,120 @@ fun MovieDetailScreen(
                 },
                 confirmButton = {
                     TextButton(onClick = { viewModel.cancelDownloadDialog() }) {
+                        Text("Cancel", color = MaterialTheme.colorScheme.primary)
+                    }
+                }
+            )
+        }
+
+        // --- NO PROVIDER SELECTED POPUP ---
+        if (showNoProviderDialog) {
+            AlertDialog(
+                onDismissRequest = { 
+                    showNoProviderDialog = false
+                    pendingPlayAction = null
+                },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Outlined.Extension,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(36.dp)
+                    )
+                },
+                title = {
+                    Text(
+                        text = "No Provider Selected",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                },
+                text = {
+                    Text(
+                        text = "Please first select any provider to watch or download this title.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            showNoProviderDialog = false
+                            showProviderSelectorDialog = true
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                    ) {
+                        Text("Select Provider", color = Color.White, fontWeight = FontWeight.Bold)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = {
+                        showNoProviderDialog = false
+                        pendingPlayAction = null
+                    }) {
+                        Text("Cancel", color = MaterialTheme.colorScheme.outline)
+                    }
+                }
+            )
+        }
+
+        // --- SELECT PROVIDER DIALOG ---
+        if (showProviderSelectorDialog) {
+            AlertDialog(
+                onDismissRequest = { 
+                    showProviderSelectorDialog = false
+                    pendingPlayAction = null
+                },
+                title = { Text("Select Provider", fontWeight = FontWeight.Bold) },
+                containerColor = MaterialTheme.colorScheme.surface,
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        providerRepository.enabledProviders().forEach { provider ->
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        providerRepository.selectedProviderId = provider.id
+                                        context.getSharedPreferences("cinetheta_settings", android.content.Context.MODE_PRIVATE)
+                                            .edit().putString("selected_provider", provider.id).apply()
+                                        showProviderSelectorDialog = false
+                                        val action = pendingPlayAction
+                                        pendingPlayAction = null
+                                        action?.invoke()
+                                    },
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                                )
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(14.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        Icons.Outlined.Extension,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Spacer(Modifier.width(12.dp))
+                                    Text(
+                                        text = provider.name,
+                                        fontWeight = FontWeight.Medium,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { 
+                        showProviderSelectorDialog = false
+                        pendingPlayAction = null
+                    }) {
                         Text("Cancel", color = MaterialTheme.colorScheme.primary)
                     }
                 }

@@ -23,7 +23,7 @@ object HttpClient {
         setCookiePolicy(CookiePolicy.ACCEPT_ALL)
     }
     private val baseClient: OkHttpClient by lazy {
-        OkHttpClient.Builder()
+        val builder = OkHttpClient.Builder()
             .cookieJar(JavaNetCookieJar(cookieManager))
             .followRedirects(true)
             .followSslRedirects(true)
@@ -36,7 +36,7 @@ object HttpClient {
             .addInterceptor(RetryInterceptor())
             .addInterceptor(com.cinetheta.core.network.interceptor.CloudflareKiller())
 
-            .build()
+        DohProviders.applyDoh(builder).build()
     }
 
     fun getOkHttpClient(): OkHttpClient = baseClient

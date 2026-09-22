@@ -59,10 +59,12 @@ fun SettingsScreen(
     var showPlayerQualityDialog by remember { mutableStateOf(false) }
     var showDeleteAllDialog by remember { mutableStateOf(false) }
     var showSupportDialog by remember { mutableStateOf(false) }
+    var showThankYouDialog by remember { mutableStateOf(false) }
+    var showIssueReportDialog by remember { mutableStateOf(false) }
     
     val providerRepository = com.cinetheta.app.di.ProviderModule.repository
     var selectedProviderName by remember { 
-        mutableStateOf(providerRepository.provider(providerRepository.selectedProviderId ?: "")?.name ?: "All in One") 
+        mutableStateOf(providerRepository.provider(providerRepository.selectedProviderId ?: "")?.name ?: "None") 
     }
     val context = androidx.compose.ui.platform.LocalContext.current
     val coroutineScope = androidx.compose.runtime.rememberCoroutineScope()
@@ -263,7 +265,11 @@ fun SettingsScreen(
                     SettingsTile(
                         icon = Icons.Outlined.Dns,
                         title = "DNS over HTTPS",
-                        subtitle = com.cinetheta.core.network.DohProvider.valueOf(dohProvider).title,
+                        subtitle = try {
+                            com.cinetheta.core.network.DohProvider.valueOf(dohProvider).title
+                        } catch (_: Exception) {
+                            com.cinetheta.core.network.DohProvider.GOOGLE.title
+                        },
                         isLast = true,
                         onTap = { showDohDialog = true }
                     )
@@ -362,6 +368,13 @@ fun SettingsScreen(
                                 android.net.Uri.parse("https://cinetheta.github.io"))
                             context.startActivity(intent)
                         }
+                    )
+                    SettingsDivider()
+                    SettingsTile(
+                        icon = Icons.Outlined.BugReport,
+                        title = "Report an Issue / Feedback",
+                        subtitle = "Report bugs or broken streams to GitHub admin tracker",
+                        onTap = { showIssueReportDialog = true }
                     )
                     SettingsDivider()
                     SettingsTile(
@@ -590,7 +603,7 @@ fun SettingsScreen(
                                 .clickable {
                                     val oldId = providerRepository.selectedProviderId
                                     providerRepository.selectedProviderId = null
-                                    selectedProviderName = "All in One"
+                                    selectedProviderName = "None"
                                     showProviderDialog = false
                                     
                                     context.getSharedPreferences("cinetheta_settings", android.content.Context.MODE_PRIVATE)
@@ -605,7 +618,7 @@ fun SettingsScreen(
                                 .padding(16.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            androidx.compose.material3.Text("All in One", modifier = Modifier.weight(1f))
+                            androidx.compose.material3.Text("None", modifier = Modifier.weight(1f))
                         }
                         
                         providerRepository.enabledProviders().forEach { provider ->
@@ -661,7 +674,36 @@ fun SettingsScreen(
         if (showSupportDialog) {
             com.cinetheta.app.utils.FullSupportCineThetaDialog(
                 onDismiss = { showSupportDialog = false },
-                context = context
+                context = context,
+                onWatchAdSuccess = {
+                    showSupportDialog = false
+                }
+            )
+        }
+
+        // Listens for return from ad: shows big ThankYouSupportDialog if >= 20s, or Toast if < 20s
+        com.cinetheta.app.utils.AdReturnLifecycleTracker(
+            context = context,
+            onShowThankYouDialog = { showThankYouDialog = true }
+        )
+
+        if (showThankYouDialog) {
+            com.cinetheta.app.utils.ThankYouSupportDialog(
+                onDismiss = { showThankYouDialog = false },
+                onOpenAdAgain = {
+                    showThankYouDialog = false
+                    com.cinetheta.app.utils.SupportManager.openAd(context)
+                }
+            )
+        }
+
+        if (showIssueReportDialog) {
+            IssueReportDialog(
+                selectedProviderName = selectedProviderName,
+                dohProviderName = try {
+                    com.cinetheta.core.network.DohProvider.valueOf(dohProvider).title
+                } catch (_: Exception) { "Google" },
+                onDismissRequest = { showIssueReportDialog = false }
             )
         }
     }

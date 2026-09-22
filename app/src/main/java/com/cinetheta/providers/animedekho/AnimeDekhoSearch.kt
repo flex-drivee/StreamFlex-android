@@ -22,18 +22,28 @@ class AnimeDekhoSearch {
         query   : String,
         baseUrl : String = AnimeDekhoConfig.DEFAULT_DOMAIN
     ): List<SearchResult> = withContext(Dispatchers.IO) {
-        val request = RequestBuilder()
-            .url("$baseUrl/?s=${NetworkUtils.encode(query)}")
-            .header("Referer", baseUrl)
-            .build()
+        val domainsToTry = listOf(baseUrl, AnimeDekhoConfig.DEFAULT_DOMAIN, AnimeDekhoConfig.MIRROR_DOMAIN).distinct()
+        for (domain in domainsToTry) {
+            val request = RequestBuilder()
+                .url("$domain/?s=${NetworkUtils.encode(query)}")
+                .header("Referer", domain)
+                .timeout(8_000L)
+                .build()
 
-        when (val response = HttpClient.execute(request)) {
-            is NetworkResult.Success -> {
-                val html = response.data.body?.toString(Charsets.UTF_8) ?: return@withContext emptyList()
-                parse(html, baseUrl)
+            when (val response = HttpClient.execute(request)) {
+                is NetworkResult.Success -> {
+                    val html = response.data.body?.toString(Charsets.UTF_8)
+                    if (!html.isNullOrBlank()) {
+                        val results = parse(html, domain)
+                        if (results.isNotEmpty()) {
+                            return@withContext results
+                        }
+                    }
+                }
+                else -> continue
             }
-            else -> emptyList()
         }
+        emptyList()
     }
 
     internal fun parse(html: String, baseUrl: String): List<SearchResult> {
