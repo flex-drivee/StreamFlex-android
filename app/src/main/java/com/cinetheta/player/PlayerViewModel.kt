@@ -153,6 +153,15 @@ class PlayerViewModel(
                 }
 
                 // 3. If not downloaded, resolve online streams
+                if (session.pluginProviderId == null && com.cinetheta.app.di.ProviderModule.repository.selectedProviderId == null) {
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        streams = emptyList(),
+                        error = "NO_PROVIDER_SELECTED"
+                    )
+                    return@launch
+                }
+
                 val resolved = if (session.isShow && session.currentEpisode != null) {
                     streamRepository.resolveEpisode(
                         title = session.title,

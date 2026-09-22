@@ -406,7 +406,8 @@ object CineThetaHttpClient {
     suspend fun head(
         url     : String,
         headers : Map<String, String> = emptyMap(),
-        referer : String?             = null
+        referer : String?             = null,
+        timeout : Long                = Constants.CONNECT_TIMEOUT_MS
     ): NetworkResult<NetworkResponse> = execute(
         NetworkRequest(
             url            = url,
@@ -415,7 +416,7 @@ object CineThetaHttpClient {
             referer        = referer,
             followRedirects = false,  // HEAD is used to DETECT redirects, not follow them
             useCookies     = true,
-            timeout        = Constants.CONNECT_TIMEOUT_MS
+            timeout        = timeout
         )
     )
 

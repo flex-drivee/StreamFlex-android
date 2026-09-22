@@ -24,7 +24,7 @@ class ToonStreamSearch {
         query   : String,
         baseUrl : String = ToonStreamConfig.DEFAULT_DOMAIN
     ): List<SearchResult> = withContext(Dispatchers.IO) {
-        val domainsToTry = listOf(ToonStreamConfig.DEFAULT_DOMAIN, baseUrl, ToonStreamConfig.FALLBACK_DOMAIN).distinct()
+        val domainsToTry = listOf(baseUrl, ToonStreamConfig.DEFAULT_DOMAIN, ToonStreamConfig.FALLBACK_DOMAIN).distinct()
 
         // Clean query: colons (':') and special chars break WordPress search queries
         val cleanQuery = query.replace(":", " ").replace("-", " ").replace(Regex("\\s+"), " ").trim()
@@ -55,6 +55,7 @@ class ToonStreamSearch {
                         .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8")
                         .header("Accept-Language", "en-US,en;q=0.5")
                         .header("Upgrade-Insecure-Requests", "1")
+                        .timeout(8_000L)
                         .build()
 
                     when (val response = HttpClient.execute(request)) {

@@ -25,6 +25,12 @@ class RetryInterceptor(
 ) : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
+        val req = chain.request()
+        if (req.method.equals("HEAD", ignoreCase = true) ||
+            req.header("X-No-Retry").equals("true", ignoreCase = true)) {
+            return chain.proceed(req)
+        }
+
         var attempt = 0
         var lastException: IOException? = null
 

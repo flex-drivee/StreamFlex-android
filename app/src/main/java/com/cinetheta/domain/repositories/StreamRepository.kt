@@ -42,6 +42,7 @@ class StreamRepository(
     }
 
     suspend fun resolveMovie(title: String, year: Int? = null, onStreamFound: suspend (FinalStreams) -> Unit = {}): FinalStreams = coroutineScope {
+        if (providerRepository.isNoneSelected) return@coroutineScope FinalStreams.EMPTY
         val cleanTitle = title.replace(Regex("[:\\-–—_.'!?()]+"), " ").replace(Regex("\\s+"), " ").trim()
         val baseResults = search(title)
         val cleanResults = if (cleanTitle.lowercase() != title.lowercase()) search(cleanTitle) else emptyList()
@@ -97,6 +98,7 @@ class StreamRepository(
     }
 
     suspend fun resolveEpisode(title: String, season: Int, episode: Int, year: Int? = null, onStreamFound: suspend (FinalStreams) -> Unit = {}): FinalStreams = coroutineScope {
+        if (providerRepository.isNoneSelected) return@coroutineScope FinalStreams.EMPTY
         Logger.d("resolveEpisode called: title=$title, season=$season, episode=$episode", "StreamRepository")
         
         val cleanTitle = title.replace(Regex("[:\\-–—_.'!?()]+"), " ").replace(Regex("\\s+"), " ").trim()

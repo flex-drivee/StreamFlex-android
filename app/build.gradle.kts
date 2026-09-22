@@ -25,8 +25,8 @@ android {
         applicationId = "com.cinetheta.app"
         minSdk = 24
         targetSdk = 34
-        versionCode = 5
-        versionName = "1.0.0"
+        versionCode = 7
+        versionName = "1.0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

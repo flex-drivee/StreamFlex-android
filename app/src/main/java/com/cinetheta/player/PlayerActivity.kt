@@ -16,6 +16,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.outlined.Extension
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -43,6 +44,8 @@ import com.cinetheta.player.resume.PlaybackProgressManager
 import com.cinetheta.extractors.netmirror.NetMirrorBypassManager
 import com.cinetheta.app.utils.SupportManager
 import com.cinetheta.app.utils.NetMirrorBypassAdDialog
+import com.cinetheta.app.utils.ThankYouSupportDialog
+import com.cinetheta.app.utils.AdReturnLifecycleTracker
 
 class PlayerActivity : ComponentActivity() {
     
@@ -147,6 +150,7 @@ class PlayerActivity : ComponentActivity() {
 
             val isNetMirrorBypassing by NetMirrorBypassManager.isBypassing.collectAsState()
             var bypassAdDismissed by remember { mutableStateOf(false) }
+            var showThankYouDialog by remember { mutableStateOf(false) }
 
             LaunchedEffect(isNetMirrorBypassing) {
                 if (!isNetMirrorBypassing) {
@@ -163,6 +167,7 @@ class PlayerActivity : ComponentActivity() {
                         .background(Color(0xFF0F1014)),
                     contentAlignment = Alignment.Center
                 ) {
+                    val isNoProvider = uiState.error == "NO_PROVIDER_SELECTED"
                     androidx.compose.material3.AlertDialog(
                         onDismissRequest = { finish() },
                         containerColor = Color(0xFF1E1F24),
@@ -171,15 +176,15 @@ class PlayerActivity : ComponentActivity() {
                         shape = RoundedCornerShape(16.dp),
                         icon = {
                             Icon(
-                                imageVector = Icons.Default.Warning,
+                                imageVector = if (isNoProvider) Icons.Outlined.Extension else Icons.Default.Warning,
                                 contentDescription = null,
-                                tint = Color(0xFFFF3300),
+                                tint = if (isNoProvider) MaterialTheme.colorScheme.primary else Color(0xFFFF3300),
                                 modifier = Modifier.size(36.dp)
                             )
                         },
                         title = {
                             Text(
-                                text = "Video Not Available",
+                                text = if (isNoProvider) "No Provider Selected" else "Video Not Available",
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
@@ -187,7 +192,10 @@ class PlayerActivity : ComponentActivity() {
                         },
                         text = {
                             Text(
-                                text = "No playable stream links were found for this title. Please check back later or try another server/provider.",
+                                text = if (isNoProvider)
+                                    "Please first select any provider on the Home Screen or in Settings to start streaming."
+                                else
+                                    "No playable stream links were found for this title. Please check back later or try another server/provider.",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color(0xFFCCCCCC)
                             )
@@ -196,7 +204,7 @@ class PlayerActivity : ComponentActivity() {
                             Button(
                                 onClick = { finish() },
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(0xFFFF3300)
+                                    containerColor = if (isNoProvider) MaterialTheme.colorScheme.primary else Color(0xFFFF3300)
                                 ),
                                 shape = RoundedCornerShape(8.dp)
                             ) {
@@ -265,6 +273,22 @@ class PlayerActivity : ComponentActivity() {
                     },
                     onDismiss = {
                         bypassAdDismissed = true
+                    }
+                )
+            }
+
+            // Listens for return from ad: shows big ThankYouSupportDialog if >= 20s, or Toast if < 20s
+            AdReturnLifecycleTracker(
+                context = context,
+                onShowThankYouDialog = { showThankYouDialog = true }
+            )
+
+            if (showThankYouDialog) {
+                ThankYouSupportDialog(
+                    onDismiss = { showThankYouDialog = false },
+                    onOpenAdAgain = {
+                        showThankYouDialog = false
+                        SupportManager.openAd(context)
                     }
                 )
             }

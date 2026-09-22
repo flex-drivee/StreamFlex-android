@@ -14,7 +14,6 @@ import android.os.IBinder
 import android.os.PowerManager
 import androidx.core.app.NotificationCompat
 import com.cinetheta.app.MainActivity
-import com.cinetheta.app.R
 import com.cinetheta.domain.models.download.DownloadItem
 import com.cinetheta.domain.models.download.DownloadStatus
 
@@ -136,10 +135,18 @@ class CineThetaDownloadService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        val logoId = resources.getIdentifier("ic_launcher_foreground_logo", "drawable", packageName)
+        val appLogo = if (logoId != 0) {
+            runCatching {
+                android.graphics.BitmapFactory.decodeResource(resources, logoId)
+            }.getOrNull()
+        } else null
+
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("CineTheta Downloader")
             .setContentText("Initializing download engine...")
             .setSmallIcon(android.R.drawable.stat_sys_download)
+            .apply { if (appLogo != null) setLargeIcon(appLogo) }
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setContentIntent(pendingIntent)
@@ -180,11 +187,19 @@ class CineThetaDownloadService : Service() {
 
         val contentText = "${activeItem.progressPercent}% • ${activeItem.formattedDownloadedSize} / ${activeItem.formattedSize} • $speedText$etaText"
 
+        val activeLogoId = resources.getIdentifier("ic_launcher_foreground_logo", "drawable", packageName)
+        val activeLogo = if (activeLogoId != 0) {
+            runCatching {
+                android.graphics.BitmapFactory.decodeResource(resources, activeLogoId)
+            }.getOrNull()
+        } else null
+
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(title)
             .setSubText(subtitle)
             .setContentText(contentText)
             .setSmallIcon(android.R.drawable.stat_sys_download)
+            .apply { if (activeLogo != null) setLargeIcon(activeLogo) }
             .setProgress(100, activeItem.progressPercent, activeItem.status == DownloadStatus.CONNECTING)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
