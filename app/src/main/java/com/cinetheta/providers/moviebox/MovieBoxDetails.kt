@@ -67,12 +67,30 @@ class MovieBoxDetails {
                                titleHasTvMarkers
                     val year = JsonParser.int(data, "year") ?: result.year
 
+                    val baseTitle = cleanTitle(title)
+                    val currentLang = JsonParser.string(data, "language") ?: ""
+                    
+                    val relatedIds = mutableListOf(Pair(result.id, currentLang))
+                    val dubsArray = JsonParser.array(data, "dubs")
+                    if (dubsArray != null && dubsArray.size > 0) {
+                        for (dub in dubsArray) {
+                            val dubId = JsonParser.string(dub, "subjectId") ?: continue
+                            if (relatedIds.none { it.first == dubId }) {
+                                val dubLang = JsonParser.string(dub, "lanName")?.replace(" dub", "", ignoreCase = true)?.replace(" Audio", "", ignoreCase = true)?.trim() ?: "Unknown"
+                                relatedIds.add(Pair(dubId, dubLang))
+                            }
+                        }
+                    } else {
+                        // Fallback to searching API for related languages if dubs array is empty
+                        val searchIds = fetchRelatedMovieIds(baseTitle, result.id, currentLang, baseUrl, expectedYear = if(isTV) null else year, isTV = isTV)
+                        for (pair in searchIds) {
+                            if (relatedIds.none { it.first == pair.first }) {
+                                relatedIds.add(pair)
+                            }
+                        }
+                    }
+
                     if (!isTV) {
-                        // For movies, fetch alternative subjectIds to get all languages
-                        val baseTitle = cleanTitle(title)
-                        val currentLang = JsonParser.string(data, "language") ?: ""
-                        val relatedIds = fetchRelatedMovieIds(baseTitle, result.id, currentLang, baseUrl, expectedYear = year, isTV = false)
-                        
                         val sources = relatedIds.map { (id, lang) ->
                             val source = MovieBoxMapper.toProviderSource(url = "$baseUrl/wefeed-mobile-bff/subject-api/play-info?subjectId=$id")
                             source.copy(metadata = mapOf("language" to lang))
@@ -88,10 +106,6 @@ class MovieBoxDetails {
                             poster     = poster
                         )
                     } else {
-                        val baseTitle = cleanTitle(title)
-                        val currentLang = JsonParser.string(data, "language") ?: ""
-                        val relatedIds = fetchRelatedMovieIds(baseTitle, result.id, currentLang, baseUrl, expectedYear = null, isTV = true)
-
                         val allSeasons = mutableListOf<ProviderSeason>()
                         for ((id, lang) in relatedIds) {
                             val seasonsForLang = fetchSeasons(

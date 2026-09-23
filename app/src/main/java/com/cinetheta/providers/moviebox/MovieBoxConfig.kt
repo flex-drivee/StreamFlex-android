@@ -23,6 +23,7 @@ object MovieBoxConfig {
     const val DOMAIN_CONFIG_URL =
         "https://raw.githubusercontent.com/flex-drivee/streamflex-providers/main/providers/moviebox.json"
     
+    // Secret keys — verified identical to phisher v33 (MovieBoxProvider.cs3 version 33)
     const val SECRET_KEY_DEFAULT_B64 = "NzZpUmwwN3MweFNOOWpxbUVXQXQ3OUVCSlp1bElRSXNWNjRGWnIyTw=="
     const val SECRET_KEY_ALT_B64 = "WHFuMm5uTzQxL0w5Mm8xaXVYaFNMSFRiWHZZNFo1Wlo2Mm04bVNMQQ=="
     

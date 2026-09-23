@@ -586,6 +586,63 @@ fun FullSupportCineThetaDialog(
                         color = Color.White.copy(alpha = 0.5f)
                     )
                 }
+
+                // ── Card 4: Community ──────────────────────────────────────────
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color(0xFF23232A))
+                        .border(1.dp, Color(0xFF0088CC).copy(alpha = 0.35f), RoundedCornerShape(12.dp))
+                        .padding(12.dp)
+                ) {
+                    Text(
+                        text = "Join Our Community",
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 14.sp,
+                        color = Color(0xFF0088CC)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Button(
+                            onClick = {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/CinethetaChat"))
+                                try { context.startActivity(intent) } catch (e: Exception) {}
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0088CC)),
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.weight(1f),
+                            contentPadding = PaddingValues(0.dp)
+                        ) {
+                            Text("Chat", color = Color.White, fontSize = 12.sp)
+                        }
+                        Button(
+                            onClick = {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/CinethetaApp"))
+                                try { context.startActivity(intent) } catch (e: Exception) {}
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0088CC)),
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.weight(1f),
+                            contentPadding = PaddingValues(0.dp)
+                        ) {
+                            Text("Channel", color = Color.White, fontSize = 12.sp)
+                        }
+                        Button(
+                            onClick = {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://discord.gg/KxzD8nA8vb"))
+                                try { context.startActivity(intent) } catch (e: Exception) {}
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF5865F2)),
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.weight(1f),
+                            contentPadding = PaddingValues(0.dp)
+                        ) {
+                            Text("Discord", color = Color.White, fontSize = 12.sp)
+                        }
+                    }
+                }
             }
         },
         confirmButton = {
