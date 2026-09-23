@@ -348,6 +348,42 @@ fun SettingsScreen(
                 }
             }
 
+            // --- Community ---
+            item {
+                SettingsGroup("Community") {
+                    SettingsTile(
+                        icon = Icons.Outlined.Chat,
+                        title = "Telegram Chat",
+                        subtitle = "Join the CineTheta community chat",
+                        onTap = {
+                            val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://t.me/CinethetaChat"))
+                            try { context.startActivity(intent) } catch (e: Exception) {}
+                        }
+                    )
+                    SettingsDivider()
+                    SettingsTile(
+                        icon = Icons.Outlined.Campaign,
+                        title = "Telegram Channel",
+                        subtitle = "Official CineTheta updates",
+                        onTap = {
+                            val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://t.me/CinethetaApp"))
+                            try { context.startActivity(intent) } catch (e: Exception) {}
+                        }
+                    )
+                    SettingsDivider()
+                    SettingsTile(
+                        icon = Icons.Outlined.Forum,
+                        title = "Discord Server",
+                        subtitle = "Join our official Discord",
+                        isLast = true,
+                        onTap = {
+                            val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://discord.gg/KxzD8nA8vb"))
+                            try { context.startActivity(intent) } catch (e: Exception) {}
+                        }
+                    )
+                }
+            }
+
             // --- About ---
             item {
                 SettingsGroup("About") {

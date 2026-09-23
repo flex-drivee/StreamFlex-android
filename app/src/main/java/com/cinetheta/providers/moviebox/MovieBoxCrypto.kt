@@ -142,23 +142,24 @@ object MovieBoxCrypto {
     ): Map<String, String> {
         // For GET requests, Content-Type is null (not sent); for POST it's application/json
         val actualContentType = if (method.uppercase(Locale.ROOT) == "GET") null else contentType
-        val clientInfo = "{\"package_name\":\"com.community.oneroom\",\"version_name\":\"3.0.13.0325.03\",\"version_code\":50020088,\"os\":\"android\",\"os_version\":\"13\",\"install_ch\":\"ps\",\"device_id\":\"$deviceId\",\"install_store\":\"ps\",\"gaid\":\"1b2212c1-dadf-43c3-a0c8-bd6ce48ae22d\",\"brand\":\"${currentBrandModel.first}\",\"model\":\"${currentBrandModel.second}\",\"system_language\":\"en\",\"net\":\"NETWORK_WIFI\",\"region\":\"US\",\"timezone\":\"Asia/Calcutta\",\"sp_code\":\"\",\"X-Play-Mode\":\"1\",\"X-Idle-Data\":\"1\",\"X-Family-Mode\":\"0\",\"X-Content-Mode\":\"0\"}"
+        val clientInfo = "{\"package_name\":\"com.community.mbox.in\",\"version_name\":\"4.0.03.0920.03\",\"version_code\":50020130,\"os\":\"android\",\"os_version\":\"14\",\"device_id\":\"$deviceId\",\"install_store\":\"official\",\"gaid\":\"1b2212c1-dadf-43c3-a0c8-bd6ce48ae22d\",\"brand\":\"${currentBrandModel.first}\",\"model\":\"${currentBrandModel.second}\",\"system_language\":\"en\",\"net\":\"NETWORK_WIFI\",\"region\":\"IN\",\"timezone\":\"Asia/Calcutta\",\"sp_code\":\"\"}"
         val xClientToken = generateXClientToken()
         // Always pass ACCEPT_JSON as accept parameter — required for valid signature
         val xTrSignature = generateXTrSignature(method, ACCEPT_JSON, actualContentType, url, body, useAltKey)
 
         val map = mutableMapOf(
-            "X-Client-Info"   to clientInfo,
-            "X-Client-Status" to "0",
-            "X-Client-Token"  to xClientToken,
-            "X-Tr-Signature"  to xTrSignature,
-            "User-Agent"      to "com.community.oneroom/50020088 (Linux; U; Android 13; en_US; ${currentBrandModel.first}; Build/TQ3A.230901.001; Cronet/145.0.7582.0)",
-            "Accept"          to ACCEPT_JSON
+            "x-client-info"   to clientInfo,
+            "x-client-status" to "0",
+            "x-client-token"  to xClientToken,
+            "x-tr-signature"  to xTrSignature,
+            "user-agent"      to "com.community.mbox.in/50020130 (Linux; U; Android 14; en_IN; ${currentBrandModel.second}; Build/UD1A.230803.041; Cronet/145.0.7582.0)",
+            "accept"          to ACCEPT_JSON,
+            "connection"      to "keep-alive"
         )
         if (actualContentType != null) {
-            map["Content-Type"] = actualContentType
+            map["content-type"] = actualContentType
         }
-        xUserToken?.let { map["Authorization"] = "Bearer $it" }
+        xUserToken?.let { map["authorization"] = "Bearer $it" }
         return map
     }
 }
