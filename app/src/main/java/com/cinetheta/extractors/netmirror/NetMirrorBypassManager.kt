@@ -65,6 +65,14 @@ object NetMirrorBypassManager {
     private var cachedTokenTimestamp: Long
         get() = prefs.getLong("timestamp", 0L)
         set(value) = prefs.edit().putLong("timestamp", value).apply()
+
+    private var ongoingHash: String
+        get() = prefs.getString("ongoingHash", "") ?: ""
+        set(value) = prefs.edit().putString("ongoingHash", value).apply()
+
+    private var ongoingHashPingTime: Long
+        get() = prefs.getLong("ongoingHashPingTime", 0L)
+        set(value) = prefs.edit().putLong("ongoingHashPingTime", value).apply()
     private val bypassMutex = Mutex()
 
     private val _isBypassing = MutableStateFlow(false)
@@ -123,52 +131,54 @@ object NetMirrorBypassManager {
     private suspend fun runBypass(baseUrl: String): String? {
         val base = baseUrl.trimEnd('/')
 
-        // ── Step 1: Fetch /mobile/home?app=1 and extract data-addhash ────────
-        val homeUrl = "$base/mobile/home?app=1"
-        StreamLogger.debug(TAG, "GET $homeUrl")
+        var addHash = ongoingHash
+        val now = System.currentTimeMillis()
+        val timeSincePing = now - ongoingHashPingTime
 
-        val homeResponse = try {
-            HttpClient.execute(
-                RequestBuilder()
-                    .url(homeUrl)
-                    .header("User-Agent", NATIVE_UA)
-                    .header("X-Requested-With", "app.netmirror.netmirrornew")
-                    .header("Accept", "text/html,application/xhtml+xml,*/*;q=0.8")
-                    .build()
-            )
-        } catch (e: Exception) {
-            StreamLogger.error(TAG, "Home fetch failed: ${e.message}")
-            return null
-        }
-
-        val homeHtml = when (homeResponse) {
-            is NetworkResult.Success -> homeResponse.data.bodyAsString()
-            else -> {
-                StreamLogger.error(TAG, "Home request failed: $homeResponse")
+        // If hash is missing or older than 75 seconds (our max loop time), start fresh
+        if (addHash.isBlank() || timeSincePing > 75_000L) {
+            // ── Step 1: Fetch /mobile/home?app=1 and extract data-addhash ────────
+            val homeUrl = "$base/mobile/home?app=1"
+            StreamLogger.debug(TAG, "GET $homeUrl")
+            val homeResponse = try {
+                HttpClient.execute(
+                    RequestBuilder()
+                        .url(homeUrl)
+                        .header("User-Agent", NATIVE_UA)
+                        .header("X-Requested-With", "app.netmirror.netmirrornew")
+                        .header("Accept", "text/html,application/xhtml+xml,*/*;q=0.8")
+                        .build()
+                )
+            } catch (e: Exception) {
+                StreamLogger.error(TAG, "Home fetch failed: ${e.message}")
                 return null
             }
-        }
 
-        // Extract data-addhash="..." from the <body> tag
-        val addHash = Regex("""data-addhash="([^"]+)"""").find(homeHtml)?.groupValues?.get(1)
-        if (addHash.isNullOrBlank()) {
-            StreamLogger.error(TAG, "data-addhash not found in home page HTML")
-            return null
-        }
-        StreamLogger.debug(TAG, "Extracted hash: $addHash")
+            val homeHtml = when (homeResponse) {
+                is NetworkResult.Success -> homeResponse.data.bodyAsString()
+                else -> return null
+            }
 
-        // ── Step 2: Ping the challenge server (fire-and-forget, ignore result) ─
-        val pingUrl = "https://userver.net52.cc/?hee5=$addHash&a=y&t=${Math.random()}"
-        StreamLogger.debug(TAG, "Pinging challenge server: $pingUrl")
-        try {
-            HttpClient.execute(
-                RequestBuilder()
-                    .url(pingUrl)
-                    .header("User-Agent", NATIVE_UA)
-                    .build()
-            )
-        } catch (_: Exception) {
-            // Intentionally ignored — ping failure doesn't stop the flow
+            val extractedHash = Regex("""data-addhash="([^"]+)"""").find(homeHtml)?.groupValues?.get(1)
+            if (extractedHash.isNullOrBlank()) {
+                StreamLogger.error(TAG, "data-addhash not found in home page HTML")
+                return null
+            }
+            addHash = extractedHash
+            ongoingHash = addHash
+
+            // ── Step 2: Ping the challenge server (fire-and-forget, ignore result) ─
+            val pingUrl = "https://userver.net52.cc/?hee5=$addHash&a=y&t=${Math.random()}"
+            StreamLogger.debug(TAG, "Pinging challenge server: $pingUrl")
+            try {
+                HttpClient.execute(
+                    RequestBuilder().url(pingUrl).header("User-Agent", NATIVE_UA).build()
+                )
+            } catch (_: Exception) {}
+
+            ongoingHashPingTime = System.currentTimeMillis()
+        } else {
+            StreamLogger.debug(TAG, "Resuming bypass for existing hash: $addHash (Pinged ${timeSincePing}ms ago)")
         }
 
         // ── Step 3: Poll /mobile/verify2.php until "All Done" ────────────────
@@ -212,14 +222,17 @@ object NetMirrorBypassManager {
 
                 if (!tHashT.isNullOrBlank()) {
                     StreamLogger.debug(TAG, "Got t_hash_t on loop $loop: $tHashT")
+                    ongoingHash = "" // Clear it on success
                     return tHashT
                 }
                 StreamLogger.error(TAG, "Got 'All Done' but no t_hash_t cookie in response!")
+                ongoingHash = ""
                 return null
             }
         }
 
         StreamLogger.error(TAG, "Bypass failed after $MAX_VERIFY_LOOPS loops.")
+        ongoingHash = ""
         return null
     }
 }

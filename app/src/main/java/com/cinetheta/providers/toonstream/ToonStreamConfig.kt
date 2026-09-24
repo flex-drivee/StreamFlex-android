@@ -5,7 +5,7 @@ import com.cinetheta.domain.models.HostType
 object ToonStreamConfig {
 
     const val PROVIDER_ID   = "toonstream"
-    const val PROVIDER_NAME = "Anime 2"
+    const val PROVIDER_NAME = "Toonstream"
 
     /**
      * Primary domain — no Cloudflare challenge on this mirror.

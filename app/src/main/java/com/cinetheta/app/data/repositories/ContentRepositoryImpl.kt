@@ -91,7 +91,10 @@ class ContentRepositoryImpl(
             "japan_movies" -> tmdbApi.discoverMovies(apiKey, originalLanguage = "ja", page = page)
             "japan_series" -> tmdbApi.discoverTvShows(apiKey, originalLanguage = "ja", page = page)
             "usa_movies" -> tmdbApi.discoverMovies(apiKey, originCountry = "US", page = page)
-            "usa_series" -> tmdbApi.discoverTvShows(apiKey, originCountry = "US", page = page)
+                        "usa_series" -> tmdbApi.discoverTvShows(apiKey, originCountry = "US", page = page)
+            "pakistani_shows" -> tmdbApi.discoverTvShows(apiKey, originCountry = "PK", page = page)
+            "english_series" -> tmdbApi.discoverTvShows(apiKey, originalLanguage = "en", page = page)
+            "english_movies" -> tmdbApi.discoverMovies(apiKey, originalLanguage = "en", page = page)
             "indian_movies" -> tmdbApi.discoverMovies(apiKey, originCountry = "IN", page = page)
             "indian_series" -> tmdbApi.discoverTvShows(apiKey, originCountry = "IN", page = page)
             "thai_movies" -> tmdbApi.discoverMovies(apiKey, originCountry = "TH", page = page)
@@ -107,7 +110,7 @@ class ContentRepositoryImpl(
             
             // Legacy/Existing ones for HomeViewModel
             "bollywood_movies" -> tmdbApi.discoverMovies(apiKey, originCountry = "IN", originalLanguage = "hi", page = page)
-            "indian_web_series" -> tmdbApi.discoverTvShows(apiKey, originCountry = "IN", originalLanguage = "hi", page = page)
+            "indian_web_series" -> tmdbApi.discoverTvShows(apiKey, originCountry = "IN", originalLanguage = "hi", withWatchProviders = "8|119|122|232|237|220|258|121", watchRegion = "IN", withoutGenres = "10766", page = page)
             "netflix_originals" -> tmdbApi.discoverTvShows(apiKey, withWatchProviders = "8", watchRegion = "US", page = page)
             "prime_originals" -> tmdbApi.discoverTvShows(apiKey, withWatchProviders = "119", watchRegion = "US", page = page)
                         "netflix_anime" -> tmdbApi.discoverTvShows(apiKey, genres = "16", originalLanguage = "ja", withWatchProviders = "8", watchRegion = "US", page = page)
@@ -158,8 +161,11 @@ class ContentRepositoryImpl(
             "turkish_drama" to "Turkish Dramas",
             "chinese_series" to "Chinese Series",
             "japan_series" to "Japanese Series",
-            "thai_series" to "Thai Series",
-            "usa_movies" to "USA Movies"
+            "usa_movies" to "USA Movies",
+            "pakistani_shows" to "Pakistani TV Shows (Use MovieBox)",
+            "usa_series" to "USA Series",
+            "english_series" to "English Series",
+            "english_movies" to "English Movies"
         )
     }
 }

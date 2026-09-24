@@ -405,11 +405,7 @@ private fun SFTopBar(
                                     context.getSharedPreferences("cinetheta_settings", android.content.Context.MODE_PRIVATE)
                                         .edit().putString("selected_provider", null).apply()
                                         
-                                    if (oldId != null) {
-                                        val intent = android.content.Intent(context, com.cinetheta.app.MainActivity::class.java)
-                                        intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                                        context.startActivity(intent)
-                                    }
+                                    // UI state is updated smoothly. No restart needed.
                                 }
                             )
                             providerRepository.enabledProviders().forEach { provider ->
@@ -424,11 +420,7 @@ private fun SFTopBar(
                                         context.getSharedPreferences("cinetheta_settings", android.content.Context.MODE_PRIVATE)
                                             .edit().putString("selected_provider", provider.id).apply()
                                             
-                                        if (oldId != provider.id) {
-                                            val intent = android.content.Intent(context, com.cinetheta.app.MainActivity::class.java)
-                                            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                                            context.startActivity(intent)
-                                        }
+                                        // UI state is updated smoothly. No restart needed.
                                     },
                                     trailingIcon = {
                                         if (provider.id == "moviebox") {
@@ -1038,17 +1030,14 @@ fun MovieBoxSettingsDialog(
     if (showReloadPrompt) {
         androidx.compose.material3.AlertDialog(
             onDismissRequest = onDismiss,
-            title = { androidx.compose.material3.Text("Restart Required") },
-            text = { androidx.compose.material3.Text("App needs to restart to apply the new API settings.") },
+            title = { androidx.compose.material3.Text("Success") },
+            text = { androidx.compose.material3.Text("Settings applied successfully!") },
             confirmButton = {
                 androidx.compose.material3.TextButton(onClick = {
-                    val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
-                    val componentName = intent?.component
-                    val mainIntent = android.content.Intent.makeRestartActivityTask(componentName)
-                    context.startActivity(mainIntent)
-                    Runtime.getRuntime().exit(0)
+                    showReloadPrompt = false
+                    onDismiss()
                 }) {
-                    androidx.compose.material3.Text("Reload")
+                    androidx.compose.material3.Text("Apply")
                 }
             },
             dismissButton = {

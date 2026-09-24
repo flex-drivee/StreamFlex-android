@@ -104,6 +104,39 @@ class HubCloudExtractor : BaseExtractor() {
         val visitedUrls = mutableSetOf<String>()
 
         val currentUrl = source.url
+        
+        val html = document.html()
+        val extractedSubs = mutableListOf<com.cinetheta.domain.models.Subtitle>()
+        
+        val tracksRegex = Regex("""tracks\s*:\s*\[(.*?)\]""", RegexOption.DOT_MATCHES_ALL)
+        val fileRegex = Regex("""file\s*:\s*['"](.*?)['"]""")
+        val labelRegex = Regex("""label\s*:\s*['"](.*?)['"]""")
+        
+        tracksRegex.find(html)?.let { match ->
+            val tracksStr = match.groupValues[1]
+            val blocks = tracksStr.split("},")
+            for (block in blocks) {
+                val fMatch = fileRegex.find(block)
+                val lMatch = labelRegex.find(block)
+                if (fMatch != null) {
+                    val subUrl = fMatch.groupValues[1]
+                    val subLang = lMatch?.groupValues?.get(1) ?: "English"
+                    if (subUrl.endsWith(".vtt") || subUrl.endsWith(".srt") || subUrl.contains("subtitle")) {
+                        extractedSubs.add(com.cinetheta.domain.models.Subtitle(language = subLang, url = subUrl))
+                    }
+                }
+            }
+        }
+        
+        // Sometimes they are just in simple var subtitle = '...'
+        val singleSubRegex = Regex("""subtitle\s*=\s*['"](.*?)['"]""")
+        singleSubRegex.findAll(html).forEach { match ->
+            val subUrl = match.groupValues[1]
+            if (subUrl.isNotBlank()) {
+                extractedSubs.add(com.cinetheta.domain.models.Subtitle(language = "English", url = subUrl))
+            }
+        }
+
         val baseHost = try {
             val u = URL(currentUrl)
             "${u.protocol}://${u.host}"
@@ -191,7 +224,8 @@ class HubCloudExtractor : BaseExtractor() {
                             url = safeUrl,
                             quality = detectedQuality,
                             serverLabel = serverName + sizeSuffix,
-                            headers = baseHeaders
+                            headers = baseHeaders,
+                            subtitles = extractedSubs
                         )
                     }
                 }
@@ -215,7 +249,8 @@ class HubCloudExtractor : BaseExtractor() {
                         url = directPixelUrl,
                         quality = detectedQuality,
                         serverLabel = "Pixeldrain" + sizeSuffix,
-                        headers = baseHeaders
+                        headers = baseHeaders,
+                            subtitles = extractedSubs
                     )
                 }
 
@@ -230,7 +265,8 @@ class HubCloudExtractor : BaseExtractor() {
                             url = safeUrl,
                             quality = detectedQuality,
                             serverLabel = "[S3 Server]" + sizeSuffix,
-                            headers = baseHeaders
+                            headers = baseHeaders,
+                            subtitles = extractedSubs
                         )
                     }
                 }
@@ -246,7 +282,8 @@ class HubCloudExtractor : BaseExtractor() {
                             url = safeUrl,
                             quality = detectedQuality,
                             serverLabel = "[Mega Server]" + sizeSuffix,
-                            headers = baseHeaders
+                            headers = baseHeaders,
+                            subtitles = extractedSubs
                         )
                     }
                 }
@@ -262,7 +299,8 @@ class HubCloudExtractor : BaseExtractor() {
                             url = safeUrl,
                             quality = detectedQuality,
                             serverLabel = "[PDL Server]" + sizeSuffix,
-                            headers = baseHeaders
+                            headers = baseHeaders,
+                            subtitles = extractedSubs
                         )
                     }
                 }
@@ -279,7 +317,8 @@ class HubCloudExtractor : BaseExtractor() {
                             url = direct10Gbps,
                             quality = detectedQuality,
                             serverLabel = "10Gbps [Download]" + sizeSuffix,
-                            headers = baseHeaders
+                            headers = baseHeaders,
+                            subtitles = extractedSubs
                         )
                     }
                 }
@@ -300,7 +339,8 @@ class HubCloudExtractor : BaseExtractor() {
                             url = safeUrl,
                             quality = detectedQuality,
                             serverLabel = "[Download]" + sizeSuffix,
-                            headers = baseHeaders
+                            headers = baseHeaders,
+                            subtitles = extractedSubs
                         )
                     }
                 }
@@ -313,7 +353,8 @@ class HubCloudExtractor : BaseExtractor() {
                         url = safeUrl,
                         quality = detectedQuality,
                         serverLabel = "Google Drive" + sizeSuffix,
-                        headers = baseHeaders
+                        headers = baseHeaders,
+                            subtitles = extractedSubs
                     )
                 }
 
@@ -325,7 +366,8 @@ class HubCloudExtractor : BaseExtractor() {
                         url = safeUrl,
                         quality = detectedQuality,
                         serverLabel = "Direct Video" + sizeSuffix,
-                        headers = baseHeaders
+                        headers = baseHeaders,
+                            subtitles = extractedSubs
                     )
                 }
 
@@ -513,7 +555,8 @@ class HubCloudExtractor : BaseExtractor() {
         url: String,
         quality: Quality,
         serverLabel: String,
-        headers: Map<String, String>
+        headers: Map<String, String>,
+        subtitles: List<com.cinetheta.domain.models.Subtitle> = emptyList()
     ): StreamLink {
         val contentType = ContentTypeDetector.detect(url)
         val name = buildString {
@@ -538,6 +581,7 @@ class HubCloudExtractor : BaseExtractor() {
             host = HostType.DIRECT,
             contentType = contentType,
             headers = headers,
+            subtitles = subtitles,
             cookies = source.cookies,
             adaptive = ContentTypeDetector.isAdaptive(contentType),
             referer = source.referer

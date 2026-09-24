@@ -1,0 +1,77 @@
+# 🔐 Phase 2: Keystore Generation & App Signing Guide (GitHub / Web Release)
+
+Since you are not publishing to the Google Play Store, we will focus solely on generating the final **APK** for GitHub, APKPure, and your website.
+
+> [!WARNING]
+> **CRITICAL RULE**: Even though you aren't using the Play Store, you **still need a keystore**. If you release v1.0 today, and next month you release v1.1, users' phones will **refuse to install the update** if the new APK is not signed with the exact same keystore file. Always back up your `cinetheta-release.jks` file and password!
+
+---
+
+### Step 1: Generate the Keystore File
+
+You need to run a command in your **AndroidIDE Terminal** to generate the secure key.
+
+1. Open the Terminal in AndroidIDE.
+2. Ensure you are in your project root folder (`/sdcard/AndroidIDEProjects/StreamFlex-android`).
+3. Copy and paste this exact command, then hit Enter:
+
+```bash
+keytool -genkey -v -keystore cinetheta-release.jks -alias cinetheta -keyalg RSA -keysize 2048 -validity 10000
+```
+
+4. **Answer the Prompts:**
+   - **Password:** It will ask you for a keystore password. (As you type, nothing will show on the screen — this is normal for security. Just type it carefully and press Enter).
+   - **Confirm Password:** Type it again.
+   - **Your First and Last Name:** e.g., "CineTheta Dev" or your name.
+   - **Organizational Unit:** e.g., "Development"
+   - **Organization:** e.g., "CineTheta"
+   - **City/Locality:** (Your city)
+   - **State/Province:** (Your state)
+   - **Country Code:** (e.g., US, IN, UK)
+   - It will ask if everything is correct. Type `yes` and hit Enter.
+
+Once finished, you will see a new file in your project folder called `cinetheta-release.jks`. **Do not delete this file!**
+
+---
+
+### Step 2: Configure the App to Use the Keystore
+
+Once you have generated the `cinetheta-release.jks` file, the app needs to know how to use it. 
+
+You can either tell me when you are done and **I will write the code for you**, OR you can manually open `app/build.gradle.kts` and add this inside the `android { ... }` block:
+
+```kotlin
+signingConfigs {
+    create("release") {
+        storeFile = file("../cinetheta-release.jks") // Path to your generated file
+        storePassword = "YOUR_PASSWORD"              // The password you just created
+        keyAlias = "cinetheta"                       // The alias we used in the command
+        keyPassword = "YOUR_PASSWORD"                // Usually the same as storePassword
+    }
+}
+
+buildTypes {
+    release {
+        isMinifyEnabled = true
+        isShrinkResources = true
+        proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        signingConfig = signingConfigs.getByName("release")
+    }
+}
+```
+
+---
+
+### Step 3: Build the Final Release APK!
+
+Once the keystore is connected to your `build.gradle.kts`, you just need to compile the final release file.
+
+Run this in your terminal to get the **APK** (perfect for GitHub Releases, your website, or sharing directly):
+```bash
+sh gradlew assembleRelease
+```
+
+*Your final file will be successfully generated at:* 
+`app/build/outputs/apk/release/app-release.apk`
+
+You can safely rename this file to `CineTheta-v1.0-beta.apk` and upload it directly to your GitHub!
