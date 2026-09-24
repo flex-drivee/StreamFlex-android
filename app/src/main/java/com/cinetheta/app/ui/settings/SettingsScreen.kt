@@ -34,6 +34,7 @@ import kotlinx.coroutines.launch
 fun SettingsScreen(
     onBackClick: () -> Unit,
     onNavigateToDownloads: () -> Unit = {},
+    onPluginChanged: () -> Unit = {},
     viewModel: SettingsViewModel = viewModel()
 ) {
     val appTheme by viewModel.appTheme.collectAsState()
@@ -646,9 +647,7 @@ fun SettingsScreen(
                                         .edit().putString("selected_provider", null).apply()
                                         
                                     if (oldId != null) {
-                                        val intent = android.content.Intent(context, com.cinetheta.app.MainActivity::class.java)
-                                        intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                                        context.startActivity(intent)
+                                        onPluginChanged()
                                     }
                                 }
                                 .padding(16.dp),
@@ -671,9 +670,7 @@ fun SettingsScreen(
                                             .edit().putString("selected_provider", provider.id).apply()
                                             
                                         if (oldId != provider.id) {
-                                            val intent = android.content.Intent(context, com.cinetheta.app.MainActivity::class.java)
-                                            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                                            context.startActivity(intent)
+                                            onPluginChanged()
                                         }
                                     }
                                     .padding(horizontal = 16.dp, vertical = 8.dp),
