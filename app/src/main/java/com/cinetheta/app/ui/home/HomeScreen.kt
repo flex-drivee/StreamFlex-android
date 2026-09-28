@@ -159,27 +159,34 @@ fun HomeScreen(
             // ── HERO (Swipeable Carousel) ─────────────────────────────────────
             item {
                 if (featuredItems.isNotEmpty()) {
-                    HorizontalPager(
-                        state = pagerState,
-                        modifier = Modifier.fillMaxWidth()
-                    ) { page ->
-                        val hero = featuredItems.getOrNull(page)
-                        if (hero != null) {
-                            SFHeroSection(
-                                movie        = hero,
-                                heroIndex    = pagerState.currentPage,
-                                heroCount    = featuredItems.size,
-                                onPlayClick  = { onNavigateToDetail(hero.type.name, hero.id) },
-                                onInfoClick  = { onNavigateToDetail(hero.type.name, hero.id) },
-                                onDotClick   = { targetIndex ->
-                                    coroutineScope.launch {
-                                        pagerState.animateScrollToPage(targetIndex)
-                                    }
-                                }
-                            )
-                        } else {
-                            SFHeroShimmer()
+                    val currentHero = featuredItems.getOrNull(pagerState.currentPage) ?: featuredItems.first()
+                    
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        HorizontalPager(
+                            state = pagerState,
+                            modifier = Modifier.fillMaxWidth()
+                        ) { page ->
+                            val hero = featuredItems.getOrNull(page)
+                            if (hero != null) {
+                                SFHeroBackdrop(movie = hero)
+                            } else {
+                                SFHeroShimmer()
+                            }
                         }
+                        
+                        // Static overlay for Buttons and Dots
+                        SFHeroStaticOverlay(
+                            movie = currentHero,
+                            heroIndex = pagerState.currentPage,
+                            heroCount = featuredItems.size,
+                            onPlayClick = { onNavigateToDetail(currentHero.type.name, currentHero.id) },
+                            onInfoClick = { onNavigateToDetail(currentHero.type.name, currentHero.id) },
+                            onDotClick = { targetIndex ->
+                                coroutineScope.launch {
+                                    pagerState.animateScrollToPage(targetIndex)
+                                }
+                            }
+                        )
                     }
                 } else {
                     // Shimmer placeholder while loading
@@ -314,7 +321,6 @@ private fun SFTopBar(
             .statusBarsPadding()
     ) {
         Column {
-            // Row 1: Logo + Icons
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -338,7 +344,7 @@ private fun SFTopBar(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Search (as per reference image top bar)
+                    // Search icon
                     IconButton(
                         onClick = onSearchClick,
                         modifier = Modifier
@@ -348,8 +354,8 @@ private fun SFTopBar(
                         Icon(Icons.Outlined.Search, "Search",
                             tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(20.dp))
                     }
-                    
-                    // Provider Selector Chip
+
+                    // Provider Selector (Icon only)
                     var showProviderDropdown by remember { mutableStateOf(false) }
                     var selectedProviderName by remember { 
                         mutableStateOf(providerRepository.provider(providerRepository.selectedProviderId ?: "")?.name ?: "None") 
@@ -504,22 +510,14 @@ private fun SFTopBar(
 // ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
-fun SFHeroSection(
-    movie: SearchResult,
-    heroIndex: Int,
-    heroCount: Int,
-    onPlayClick: () -> Unit,
-    onInfoClick: () -> Unit,
-    onDotClick: (Int) -> Unit
-) {
+fun SFHeroBackdrop(movie: SearchResult) {
     val screenH = LocalConfiguration.current.screenHeightDp.dp
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(screenH * 0.70f) // 70% of screen height
+            .height(screenH * 0.70f)
     ) {
-        // ── Backdrop image ────────────────────────────────────────────────
         SubcomposeAsyncImage(
             model              = movie.poster,
             contentDescription = movie.title,
@@ -527,24 +525,20 @@ fun SFHeroSection(
             loading            = { SFHeroShimmer() },
             modifier           = Modifier.fillMaxSize()
         )
-
-        // ── Multi-stop gradient overlay: dark top (for nav) + dark bottom ─
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
                         colorStops = arrayOf(
-                            0.0f to Color.Black.copy(alpha = 0.55f), // nav bar area
-                            0.3f to Color.Transparent,               // clear in middle
+                            0.0f to Color.Black.copy(alpha = 0.55f),
+                            0.3f to Color.Transparent,
                             0.7f to MaterialTheme.colorScheme.background.copy(alpha = 0.4f),
-                            1.0f to MaterialTheme.colorScheme.background                     // full bg at bottom
+                            1.0f to MaterialTheme.colorScheme.background
                         )
                     )
                 )
         )
-
-        // ── Side gradient for depth ────────────────────────────────────────
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -557,24 +551,21 @@ fun SFHeroSection(
                     )
                 )
         )
-
-        // ── Bottom Content: genres, title, buttons ─────────────────────────
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 24.dp),
+                // Extra bottom padding to leave room for the static overlay buttons
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 120.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Genre tags
             Text(
                 text  = "Action  •  Thriller  •  Sci-Fi",
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(bottom = 10.dp)
             )
-
-            // Movie title
             Text(
                 text     = movie.title,
                 style    = MaterialTheme.typography.displayLarge.copy(fontSize = 28.sp),
@@ -583,12 +574,9 @@ fun SFHeroSection(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.padding(bottom = 6.dp)
             )
-
-            // Year + type badges
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(bottom = 20.dp)
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 movie.year?.let {
                     Text(it.toString(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -597,30 +585,50 @@ fun SFHeroSection(
                 SFBadge("HD", SFHDTag, Color.Black)
                 SFBadge("DUB", SFDubBg, Color.White)
             }
+        }
+    }
+}
 
-            // Action buttons row
+@Composable
+fun SFHeroStaticOverlay(
+    movie: SearchResult,
+    heroIndex: Int,
+    heroCount: Int,
+    onPlayClick: () -> Unit,
+    onInfoClick: () -> Unit,
+    onDotClick: (Int) -> Unit
+) {
+    val screenH = LocalConfiguration.current.screenHeightDp.dp
+    
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(screenH * 0.70f)
+    ) {
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Play button (primary — white like Netflix)
                 Button(
                     onClick = onPlayClick,
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(46.dp),
+                    modifier = Modifier.weight(1f).height(46.dp),
                     shape  = RoundedCornerShape(6.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color.White)
                 ) {
-                    Icon(Icons.Default.PlayArrow, null,
-                        tint = Color.Black, modifier = Modifier.size(22.dp))
+                    Icon(Icons.Default.PlayArrow, null, tint = Color.Black, modifier = Modifier.size(22.dp))
                     Spacer(Modifier.width(6.dp))
-                    Text("Play", color = Color.Black,
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
+                    Text("Play", color = Color.Black, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
                 }
 
-                // My List button
                 var isInMyList by remember(movie.id) { mutableStateOf(BookmarkManager.isBookmarked(movie.id)) }
                 OutlinedButton(
                     onClick = {
@@ -643,20 +651,14 @@ fun SFHeroSection(
                     Text(if (isInMyList) "Added" else "List", color = tint, style = MaterialTheme.typography.bodyMedium)
                 }
 
-                // Info button
                 IconButton(
                     onClick  = onInfoClick,
-                    modifier = Modifier
-                        .size(46.dp)
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f))
+                    modifier = Modifier.size(46.dp).clip(RoundedCornerShape(6.dp)).background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f))
                 ) {
-                    Icon(Icons.Outlined.Info, "Info",
-                        tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(22.dp))
+                    Icon(Icons.Outlined.Info, "Info", tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(22.dp))
                 }
             }
 
-            // Hero page dots
             if (heroCount > 1) {
                 Spacer(Modifier.height(16.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {

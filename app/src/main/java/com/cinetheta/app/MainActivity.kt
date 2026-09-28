@@ -25,6 +25,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
+        androidx.core.view.WindowCompat.setDecorFitsSystemWindows(window, false)
+        window.statusBarColor = android.graphics.Color.parseColor("#66000000") // 40% opacity (60% transparent)
+        window.navigationBarColor = android.graphics.Color.TRANSPARENT
+        
         // Check for updates automatically in the background
         lifecycleScope.launch {
             AppUpdater.checkUpdate(this@MainActivity)

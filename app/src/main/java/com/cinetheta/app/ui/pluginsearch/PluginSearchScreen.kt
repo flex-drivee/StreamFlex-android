@@ -101,29 +101,19 @@ fun PluginSearchScreen(
 
                     // Provider Dropdown
                     Box {
-                        Row(
+                        Box(
                             modifier = Modifier
-                                .height(50.dp)
-                                .clip(RoundedCornerShape(25.dp))
+                                .size(50.dp)
+                                .clip(CircleShape)
                                 .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.85f))
-                                .clickable { expanded = true }
-                                .padding(horizontal = 16.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                .clickable { expanded = true },
+                            contentAlignment = Alignment.Center
                         ) {
-                            Text(
-                                text = state.selectedProvider?.name ?: "Provider",
-                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.onBackground,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.widthIn(max = 80.dp)
-                            )
                             Icon(
-                                Icons.Default.ArrowDropDown,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(18.dp)
+                                Icons.Outlined.Extension,
+                                contentDescription = "Provider",
+                                tint = MaterialTheme.colorScheme.onBackground,
+                                modifier = Modifier.size(24.dp)
                             )
                         }
                         DropdownMenu(
@@ -132,11 +122,27 @@ fun PluginSearchScreen(
                             modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
                         ) {
                             state.providers.forEach { provider ->
+                                val isSelected = provider.id == state.selectedProvider?.id
                                 DropdownMenuItem(
-                                    text = { Text(provider.name, color = MaterialTheme.colorScheme.onBackground) },
+                                    text = { 
+                                        Text(
+                                            provider.name, 
+                                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                        ) 
+                                    },
                                     onClick = {
                                         viewModel.selectProvider(provider)
                                         expanded = false
+                                    },
+                                    trailingIcon = {
+                                        if (isSelected) {
+                                            Icon(
+                                                Icons.Default.Check,
+                                                contentDescription = "Selected",
+                                                tint = MaterialTheme.colorScheme.primary
+                                            )
+                                        }
                                     }
                                 )
                             }
