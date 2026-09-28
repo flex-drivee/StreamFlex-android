@@ -14,7 +14,10 @@ import kotlinx.coroutines.launch
 data class PluginDetailUiState(
     val isLoading: Boolean = true,
     val result: ProviderResult? = null,
-    val error: String? = null
+    val error: String? = null,
+    val isResolvingDownload: Boolean = false,
+    val downloadStreamsAvailable: List<com.cinetheta.domain.models.StreamLink>? = null,
+    val pendingDownloadEpisode: com.cinetheta.domain.models.ProviderEpisode? = null
 )
 
 class PluginDetailViewModel(
@@ -38,6 +41,46 @@ class PluginDetailViewModel(
                 _uiState.value = _uiState.value.copy(isLoading = false, error = e.localizedMessage ?: "Unknown error")
             }
         }
+    }
+
+    fun downloadContent(episode: com.cinetheta.domain.models.ProviderEpisode? = null) {
+        viewModelScope.launch {
+            val result = _uiState.value.result ?: return@launch
+            _uiState.value = _uiState.value.copy(
+                isResolvingDownload = true,
+                downloadStreamsAvailable = null,
+                pendingDownloadEpisode = episode
+            )
+
+            try {
+                val sourcesToUse = if (episode != null) episode.sources else result.sources
+                val finalStreams = streamRepository.resolveSources(sourcesToUse)
+                if (finalStreams.streams.isNotEmpty()) {
+                    _uiState.value = _uiState.value.copy(
+                        isResolvingDownload = false,
+                        downloadStreamsAvailable = finalStreams.streams
+                    )
+                } else {
+                    _uiState.value = _uiState.value.copy(
+                        isResolvingDownload = false,
+                        error = "No streams found"
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isResolvingDownload = false,
+                    error = e.localizedMessage ?: "Unknown error"
+                )
+            }
+        }
+    }
+
+    fun cancelDownloadDialog() {
+        _uiState.value = _uiState.value.copy(
+            isResolvingDownload = false,
+            downloadStreamsAvailable = null,
+            pendingDownloadEpisode = null
+        )
     }
 }
 

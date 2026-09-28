@@ -141,7 +141,7 @@ fun PluginDetailScreen(
                                         }
 
                                         OutlinedButton(
-                                            onClick = { showComingSoonDialog = true },
+                                            onClick = { viewModel.downloadContent(null) },
                                             modifier = Modifier.height(50.dp),
                                             shape = RoundedCornerShape(8.dp),
                                             colors = ButtonDefaults.outlinedButtonColors(
@@ -248,7 +248,7 @@ fun PluginDetailScreen(
                                     PluginEpisodeItem(
                                         episode = episode,
                                         onClick = { onPlayClick(episode.sources, episode) },
-                                        onDownloadClick = { showComingSoonDialog = true }
+                                        onDownloadClick = { viewModel.downloadContent(episode) }
                                     )
                                 }
                                 
@@ -268,17 +268,128 @@ fun PluginDetailScreen(
                 }
             }
 
-            if (showComingSoonDialog) {
+            val context = androidx.compose.ui.platform.LocalContext.current
+            var selectedStreamForSaveTheta by remember { mutableStateOf<com.cinetheta.domain.models.StreamLink?>(null) }
+            val availableStreams = uiState.downloadStreamsAvailable
+
+            if (uiState.isResolvingDownload || !availableStreams.isNullOrEmpty()) {
                 AlertDialog(
-                    onDismissRequest = { showComingSoonDialog = false },
-                    title = { Text("Coming Soon", fontWeight = FontWeight.Bold) },
-                    text = { Text("Downloads from this provider are currently not supported and will be available in an upcoming update.") },
-                    confirmButton = {
-                        TextButton(onClick = { showComingSoonDialog = false }) {
-                            Text("OK", color = MaterialTheme.colorScheme.primary)
+                    onDismissRequest = { viewModel.cancelDownloadDialog() },
+                    title = { Text(if (uiState.isResolvingDownload) "Resolving Links..." else "Select Download Link", fontWeight = FontWeight.Bold) },
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    text = {
+                        if (uiState.isResolvingDownload) {
+                            Column(
+                                modifier = Modifier.fillMaxWidth().padding(24.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                                Spacer(Modifier.height(16.dp))
+                                Text("Fetching best qualities...", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        } else {
+                            LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                                items(availableStreams!!) { stream ->
+                                    val isFast = stream.url.contains("google", true) || stream.url.contains("fsl", true)
+                                    val isResume = stream.url.contains("google", true) || stream.url.contains("pixeldrain", true) || stream.url.contains("buzz", true)
+                                    
+                                    val tags = mutableListOf<String>()
+                                    if (isFast) tags.add("Fast downloading")
+                                    if (isResume) tags.add("Resume support")
+                                    if (!isFast && !isResume) tags.add("Reliable")
+                                    tags.add(stream.quality.name)
+                                    
+                                    Card(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable { selectedStreamForSaveTheta = stream },
+                                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                                    ) {
+                                        Column(modifier = Modifier.padding(12.dp)) {
+                                            Text(text = stream.name, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                                            Spacer(modifier = Modifier.height(4.dp))
+                                            Text(text = tags.joinToString(" • "), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+                                        }
+                                    }
+                                }
+                            }
                         }
                     },
-                    containerColor = MaterialTheme.colorScheme.surface
+                    confirmButton = {
+                        TextButton(onClick = { viewModel.cancelDownloadDialog() }) {
+                            Text("Cancel", color = MaterialTheme.colorScheme.primary)
+                        }
+                    }
+                )
+            }
+
+            selectedStreamForSaveTheta?.let { stream ->
+                AlertDialog(
+                    onDismissRequest = { selectedStreamForSaveTheta = null },
+                    title = { Text("Choose Downloader", fontWeight = FontWeight.Bold) },
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    text = {
+                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        try {
+                                            val encodedUrl = java.net.URLEncoder.encode(stream.url, "UTF-8")
+                                            var uriString = "savetheta://download?url=$encodedUrl"
+                                            
+                                            val ref = stream.referer ?: stream.headers.entries.find { it.key.equals("Referer", ignoreCase = true) }?.value
+                                            if (ref != null) uriString += "&referer=${java.net.URLEncoder.encode(ref, "UTF-8")}"
+                                            
+                                            val ua = stream.headers.entries.find { it.key.equals("User-Agent", ignoreCase = true) }?.value ?: com.cinetheta.core.constants.Constants.DEFAULT_USER_AGENT
+                                            if (ua != null) uriString += "&userAgent=${java.net.URLEncoder.encode(ua, "UTF-8")}"
+                                            
+                                            val movieTitle = uiState.result?.title ?: "Unknown"
+                                            val pendingEp = uiState.pendingDownloadEpisode
+                                            val epStr = if (pendingEp != null) " - E${pendingEp.number}" else ""
+                                            val fullTitle = "$movieTitle$epStr"
+                                            uriString += "&title=${java.net.URLEncoder.encode(fullTitle, "UTF-8")}"
+
+                                            try {
+                                                val jsonHeaders = org.json.JSONObject()
+                                                stream.headers.forEach { (key, value) -> jsonHeaders.put(key, value) }
+                                                if (stream.cookies.isNotEmpty()) {
+                                                    val cookieStr = stream.cookies.entries.joinToString("; ") { "${it.key}=${it.value}" }
+                                                    jsonHeaders.put("Cookie", cookieStr)
+                                                }
+                                                uriString += "&headers=${java.net.URLEncoder.encode(jsonHeaders.toString(), "UTF-8")}"
+                                            } catch (e: Exception) {}
+
+                                            val intent = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
+                                                data = android.net.Uri.parse(uriString)
+                                            }
+                                            context.startActivity(intent)
+                                            viewModel.cancelDownloadDialog()
+                                        } catch (e: Exception) {
+                                            android.widget.Toast.makeText(context, "SaveTheta app is not installed!", android.widget.Toast.LENGTH_SHORT).show()
+                                        }
+                                        selectedStreamForSaveTheta = null
+                                    },
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+                            ) {
+                                Column(modifier = Modifier.padding(16.dp)) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(Icons.Filled.Star, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                                        Spacer(Modifier.width(8.dp))
+                                        Text("Download from SaveTheta", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer, fontSize = 16.sp)
+                                    }
+                                    Spacer(Modifier.height(6.dp))
+                                    Text("Safe, Secure & Fast • ⭐ Recommended", color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f), fontSize = 13.sp)
+                                }
+                            }
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(onClick = { selectedStreamForSaveTheta = null }) {
+                            Text("Cancel")
+                        }
+                    }
                 )
             }
         }

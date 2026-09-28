@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
+  <title>CineTheta — Free Streaming & Downloader for Android</title>
+  <meta name="description" content="A sleek, modern, multi-provider video streaming & downloading app for Android. Completely ad-free playback, offline downloads, and native 120Hz UI." />
+  <meta name="theme-color" content="#0A0A0F" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* ── Global CSS Reset & Strict Box Sizing ───────────────────── */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-dark: #0A0A0F;
+      --bg-card: #13141B;
+      --bg-card-hover: #191B24;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(61, 80, 250, 0.35);
+
+      /* Brand Colors (Matching Native App Theme Tokens) */
+      --brand-blue: #3D50FA;
+      --brand-purple: #7044FA;
+      --brand-rose: #F53B66;
+      --brand-cyan: #00E5FF;
+      
+      --text-main: #FFFFFF;
+      --text-primary: #E9EAEE;
+      --text-muted: #9BA0A4;
+      --text-dim: #60646C;
+      --radius: 16px;
+    }
+
+    html, body {
+      width: 100%;
+      max-width: 100vw;
+      overflow-x: hidden;
+      background-color: var(--bg-dark);
+      color: var(--text-primary);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.6;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      position: relative;
+      background-color: var(--bg-dark);
+    }
+
+    /* Isolated fixed background layer: prevents mobile scroll repaint tearing, ghosting & tile glitches */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      background-image:
+        radial-gradient(circle at 10% 0%, rgba(61, 80, 250, 0.12) 0%, transparent 500px),
+        radial-gradient(circle at 90% 15%, rgba(245, 59, 102, 0.10) 0%, transparent 450px),
+        radial-gradient(circle at 15% 55%, rgba(112, 68, 250, 0.08) 0%, transparent 450px),
+        radial-gradient(circle at 85% 85%, rgba(0, 229, 255, 0.06) 0%, transparent 500px);
+      background-repeat: no-repeat;
+    }
+
+    /* ── Container System (Guarantees perfect center on mobile) ── */
+    .container {
+      width: 100%;
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 20px;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ── Navigation Bar ───────────────────────────────────────── */
+    header {
+      width: 100%;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10, 10, 15, 0.95);
+      display: flex;
+      justify-content: center;
+    }
+    .nav-wrap {
+      width: 100%;
+      max-width: 1140px;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #fff;
+      font-weight: 800;
+      font-size: 1.35rem;
+      letter-spacing: -0.5px;
+    }
+    .brand img {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      object-fit: cover;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+    .brand-fallback-logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #3D50FA, #F53B66);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: #fff;
+      font-size: 1.2rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+    .brand span {
+      display: inline-block;
+      background: linear-gradient(135deg, #3D50FA 0%, #B04DF6 50%, #F53B66 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      -webkit-box-decoration-break: clone;
+      box-decoration-break: clone;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      list-style: none;
+    }
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover {
+      color: #fff;
+    }
+    .btn-nav {
+      background: linear-gradient(135deg, #3D50FA, #7044FA);
+      color: #fff !important;
+      padding: 9px 20px;
+      border-radius: 99px;
+      font-weight: 700 !important;
+      font-size: 0.9rem !important;
+      box-shadow: 0 4px 18px rgba(61, 80, 250, 0.35);
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-nav:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(61, 80, 250, 0.5);
+    }
+
+    /* ── Hero Section ─────────────────────────────────────────── */
+    .hero {
+      padding: 70px 0 50px;
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      align-items: center;
+      gap: 50px;
+      width: 100%;
+    }
+    .hero-content {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      text-align: left;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 99px;
+      background: rgba(61, 80, 250, 0.1);
+      border: 1px solid rgba(61, 80, 250, 0.35);
+      color: #7B88FF;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 22px;
+    }
+    .hero-badge-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #3D50FA;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #3D50FA;
+      animation: pulseDot 2s ease-in-out infinite;
+      will-change: opacity;
+    }
+    @keyframes pulseDot {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+    .hero h1 {
+      font-size: clamp(32px, 5.2vw, 54px);
+      line-height: 1.15;
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      margin-bottom: 20px;
+      color: #fff;
+    }
+    .hero h1 span {
+      display: inline-block;
+      background: linear-gradient(135deg, #3D50FA 0%, #9B51E0 50%, #F53B66 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      -webkit-box-decoration-break: clone;
+      box-decoration-break: clone;
+    }
+    .hero p {
+      font-size: clamp(15px, 2vw, 18px);
+      color: var(--text-muted);
+      margin-bottom: 32px;
+      max-width: 520px;
+      line-height: 1.6;
+    }
+    .hero-cta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+      width: 100%;
+    }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: linear-gradient(135deg, #3D50FA 0%, #7044FA 60%, #F53B66 100%);
+      color: #fff;
+      padding: 16px 30px;
+      border-radius: 99px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1rem;
+      box-shadow: 0 6px 20px rgba(61, 80, 250, 0.35);
+      transition: box-shadow 0.2s ease, transform 0.2s ease;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      cursor: pointer;
+    }
+    @media (hover: hover) {
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 26px rgba(61, 80, 250, 0.5);
+      }
+    }
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: #fff;
+      padding: 16px 26px;
+      border-radius: 99px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    @media (hover: hover) {
+      .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.09);
+        border-color: rgba(255, 255, 255, 0.25);
+      }
+    }
+    .meta-info {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      margin-top: 24px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .meta-info span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .meta-info svg {
+      width: 15px;
+      height: 15px;
+      fill: var(--brand-blue);
+    }
+
+    /* Hero Mockup Phone - Clean Hardware-Safe Frame */
+    .hero-visual {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      width: 100%;
+    }
+    .phone-frame {
+      width: 100%;
+      max-width: 290px;
+      border-radius: 36px;
+      padding: 9px;
+      background: #13141B;
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5), 0 0 16px rgba(61, 80, 250, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      position: relative;
+      margin: 0 auto;
+    }
+    .phone-screen {
+      width: 100%;
+      height: auto;
+      border-radius: 28px;
+      display: block;
+      object-fit: cover;
+    }
+
+    /* ── Section Headings ─────────────────────────────────────── */
+    .section-head {
+      text-align: center;
+      margin: 80px 0 40px;
+      width: 100%;
+    }
+    .section-tag {
+      font-size: 0.8rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--brand-rose);
+      margin-bottom: 8px;
+      display: block;
+    }
+    .section-head h2 {
+      font-size: clamp(24px, 4vw, 36px);
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 12px;
+      color: #fff;
+    }
+    .section-head p {
+      color: var(--text-muted);
+      font-size: clamp(14px, 2vw, 16px);
+      max-width: 580px;
+      margin: 0 auto;
+    }
+
+    /* ── Features Grid ────────────────────────────────────────── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 22px;
+      width: 100%;
+    }
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 30px 26px;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+      text-align: left;
+    }
+    @media (hover: hover) {
+      .feature-card:hover {
+        transform: translateY(-3px);
+        border-color: var(--border-glow);
+      }
+    }
+    .feat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(61, 80, 250, 0.15), rgba(245, 59, 102, 0.15));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .feature-card h3 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #fff;
+    }
+    .feature-card p {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      line-height: 1.55;
+    }
+
+    /* ── Screenshots Gallery ──────────────────────────────────── */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+      width: 100%;
+    }
+    .gallery-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 22px;
+      padding: 8px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+      display: flex;
+      flex-direction: column;
+    }
+    @media (hover: hover) {
+      .gallery-item:hover {
+        transform: translateY(-4px);
+        border-color: var(--brand-blue);
+        box-shadow: 0 8px 24px rgba(61, 80, 250, 0.2);
+      }
+    }
+    .gallery-item img {
+      width: 100%;
+      height: auto;
+      border-radius: 16px;
+      display: block;
+      object-fit: cover;
+    }
+    .gallery-caption {
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      padding: 10px 4px 4px;
+    }
+
+    /* ── Steps / How to Install ───────────────────────────────── */
+    .steps-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+      width: 100%;
+    }
+    .step-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 32px 24px 24px;
+      position: relative;
+      text-align: left;
+    }
+    .step-num {
+      position: absolute;
+      top: -14px;
+      left: 24px;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3D50FA, #F53B66);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.85rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    .step-box h4 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin: 6px 0 8px;
+      color: #fff;
+    }
+    .step-box p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    /* ── Support & Sponsor Hub ────────────────────────────────── */
+    .support-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      width: 100%;
+    }
+    .support-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      text-align: left;
+      transition: border-color 0.2s ease;
+    }
+    .support-card:hover {
+      border-color: rgba(61, 80, 250, 0.35);
+    }
+    .support-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .badge-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 16px;
+    }
+    .badge-binance { background: #F3BA2F; color: #000; }
+    .badge-usdt { background: #26A17B; color: #fff; font-size: 18px; }
+    .badge-ad { background: linear-gradient(135deg, #3D50FA, #F53B66); color: #fff; }
+
+    .crypto-box {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin: 12px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .crypto-val {
+      font-family: monospace;
+      font-size: 13px;
+      color: #fff;
+      word-break: break-all;
+    }
+    .copy-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-left: 8px;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+    .copy-btn:hover {
+      background: var(--brand-blue);
+      color: #fff;
+    }
+
+    /* ── Bottom Download Banner ───────────────────────────────── */
+    .download-banner {
+      margin: 80px 0 50px;
+      width: 100%;
+      background: linear-gradient(135deg, rgba(61, 80, 250, 0.12), rgba(245, 59, 102, 0.12));
+      border: 1px solid rgba(61, 80, 250, 0.3);
+      border-radius: 28px;
+      padding: 50px 24px;
+      text-align: center;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .download-banner h2 {
+      font-size: clamp(26px, 4vw, 40px);
+      font-weight: 800;
+      margin-bottom: 14px;
+      color: #fff;
+    }
+    .download-banner p {
+      color: var(--text-muted);
+      font-size: clamp(14px, 2vw, 17px);
+      max-width: 540px;
+      margin: 0 auto 28px;
+    }
+
+    /* ── Older Versions Section ──────────────────────────────── */
+    .older-versions {
+      width: 100%;
+      max-width: 860px;
+      margin: 0 auto 50px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 30px 24px;
+      text-align: left;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+    .older-versions-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .older-versions-head h3 {
+      color: #fff;
+      font-size: 1.25rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .version-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 12px;
+      transition: all 0.2s ease;
+    }
+    .version-item:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(61, 80, 250, 0.3);
+    }
+    .version-tag {
+      display: inline-block;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #fff;
+    }
+    .version-badge-latest {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(0, 229, 255, 0.15);
+      color: #00E5FF;
+      border: 1px solid rgba(0, 229, 255, 0.4);
+      margin-left: 8px;
+    }
+    .version-badge-archive {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-muted);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      margin-left: 8px;
+    }
+    .version-meta {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+    .version-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-version-dl {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      transition: all 0.2s;
+    }
+    .btn-version-dl:hover {
+      background: var(--brand-blue);
+      border-color: var(--brand-blue);
+      color: #fff;
+    }
+    .btn-version-primary {
+      background: linear-gradient(135deg, #3D50FA, #7044FA);
+      border-color: transparent;
+    }
+    .btn-version-primary:hover {
+      box-shadow: 0 4px 16px rgba(61, 80, 250, 0.4);
+      transform: translateY(-1px);
+    }
+
+    /* ── Footer ───────────────────────────────────────────────── */
+    footer {
+      width: 100%;
+      border-top: 1px solid var(--border-color);
+      padding: 40px 0;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      text-align: center;
+    }
+    .footer-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      width: 100%;
+    }
+    .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      margin: 0 10px;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover {
+      color: var(--brand-blue);
+    }
+    .footer-disclaimer {
+      margin-top: 20px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 0.8rem;
+      color: #6b7280;
+      line-height: 1.5;
+    }
+
+    /* ── Mobile Responsive Overrides ──────────────────────────── */
+    @media (max-width: 860px) {
+      .container {
+        padding: 0 16px;
+      }
+      .nav-links {
+        display: none;
+      }
+      .hero {
+        grid-template-columns: 1fr;
+        text-align: center;
+        padding-top: 40px;
+        gap: 36px;
+      }
+      .hero-content {
+        align-items: center;
+        text-align: center;
+      }
+      .hero p {
+        margin: 0 auto 26px;
+      }
+      .hero-cta {
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+      .btn-primary, .btn-secondary {
+        width: 100%;
+        max-width: 320px;
+      }
+      .meta-info {
+        justify-content: center;
+      }
+      .phone-frame {
+        max-width: 260px;
+      }
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+      .gallery-grid {
+        grid-template-columns: 1fr;
+      }
+      .steps-row {
+        grid-template-columns: 1fr;
+      }
+      .support-grid {
+        grid-template-columns: 1fr;
+      }
+      .footer-content {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+  </style>
+
+  <!-- Popunder Ad Script (Anti-Adblock) -->
+  <script src="https://ensueddenied.com/37/25/9b/37259b66dbff460ae7ec247f566cd12a.js"></script>
+</head>
+<body>
+
+  <!-- Header Navigation -->
+  <header>
+    <div class="nav-wrap">
+      <a href="#" class="brand">
+        <img src="logo.png" alt="CineTheta Logo" onerror="this.style.display='none'; document.getElementById('fbLogo').style.display='flex';" />
+        <div id="fbLogo" class="brand-fallback-logo" style="display:none;">C</div>
+        Cine<span>Theta</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#screenshots">Screenshots</a></li>
+        <li><a href="#install">How to Install</a></li>
+        <li><a href="#releases">Releases</a></li>
+        <li><a href="#support">Support</a></li>
+        <li><a href="https://github.com/cinetheta/cinetheta.github.io" target="_blank">GitHub</a></li>
+        <li>
+          <a href="./app/SineTheta-v1.0.4.apk" download="SineTheta-v1.0.4.apk" class="btn-nav">
+            Download APK
+          </a>
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- ── Hero Section ──────────────────────────────────────── -->
+    <section class="hero">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span class="hero-badge-dot"></span>
+          <span>v1.0.2 STABLE RELEASE</span>
+        </div>
+
+        <h1>
+          Stream & Download<br />
+          <span>Without Limits</span>
+        </h1>
+
+        <p>
+          CineTheta is a sleek, modern Android streaming application built with 100% native Jetpack Compose. Enjoy high-speed multi-provider scrapers, offline downloads, Picture-in-Picture, and multi-track audio & subtitles.
+        </p>
+
+        <div class="hero-cta">
+          <!-- Direct APK Download Button -->
+          <a href="./app/SineTheta-v1.0.4.apk" download="SineTheta-v1.0.4.apk" class="btn-primary" id="heroDownloadBtn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Direct Download (v1.0.2)
+          </a>
+
+          <!-- GitHub CDN Mirror Link -->
+          <a href="https://github.com/cinetheta/cinetheta.github.io/releases/download/v1.0.2/CineTheta-v1.0.2.apk" class="btn-secondary" title="Direct download from GitHub CDN">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
+            </svg>
+            GitHub CDN Mirror
+          </a>
+        </div>
+
+        <div class="meta-info">
+          <span>
+            <svg viewBox="0 0 24 24"><path d="M17 1H7c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-2-2-2zm0 18H7V5h10v14z"/></svg>
+            Android 7.0+
+          </span>
+          <span>•</span>
+          <span>
+            <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+            ~17.5 MB
+          </span>
+          <span>•</span>
+          <span>
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+            100% Free
+          </span>
+        </div>
+      </div>
+
+      <!-- Hero Phone Mockup -->
+      <div class="hero-visual">
+        <div class="phone-frame">
+          <img src="Screenshots/home%20page/homepage-dark.jpg" alt="CineTheta Home Interface" class="phone-screen" onerror="this.src='Screenshots/home page/homepage-dark.jpg';" />
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Key Features ──────────────────────────────────────── -->
+    <section id="features" class="container">
+      <div class="section-head">
+        <span class="section-tag">Key Features</span>
+        <h2>Engineered for Seamless Entertainment</h2>
+        <p>Built completely free from ads during playback, heavy frameworks, or unnecessary trackers.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feat-icon">⚡</div>
+          <h3>Multi-Provider Engines</h3>
+          <p>Integrated with high-speed scraping sources including NetMirror, Prime, and OTT providers with automatic background challenge resolution.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feat-icon">🎬</div>
+          <h3>Next-Gen Video Player</h3>
+          <p>ExoPlayer and VLC FFmpeg decoders with hardware acceleration, Picture-in-Picture (PiP), multi-audio track switching, and subtitles.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feat-icon">📥</div>
+          <h3>Offline Download Manager</h3>
+          <p>Save full movies and episodes directly to device storage with background chunk resume capability and download speed graphs.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feat-icon">🛡️</div>
+          <h3>Ad-Free Video Playback</h3>
+          <p>Zero pre-roll video ads, zero mid-roll interruptions, and zero banner overlays while watching your favorite movies and series.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feat-icon">🌐</div>
+          <h3>Built-in DNS-over-HTTPS</h3>
+          <p>Cloudflare & Google encrypted DNS resolver bypasses ISP domain throttling and ensures reliable video connection everywhere.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feat-icon">🎨</div>
+          <h3>120Hz Jetpack Compose UI</h3>
+          <p>Fluid, ultra-responsive native interface designed specifically for modern Android devices with Dark Mode and gesture navigation.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Real App Screenshots Gallery ─────────────────────── -->
+    <section id="screenshots" class="container">
+      <div class="section-head">
+        <span class="section-tag">Interface Showcase</span>
+        <h2>Real App Screenshots</h2>
+        <p>A look inside CineTheta's clean, modern interface designed for effortless navigation.</p>
+      </div>
+
+      <div class="gallery-grid">
+        <div class="gallery-item">
+          <img src="Screenshots/home%20page/homepage-dark.jpg" alt="Home Dashboard" loading="lazy" decoding="async" onerror="this.src='Screenshots/home page/homepage-dark.jpg';" />
+          <div class="gallery-caption">Home Dashboard</div>
+        </div>
+
+        <div class="gallery-item">
+          <img src="Screenshots/player/overall-player.jpg" alt="Video Player" loading="lazy" decoding="async" onerror="this.src='Screenshots/player/overall-player.jpg';" />
+          <div class="gallery-caption">Advanced Video Player</div>
+        </div>
+
+        <div class="gallery-item">
+          <img src="Screenshots/player/Episodes-in-player.jpg" alt="Episode Selector" loading="lazy" decoding="async" onerror="this.src='Screenshots/player/Episodes-in-player.jpg';" />
+          <div class="gallery-caption">In-Player Episode Selector</div>
+        </div>
+
+        <div class="gallery-item">
+          <img src="Screenshots/player/multi-audio.jpg" alt="Multi-Audio & Subtitles" loading="lazy" decoding="async" onerror="this.src='Screenshots/player/multi-audio.jpg';" />
+          <div class="gallery-caption">Audio & Subtitle Tracks</div>
+        </div>
+
+        <div class="gallery-item">
+          <img src="Screenshots/detail card/Screenshot_20260913-123258.jpg" alt="Media Details & Seasons" loading="lazy" decoding="async" onerror="this.src='Screenshots/detail card/Screenshot_20260913-123258.jpg';" />
+          <div class="gallery-caption">Media Details & Seasons</div>
+        </div>
+
+        <div class="gallery-item">
+          <img src="Screenshots/Search/Screenshot_20260913-123452.jpg" alt="Search & Discovery" loading="lazy" decoding="async" onerror="this.src='Screenshots/Search/Screenshot_20260913-123452.jpg';" />
+          <div class="gallery-caption">Multi-Source Search</div>
+        </div>
+
+        <div class="gallery-item">
+          <img src="Screenshots/download/download-dark.jpg" alt="Downloads Manager" loading="lazy" decoding="async" onerror="this.src='Screenshots/download/download-dark.jpg';" />
+          <div class="gallery-caption">Offline Downloads Manager</div>
+        </div>
+
+        <div class="gallery-item">
+          <img src="Screenshots/setting/setting-dark.jpg" alt="Settings & DoH" loading="lazy" decoding="async" onerror="this.src='Screenshots/setting/setting-dark.jpg';" />
+          <div class="gallery-caption">Settings & DNS-over-HTTPS</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── How to Install ────────────────────────────────────── -->
+    <section id="install" class="container">
+      <div class="section-head">
+        <span class="section-tag">Quick Setup</span>
+        <h2>How to Install CineTheta</h2>
+        <p>Get up and running on your Android device in less than a minute.</p>
+      </div>
+
+      <div class="steps-row">
+        <div class="step-box">
+          <div class="step-num">1</div>
+          <h4>Download APK</h4>
+          <p>Tap the direct download button to save <code>CineTheta-v1.0.2.apk</code> directly to your device storage.</p>
+        </div>
+
+        <div class="step-box">
+          <div class="step-num">2</div>
+          <h4>Allow Unknown Sources</h4>
+          <p>If prompted by Android, enable "Install unknown apps" for your browser in device settings.</p>
+        </div>
+
+        <div class="step-box">
+          <div class="step-num">3</div>
+          <h4>Install & Enjoy</h4>
+          <p>Open the downloaded APK, tap Install, launch CineTheta, and start streaming your favorite media instantly!</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Support & Sponsor Hub ────────────────────────────── -->
+    <section id="support" class="container">
+      <div class="section-head">
+        <span class="section-tag">Support CineTheta</span>
+        <h2>Keep the Servers Running</h2>
+        <p>CineTheta is free and open. Your contributions directly cover server bandwidth, API scrapers, and continuous updates.</p>
+      </div>
+
+      <div class="support-grid">
+        <!-- Free Sponsor Ad Contribution -->
+        <div class="support-card">
+          <div>
+            <div class="support-header">
+              <div class="badge-icon badge-ad">🎬</div>
+              <div>
+                <h4 style="color:#fff; font-size:1.05rem;">Free Contribution</h4>
+                <div style="font-size:0.8rem; color:var(--text-muted);">Browse Sponsor (20s+)</div>
+              </div>
+            </div>
+            <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:14px;">
+              If you cannot donate crypto, simply visiting our sponsor page for 20 seconds is 100% free and directly supports server costs!
+            </p>
+          </div>
+          <a href="https://ensueddenied.com/jg7gcgvu?key=a0919ba886af754e302a4630d7efcf1f" target="_blank" class="btn-primary" style="padding:11px 18px; font-size:0.9rem; width:100%;">
+            Visit Sponsor Page
+          </a>
+        </div>
+
+        <!-- Binance Pay -->
+        <div class="support-card">
+          <div>
+            <div class="support-header">
+              <div class="badge-icon badge-binance">B</div>
+              <div>
+                <h4 style="color:#fff; font-size:1.05rem;">Binance Pay</h4>
+                <div style="font-size:0.8rem; color:var(--text-muted);">Instant 0% Fee Transfer</div>
+              </div>
+            </div>
+            <div class="crypto-box">
+              <span class="crypto-val" id="binanceId">1041683310</span>
+              <button class="copy-btn" onclick="copyText('1041683310', this)">Copy</button>
+            </div>
+          </div>
+          <div style="font-size:0.8rem; color:var(--text-dim);">Send via Binance App (Pay ID)</div>
+        </div>
+
+        <!-- USDT TRC-20 -->
+        <div class="support-card">
+          <div>
+            <div class="support-header">
+              <div class="badge-icon badge-usdt">₮</div>
+              <div>
+                <h4 style="color:#fff; font-size:1.05rem;">USDT (TRC-20)</h4>
+                <div style="font-size:0.8rem; color:var(--text-muted);">Tron Network</div>
+              </div>
+            </div>
+            <div class="crypto-box">
+              <span class="crypto-val" id="usdtAddress">TJEbUfurBzdNhFARk6STdzNKAKpuQR5g6j</span>
+              <button class="copy-btn" onclick="copyText('TJEbUfurBzdNhFARk6STdzNKAKpuQR5g6j', this)">Copy</button>
+            </div>
+          </div>
+          <div style="font-size:0.8rem; color:var(--text-dim);">Trust Wallet, MetaMask, or any Exchange</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Call to Action Banner ────────────────────────────── -->
+    <div class="download-banner">
+      <h2>Ready to Experience CineTheta?</h2>
+      <p>Download the latest v1.0.4 stable APK now. No account creation, subscription, or credit card required.</p>
+      <a href="./app/SineTheta-v1.0.4.apk" download="SineTheta-v1.0.4.apk" class="btn-primary">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        Direct Download APK (v1.0.2)
+      </a>
+    </div>
+
+    <!-- ── Older Versions & Release Archive ─────────────────── -->
+    <section class="older-versions" id="releases">
+      <div class="older-versions-head">
+        <h3>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+          Previous Versions & Release Archive
+        </h3>
+        <span style="font-size:0.82rem; color:var(--text-dim);">Download older APK releases</span>
+      </div>
+
+            <!-- Current Version v1.0.4 -->
+      <div class="version-item">
+        <div>
+          <div>
+            <span class="version-tag">SineTheta v1.0.4</span>
+            <span class="version-badge-latest">Latest • Recommended</span>
+          </div>
+          <div class="version-meta">Release Date: Sep 24, 2026 • Build 9 • Size: ~17.5 MB • Android 7.0+</div>
+        </div>
+        <div class="version-actions">
+          <a href="./app/SineTheta-v1.0.4.apk" download="SineTheta-v1.0.4.apk" class="btn-version-dl btn-version-primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Download v1.0.4
+          </a>
+          <a href="https://github.com/cinetheta/cinetheta.github.io/releases/download/v1.0.4/SineTheta-v1.0.4.apk" class="btn-version-dl" title="GitHub CDN Mirror">
+            CDN
+          </a>
+        </div>
+      </div>
+
+      <!-- Previous Version v1.0.3 -->
+      <div class="version-item">
+        <div>
+          <div>
+            <span class="version-tag">SineTheta v1.0.3</span>
+            <span class="version-badge-archive">Previous Release</span>
+          </div>
+          <div class="version-meta">Release Date: Sep 23, 2026 • Build 8 • Size: ~17.5 MB • Android 7.0+</div>
+        </div>
+        <div class="version-actions">
+          <a href="./app/SineTheta-v1.0.3.apk" download="SineTheta-v1.0.3.apk" class="btn-version-dl">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Download v1.0.3
+          </a>
+          <a href="https://github.com/cinetheta/cinetheta.github.io/releases/download/v1.0.3/SineTheta-v1.0.3.apk" class="btn-version-dl" title="GitHub CDN Mirror">
+            CDN
+          </a>
+        </div>
+      </div>
+
+      <!-- Older Version v1.0.2 -->
+      <div class="version-item">
+        <div>
+          <div>
+            <span class="version-tag">CineTheta v1.0.2</span>
+            <span class="version-badge-archive">Archive Release</span>
+          </div>
+          <div class="version-meta">Release Date: Sep 22, 2026 • Build 7 • Size: ~17.5 MB • Android 7.0+</div>
+        </div>
+        <div class="version-actions">
+          <a href="./app/CineTheta-v1.0.2.apk" download="CineTheta-v1.0.2.apk" class="btn-version-dl ">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Download v1.0.2
+          </a>
+          <a href="https://github.com/cinetheta/cinetheta.github.io/releases/download/v1.0.2/CineTheta-v1.0.2.apk" class="btn-version-dl" title="GitHub CDN Mirror">
+            CDN
+          </a>
+        </div>
+      </div>
+
+      <!-- Previous Version v1.0.1 -->
+      <div class="version-item">
+        <div>
+          <div>
+            <span class="version-tag">CineTheta v1.0.1</span>
+            <span class="version-badge-archive">Previous Release</span>
+          </div>
+          <div class="version-meta">Release Date: Sep 20, 2026 • Build 6 • Size: ~17.4 MB • Android 7.0+</div>
+        </div>
+        <div class="version-actions">
+          <a href="./app/CineTheta-v1.0.1.apk" download="CineTheta-v1.0.1.apk" class="btn-version-dl">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Download v1.0.1
+          </a>
+          <a href="https://github.com/cinetheta/cinetheta.github.io/releases/download/v.1.0.1/CineTheta-v1.0.1.apk" class="btn-version-dl" title="GitHub CDN Mirror">
+            CDN
+          </a>
+        </div>
+      </div>
+
+      <!-- Older Version v1.0.0 -->
+      <div class="version-item">
+        <div>
+          <div>
+            <span class="version-tag">CineTheta v1.0.0</span>
+            <span class="version-badge-archive">Initial Release</span>
+          </div>
+          <div class="version-meta">Release Date: Sep 19, 2026 • Build 5 • Size: ~17.4 MB • Android 7.0+</div>
+        </div>
+        <div class="version-actions">
+          <a href="./app/CineTheta-v1.0.0.apk" download="CineTheta-v1.0.0.apk" class="btn-version-dl">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Download v1.0.0
+          </a>
+          <a href="https://github.com/cinetheta/cinetheta.github.io/releases/download/v1.0.0/CineTheta-v1.0.0.apk" class="btn-version-dl" title="GitHub CDN Mirror">
+            CDN
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Footer ───────────────────────────────────────────── -->
+    <footer>
+      <div class="footer-content">
+        <div class="brand">
+          <img src="logo.png" alt="CineTheta Logo" style="width:28px; height:28px; border-radius:8px;" onerror="this.style.display='none';" />
+          Cine<span>Theta</span>
+        </div>
+        <div class="footer-links">
+          <a href="#features">Features</a>
+          <a href="#screenshots">Screenshots</a>
+          <a href="#install">Install</a>
+          <a href="#releases">Releases</a>
+          <a href="#support">Support</a>
+          <a href="https://github.com/cinetheta/cinetheta.github.io" target="_blank">GitHub</a>
+        </div>
+        <div>v1.0.2 Stable</div>
+      </div>
+      <div class="footer-disclaimer">
+        CineTheta does not host, upload, or store any media content on its own servers. It functions as an automated indexing client using public providers for educational and personal use only.
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Clipboard Copy Script -->
+  <script>
+    function copyText(text, btn) {
+      navigator.clipboard.writeText(text).then(() => {
+        const orig = btn.innerText;
+        btn.innerText = "Copied! ✓";
+        btn.style.background = "#3D50FA";
+        btn.style.color = "#fff";
+        setTimeout(() => {
+          btn.innerText = orig;
+          btn.style.background = "";
+          btn.style.color = "";
+        }, 2000);
+      }).catch(() => {
+        alert("Failed to copy. Please copy manually: " + text);
+      });
+    }
+  </script>
+
+  <!-- Social Bar Ad Script (Anti-Adblock) -->
+  <script src="https://ensueddenied.com/9e/1d/74/9e1d74b8e2cc80f23332df3a07e45015.js"></script>
+
+</body>
+</html>
