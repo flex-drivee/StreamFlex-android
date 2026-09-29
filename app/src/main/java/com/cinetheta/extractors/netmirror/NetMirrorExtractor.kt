@@ -167,7 +167,10 @@ class NetMirrorExtractor : BaseExtractor() {
                     val quality = Quality.fromLabel(label)
                     
                     val ott = android.net.Uri.parse(source.url).getQueryParameter("ott") ?: "pv"
-                    val finalUrl = file
+                    
+                    // NetMirror restricts the M3U8 to a single language if &lang= is present.
+                    // By removing it, NetMirror returns the full Master Playlist with all audio tracks!
+                    val finalUrl = file.replace(Regex("&lang=[a-zA-Z]+"), "")
 
                     streams += StreamLink(
                         name        = "${source.provider} - $label",

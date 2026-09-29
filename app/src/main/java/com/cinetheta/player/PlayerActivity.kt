@@ -144,6 +144,39 @@ class PlayerActivity : ComponentActivity() {
             // Sync streams to controller
             LaunchedEffect(uiState.streams) {
                 if (uiState.streams.isNotEmpty()) {
+                    val prefs = context.getSharedPreferences("cinetheta_settings", android.content.Context.MODE_PRIVATE)
+                    val prefPlayer = prefs.getString("preferred_player", "SYSTEM") ?: "SYSTEM"
+                    
+                    if (prefPlayer != "SYSTEM") {
+                        try {
+                            val stream = uiState.streams.first()
+                            var uriString = stream.url
+                            if (uriString.startsWith("//")) uriString = "https:$uriString"
+                            
+                            val intent = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
+                                setDataAndType(android.net.Uri.parse(uriString), "video/*")
+                                
+                                val packageName = when (prefPlayer) {
+                                    "VLC" -> "org.videolan.vlc"
+                                    "MX_PLAYER" -> "com.mxtech.videoplayer.ad"
+                                    "JUST_PLAYER" -> "com.brouken.player"
+                                    else -> null
+                                }
+                                if (packageName != null) {
+                                    setPackage(packageName)
+                                }
+                                
+                                val fullTitle = if (isShow) "$videoTitle - S${session.currentEpisode?.seasonNumber} E${session.currentEpisode?.episodeNumber}" else videoTitle
+                                putExtra("title", fullTitle)
+                            }
+                            context.startActivity(intent)
+                            (context as? android.app.Activity)?.finish()
+                            return@LaunchedEffect
+                        } catch (e: Exception) {
+                            android.widget.Toast.makeText(context, "Player not installed, using built-in player", android.widget.Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                    
                     controller.setStreams(uiState.streams)
                 }
             }

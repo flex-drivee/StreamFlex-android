@@ -47,11 +47,13 @@ fun SettingsScreen(
     val wifiOnlyDownloads by viewModel.wifiOnlyDownloads.collectAsState()
     val downloadQuality by viewModel.downloadQuality.collectAsState()
     val playerVideoQuality by viewModel.playerVideoQuality.collectAsState()
+    val preferredPlayer by viewModel.preferredPlayer.collectAsState()
     val smartDownloads by viewModel.smartDownloads.collectAsState()
     val storageStats by viewModel.storageStats.collectAsState()
 
     val scrollState = rememberLazyListState()
     var showThemeDialog by remember { mutableStateOf(false) }
+    var showPlayerDialog by remember { mutableStateOf(false) }
     var showDecoderDialog by remember { mutableStateOf(false) }
     var showDohDialog by remember { mutableStateOf(false) }
     var showProviderDialog by remember { mutableStateOf(false) }
@@ -152,6 +154,13 @@ fun SettingsScreen(
                         title = "Default Video Quality",
                         subtitle = "Current: $playerVideoQuality",
                         onTap = { showPlayerQualityDialog = true }
+                    )
+                    SettingsDivider()
+                    SettingsTile(
+                        icon = Icons.Outlined.PlayCircle,
+                        title = "Preferred Player",
+                        subtitle = preferredPlayer.title,
+                        onTap = { showPlayerDialog = true }
                     )
                     SettingsDivider()
                     SettingsTile(
@@ -593,6 +602,34 @@ fun SettingsScreen(
                 },
                 confirmButton = {
                     TextButton(onClick = { showPlayerQualityDialog = false }) {
+                        Text("Cancel", color = MaterialTheme.colorScheme.primary)
+                    }
+                }
+            )
+        }
+
+        if (showPlayerDialog) {
+            val players = VideoPlayer.values().toList()
+            AlertDialog(
+                onDismissRequest = { showPlayerDialog = false },
+                title = { Text("Preferred Player", color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold) },
+                containerColor = MaterialTheme.colorScheme.surface,
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        players.forEach { p ->
+                            ThemeOptionRow(
+                                title = p.title,
+                                isSelected = preferredPlayer == p,
+                                onClick = {
+                                    viewModel.setPreferredPlayer(p)
+                                    showPlayerDialog = false
+                                }
+                            )
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showPlayerDialog = false }) {
                         Text("Cancel", color = MaterialTheme.colorScheme.primary)
                     }
                 }

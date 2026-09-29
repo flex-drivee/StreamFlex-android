@@ -8,6 +8,8 @@ plugins {
     // If on older Kotlin (< 2.0), this might not be needed if set up in project gradle, but keeping it if it works for you.
     id("org.jetbrains.kotlin.plugin.compose")
     id("org.jetbrains.kotlin.plugin.serialization")
+    id("com.google.gms.google-services")
+    
 }
 
 // 1. Load the secrets (Using explicit imports fixes the "Unresolved reference" error)
@@ -156,6 +158,8 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
+    implementation(platform("com.google.firebase:firebase-bom:34.19.0"))
+    implementation("com.google.firebase:firebase-analytics")
 }
 
 
