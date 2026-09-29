@@ -13,6 +13,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+enum class VideoPlayer(val title: String, val packageName: String?) {
+    SYSTEM("Built-in Player", null),
+    VLC("VLC Player", "org.videolan.vlc"),
+    MX_PLAYER("MX Player", "com.mxtech.videoplayer.ad"),
+    JUST_PLAYER("Just (Video) Player", "com.brouken.player")
+}
+
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
     private val prefs = application.getSharedPreferences("cinetheta_settings", Context.MODE_PRIVATE)
     private val storageManager = RepositoryModule.downloadStorageManager
@@ -57,6 +64,11 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     
     private val _playerVideoQuality = MutableStateFlow(prefs.getString("player_video_quality", "Auto") ?: "Auto")
     val playerVideoQuality: StateFlow<String> = _playerVideoQuality.asStateFlow()
+    
+    private val _preferredPlayer = MutableStateFlow(
+        VideoPlayer.valueOf(prefs.getString("preferred_player", VideoPlayer.SYSTEM.name) ?: VideoPlayer.SYSTEM.name)
+    )
+    val preferredPlayer: StateFlow<VideoPlayer> = _preferredPlayer.asStateFlow()
 
     private val _smartDownloads = MutableStateFlow(prefs.getBoolean("smart_downloads", true))
     val smartDownloads: StateFlow<Boolean> = _smartDownloads.asStateFlow()
@@ -120,6 +132,11 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun setPlayerVideoQuality(quality: String) {
         prefs.edit().putString("player_video_quality", quality).apply()
         _playerVideoQuality.value = quality
+    }
+
+    fun setPreferredPlayer(player: VideoPlayer) {
+        prefs.edit().putString("preferred_player", player.name).apply()
+        _preferredPlayer.value = player
     }
 
     fun setSmartDownloads(enabled: Boolean) {

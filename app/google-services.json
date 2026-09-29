@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "65940733118",
+    "project_id": "cinetheta",
+    "storage_bucket": "cinetheta.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:65940733118:android:9ccf97f3d85459842432ef",
+        "android_client_info": {
+          "package_name": "com.cinetheta.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDVSYrkf7eNCXFYrSEJPuykZl8KuxPM-0w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

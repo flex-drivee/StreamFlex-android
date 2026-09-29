@@ -359,6 +359,19 @@ fun PluginDetailScreen(
                                                     jsonHeaders.put("Cookie", cookieStr)
                                                 }
                                                 uriString += "&headers=${java.net.URLEncoder.encode(jsonHeaders.toString(), "UTF-8")}"
+                                                
+                                                // Pass subtitles to SaveTheta!
+                                                if (stream.subtitles.isNotEmpty()) {
+                                                    val subsJson = org.json.JSONArray()
+                                                    stream.subtitles.forEach { sub ->
+                                                        val subObj = org.json.JSONObject()
+                                                        subObj.put("language", sub.language)
+                                                        subObj.put("url", sub.url)
+                                                        subObj.put("label", sub.label)
+                                                        subsJson.put(subObj)
+                                                    }
+                                                    uriString += "&subtitles=${java.net.URLEncoder.encode(subsJson.toString(), "UTF-8")}"
+                                                }
                                             } catch (e: Exception) {}
 
                                             val intent = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
