@@ -1,9 +1,8 @@
 package com.cinetheta.app.data.bookmarks
 
-import android.content.Context
 import com.cinetheta.app.CineThetaApplication
-import org.json.JSONArray
-import org.json.JSONObject
+import com.cinetheta.app.data.local.AppDatabase
+import com.cinetheta.app.data.local.entities.BookmarkEntity
 
 data class BookmarkItem(
     val id: String,
@@ -13,63 +12,41 @@ data class BookmarkItem(
 )
 
 object BookmarkManager {
-    private const val PREFS_NAME = "bookmarks_prefs"
-    private const val KEY_BOOKMARKS = "bookmarks_list"
-
-    private val prefs by lazy {
-        CineThetaApplication.instance.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    private val db by lazy {
+        AppDatabase.getDatabase(CineThetaApplication.instance)
+    }
+    private val bookmarkDao by lazy {
+        db.bookmarkDao()
     }
 
     fun addBookmark(item: BookmarkItem) {
-        val list = getBookmarks().toMutableList()
-        if (list.none { it.id == item.id }) {
-            list.add(0, item) // Add to top
-            saveBookmarks(list)
-        }
+        val entity = BookmarkEntity(
+            id = item.id,
+            title = item.title,
+            type = if (item.isShow) "tv" else "movie",
+            posterPath = item.posterUrl,
+            timestamp = System.currentTimeMillis()
+        )
+        bookmarkDao.insertBookmark(entity)
     }
 
     fun removeBookmark(id: String) {
-        val list = getBookmarks().toMutableList()
-        list.removeAll { it.id == id }
-        saveBookmarks(list)
+        bookmarkDao.deleteBookmark(id)
     }
 
     fun isBookmarked(id: String): Boolean {
-        return getBookmarks().any { it.id == id }
+        return bookmarkDao.getBookmark(id) != null
     }
 
     fun getBookmarks(): List<BookmarkItem> {
-        val jsonString = prefs.getString(KEY_BOOKMARKS, "[]") ?: "[]"
-        val list = mutableListOf<BookmarkItem>()
-        try {
-            val array = JSONArray(jsonString)
-            for (i in 0 until array.length()) {
-                val obj = array.getJSONObject(i)
-                list.add(
-                    BookmarkItem(
-                        id = obj.getString("id"),
-                        title = obj.getString("title"),
-                        posterUrl = if (obj.has("posterUrl")) obj.getString("posterUrl") else null,
-                        isShow = obj.getBoolean("isShow")
-                    )
-                )
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
+        val entities = bookmarkDao.getAllBookmarksSync()
+        return entities.map {
+            BookmarkItem(
+                id = it.id,
+                title = it.title,
+                posterUrl = it.posterPath,
+                isShow = it.type == "tv"
+            )
         }
-        return list
-    }
-
-    private fun saveBookmarks(list: List<BookmarkItem>) {
-        val array = JSONArray()
-        list.forEach {
-            val obj = JSONObject()
-            obj.put("id", it.id)
-            obj.put("title", it.title)
-            if (it.posterUrl != null) obj.put("posterUrl", it.posterUrl)
-            obj.put("isShow", it.isShow)
-            array.put(obj)
-        }
-        prefs.edit().putString(KEY_BOOKMARKS, array.toString()).apply()
     }
 }
