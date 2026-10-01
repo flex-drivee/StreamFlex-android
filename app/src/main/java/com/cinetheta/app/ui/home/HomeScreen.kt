@@ -53,6 +53,7 @@ fun HomeScreen(
     viewModel: HomeViewModel,
     providerRepository: ProviderRepository,
     onNavigateToDetail: (String, String) -> Unit,
+    onContinueWatchingClick: (com.cinetheta.player.resume.HistoryItem) -> Unit,
     onNavigateToContinueWatching: () -> Unit = {},
     onSearchClick: () -> Unit = {},
     onSettingsClick: () -> Unit = {},
@@ -199,7 +200,7 @@ fun HomeScreen(
                 item {
                     SFContinueWatchingRow(
                         items    = state.continueWatching,
-                        onItemClick = onNavigateToDetail,
+                        onItemClick = onContinueWatchingClick,
                         onSeeAllClick = onNavigateToContinueWatching
                     )
                 }
@@ -237,7 +238,8 @@ fun HomeScreen(
                 },
                 onSearchClick = onSearchClick,
                 onProfileClick = onSettingsClick,
-                onDownloadsClick = onDownloadsClick
+                onDownloadsClick = onDownloadsClick,
+                onProviderChanged = { viewModel.loadHomeData() }
             )
         }
 
@@ -301,7 +303,8 @@ private fun SFTopBar(
     onTabSelected: (Int) -> Unit,
     onSearchClick: () -> Unit,
     onProfileClick: () -> Unit,
-    onDownloadsClick: () -> Unit
+    onDownloadsClick: () -> Unit,
+    onProviderChanged: () -> Unit = {}
 ) {
     Box(
         modifier = Modifier
@@ -412,6 +415,7 @@ private fun SFTopBar(
                                         .edit().putString("selected_provider", null).apply()
                                         
                                     // UI state is updated smoothly. No restart needed.
+                                    onProviderChanged()
                                 }
                             )
                             providerRepository.enabledProviders().forEach { provider ->
@@ -427,6 +431,7 @@ private fun SFTopBar(
                                             .edit().putString("selected_provider", provider.id).apply()
                                             
                                         // UI state is updated smoothly. No restart needed.
+                                        onProviderChanged()
                                     },
                                     trailingIcon = {
                                         if (provider.id == "moviebox") {
@@ -743,7 +748,7 @@ fun SFSectionRow(
 @Composable
 private fun SFContinueWatchingRow(
     items: List<com.cinetheta.player.resume.HistoryItem>,
-    onItemClick: (String, String) -> Unit,
+    onItemClick: (com.cinetheta.player.resume.HistoryItem) -> Unit,
     onSeeAllClick: () -> Unit
 ) {
     if (items.isEmpty()) return
@@ -772,7 +777,7 @@ private fun SFContinueWatchingRow(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(items) { item ->
-                SFContinueCard(item = item, onClick = { onItemClick(item.type, item.id) })
+                SFContinueCard(item = item, onClick = { onItemClick(item) })
             }
         }
     }

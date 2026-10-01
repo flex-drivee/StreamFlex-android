@@ -64,9 +64,22 @@ var currentPluginSearchResult: DomainSearchResult? = null
 @Composable
 fun AppNavigation(
     repository: ContentRepository,
-    streamRepository: StreamRepository
+    streamRepository: StreamRepository,
+    navAction: String? = null
 ) {
     val navController = rememberNavController()
+    
+    // Handle external navigation actions (e.g. from notifications)
+    LaunchedEffect(navAction) {
+        if (navAction == "downloads") {
+            navController.navigate(Screen.Downloads.route) {
+                popUpTo(Screen.Home.route) { saveState = true }
+                launchSingleTop = true
+                restoreState = true
+            }
+        }
+    }
+
     val context = LocalContext.current
     val progressManager = remember { com.cinetheta.player.resume.PlaybackProgressManager(context) }
     val homeViewModelFactory = remember { HomeViewModelFactory(repository, progressManager) }
@@ -83,6 +96,29 @@ fun AppNavigation(
         Screen.Settings.route
     )
 
+    val handleHistoryItemClick: (com.cinetheta.player.resume.HistoryItem) -> Unit = { item ->
+        if (item.type.startsWith("PLUGIN:")) {
+            val parts = item.type.split(":")
+            val providerId = parts.getOrNull(1) ?: "unknown"
+            val mediaTypeStr = parts.getOrNull(2) ?: "MOVIE"
+            val mType = if (mediaTypeStr == "TV") com.cinetheta.domain.models.MediaType.TV else com.cinetheta.domain.models.MediaType.MOVIE
+            
+            val searchResult = com.cinetheta.domain.models.SearchResult(
+                id = item.id,
+                url = "", // Not needed for detail fetching if provider uses id
+                providerId = providerId,
+                providerName = providerId,
+                title = item.title,
+                mediaType = mType,
+                poster = item.posterPath
+            )
+            currentPluginSearchResult = searchResult
+            navController.navigate(Screen.PluginDetail.route)
+        } else {
+            navController.navigate(Screen.Detail.createRoute(item.type, item.id))
+        }
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         NavHost(
             navController = navController,
@@ -95,6 +131,7 @@ fun AppNavigation(
                     viewModel = homeViewModel,
                     providerRepository = com.cinetheta.app.di.ProviderModule.repository,
                     onNavigateToDetail = { type, id -> navController.navigate(Screen.Detail.createRoute(type, id)) },
+                    onContinueWatchingClick = handleHistoryItemClick,
                     onNavigateToContinueWatching = { navController.navigate(Screen.ContinueWatching.route) },
                     onSearchClick = { navController.navigate(Screen.PluginSearch.route) },
                     onSettingsClick = { navController.navigate(Screen.Settings.route) },
@@ -107,7 +144,7 @@ fun AppNavigation(
                 ContinueWatchingScreen(
                     viewModel = homeViewModel,
                     onBackClick = { navController.popBackStack() },
-                    onItemClick = { type, id -> navController.navigate(Screen.Detail.createRoute(type, id)) }
+                    onItemClick = handleHistoryItemClick
                 )
             }
 
