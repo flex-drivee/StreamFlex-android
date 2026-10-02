@@ -11,6 +11,9 @@ import androidx.compose.ui.text.font.FontWeight
 import com.cinetheta.app.ui.downloads.DownloadsScreen
 import com.cinetheta.app.ui.mylist.MyListScreen
 import kotlinx.coroutines.launch
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable

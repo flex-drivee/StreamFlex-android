@@ -1,59 +1,35 @@
 package com.cinetheta.app.data.search
 
-import android.content.Context
 import com.cinetheta.app.CineThetaApplication
-import org.json.JSONArray
+import com.cinetheta.app.data.local.AppDatabase
+import com.cinetheta.app.data.local.entities.SearchHistoryEntity
 
 object SearchHistoryManager {
-    private const val PREFS_NAME = "search_history_prefs"
-    private const val KEY_HISTORY = "search_history_list"
     private const val MAX_HISTORY = 10
-
-    private val prefs by lazy {
-        CineThetaApplication.instance.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    private val db by lazy {
+        AppDatabase.getDatabase(CineThetaApplication.instance)
+    }
+    private val searchDao by lazy {
+        db.searchHistoryDao()
     }
 
     fun addSearchQuery(query: String) {
         val q = query.trim()
         if (q.isBlank()) return
-        val list = getHistory().toMutableList()
-        // Remove it if it already exists so we can bump it to the top
-        list.remove(q)
-        list.add(0, q)
         
-        if (list.size > MAX_HISTORY) {
-            list.removeAt(list.size - 1)
-        }
-        saveHistory(list)
+        val entity = SearchHistoryEntity(query = q, timestamp = System.currentTimeMillis())
+        searchDao.insertSearchQuery(entity)
     }
 
     fun removeSearchQuery(query: String) {
-        val list = getHistory().toMutableList()
-        list.remove(query)
-        saveHistory(list)
+        searchDao.deleteSearchQuery(query)
     }
     
     fun clearHistory() {
-        prefs.edit().remove(KEY_HISTORY).apply()
+        searchDao.clearHistory()
     }
 
     fun getHistory(): List<String> {
-        val jsonString = prefs.getString(KEY_HISTORY, "[]") ?: "[]"
-        val list = mutableListOf<String>()
-        try {
-            val array = JSONArray(jsonString)
-            for (i in 0 until array.length()) {
-                list.add(array.getString(i))
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        return list
-    }
-
-    private fun saveHistory(list: List<String>) {
-        val array = JSONArray()
-        list.forEach { array.put(it) }
-        prefs.edit().putString(KEY_HISTORY, array.toString()).apply()
+        return searchDao.getSearchHistorySync(MAX_HISTORY).map { it.query }
     }
 }

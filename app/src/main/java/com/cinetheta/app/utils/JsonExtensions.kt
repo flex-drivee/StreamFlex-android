@@ -7,7 +7,7 @@ inline fun <reified T> String?.parsed(): T? {
         if (this == null) return null
         Gson().fromJson(this, T::class.java)
     } catch (e: Exception) {
-        e.printStackTrace()
+        e.let { com.cinetheta.core.logger.Logger.e("Exception", it) }
         null
     }
 }

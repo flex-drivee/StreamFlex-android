@@ -59,6 +59,7 @@ object ExtractorManager {
         DoodExtractor(),
 
         PixelDrainExtractor(),
+        com.cinetheta.extractors.vidstack.VidStackExtractor(),
 
         com.cinetheta.extractors.hdstream4u.HdStream4uExtractor(),
         com.cinetheta.extractors.hdstream4u.HubStreamExtractor(),

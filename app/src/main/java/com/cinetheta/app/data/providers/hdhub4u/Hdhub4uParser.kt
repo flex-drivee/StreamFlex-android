@@ -96,7 +96,7 @@ class Hdhub4uParser {
             links.addAll(extractedLinks)
 
         } catch (e: Exception) {
-            e.printStackTrace()
+            e.let { com.cinetheta.core.logger.Logger.e("Exception", it) }
         }
 
         return@withContext links

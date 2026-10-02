@@ -10,5 +10,7 @@ data class AudioTrack(
 
     val channels: String? = null,
 
-    val isDefault: Boolean = false
+    val isDefault: Boolean = false,
+    
+    val url: String = ""
 )

@@ -1,14 +1,9 @@
 package com.cinetheta.player.resume
 
 import android.content.Context
-import android.content.SharedPreferences
-import com.cinetheta.app.domain.models.SearchResult
+import com.cinetheta.app.data.local.AppDatabase
+import com.cinetheta.app.data.local.entities.HistoryEntity
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
 @Serializable
 data class HistoryItem(
@@ -23,7 +18,11 @@ data class HistoryItem(
 )
 
 class PlaybackProgressManager(context: Context) {
-    private val prefs: SharedPreferences = context.getSharedPreferences("cinetheta_playback_progress", Context.MODE_PRIVATE)
+    private val db = AppDatabase.getDatabase(context)
+    private val historyDao = db.historyDao()
+    // Keeping SharedPreferences just for simple raw progress lookup optimization if needed,
+    // or we can use DB. We will migrate to DB for simplicity and scale.
+    private val prefs = context.getSharedPreferences("cinetheta_playback_progress", Context.MODE_PRIVATE)
 
     fun saveProgress(
         mediaId: String,
@@ -39,16 +38,16 @@ class PlaybackProgressManager(context: Context) {
         
         val percentage = positionMs.toFloat() / durationMs.toFloat()
         
-        // Raw progress for quick lookup (keyed by progressKey)
+        // Fast access progress for exact millisecond seeking
         if (percentage >= 0.95f) {
             prefs.edit().remove(progressKey).apply()
         } else if (positionMs > 10000L) {
             prefs.edit().putLong(progressKey, positionMs).apply()
         }
 
-        // Keep History for Continue Watching if watched > 10s and not completely finished
+        // Save to Room Database for 'Continue Watching' Home Screen
         if (positionMs > 10000L && percentage < 0.95f) {
-            val historyItem = HistoryItem(
+            val entity = HistoryEntity(
                 id = mediaId,
                 title = title,
                 type = type,
@@ -58,32 +57,38 @@ class PlaybackProgressManager(context: Context) {
                 timestamp = System.currentTimeMillis(),
                 episodeId = episodeId
             )
-            saveToHistoryList(historyItem)
+            // Using runBlocking logic internally via allowMainThreadQueries for sync compatibility
+            historyDao.insertHistoryItem(entity)
         } else if (percentage >= 0.95f) {
             removeFromHistory(mediaId)
         }
     }
+
+    fun saveLastStream(progressKey: String, streamName: String) {
+        prefs.edit().putString("stream_$progressKey", streamName).apply()
+    }
     
-    private fun saveToHistoryList(item: HistoryItem) {
-        val currentList = getHistory().toMutableList()
-        currentList.removeAll { it.id == item.id }
-        currentList.add(0, item) // Add to top
-        val limitedList = currentList.take(20) // Keep 20 recent items
-        prefs.edit().putString("history_list", Json.encodeToString(limitedList)).apply()
+    fun getLastStream(progressKey: String): String? {
+        return prefs.getString("stream_$progressKey", null)
     }
 
     fun removeFromHistory(mediaId: String) {
-        val currentList = getHistory().toMutableList()
-        currentList.removeAll { it.id == mediaId }
-        prefs.edit().putString("history_list", Json.encodeToString(currentList)).apply()
+        historyDao.deleteHistoryItem(mediaId)
     }
 
     fun getHistory(): List<HistoryItem> {
-        val json = prefs.getString("history_list", "[]") ?: "[]"
-        return try {
-            Json.decodeFromString<List<HistoryItem>>(json)
-        } catch (e: Exception) {
-            emptyList()
+        val entities = historyDao.getAllHistorySync()
+        return entities.map { 
+            HistoryItem(
+                id = it.id,
+                title = it.title,
+                type = it.type,
+                posterPath = it.posterPath,
+                positionMs = it.positionMs,
+                durationMs = it.durationMs,
+                timestamp = it.timestamp,
+                episodeId = it.episodeId
+            )
         }
     }
 

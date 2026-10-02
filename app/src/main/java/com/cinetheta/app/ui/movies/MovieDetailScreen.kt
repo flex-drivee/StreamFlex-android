@@ -83,6 +83,7 @@ fun MovieDetailScreen(
     var showProviderSelectorDialog by remember { mutableStateOf(false) }
     var pendingPlayAction by remember { mutableStateOf<(() -> Unit)?>(null) }
     var selectedStreamForSaveTheta by remember { mutableStateOf<com.cinetheta.domain.models.StreamLink?>(null) }
+    var showSaveThetaPrompt by remember { mutableStateOf(false) }
 
     LaunchedEffect(state.selectedSeason) { areAllEpisodesVisible = false }
 
@@ -525,7 +526,7 @@ fun MovieDetailScreen(
                                         context.startActivity(intent)
                                         viewModel.cancelDownloadDialog()
                                     } catch (e: Exception) {
-                                        android.widget.Toast.makeText(context, "SaveTheta app is not installed!", android.widget.Toast.LENGTH_SHORT).show()
+                                        showSaveThetaPrompt = true
                                     }
                                     selectedStreamForSaveTheta = null
                                 },
@@ -693,6 +694,58 @@ fun MovieDetailScreen(
                     }
                 },
                 containerColor = MaterialTheme.colorScheme.surface
+            )
+        }
+        
+        // --- SAVE THETA PROMPT ---
+        if (showSaveThetaPrompt) {
+            AlertDialog(
+                onDismissRequest = { showSaveThetaPrompt = false },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Filled.CloudDownload,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(36.dp)
+                    )
+                },
+                title = {
+                    Text(
+                        text = "SaveTheta Required",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                },
+                text = {
+                    Text(
+                        text = "To use this advanced download feature, you need to install the free SaveTheta app.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            showSaveThetaPrompt = false
+                            try {
+                                val intent = android.content.Intent(
+                                    android.content.Intent.ACTION_VIEW,
+                                    android.net.Uri.parse("https://github.com/cinetheta/savetheta/releases")
+                                )
+                                context.startActivity(intent)
+                            } catch (e: Exception) {}
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                    ) {
+                        Text("Download App", color = Color.White, fontWeight = FontWeight.Bold)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showSaveThetaPrompt = false }) {
+                        Text("Cancel", color = MaterialTheme.colorScheme.outline)
+                    }
+                }
             )
         }
     }

@@ -67,7 +67,7 @@ class AllProvidersTest {
                 println("[+] Provider ${provider.name} is working correctly.")
             } catch (e: Exception) {
                 println("[ERROR] Exception in provider ${provider.name}: ${e.message}")
-                e.printStackTrace()
+                e.let { com.cinetheta.core.logger.Logger.e("Exception", it) }
             }
         }
     }

@@ -132,13 +132,14 @@ object ResolverEngine {
         if (HostDetector.isDirect(source.hostType)) {
             StreamLogger.debug(TAG, "Direct stream detected: ${source.url}")
             val directLink = StreamLink(
-                name = "${source.provider} • Direct",
+                name = if (source.host.isNotBlank() && source.host != source.provider) "${source.provider} • ${source.host}" else "${source.provider} • Direct",
                 url = source.url,
                 quality = source.quality,
                 host = source.hostType,
                 headers = source.headers,
                 cookies = source.cookies,
-                referer = source.referer
+                referer = source.referer,
+                audioTracks = source.audioTracks
             )
             onStreamFound(directLink)
             return listOf(directLink)

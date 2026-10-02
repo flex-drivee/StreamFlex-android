@@ -183,6 +183,24 @@ fun AppNavigation(
                             if (episode != null) {
                                 putExtra("IS_SHOW", true)
                                 putExtra("CURRENT_EPISODE_ID", episode.number.toString())
+                                
+                                val allEpisodes = viewModel.uiState.value.result?.seasons?.flatMap { season -> 
+                                    season.episodes.map { ep -> Pair(season.number, ep) } 
+                                } ?: emptyList()
+                                
+                                if (allEpisodes.isNotEmpty()) {
+                                    val epIds = ArrayList(allEpisodes.map { it.second.number.toString() })
+                                    val epTitles = ArrayList(allEpisodes.map { it.second.title })
+                                    val epSeasons = ArrayList(allEpisodes.map { it.first })
+                                    val epNumbers = ArrayList(allEpisodes.map { it.second.number })
+                                    val epStills = ArrayList(allEpisodes.map { it.second.thumbnail ?: "" })
+
+                                    putStringArrayListExtra("EPISODE_IDS", epIds)
+                                    putStringArrayListExtra("EPISODE_TITLES", epTitles)
+                                    putIntegerArrayListExtra("EPISODE_SEASONS", epSeasons)
+                                    putIntegerArrayListExtra("EPISODE_NUMBERS", epNumbers)
+                                    putStringArrayListExtra("EPISODE_STILLS", epStills)
+                                }
                             } else {
                                 putExtra("IS_SHOW", false)
                             }

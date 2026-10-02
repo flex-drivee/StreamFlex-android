@@ -15,7 +15,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -52,6 +52,13 @@ fun PluginDetailScreen(
     val uiState by viewModel.uiState.collectAsState()
     val isShow = searchResult.mediaType.name == "TV" || searchResult.mediaType.name == "ANIME"
     var showComingSoonDialog by remember { mutableStateOf(false) }
+    var showSaveThetaPrompt by remember { mutableStateOf(false) }
+    var selectedStreamForSaveTheta by remember { mutableStateOf<com.cinetheta.domain.models.StreamLink?>(null) }
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val progressManager = remember { com.cinetheta.player.resume.PlaybackProgressManager(context) }
+    val historyItem = remember(searchResult.id) {
+        progressManager.getHistory().find { it.id == searchResult.id }
+    }
 
     LaunchedEffect(searchResult) {
         viewModel.loadContent(searchResult)
@@ -111,8 +118,8 @@ fun PluginDetailScreen(
                             )
                         }
                         
-                        // ── 2. MOVIE PLAY BUTTON ──────────
-                        if (result.sources.isNotEmpty() && result.seasons.isEmpty()) {
+                        // ── 2. ACTION BUTTONS ──────────
+                        if (result.sources.isNotEmpty() || result.seasons.isNotEmpty()) {
                             item {
                                 Column(
                                     modifier = Modifier
@@ -125,7 +132,19 @@ fun PluginDetailScreen(
                                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                                     ) {
                                         Button(
-                                            onClick = { onPlayClick(result.sources, null) },
+                                            onClick = {
+                                                if (isShow && result.seasons.isNotEmpty()) {
+                                                    val epToPlay = historyItem?.episodeId?.let { id ->
+                                                        result.seasons.flatMap { it.episodes }.find { it.number.toString() == id }
+                                                    } ?: result.seasons.firstOrNull()?.episodes?.firstOrNull()
+                                                    
+                                                    if (epToPlay != null) {
+                                                        onPlayClick(epToPlay.sources, epToPlay)
+                                                    }
+                                                } else if (result.sources.isNotEmpty()) {
+                                                    onPlayClick(result.sources, null)
+                                                }
+                                            },
                                             modifier = Modifier
                                                 .weight(1f)
                                                 .height(50.dp),
@@ -137,20 +156,23 @@ fun PluginDetailScreen(
                                         ) {
                                             Icon(Icons.Filled.PlayArrow, contentDescription = null, modifier = Modifier.size(24.dp))
                                             Spacer(modifier = Modifier.width(8.dp))
-                                            Text("Play Movie", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                                            val btnText = if (historyItem != null && historyItem.positionMs > 10000L) "Resume" else if (isShow) "Play" else "Play Movie"
+                                            Text(btnText, fontSize = 16.sp, fontWeight = FontWeight.Bold)
                                         }
 
-                                        OutlinedButton(
-                                            onClick = { viewModel.downloadContent(null) },
-                                            modifier = Modifier.height(50.dp),
-                                            shape = RoundedCornerShape(8.dp),
-                                            colors = ButtonDefaults.outlinedButtonColors(
-                                                contentColor = MaterialTheme.colorScheme.primary
-                                            )
-                                        ) {
-                                            Icon(Icons.Outlined.FileDownload, contentDescription = "Download", modifier = Modifier.size(22.dp))
-                                            Spacer(modifier = Modifier.width(6.dp))
-                                            Text("Download", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                                        if (!isShow) {
+                                            OutlinedButton(
+                                                onClick = { viewModel.downloadContent(null) },
+                                                modifier = Modifier.height(50.dp),
+                                                shape = RoundedCornerShape(8.dp),
+                                                colors = ButtonDefaults.outlinedButtonColors(
+                                                    contentColor = MaterialTheme.colorScheme.primary
+                                                )
+                                            ) {
+                                                Icon(Icons.Outlined.FileDownload, contentDescription = "Download", modifier = Modifier.size(22.dp))
+                                                Spacer(modifier = Modifier.width(6.dp))
+                                                Text("Download", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                                            }
                                         }
                                     }
                                 }
@@ -268,8 +290,6 @@ fun PluginDetailScreen(
                 }
             }
 
-            val context = androidx.compose.ui.platform.LocalContext.current
-            var selectedStreamForSaveTheta by remember { mutableStateOf<com.cinetheta.domain.models.StreamLink?>(null) }
             val availableStreams = uiState.downloadStreamsAvailable
 
             if (uiState.isResolvingDownload || !availableStreams.isNullOrEmpty()) {
@@ -380,7 +400,7 @@ fun PluginDetailScreen(
                                             context.startActivity(intent)
                                             viewModel.cancelDownloadDialog()
                                         } catch (e: Exception) {
-                                            android.widget.Toast.makeText(context, "SaveTheta app is not installed!", android.widget.Toast.LENGTH_SHORT).show()
+                                            showSaveThetaPrompt = true
                                         }
                                         selectedStreamForSaveTheta = null
                                     },
@@ -388,7 +408,7 @@ fun PluginDetailScreen(
                             ) {
                                 Column(modifier = Modifier.padding(16.dp)) {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(Icons.Filled.Star, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+                                        Icon(Icons.Filled.CloudDownload, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
                                         Spacer(Modifier.width(8.dp))
                                         Text("Download from SaveTheta", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer, fontSize = 16.sp)
                                     }
@@ -405,6 +425,58 @@ fun PluginDetailScreen(
                     }
                 )
             }
+        }
+        
+        // --- SAVE THETA PROMPT ---
+        if (showSaveThetaPrompt) {
+            AlertDialog(
+                onDismissRequest = { showSaveThetaPrompt = false },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Filled.CloudDownload,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(36.dp)
+                    )
+                },
+                title = {
+                    Text(
+                        text = "SaveTheta Required",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                },
+                text = {
+                    Text(
+                        text = "To use this advanced download feature, you need to install the free SaveTheta app.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            showSaveThetaPrompt = false
+                            try {
+                                val intent = android.content.Intent(
+                                    android.content.Intent.ACTION_VIEW,
+                                    android.net.Uri.parse("https://github.com/cinetheta/savetheta/releases")
+                                )
+                                context.startActivity(intent)
+                            } catch (e: Exception) {}
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                    ) {
+                        Text("Download App", color = Color.White, fontWeight = FontWeight.Bold)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showSaveThetaPrompt = false }) {
+                        Text("Cancel", color = MaterialTheme.colorScheme.outline)
+                    }
+                }
+            )
         }
     }
 }

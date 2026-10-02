@@ -33,15 +33,19 @@ object RepositoryModule {
     
 
 
+    private val youtubeRepository: com.cinetheta.app.data.repositories.YouTubeRepositoryImpl by lazy {
+        com.cinetheta.app.data.repositories.YouTubeRepositoryImpl()
+    }
+
     /**
-     * Metadata repository. Switches dynamically to AniList if an Anime provider is selected.
+     * Dynamic Metadata repository. Switches automatically based on active provider!
      */
-    val contentRepository: com.cinetheta.app.domain.repository.ContentRepository
-        get() {
-            // Reverting back to TMDB exclusively as per user request to restore episode metadata
-            // and avoid AnimeDekho season splitting mismatches.
-            return tmdbRepository
-        }
+    val contentRepository: com.cinetheta.app.domain.repository.ContentRepository by lazy {
+        com.cinetheta.app.data.repositories.DelegatingContentRepository(
+            tmdbRepository = tmdbRepository,
+            youtubeRepository = youtubeRepository
+        )
+    }
 
     /**
      * Streaming repository.

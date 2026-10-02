@@ -101,7 +101,7 @@ class Hdhub4uExtractor {
                 }
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            e.let { com.cinetheta.core.logger.Logger.e("Exception", it) }
         }
 
         if (streamLinks.isEmpty()) {

@@ -40,6 +40,7 @@ fun PlayerControls(
     onSettingsClick: (tab: Int) -> Unit,
     onEpisodesClick: () -> Unit,
     onFullscreenToggle: () -> Unit,
+    onSpeedClick: () -> Unit = {},
     onBack: () -> Unit
 ) {
     var isVisible by remember { mutableStateOf(true) }
@@ -312,6 +313,11 @@ fun PlayerControls(
                             // Subtitles (tab 2)
                             IconButton(onClick = { onSettingsClick(2) }, modifier = Modifier.size(44.dp)) {
                                 Icon(Icons.Outlined.ClosedCaption, contentDescription = "Subtitles", tint = Color.White, modifier = Modifier.size(26.dp))
+                            }
+                            // Playback Speed
+                            TextButton(onClick = onSpeedClick, modifier = Modifier.size(44.dp), contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)) {
+                                val speedText = if (state.playbackSpeed == 1.0f) "1x" else "${state.playbackSpeed}x"
+                                Text(speedText, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                             }
                             // Picture in Picture
                             IconButton(onClick = onPipClick, modifier = Modifier.size(44.dp)) {

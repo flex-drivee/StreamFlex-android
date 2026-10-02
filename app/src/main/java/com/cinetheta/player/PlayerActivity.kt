@@ -43,7 +43,6 @@ import com.cinetheta.player.media3.Media3PlayerFactory
 import com.cinetheta.player.resume.PlaybackProgressManager
 import com.cinetheta.extractors.netmirror.NetMirrorBypassManager
 import com.cinetheta.app.utils.SupportManager
-import com.cinetheta.app.utils.NetMirrorBypassAdDialog
 import com.cinetheta.app.utils.ThankYouSupportDialog
 import com.cinetheta.app.utils.AdReturnLifecycleTracker
 
@@ -64,11 +63,36 @@ class PlayerActivity : ComponentActivity() {
         windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
 
         // Extract intent data
-        val mediaId = intent.getStringExtra("MEDIA_ID") ?: "unknown"
-        val videoTitle = intent.getStringExtra("VIDEO_TITLE") ?: "Unknown Media"
+        var mediaId = intent.getStringExtra("MEDIA_ID") ?: "unknown"
+        var videoTitle = intent.getStringExtra("VIDEO_TITLE") ?: "Unknown Media"
         val videoYear = intent.getIntExtra("VIDEO_YEAR", 0)
         val isShow = intent.getBooleanExtra("IS_SHOW", false)
         val posterPath = intent.getStringExtra("POSTER_PATH")
+        
+        var localFilePath = intent.getStringExtra("LOCAL_FILE_PATH")
+        
+        if (intent.action == android.content.Intent.ACTION_VIEW && intent.data != null) {
+            mediaId = "local_video"
+            
+            // Try to extract filename from URI
+            val uri = intent.data
+            var fileName = "Local Video"
+            if (uri?.scheme == "content") {
+                val cursor = contentResolver.query(uri, null, null, null, null)
+                cursor?.use {
+                    if (it.moveToFirst()) {
+                        val index = it.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+                        if (index != -1) {
+                            fileName = it.getString(index)
+                        }
+                    }
+                }
+            } else if (uri?.scheme == "file") {
+                fileName = uri.lastPathSegment ?: "Local Video"
+            }
+            videoTitle = fileName
+            localFilePath = uri.toString()
+        }
         
         val epIds = intent.getStringArrayListExtra("EPISODE_IDS") ?: arrayListOf()
         val epTitles = intent.getStringArrayListExtra("EPISODE_TITLES") ?: arrayListOf()
@@ -92,7 +116,6 @@ class PlayerActivity : ComponentActivity() {
         val epSeasonNum = intent.getIntExtra("CURRENT_EPISODE_SEASON", 1)
         val epEpisodeNum = intent.getIntExtra("CURRENT_EPISODE_NUMBER", 1)
         val epTitle = intent.getStringExtra("CURRENT_EPISODE_TITLE") ?: "Episode $epEpisodeNum"
-        val localFilePath = intent.getStringExtra("LOCAL_FILE_PATH")
         val downloadItemId = intent.getStringExtra("DOWNLOAD_ITEM_ID")
         
         if (currentEpisode == null && currentEpisodeId != null && isShow) {
@@ -128,6 +151,7 @@ class PlayerActivity : ComponentActivity() {
             val controller = remember { 
                 val player = Media3PlayerFactory.create(context)
                 val progressManager = PlaybackProgressManager(context)
+                val pluginPrefix = session.pluginProviderId?.let { "PLUGIN:$it:" } ?: ""
                 PlayerController(
                     context = context,
                     player = player, 
@@ -136,7 +160,7 @@ class PlayerActivity : ComponentActivity() {
                     scope = scope, 
                     viewModel = viewModel,
                     title = videoTitle,
-                    type = if (isShow) "TV" else "MOVIE",
+                    type = pluginPrefix + if (isShow) "TV" else "MOVIE",
                     posterPath = posterPath
                 ).also { playerController = it }
             }
@@ -275,7 +299,7 @@ class PlayerActivity : ComponentActivity() {
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = if (isNetMirrorBypassing) "Fetching OTT security tokens (~37s)..." else "Loading...",
+                            text = "Loading...",
                             color = Color.White,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Medium
@@ -298,33 +322,6 @@ class PlayerActivity : ComponentActivity() {
                 )
             }
 
-            if (isNetMirrorBypassing && !bypassAdDismissed) {
-                NetMirrorBypassAdDialog(
-                    onWatchAd = {
-                        bypassAdDismissed = true
-                        SupportManager.openAd(context)
-                    },
-                    onDismiss = {
-                        bypassAdDismissed = true
-                    }
-                )
-            }
-
-            // Listens for return from ad: shows big ThankYouSupportDialog if >= 20s, or Toast if < 20s
-            AdReturnLifecycleTracker(
-                context = context,
-                onShowThankYouDialog = { showThankYouDialog = true }
-            )
-
-            if (showThankYouDialog) {
-                ThankYouSupportDialog(
-                    onDismiss = { showThankYouDialog = false },
-                    onOpenAdAgain = {
-                        showThankYouDialog = false
-                        SupportManager.openAd(context)
-                    }
-                )
-            }
         }
     }
     

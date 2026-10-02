@@ -37,6 +37,7 @@ class HomeViewModel(
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
     var selectedTabIndex: Int = 0
+    private var lastLoadedProviderId: String? = null
 
     init {
         loadHomeData()
@@ -53,7 +54,16 @@ class HomeViewModel(
 
     fun loadHomeData() {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
+            val currentProviderId = com.cinetheta.app.di.ProviderModule.repository.selectedProviderId
+            val isSwitchingToOrFromYoutube = (currentProviderId == "youtube" || lastLoadedProviderId == "youtube")
+            
+            if (isSwitchingToOrFromYoutube && lastLoadedProviderId != currentProviderId) {
+                _uiState.value = HomeUiState(isLoading = true) // Instantly drop old data for completely different UI
+            } else {
+                _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null) // Keep old TMDB data visible while loading new TMDB data
+            }
+            lastLoadedProviderId = currentProviderId
+            
             try {
                 val history = progressManager.getHistory()
                 val popMovies = repository.getPopularMovies()

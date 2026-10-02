@@ -25,6 +25,9 @@ class MovieBoxDetails {
      *   per-episode play-info URLs using `&se=<season>&ep=<episode>` params.
      */
     suspend fun load(result: SearchResult, baseUrl: String): ProviderResult? {
+        if (MovieBoxCrypto.xUserToken == null) {
+            fetchXUserToken(baseUrl)
+        }
         val detailUrl = "$baseUrl/wefeed-mobile-bff/subject-api/get?subjectId=${result.id}"
 
         val headers = MovieBoxCrypto.getHeaders(
@@ -269,7 +272,7 @@ class MovieBoxDetails {
                 else -> {}
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            e.let { com.cinetheta.core.logger.Logger.e("Exception", it) }
         }
         return ids
     }
@@ -347,6 +350,31 @@ class MovieBoxDetails {
     }
 
     // "?"? Helpers "?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?
+
+    private suspend fun fetchXUserToken(baseUrl: String) {
+        val url = "$baseUrl/wefeed-mobile-bff/tab/ranking-list?tabId=0&categoryType=4516404531735022304&page=1&perPage=1"
+        val headers = MovieBoxCrypto.getHeaders(
+            method = "GET",
+            url = url
+        )
+
+        val request = RequestBuilder()
+            .url(url)
+            .get()
+            .headers(headers)
+            .build()
+
+        withContext(Dispatchers.IO) {
+            when (val response = HttpClient.execute(request)) {
+                is NetworkResult.Success -> {
+                    response.data.header("x-user")?.let {
+                        MovieBoxCrypto.xUserToken = parseToken(it)
+                    }
+                }
+                else -> {}
+            }
+        }
+    }
 
     private fun parseToken(xUserHeader: String): String? {
         if (xUserHeader.isBlank()) return null

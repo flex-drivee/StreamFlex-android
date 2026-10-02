@@ -64,6 +64,7 @@ fun SettingsScreen(
     var showSupportDialog by remember { mutableStateOf(false) }
     var showThankYouDialog by remember { mutableStateOf(false) }
     var showIssueReportDialog by remember { mutableStateOf(false) }
+    var showFactoryResetDialog by remember { mutableStateOf(false) }
     
     val providerRepository = com.cinetheta.app.di.ProviderModule.repository
     var selectedProviderName by remember { 
@@ -318,7 +319,7 @@ fun SettingsScreen(
                         title = "Factory Reset",
                         subtitle = "Wipe all app data and settings",
                         isLast = true,
-                        onTap = { android.widget.Toast.makeText(context, "Coming soon!", android.widget.Toast.LENGTH_SHORT).show() }
+                        onTap = { showFactoryResetDialog = true }
                     )
                 }
             }
@@ -435,8 +436,16 @@ fun SettingsScreen(
                         title = "Version",
                         subtitle = "CineTheta v${com.cinetheta.app.BuildConfig.VERSION_NAME}",
                         trailing = { Spacer(modifier = Modifier.width(0.dp)) }, // No chevron
-                        isLast = true,
                         onTap = { /* No action needed for version tile */ }
+                    )
+                    SettingsDivider()
+                    SettingsTile(
+                        icon = Icons.Outlined.Group,
+                        title = "Credits & Special Thanks",
+                        subtitle = "Special thanks to Phiser, NivinCNC, and Cloudstream.",
+                        trailing = { Spacer(modifier = Modifier.width(0.dp)) }, // No chevron
+                        isLast = true,
+                        onTap = { /* No action needed */ }
                     )
                 }
             }
@@ -713,7 +722,23 @@ fun SettingsScreen(
                                     .padding(horizontal = 16.dp, vertical = 8.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                androidx.compose.material3.Text(provider.name, modifier = Modifier.weight(1f))
+                                Column(modifier = Modifier.weight(1f)) {
+                                    androidx.compose.material3.Text(provider.name)
+                                    val badgeText = when(provider.id) {
+                                        "moviebox", "all_otts", "animedekho", "toonstream" -> "Recommended"
+                                        "hdhub4u", "fourkhdhub" -> "Backup Plugin"
+                                        "youtube" -> "100% Working"
+                                        else -> null
+                                    }
+                                    if (badgeText != null) {
+                                        androidx.compose.material3.Text(
+                                            badgeText,
+                                            fontSize = 11.sp,
+                                            color = if (badgeText == "Recommended") Color(0xFF00C853) else if (badgeText == "100% Working") Color(0xFF29B6F6) else Color.Gray,
+                                            fontWeight = FontWeight.Medium
+                                        )
+                                    }
+                                }
                                 if (provider.id == "moviebox") {
                                     androidx.compose.material3.IconButton(onClick = {
                                         showProviderDialog = false
@@ -774,6 +799,38 @@ fun SettingsScreen(
                     com.cinetheta.core.network.DohProvider.valueOf(dohProvider).title
                 } catch (_: Exception) { "Google" },
                 onDismissRequest = { showIssueReportDialog = false }
+            )
+        }
+
+        if (showFactoryResetDialog) {
+            AlertDialog(
+                onDismissRequest = { showFactoryResetDialog = false },
+                icon = { Icon(Icons.Outlined.DeleteForever, contentDescription = null, tint = MaterialTheme.colorScheme.error) },
+                title = { Text("Factory Reset", fontWeight = FontWeight.Bold) },
+                text = {
+                    Text(
+                        "This will permanently wipe all your settings, preferences, and cached data. This action cannot be undone.",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            showFactoryResetDialog = false
+                            val ok = viewModel.factoryReset()
+                            val msg = if (ok) "Factory reset complete." else "Reset failed. Please try again."
+                            android.widget.Toast.makeText(context, msg, android.widget.Toast.LENGTH_SHORT).show()
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                    ) {
+                        Text("Reset", color = MaterialTheme.colorScheme.onError)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showFactoryResetDialog = false }) {
+                        Text("Cancel")
+                    }
+                }
             )
         }
     }

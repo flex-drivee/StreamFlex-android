@@ -51,6 +51,28 @@ fun DownloadsScreen(
     val isSmartDownloadsEnabled by viewModel.smartDownloadsEnabled.collectAsState()
     val context = LocalContext.current
 
+    var localVideos by remember { mutableStateOf<List<com.cinetheta.domain.models.SearchResult>>(emptyList()) }
+    var hasStoragePermission by remember { mutableStateOf(false) }
+    
+    val permissionLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        hasStoragePermission = permissions.values.all { it }
+    }
+    
+    LaunchedEffect(hasStoragePermission) {
+        if (hasStoragePermission) {
+            localVideos = LocalMediaManager.getLocalVideos(context)
+        } else {
+            val perms = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                arrayOf(android.Manifest.permission.READ_MEDIA_VIDEO)
+            } else {
+                arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE)
+            }
+            permissionLauncher.launch(perms)
+        }
+    }
+
     Scaffold(
         topBar = {
             if (showTopBar) {
@@ -163,6 +185,80 @@ fun DownloadsScreen(
                         onRetry = { viewModel.retryDownload(item.id) },
                         onDelete = { viewModel.deleteDownload(item.id) }
                     )
+                }
+            }
+            
+            // Device Local Videos
+            item {
+                Spacer(modifier = Modifier.height(24.dp))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), thickness = 1.dp)
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "Device Local Videos",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+            }
+            
+            if (localVideos.isEmpty()) {
+                item {
+                    Text(
+                        text = "No local videos found on device.",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 14.sp,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                }
+            } else {
+                items(localVideos) { video ->
+                    Surface(
+                        onClick = {
+                            val intent = Intent(Intent.ACTION_VIEW).apply {
+                                data = android.net.Uri.parse(video.url)
+                                type = "video/*"
+                                setClass(context, PlayerActivity::class.java)
+                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            }
+                            context.startActivity(intent)
+                        },
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+                        shape = RoundedCornerShape(8.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(Icons.Filled.Movie, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = video.title,
+                                    color = MaterialTheme.colorScheme.onBackground,
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 15.sp,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    text = video.overview ?: "",
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontSize = 12.sp
+                                )
+                            }
+                            Icon(Icons.Filled.PlayArrow, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        }
+                    }
                 }
             }
         }

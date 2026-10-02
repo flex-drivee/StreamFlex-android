@@ -36,6 +36,8 @@ data class ProviderSource(
 
     /** Referer if required */
     val referer: String? = null,
+    /** Optional audio tracks for DASH */
+    val audioTracks: List<AudioTrack> = emptyList(),
 
     /** Extra provider-specific metadata */
     val metadata: Map<String, String> = emptyMap()

@@ -171,4 +171,36 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             false
         }
     }
+
+    /**
+     * Full factory reset: wipes all SharedPreferences settings and all caches.
+     * StateFlows are reset to defaults so the UI reflects the change immediately
+     * without requiring an app restart.
+     * Returns true if successful.
+     */
+    fun factoryReset(): Boolean {
+        return try {
+            // 1. Wipe all SharedPreferences
+            prefs.edit().clear().apply()
+            // 2. Clear all caches and cookies
+            cacheManager.clearAll()
+            android.webkit.CookieManager.getInstance().removeAllCookies(null)
+            android.webkit.CookieManager.getInstance().flush()
+            // 3. Reset all StateFlows to defaults so UI updates immediately
+            _appTheme.value = "SYSTEM"
+            _autoPlayNext.value = true
+            _enableSubtitles.value = true
+            _cellularData.value = true
+            _developerMode.value = false
+            _wifiOnlyDownloads.value = false
+            _downloadQuality.value = "1080p"
+            _playerVideoQuality.value = "Auto"
+            _preferredPlayer.value = VideoPlayer.SYSTEM
+            _smartDownloads.value = true
+            refreshStorageStats()
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
 }

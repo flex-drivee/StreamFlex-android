@@ -84,6 +84,17 @@ object ExtractorRegistry {
                 androidClass = "com.cinetheta.extractors.pixeldrain.PixelDrainExtractor"
             ),
             ExtractorDefinition(
+                id = "vidstack",
+                name = "VidStack",
+                priority = 83,
+                status = "active",
+                domains = listOf("vidstack.io"),
+                outputFormats = listOf("mp4", "m3u8"),
+                requiresReferer = true,
+                headers = emptyMap(),
+                androidClass = "com.cinetheta.extractors.vidstack.VidStackExtractor"
+            ),
+            ExtractorDefinition(
                 id = "filemoon",
                 name = "FileMoon",
                 priority = 80,

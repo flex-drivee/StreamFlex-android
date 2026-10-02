@@ -127,6 +127,7 @@ class CineThetaDownloadService : Service() {
     private fun buildInitialNotification(): Notification {
         val launchIntent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra(MainActivity.EXTRA_NAVIGATE_TO, "downloads")
         }
         val pendingIntent = PendingIntent.getActivity(
             this,
@@ -159,6 +160,7 @@ class CineThetaDownloadService : Service() {
     fun updateDownloadProgress(activeItem: DownloadItem, totalActiveCount: Int) {
         val launchIntent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra(MainActivity.EXTRA_NAVIGATE_TO, "downloads")
         }
         val pendingIntent = PendingIntent.getActivity(
             this,

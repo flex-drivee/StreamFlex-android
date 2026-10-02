@@ -69,12 +69,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
 
     buildFeatures {
@@ -124,6 +124,9 @@ dependencies {
     // --- HTML Parsing ---
     implementation("org.jsoup:jsoup:1.17.2")
 
+    // --- NewPipe Extractor (YouTube support) ---
+    implementation("com.github.TeamNewPipe:NewPipeExtractor:v0.26.3")
+
     // --- Media (ExoPlayer) ---
     implementation("androidx.media3:media3-exoplayer:1.10.1")
     implementation("androidx.media3:media3-session:1.10.1")
@@ -156,6 +159,8 @@ dependencies {
     // Debugging
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+
+
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
     implementation(platform("com.google.firebase:firebase-bom:34.19.0"))
