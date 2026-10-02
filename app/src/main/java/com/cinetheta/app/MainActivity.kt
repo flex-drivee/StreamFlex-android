@@ -22,6 +22,12 @@ import androidx.compose.foundation.layout.fillMaxSize
  */
 class MainActivity : ComponentActivity() {
 
+    companion object {
+        const val EXTRA_NAVIGATE_TO = "NAVIGATE_TO"
+    }
+
+    private val navActionState = androidx.compose.runtime.mutableStateOf<String?>(null)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
@@ -29,6 +35,8 @@ class MainActivity : ComponentActivity() {
         window.statusBarColor = android.graphics.Color.parseColor("#66000000") // 40% opacity (60% transparent)
         window.navigationBarColor = android.graphics.Color.TRANSPARENT
         
+        handleIntent(intent)
+
         // Check for updates automatically in the background
         lifecycleScope.launch {
             AppUpdater.checkUpdate(this@MainActivity)
@@ -74,10 +82,23 @@ class MainActivity : ComponentActivity() {
                 ) {
                     AppNavigation(
                         repository = contentRepository,
-                        streamRepository = streamRepository
+                        streamRepository = streamRepository,
+                        navAction = navActionState.value
                     )
                 }
             }
+        }
+    }
+
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleIntent(intent)
+    }
+
+    private fun handleIntent(intent: android.content.Intent?) {
+        intent?.getStringExtra(EXTRA_NAVIGATE_TO)?.let {
+            navActionState.value = it
         }
     }
 }

@@ -269,7 +269,8 @@ class Media3Player(
             isBuffering = exoPlayer.playbackState == Player.STATE_BUFFERING,
             positionMs = currentPos,
             durationMs = dur,
-            bufferedPositionMs = buf
+            bufferedPositionMs = buf,
+            playbackSpeed = exoPlayer.playbackParameters.speed
         )
     }
 
@@ -417,12 +418,15 @@ class Media3Player(
             }
         }
 
+        val isContentUri = stream.url.startsWith("content://")
         val isLocalFile = stream.url.startsWith("/") || stream.url.startsWith("file:")
-        val mediaUri = if (isLocalFile) {
-            val cleanPath = stream.url.removePrefix("file://")
-            android.net.Uri.fromFile(java.io.File(cleanPath))
-        } else {
-            android.net.Uri.parse(stream.url)
+        val mediaUri = when {
+            isContentUri -> android.net.Uri.parse(stream.url)   // content:// must be parsed as-is, NOT via fromFile
+            isLocalFile -> {
+                val cleanPath = stream.url.removePrefix("file://")
+                android.net.Uri.fromFile(java.io.File(cleanPath))
+            }
+            else -> android.net.Uri.parse(stream.url)
         }
 
         val mediaItemBuilder = MediaItem.Builder()
@@ -431,7 +435,7 @@ class Media3Player(
         // For local files, NEVER force a MIME type!
         // Allow ExoPlayer's DefaultExtractorsFactory to sniff and auto-detect whether the file is MP4, TS, MKV, etc.
         // For remote streams, attach mimeType if detected.
-        if (!isLocalFile && mimeType != null) {
+        if (!isLocalFile && !isContentUri && mimeType != null) {
             mediaItemBuilder.setMimeType(mimeType)
         }
 
@@ -472,7 +476,22 @@ class Media3Player(
         // It correctly builds HlsMediaSource for M3U8.
         // It also seamlessly injects SubtitleConfigurations via MergingMediaSource and SubtitleExtractor
         // without crashing due to legacy decoding being disabled.
-        val source = mediaSourceFactory.createMediaSource(mediaItem)
+        var source: androidx.media3.exoplayer.source.MediaSource = mediaSourceFactory.createMediaSource(mediaItem)
+        
+        // 7. Attach external audio tracks if present
+        if (stream.audioTracks.isNotEmpty() && stream.audioTracks.any { it.url.isNotBlank() }) {
+            val audioSources = stream.audioTracks.filter { it.url.isNotBlank() }.map { audioTrack ->
+                val audioItem = MediaItem.Builder()
+                    .setUri(android.net.Uri.parse(audioTrack.url))
+                    .build()
+                mediaSourceFactory.createMediaSource(audioItem)
+            }
+            if (audioSources.isNotEmpty()) {
+                val allSources = arrayOf(source) + audioSources.toTypedArray()
+                source = androidx.media3.exoplayer.source.MergingMediaSource(*allSources)
+            }
+        }
+        
         exoPlayer.setMediaSource(source)
         exoPlayer.prepare()
     }
@@ -487,6 +506,11 @@ class Media3Player(
     override fun seekBackward(ms: Long) { seekTo((exoPlayer.currentPosition - ms).coerceAtLeast(0)) }
     override fun setVolume(volume: Float) {
         exoPlayer.volume = volume
+    }
+
+    override fun setPlaybackSpeed(speed: Float) {
+        exoPlayer.setPlaybackSpeed(speed)
+        updateState()
     }
 
     override fun release() {
@@ -575,15 +599,56 @@ class Media3Player(
     override fun Surface(modifier: androidx.compose.ui.Modifier, isFullScreen: Boolean) {
         androidx.compose.ui.viewinterop.AndroidView(
             factory = { ctx ->
-                androidx.media3.ui.PlayerView(ctx).apply {
-                    player = exoPlayer
-                    useController = false
-                    setShowBuffering(androidx.media3.ui.PlayerView.SHOW_BUFFERING_NEVER)
-                    resizeMode = if (isFullScreen) androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_ZOOM else androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FIT
+                android.widget.FrameLayout(ctx).apply {
+                    layoutParams = android.view.ViewGroup.LayoutParams(
+                        android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                        android.view.ViewGroup.LayoutParams.MATCH_PARENT
+                    )
+                    
+                    val playerView = androidx.media3.ui.PlayerView(ctx).apply {
+                        player = exoPlayer
+                        useController = false
+                        setShowBuffering(androidx.media3.ui.PlayerView.SHOW_BUFFERING_NEVER)
+                        resizeMode = if (isFullScreen) androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_ZOOM else androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FIT
+                        // Hide built-in subtitle view so it doesn't get scaled/cropped
+                        subtitleView?.visibility = android.view.View.GONE
+                    }
+                    
+                    addView(playerView, android.widget.FrameLayout.LayoutParams(
+                        android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                        android.view.ViewGroup.LayoutParams.MATCH_PARENT
+                    ))
+                    
+                    val customSubtitleView = androidx.media3.ui.SubtitleView(ctx).apply {
+                        setUserDefaultStyle()
+                        setUserDefaultTextSize()
+                        setBottomPaddingFraction(0.08f)
+                    }
+                    
+                    addView(customSubtitleView, android.widget.FrameLayout.LayoutParams(
+                        android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                        android.view.ViewGroup.LayoutParams.MATCH_PARENT
+                    ))
+                    
+                    val listener = object : androidx.media3.common.Player.Listener {
+                        override fun onCues(cueGroup: androidx.media3.common.text.CueGroup) {
+                            customSubtitleView.setCues(cueGroup.cues)
+                        }
+                    }
+                    exoPlayer.addListener(listener)
+                    
+                    // We also need to remove the listener when this view is detached
+                    addOnAttachStateChangeListener(object : android.view.View.OnAttachStateChangeListener {
+                        override fun onViewAttachedToWindow(v: android.view.View) {}
+                        override fun onViewDetachedFromWindow(v: android.view.View) {
+                            exoPlayer.removeListener(listener)
+                        }
+                    })
                 }
             },
-            update = { view ->
-                view.resizeMode = if (isFullScreen) androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_ZOOM else androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FIT
+            update = { frameLayout ->
+                val playerView = frameLayout.getChildAt(0) as androidx.media3.ui.PlayerView
+                playerView.resizeMode = if (isFullScreen) androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_ZOOM else androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FIT
             },
             modifier = modifier
         )

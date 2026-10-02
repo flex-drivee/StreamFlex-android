@@ -97,15 +97,19 @@ class StreamRepository(
         return@coroutineScope streamEngine.resolve(allSources, onStreamFound)
     }
 
-    suspend fun resolveEpisode(title: String, season: Int, episode: Int, year: Int? = null, onStreamFound: suspend (FinalStreams) -> Unit = {}): FinalStreams = coroutineScope {
-        if (providerRepository.isNoneSelected) return@coroutineScope FinalStreams.EMPTY
+    suspend fun resolveEpisode(title: String, season: Int, episode: Int, year: Int? = null, pluginProviderId: String? = null, onStreamFound: suspend (FinalStreams) -> Unit = {}): FinalStreams = coroutineScope {
+        if (pluginProviderId == null && providerRepository.isNoneSelected) return@coroutineScope FinalStreams.EMPTY
         Logger.d("resolveEpisode called: title=$title, season=$season, episode=$episode", "StreamRepository")
         
+        suspend fun doSearch(query: String): List<SearchResult> {
+            return if (pluginProviderId != null) searchProvider(pluginProviderId, query) else search(query)
+        }
+        
         val cleanTitle = title.replace(Regex("[:\\-–—_.'!?()]+"), " ").replace(Regex("\\s+"), " ").trim()
-        val baseResults = search(title)
-        val cleanResults = if (cleanTitle.lowercase() != title.lowercase()) search(cleanTitle) else emptyList()
-        val seasonResults = search("$title Season $season")
-        val cleanSeasonResults = if (cleanTitle.lowercase() != title.lowercase()) search("$cleanTitle Season $season") else emptyList()
+        val baseResults = doSearch(title)
+        val cleanResults = if (cleanTitle.lowercase() != title.lowercase()) doSearch(cleanTitle) else emptyList()
+        val seasonResults = doSearch("$title Season $season")
+        val cleanSeasonResults = if (cleanTitle.lowercase() != title.lowercase()) doSearch("$cleanTitle Season $season") else emptyList()
         
         val directResults = (seasonResults + cleanSeasonResults + baseResults + cleanResults).distinctBy { it.url }
         val combinedResults = if (directResults.isNotEmpty()) {
@@ -113,7 +117,7 @@ class StreamRepository(
         } else {
             val shortTitle = cleanTitle.split(" ").take(2).joinToString(" ")
             if (shortTitle.length > 3 && shortTitle.lowercase() != title.lowercase()) {
-                search(shortTitle)
+                doSearch(shortTitle)
             } else {
                 emptyList()
             }

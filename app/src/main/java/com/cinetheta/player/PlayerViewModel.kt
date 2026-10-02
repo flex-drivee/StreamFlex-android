@@ -81,6 +81,22 @@ class PlayerViewModel(
                 } else null
 
                 if (!filePath.isNullOrBlank()) {
+                    if (filePath.startsWith("content://")) {
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            isOffline = true,
+                            streams = listOf(
+                                StreamLink(
+                                    name = "Local Storage",
+                                    url = filePath,
+                                    host = HostType.DIRECT,
+                                    adaptive = false
+                                )
+                            )
+                        )
+                        return@launch
+                    }
+
                     val localFile = File(filePath)
                     if (localFile.exists() && localFile.length() > 0) {
                         val localSubtitles = mutableListOf<com.cinetheta.domain.models.Subtitle>()
@@ -167,7 +183,8 @@ class PlayerViewModel(
                         title = session.title,
                         season = session.currentEpisode.seasonNumber,
                         episode = session.currentEpisode.episodeNumber,
-                        year = session.year
+                        year = session.year,
+                        pluginProviderId = session.pluginProviderId
                     ) { currentStreams ->
                         if (currentStreams.isPlayable && currentStreams.streams.isNotEmpty()) {
                             _uiState.value = _uiState.value.copy(

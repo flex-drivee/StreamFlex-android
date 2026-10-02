@@ -51,7 +51,7 @@ class PlayerController(
     val isPiPMode = MutableStateFlow(false)
 
     private val progressKey: String
-        get() = if (type == "TV" && viewModel.uiState.value.session?.currentEpisode != null) {
+        get() = if ((type.endsWith("TV") || type == "SHOW") && viewModel.uiState.value.session?.currentEpisode != null) {
             "${mediaId}_${viewModel.uiState.value.session?.currentEpisode?.id}"
         } else {
             mediaId
@@ -125,7 +125,15 @@ class PlayerController(
         val isDifferentFirstStream = _allStreams.value.firstOrNull()?.url != streams.firstOrNull()?.url
         _allStreams.value = streams
         if (isFirstTime || isDifferentFirstStream) {
-            _currentStreamIndex.value = 0
+            val savedStreamName = progressManager.getLastStream(progressKey)
+            var targetIndex = 0
+            if (savedStreamName != null) {
+                val foundIndex = streams.indexOfFirst { it.name == savedStreamName }
+                if (foundIndex != -1) {
+                    targetIndex = foundIndex
+                }
+            }
+            _currentStreamIndex.value = targetIndex
             loadCurrentStream()
         }
     }
@@ -152,7 +160,9 @@ class PlayerController(
         val index = _currentStreamIndex.value
         val streams = _allStreams.value
         if (index in streams.indices) {
-            player.load(streams[index])
+            val selectedStream = streams[index]
+            progressManager.saveLastStream(progressKey, selectedStream.name)
+            player.load(selectedStream)
             
             // Restore progress
             val savedPos = progressManager.getProgress(progressKey)
@@ -186,6 +196,19 @@ class PlayerController(
 
     fun togglePlayPause() {
         if (state.value.isPlaying) pause() else play()
+    }
+    
+    fun cyclePlaybackSpeed() {
+        val current = state.value.playbackSpeed
+        val next = when {
+            current < 0.75f -> 0.75f
+            current < 1.0f -> 1.0f
+            current < 1.25f -> 1.25f
+            current < 1.5f -> 1.5f
+            current < 2.0f -> 2.0f
+            else -> 0.5f
+        }
+        player.setPlaybackSpeed(next)
     }
     
     fun resumePlayback(resume: Boolean) {

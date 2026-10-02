@@ -9,6 +9,8 @@ import com.cinetheta.providers.fourkhdhub.FourKHDHubProvider
 import com.cinetheta.providers.animedekho.AnimeDekhoProvider
 import com.cinetheta.providers.toonstream.ToonStreamProvider
 
+import com.cinetheta.providers.youtube.YouTubeProvider
+
 /**
  * Dependency module for streaming providers.
  *
@@ -31,7 +33,8 @@ object ProviderModule {
             AnimeDekhoProvider(),
             ToonStreamProvider(),
             HDHubProvider(),
-            FourKHDHubProvider()
+            FourKHDHubProvider(),
+            YouTubeProvider()
         )
     }
 

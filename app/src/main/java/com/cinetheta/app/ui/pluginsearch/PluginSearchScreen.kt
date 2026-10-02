@@ -125,11 +125,27 @@ fun PluginSearchScreen(
                                 val isSelected = provider.id == state.selectedProvider?.id
                                 DropdownMenuItem(
                                     text = { 
-                                        Text(
-                                            provider.name, 
-                                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground,
-                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                                        ) 
+                                        Column {
+                                            Text(
+                                                provider.name, 
+                                                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground,
+                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                            )
+                                            val badgeText = when(provider.id) {
+                                                "moviebox", "all_otts", "animedekho", "toonstream" -> "Recommended"
+                                                "hdhub4u", "fourkhdhub" -> "Backup Plugin"
+                                                "youtube" -> "100% Working"
+                                                else -> null
+                                            }
+                                            if (badgeText != null) {
+                                                Text(
+                                                    badgeText,
+                                                    fontSize = 10.sp,
+                                                    color = if (badgeText == "Recommended") Color(0xFF00C853) else if (badgeText == "100% Working") Color(0xFF29B6F6) else Color.Gray,
+                                                    fontWeight = FontWeight.Medium
+                                                )
+                                            }
+                                        }
                                     },
                                     onClick = {
                                         viewModel.selectProvider(provider)

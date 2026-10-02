@@ -107,6 +107,10 @@ fun PlayerScreen(
                 },
                 onEpisodesClick = { showEpisodeDrawer = true },
                 onFullscreenToggle = { isFullScreen = !isFullScreen },
+                onSpeedClick = { 
+                    initialSettingsTab = 4
+                    showSettingsDialog = true 
+                },
                 onBack = onBack
             )
         }
@@ -234,6 +238,10 @@ fun PlayerScreen(
             onServerSelected = { index ->
                 controller.selectStream(index)
                 showSettingsDialog = false
+            },
+            onSpeedSelected = { speed ->
+                controller.player.setPlaybackSpeed(speed)
+                showSettingsDialog = false
             }
         )
     }
@@ -249,7 +257,8 @@ fun SettingsDialog(
     onQualitySelected: (QualityOption) -> Unit,
     onAudioSelected: (AudioTrack) -> Unit,
     onSubtitleSelected: (SubtitleTrack?) -> Unit,
-    onServerSelected: (Int) -> Unit
+    onServerSelected: (Int) -> Unit,
+    onSpeedSelected: (Float) -> Unit
 ) {
     var currentTab by remember { mutableStateOf(initialTab) } // 0=Video, 1=Audio, 2=Subtitle, 3=Server, 4=Decoder
     val context = LocalContext.current
@@ -295,6 +304,11 @@ fun SettingsDialog(
                         icon = Icons.Default.Dns, // Servers Tab
                         isSelected = currentTab == 3, 
                         onClick = { currentTab = 3 }
+                    )
+                    TabButton(
+                        icon = Icons.Default.PlayArrow, // Speed Tab
+                        isSelected = currentTab == 4, 
+                        onClick = { currentTab = 4 }
                     )
 
                     // Close button
@@ -365,6 +379,16 @@ fun SettingsDialog(
                                         onClick = { onServerSelected(index) }
                                     )
                                 }
+                            }
+                        }
+                        4 -> { // Speed
+                            val speeds = listOf(0.5f, 0.75f, 1.0f, 1.25f, 1.5f, 2.0f)
+                            items(speeds) { speed ->
+                                SettingsRow(
+                                    label = if (speed == 1.0f) "Normal (1x)" else "${speed}x",
+                                    isSelected = state.playbackSpeed == speed,
+                                    onClick = { onSpeedSelected(speed) }
+                                )
                             }
                         }
                         

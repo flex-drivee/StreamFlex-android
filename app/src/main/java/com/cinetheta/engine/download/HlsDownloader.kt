@@ -682,7 +682,7 @@ class HlsDownloader(
             muxer.stop()
             return true
         } catch (e: Exception) {
-            e.printStackTrace()
+            e.let { com.cinetheta.core.logger.Logger.e("Exception", it) }
             return false
         } finally {
             try { videoExtractor.release() } catch (_: Exception) {}
@@ -801,7 +801,7 @@ class HlsDownloader(
                 videoFormat.setByteBuffer("csd-0", hevcCsd)
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            e.let { com.cinetheta.core.logger.Logger.e("Exception", it) }
         } finally {
             try { probeExtractor.release() } catch (_: Exception) {}
         }

@@ -24,6 +24,7 @@ data class PlayerState(
     // UI State
     val showControls: Boolean = true,
     val isFullscreen: Boolean = false,
+    val playbackSpeed: Float = 1.0f,
     
     // Errors
     val error: PlayerError? = null

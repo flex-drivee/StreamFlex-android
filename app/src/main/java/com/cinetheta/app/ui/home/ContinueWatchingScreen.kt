@@ -18,7 +18,7 @@ import com.cinetheta.player.resume.HistoryItem
 fun ContinueWatchingScreen(
     viewModel: HomeViewModel,
     onBackClick: () -> Unit,
-    onItemClick: (String, String) -> Unit
+    onItemClick: (HistoryItem) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -68,7 +68,7 @@ fun ContinueWatchingScreen(
                     Box(modifier = Modifier.fillMaxWidth()) {
                         SFContinueCard(
                             item = item,
-                            onClick = { onItemClick(item.type, item.id) },
+                            onClick = { onItemClick(item) },
                             modifier = Modifier.fillMaxWidth()
                         )
                         IconButton(
