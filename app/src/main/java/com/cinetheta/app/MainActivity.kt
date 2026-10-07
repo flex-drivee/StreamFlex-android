@@ -50,7 +50,10 @@ class MainActivity : ComponentActivity() {
         val contentRepository = RepositoryModule.contentRepository
         val streamRepository = RepositoryModule.streamRepository
 
+        
         setContent {
+            
+
             val context = androidx.compose.ui.platform.LocalContext.current
             val prefs = context.getSharedPreferences("cinetheta_settings", android.content.Context.MODE_PRIVATE)
             

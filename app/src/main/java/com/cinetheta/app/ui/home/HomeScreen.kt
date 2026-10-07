@@ -27,6 +27,9 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.blur
+import coil.request.ImageRequest
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
@@ -42,6 +45,7 @@ import coil.compose.SubcomposeAsyncImage
 import com.cinetheta.app.domain.models.SearchResult
 import com.cinetheta.domain.repositories.ProviderRepository
 import com.cinetheta.app.ui.theme.*
+import kotlin.math.absoluteValue
 
 // ─────────────────────────────────────────────────────────────────────────────
 // HomeScreen — Netflix/Prime-inspired cinematic home
@@ -71,6 +75,20 @@ fun HomeScreen(
     var showHomeSupportDialog by remember { mutableStateOf(false) }
     var showFullDonationDialog by remember { mutableStateOf(false) }
     var showThankYouDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(providerRepository.selectedProviderId) {
+        val pid = providerRepository.selectedProviderId
+        if (pid == "animedekho" || pid == "toonstream") {
+            selectedTab = 3
+            viewModel.selectedTabIndex = 3
+        } else if (pid == "moviebox" || pid == "all_otts" || pid == "hdhub4u" || pid == "fourkhdhub" || pid == "youtube") {
+            // Optional: reset to Home if switching back from an anime provider to a general provider
+            if (selectedTab == 3) {
+                selectedTab = 0
+                viewModel.selectedTabIndex = 0
+            }
+        }
+    }
 
     val filteredSections = remember(state.sections, selectedTab) {
         when (selectedTab) {
@@ -162,32 +180,88 @@ fun HomeScreen(
                 if (featuredItems.isNotEmpty()) {
                     val currentHero = featuredItems.getOrNull(pagerState.currentPage) ?: featuredItems.first()
                     
+                    // Wrapping in a Box just for the Ambient Background
                     Box(modifier = Modifier.fillMaxWidth()) {
-                        HorizontalPager(
-                            state = pagerState,
-                            modifier = Modifier.fillMaxWidth()
-                        ) { page ->
-                            val hero = featuredItems.getOrNull(page)
-                            if (hero != null) {
-                                SFHeroBackdrop(movie = hero)
-                            } else {
-                                SFHeroShimmer()
-                            }
+                        // Safe Ambient Background
+                        val blurRequest = remember(currentHero.poster) {
+                            ImageRequest.Builder(context)
+                                .data(currentHero.poster)
+                                .size(16) // Load a tiny 64x64 thumbnail to save memory
+                                .build()
                         }
                         
-                        // Static overlay for Buttons and Dots
-                        SFHeroStaticOverlay(
-                            movie = currentHero,
-                            heroIndex = pagerState.currentPage,
-                            heroCount = featuredItems.size,
-                            onPlayClick = { onNavigateToDetail(currentHero.type.name, currentHero.id) },
-                            onInfoClick = { onNavigateToDetail(currentHero.type.name, currentHero.id) },
-                            onDotClick = { targetIndex ->
-                                coroutineScope.launch {
-                                    pagerState.animateScrollToPage(targetIndex)
+                        SubcomposeAsyncImage(
+                            model = blurRequest,
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .blur(50.dp) // Safe blur because the image is tiny
+                                .graphicsLayer { alpha = 0.65f }
+                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(
+                                    Brush.verticalGradient(
+                                        colorStops = arrayOf(
+                                            0.0f to Color.Black.copy(alpha = 0.6f), // Dark at top for status bar
+                                            0.15f to Color.Transparent,
+                                            0.75f to Color.Transparent,
+                                            1.0f to MaterialTheme.colorScheme.background // Fade to app background at bottom
+                                        )
+                                    )
+                                )
+                        )
+
+                        // Content (Pager + Buttons) stacked vertically
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            // Top spacing so the poster sits in the middle and clears the status bar
+                            Spacer(modifier = Modifier.height(72.dp))
+                            HorizontalPager(
+                                state = pagerState,
+                                contentPadding = PaddingValues(horizontal = 32.dp),
+                                pageSpacing = 16.dp,
+                                modifier = Modifier.fillMaxWidth()
+                            ) { page ->
+                                val hero = featuredItems.getOrNull(page)
+
+                                Box(modifier = Modifier.graphicsLayer {
+                                    val pageOffset = (pagerState.currentPage - page) + pagerState.currentPageOffsetFraction
+                                    val cardScale = 1f - (kotlin.math.abs(pageOffset) * 0.15f).coerceIn(0f, 1f)
+                                    val cardAlpha = 1f - (kotlin.math.abs(pageOffset) * 0.5f).coerceIn(0f, 1f)
+                                    val cardRotation = (pageOffset * 15f).coerceIn(-15f, 15f)
+
+                                    scaleX = cardScale
+                                    scaleY = cardScale
+                                    this.alpha = cardAlpha
+                                    rotationY = cardRotation
+                                    cameraDistance = 8 * density
+                                }.clip(RoundedCornerShape(24.dp))) {
+                                    if (hero != null) {
+                                        SFHeroBackdrop(movie = hero)
+                                    } else {
+                                        SFHeroShimmer()
+                                    }
                                 }
                             }
-                        )
+                            
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            // Static overlay for Buttons and Dots
+                            SFHeroStaticOverlay(
+                                movie = currentHero,
+                                heroIndex = pagerState.currentPage,
+                                heroCount = featuredItems.size,
+                                onPlayClick = { onNavigateToDetail(currentHero.type.name, currentHero.id) },
+                                onInfoClick = { onNavigateToDetail(currentHero.type.name, currentHero.id) },
+                                onDotClick = { targetIndex ->
+                                    coroutineScope.launch {
+                                        pagerState.animateScrollToPage(targetIndex)
+                                    }
+                                }
+                            )
+                        }
                     }
                 } else {
                     // Shimmer placeholder while loading
@@ -272,21 +346,21 @@ fun HomeScreen(
             )
         }
 
-        // Listens for return from ad: shows big ThankYouSupportDialog if >= 20s, or Toast if < 20s
-        com.cinetheta.app.utils.AdReturnLifecycleTracker(
-            context = context,
-            onShowThankYouDialog = { showThankYouDialog = true }
-        )
-
-        if (showThankYouDialog) {
-            com.cinetheta.app.utils.ThankYouSupportDialog(
-                onDismiss = { showThankYouDialog = false },
-                onOpenAdAgain = {
-                    showThankYouDialog = false
-                    com.cinetheta.app.utils.SupportManager.openAd(context)
-                }
-            )
-        }
+//        // Listens for return from ad: shows big ThankYouSupportDialog if >= 20s, or Toast if < 20s
+//        com.cinetheta.app.utils.AdReturnLifecycleTracker(
+//            context = context,
+//            onShowThankYouDialog = { showThankYouDialog = true }
+//        )
+//
+//        if (showThankYouDialog) {
+//            com.cinetheta.app.utils.ThankYouSupportDialog(
+//                onDismiss = { showThankYouDialog = false },
+//                onOpenAdAgain = {
+//                    showThankYouDialog = false
+//                    com.cinetheta.app.utils.SupportManager.openAd(context)
+//                }
+//            )
+//        }
     }
 }
 
@@ -327,7 +401,7 @@ private fun SFTopBar(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -501,7 +575,7 @@ private fun SFTopBar(
                                 fontSize   = 15.sp
                             ),
                             color = if (selectedTab == index) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(vertical = 10.dp)
+                            modifier = Modifier.padding(vertical = 6.dp)
                         )
                     }
                 }
@@ -516,12 +590,14 @@ private fun SFTopBar(
 
 @Composable
 fun SFHeroBackdrop(movie: SearchResult) {
-    val screenH = LocalConfiguration.current.screenHeightDp.dp
+    val screenW = LocalConfiguration.current.screenWidthDp.dp
+    val cardWidth = screenW - 64.dp
+    val exactHeight = cardWidth * 1.4f // Standard TMDB poster aspect ratio
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(screenH * 0.70f)
+            .height(exactHeight)
     ) {
         SubcomposeAsyncImage(
             model              = movie.poster,
@@ -530,61 +606,34 @@ fun SFHeroBackdrop(movie: SearchResult) {
             loading            = { SFHeroShimmer() },
             modifier           = Modifier.fillMaxSize()
         )
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colorStops = arrayOf(
-                            0.0f to Color.Black.copy(alpha = 0.55f),
-                            0.3f to Color.Transparent,
-                            0.7f to MaterialTheme.colorScheme.background.copy(alpha = 0.4f),
-                            1.0f to MaterialTheme.colorScheme.background
-                        )
-                    )
-                )
-        )
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.horizontalGradient(
-                        colorStops = arrayOf(
-                            0.0f to MaterialTheme.colorScheme.background.copy(alpha = 0.2f),
-                            0.5f to Color.Transparent
-                        )
-                    )
-                )
-        )
+        
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                // Extra bottom padding to leave room for the static overlay buttons
-                .padding(horizontal = 20.dp)
-                .padding(bottom = 120.dp),
+                .padding(horizontal = 32.dp)
+                .padding(bottom = 90.dp), // reduced bottom padding since buttons are lower
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text  = "Action  •  Thriller  •  Sci-Fi",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = 10.dp)
-            )
-            Text(
-                text     = movie.title,
-                style    = MaterialTheme.typography.displayLarge.copy(fontSize = 28.sp),
-                color    = MaterialTheme.colorScheme.onBackground,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    shadow = androidx.compose.ui.graphics.Shadow(
+                        color = Color.Black,
+                        offset = androidx.compose.ui.geometry.Offset(2f, 2f),
+                        blurRadius = 8f
+                    )
+                ),
+                color = Color.White,
                 modifier = Modifier.padding(bottom = 6.dp)
             )
+            
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 movie.year?.let {
-                    Text(it.toString(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(it.toString(), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     SFDot()
                 }
                 SFBadge("HD", SFHDTag, Color.Black)
@@ -603,19 +652,16 @@ fun SFHeroStaticOverlay(
     onInfoClick: () -> Unit,
     onDotClick: (Int) -> Unit
 ) {
-    val screenH = LocalConfiguration.current.screenHeightDp.dp
-    
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(screenH * 0.70f)
+            .wrapContentHeight()
     ) {
         Column(
             modifier = Modifier
-                .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp)
-                .padding(bottom = 24.dp),
+                .padding(horizontal = 32.dp)
+                .padding(bottom = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
@@ -625,11 +671,11 @@ fun SFHeroStaticOverlay(
             ) {
                 Button(
                     onClick = onPlayClick,
-                    modifier = Modifier.weight(1f).height(46.dp),
+                    modifier = Modifier.weight(1f).height(40.dp),
                     shape  = RoundedCornerShape(6.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color.White)
                 ) {
-                    Icon(Icons.Default.PlayArrow, null, tint = Color.Black, modifier = Modifier.size(22.dp))
+                    Icon(Icons.Default.PlayArrow, null, tint = Color.Black, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(6.dp))
                     Text("Play", color = Color.Black, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
                 }
@@ -644,7 +690,7 @@ fun SFHeroStaticOverlay(
                             BookmarkManager.removeBookmark(movie.id)
                         }
                     },
-                    modifier = Modifier.height(46.dp),
+                    modifier = Modifier.height(40.dp),
                     shape    = RoundedCornerShape(6.dp),
                     border   = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                     colors   = ButtonDefaults.outlinedButtonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f))
@@ -660,7 +706,7 @@ fun SFHeroStaticOverlay(
                     onClick  = onInfoClick,
                     modifier = Modifier.size(46.dp).clip(RoundedCornerShape(6.dp)).background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f))
                 ) {
-                    Icon(Icons.Outlined.Info, "Info", tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(22.dp))
+                    Icon(Icons.Outlined.Info, "Info", tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(18.dp))
                 }
             }
 
@@ -903,7 +949,7 @@ fun SFContinueCard(
                 Icons.Default.PlayArrow,
                 contentDescription = "Play",
                 tint     = Color.White,
-                modifier = Modifier.size(22.dp)
+                modifier = Modifier.size(18.dp)
             )
         }
 
@@ -1059,7 +1105,7 @@ fun MovieBoxSettingsDialog(
             title = { androidx.compose.material3.Text("MovieBox Settings") },
             text = {
                 Column {
-                    androidx.compose.material3.Text("Select API Host:", fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 8.dp))
+                    androidx.compose.material3.Text("Select API Host:", fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 16.dp))
                     hosts.forEach { host ->
                         Row(
                             verticalAlignment = Alignment.CenterVertically,

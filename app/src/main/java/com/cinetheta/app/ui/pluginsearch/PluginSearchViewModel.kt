@@ -133,6 +133,9 @@ class PluginSearchViewModel(
             }
         }
     }
+    fun getProviders(): List<Provider> {
+        return providerRepository.enabledProviders()
+    }
 }
 
 class PluginSearchViewModelFactory(

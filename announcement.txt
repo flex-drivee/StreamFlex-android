@@ -1,0 +1,25 @@
+🚀 **MASSIVE CINETHETA UPDATE INCOMING!** 🚀
+
+We’ve been working non-stop behind the scenes, and we are beyond excited to announce the next generation of **CineTheta** along with our brand-new companion app, **SaveTheta**! 
+
+Here is a sneak peek at what’s dropping in the upcoming update:
+
+🎬 **CineTheta: The Ultimate Streaming Upgrade**
+• 📺 **Dynamic Home Screen**: A gorgeous, Netflix-style cinematic UI that instantly adapts to your selected provider.
+• ❤️ **Native YouTube Integration**: Switch to the YouTube provider and watch your Home Screen magically transform to show your country's localized **Trending, Music, Gaming, & News** categories!
+• 🍿 **High-Res YouTube Engine**: We've completely overhauled our YouTube extractor. You can now seamlessly stream **1080p & 4K DASH** formats with perfectly synced audio!
+• ⚡ **Silent OTT Bypasses**: Say goodbye to annoying ad popups and countdowns! Complex OTT bypasses (like NetMirror's `t_hash_t`) now run 100% silently in the background while you see a clean, standard loading screen.
+• 🧩 **Cloudstream Plugin Engine**: Our powerful new plugin architecture allows for massive streaming capability expansions straight from the search tab.
+• 📱 **External Video Player Support**: You now have the full freedom to cast and play your favorite streams using your preferred external video players (like VLC, MX Player, etc.)!
+
+📥 **Introducing: SaveTheta!**
+Your ultimate downloading companion. SaveTheta is our new dedicated downloader app built to work flawlessly hand-in-hand with CineTheta!
+• 🔗 **One-Click Integration**: Send any movie, show, or video straight from CineTheta directly into SaveTheta with a single tap.
+• 🌐 **Universal Downloader**: Built-in support to download high-quality videos from **1,000+ websites**!
+• 📱 **Social Media Unlocked**: Easily grab videos from **YouTube, Instagram, Facebook, Twitter/X, Reddit**, and even **TikTok (completely Watermark-Free!)**.
+• 🚀 **Blazing Fast Speeds**: Multi-threaded downloading ensures you get your content offline as fast as your connection allows.
+• 📂 **Advanced Management**: Easily manage, pause, resume, and organize your downloaded library.
+
+Prepare yourselves... the update is just around the corner. Make sure you have notifications turned on so you don't miss the drop! 🔥
+
+*Thank you for supporting the CineTheta project!* ❤️

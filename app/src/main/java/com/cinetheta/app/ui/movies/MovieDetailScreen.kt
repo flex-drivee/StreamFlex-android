@@ -731,7 +731,7 @@ fun MovieDetailScreen(
                             try {
                                 val intent = android.content.Intent(
                                     android.content.Intent.ACTION_VIEW,
-                                    android.net.Uri.parse("https://github.com/cinetheta/savetheta/releases")
+                                    android.net.Uri.parse("https://cinetheta.github.io")
                                 )
                                 context.startActivity(intent)
                             } catch (e: Exception) {}

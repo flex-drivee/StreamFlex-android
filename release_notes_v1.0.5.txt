@@ -1,0 +1,15 @@
+CineTheta v1.0.5 Release Notes
+
+What's New:
+- 🎨 UI Improvements: Enjoy a cleaner, more polished, and intuitive user interface.
+- 🔌 Plugin Enhancements: Major improvements to the plugin system.
+- 💾 Resume Playback: Never lose your spot! The app now saves your resume data automatically.
+- ⏩ Playback Speed Control: Adjust the video playback speed to your preference.
+- ⬇️ SaveTheta Integration: You can now seamlessly download any video available in CineTheta directly to your device!
+- 📺 YouTube Provider Added: Enjoy YouTube content natively within the app.
+- 🎬 External Player Selection: Prefer another player? You can now route videos to your favorite external video player.
+- 📁 Local Video Playback: Play your own local videos straight from your gallery using the CineTheta player.
+- 🛠️ Multiple Bug Fixes & Stability Improvements: Under-the-hood changes for a smoother experience.
+- 📺 Ad Support for Server Costs: To keep CineTheta running and cover maintenance costs, we've introduced a brief ad video when starting the app. After watching, you can enjoy uninterrupted streaming! The ad only reappears every 6 hours. If you're in the middle of a video when the 6 hours expire, the ad will wait and only show once you return to the home page, ensuring no interruptions to your viewing experience.
+
+Thank you for using CineTheta!

@@ -73,3 +73,14 @@
 -dontwarn sun.misc.**
 -dontwarn java.lang.invoke.**
 -dontwarn org.conscrypt.**
+# ── 12. Rhino / Javascript Engine (Missing Beans) ─────────────────
+-dontwarn java.beans.**
+-dontwarn javax.script.**
+-dontwarn org.mozilla.javascript.**
+
+# ── 13. Start.io Ads ─────────────────────────────────────────────
+-keep class com.startapp.** { *; }
+-keep class com.truvid.** { *; }
+-keepattributes Exceptions, InnerClasses, Signature, Deprecated, SourceFile, LineNumberTable, *Annotation*, EnclosingMethod
+-dontwarn android.webkit.JavascriptInterface
+-dontwarn com.startapp.**

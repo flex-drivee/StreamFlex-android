@@ -13,6 +13,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.ContentCopy
@@ -37,59 +38,43 @@ object SupportManager {
     const val BINANCE_PAY_ID = "1041683310"
     const val USDT_TRC20_ADDRESS = "TJEbUfurBzdNhFARk6STdzNKAKpuQR5g6j"
 
-    const val ADSTERRA_URL = "https://ensueddenied.com/jg7gcgvu?key=a0919ba886af754e302a4630d7efcf1f"
-    const val MONETAG_URL = "https://omg10.com/4/11839109"
-
     private const val PREFS_NAME = "cinetheta_support_prefs"
     private const val KEY_APP_OPEN_COUNT = "app_open_count"
     private const val KEY_LAST_SHOWN_TIME = "last_support_prompt_time"
-    private const val KEY_AD_ROTATION_INDEX = "ad_rotation_index"
     private const val COOLDOWN_MILLIS = 6L * 60L * 60L * 1000L // 6 hours
 
     // Track when user tapped to watch an ad
     private var adClickTimestamp: Long = 0L
-    private var inMemoryAdCounter: Int = 0
-    const val MIN_AD_WATCH_DURATION_MS = 20_000L
+    const val MIN_AD_WATCH_DURATION_MS = 10_000L // 10 seconds minimum watch time
 
     fun recordAdClick() {
         adClickTimestamp = System.currentTimeMillis()
     }
 
     /**
-     * Alternates between Adsterra and Monetag, ensuring Adsterra comes 1st, then Monetag.
-     */
-    fun getRotatedAdUrl(context: Context? = null): String {
-        val index = if (context != null) {
-            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            val current = prefs.getInt(KEY_AD_ROTATION_INDEX, 0)
-            prefs.edit().putInt(KEY_AD_ROTATION_INDEX, current + 1).apply()
-            current
-        } else {
-            inMemoryAdCounter++
-        }
-        return if (index % 2 == 0) ADSTERRA_URL else MONETAG_URL
-    }
-
-    /**
-     * Opens the ad URL in the user's browser and records click timestamp.
+     * Opens a Start.io Interstitial Video Ad natively and records click timestamp.
      */
     fun openAd(context: Context) {
         recordAdClick()
         try {
-            val url = getRotatedAdUrl(context)
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-            context.startActivity(intent)
+            val startAppAd = com.startapp.sdk.adsbase.StartAppAd(context)
+            startAppAd.loadAd(com.startapp.sdk.adsbase.StartAppAd.AdMode.VIDEO, object : com.startapp.sdk.adsbase.adlisteners.AdEventListener {
+                override fun onReceiveAd(ad: com.startapp.sdk.adsbase.Ad) {
+                    startAppAd.showAd()
+                }
+                override fun onFailedToReceiveAd(ad: com.startapp.sdk.adsbase.Ad?) {
+                    Toast.makeText(context, "Sponsor ad unavailable at the moment", Toast.LENGTH_SHORT).show()
+                }
+            })
         } catch (e: Exception) {
-            Toast.makeText(context, "Unable to open browser", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Unable to load sponsor ad", Toast.LENGTH_SHORT).show()
         }
     }
 
     /**
      * Called when the app is resumed (ON_RESUME) to check if the user returned from an ad.
-     * - If user stayed for at least 20s: triggers [onQualifiesForDialog] to show the big popup.
-     * - If user returned before 20s: shows a Toast message with heart.
+     * - If user stayed for at least 15s: triggers [onQualifiesForDialog] to show the big popup.
+     * - If user returned before 15s: shows a Toast message with heart.
      */
     fun onAppResumeFromAd(context: Context, onQualifiesForDialog: () -> Unit) {
         val clickTime = adClickTimestamp
@@ -102,7 +87,7 @@ object SupportManager {
         } else {
             Toast.makeText(
                 context,
-                "You came back earlier than 20s, but Thanks! ❤️",
+                "You came back earlier than 15s, but Thanks! ❤️",
                 Toast.LENGTH_LONG
             ).show()
         }
@@ -146,12 +131,6 @@ fun CineThetaLogoBadge(
     modifier: Modifier = Modifier,
     size: androidx.compose.ui.unit.Dp = 64.dp
 ) {
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val logoResId = remember(context) {
-        val id = context.resources.getIdentifier("ic_launcher_foreground_logo", "drawable", context.packageName)
-        if (id != 0) id else context.applicationInfo.icon
-    }
-
     Box(
         modifier = modifier
             .size(size)
@@ -167,23 +146,20 @@ fun CineThetaLogoBadge(
             .padding(4.dp),
         contentAlignment = Alignment.Center
     ) {
-        if (logoResId != 0) {
-            Image(
-                painter = painterResource(id = logoResId),
-                contentDescription = "CineTheta Logo",
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape(12.dp))
-            )
-        }
+        Icon(
+            imageVector = Icons.Default.PlayArrow,
+            contentDescription = "CineTheta Logo",
+            tint = Color(0xFFE50914),
+            modifier = Modifier.size(size * 0.6f)
+        )
     }
 }
 
 /**
  * Observes lifecycle ON_RESUME to detect when the user returns from viewing an ad.
- * Automatically checks whether 20 seconds have passed:
- * - If >= 20s: triggers [onShowThankYouDialog]
- * - If < 20s: shows a Toast message with heart
+ * Automatically checks whether 15 seconds have passed:
+ * - If >= 15s: triggers [onShowThankYouDialog]
+ * - If < 15s: shows a Toast message with heart
  */
 @Composable
 fun AdReturnLifecycleTracker(
@@ -205,7 +181,7 @@ fun AdReturnLifecycleTracker(
 }
 
 /**
- * Beautiful in-app popup shown when user returns to the app after viewing an ad for at least 20 seconds.
+ * Beautiful in-app popup shown when user returns to the app after viewing an ad for at least 15 seconds.
  * Features official CineTheta app logo, gratitude message, and confirmation badge.
  */
 @Composable
@@ -237,7 +213,7 @@ fun ThankYouSupportDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Thank you so much for taking the time to browse our sponsor for 20+ seconds! ✨\n\nYour support directly covers API servers, provider scrapers, and app maintenance with zero in-video interruptions!",
+                    text = "Thank you so much for taking the time to watch our sponsor for 20+ seconds! ✨\n\nYour support directly covers API servers, provider scrapers, and app maintenance with zero in-video interruptions!",
                     fontSize = 13.5.sp,
                     color = Color.White.copy(alpha = 0.85f),
                     textAlign = TextAlign.Center,
@@ -259,7 +235,7 @@ fun ThankYouSupportDialog(
                     ) {
                         Text("❤️ ", fontSize = 14.sp)
                         Text(
-                            text = "20s+ Browsing Complete — Thank You!",
+                            text = "15s+ Browsing Complete — Thank You!",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = Color(0xFF4ADE80)
@@ -290,10 +266,7 @@ fun ThankYouSupportDialog(
 }
 
 /**
- * Non-forceful homepage dialog (similar to Phisher in Cloudstream) allowing users to either:
- * 1. Watch a quick ad for free contribution.
- * 2. Open full crypto donation options.
- * 3. Dismiss freely without any restrictions.
+ * Automatic 5-second countdown ad warning dialog for the home screen.
  */
 @Composable
 fun HomeSupportDialog(
@@ -301,17 +274,28 @@ fun HomeSupportDialog(
     onOpenDonations: () -> Unit,
     onDismiss: () -> Unit
 ) {
+    var secondsLeft by remember { mutableIntStateOf(5) }
+
+    LaunchedEffect(Unit) {
+        while (secondsLeft > 0) {
+            delay(1000L)
+            secondsLeft--
+        }
+        delay(800L) // Little bit late after time end
+        onWatchAd()
+    }
+
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = { /* Unskippable */ },
         containerColor = Color(0xFF18181E),
-        shape = RoundedCornerShape(22.dp),
+        shape = RoundedCornerShape(24.dp),
         icon = {
             CineThetaLogoBadge(size = 64.dp)
         },
         title = {
             Text(
-                text = "Enjoying CineTheta?",
-                fontWeight = FontWeight.Bold,
+                text = "Supporting CineTheta",
+                fontWeight = FontWeight.ExtraBold,
                 fontSize = 20.sp,
                 color = Color.White,
                 textAlign = TextAlign.Center,
@@ -321,54 +305,36 @@ fun HomeSupportDialog(
         text = {
             Column(
                 modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Help keep CineTheta free, ad-free during playback, and actively maintained! If you can't donate money, browsing a sponsor ad for at least 20 seconds is completely free and directly supports server maintenance.",
-                    fontSize = 13.sp,
-                    color = Color.White.copy(alpha = 0.8f),
+                    text = "We're sorry for the interruption! We know ads are a headache, but for server stability and continuous maintenance, the app requires support to stay alive.\n\nThank you for your understanding! ❤️",
+                    fontSize = 14.sp,
+                    color = Color.White.copy(alpha = 0.85f),
                     textAlign = TextAlign.Center,
-                    lineHeight = 18.sp
+                    lineHeight = 20.sp
                 )
 
-                // ── Option 1: Watch Ad (Free) ──────────────────────────────────
-                Button(
-                    onClick = onWatchAd,
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE50914)),
-                    shape = RoundedCornerShape(10.dp),
-                    modifier = Modifier.fillMaxWidth()
+                // Countdown badge
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color(0xFFE50914).copy(alpha = 0.15f))
+                        .padding(vertical = 12.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Outlined.OpenInNew,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(18.dp)
+                    Text(
+                        text = if (secondsLeft > 0) "Ad is coming in $secondsLeft seconds..." else "Loading sponsor ad...",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFFF5252)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("🎬 Watch Ad (Browse 20s+ to Support)", fontWeight = FontWeight.Bold, color = Color.White)
-                }
-
-                // ── Option 2: Donate (Crypto / Binance) ─────────────────────────
-                OutlinedButton(
-                    onClick = onOpenDonations,
-                    shape = RoundedCornerShape(10.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFF3BA2F).copy(alpha = 0.7f)),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFF3BA2F)),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("☕ Donate via Binance / USDT", fontWeight = FontWeight.SemiBold)
                 }
             }
         },
-        confirmButton = {},
-        dismissButton = {
-            TextButton(
-                onClick = onDismiss,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Maybe Later", color = Color.White.copy(alpha = 0.6f))
-            }
-        }
+        confirmButton = {}
     )
 }
 
@@ -458,7 +424,7 @@ fun FullSupportCineThetaDialog(
 
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "100% Free • Please browse the page for at least 20s • Opens in browser",
+                        text = "100% Free • Please browse the page for at least 15s • Opens in browser",
                         fontSize = 11.sp,
                         color = Color.White.copy(alpha = 0.6f)
                     )
@@ -661,7 +627,7 @@ fun FullSupportCineThetaDialog(
 /**
  * Ad countdown dialog shown when NetMirror t_hash_t security token is expired or missing.
  * The NetMirror headless bypass takes ~37 seconds.
- * Gives the user a 5-second countdown to open a sponsor ad for 20 seconds to support server costs,
+ * Gives the user a 5-second countdown to open a sponsor ad for 15 seconds to support server costs,
  * while the bypass continues concurrently in the background.
  */
 @Composable
@@ -726,7 +692,7 @@ fun NetMirrorBypassAdDialog(
                 }
 
                 Text(
-                    text = "NetMirror / OTT stream security tokens (t_hash_t) are being generated in the background. This process takes ~37 seconds to complete.\n\nWhile we prepare your streams, please browse our sponsor page for at least 20 seconds to help cover app maintenance & server costs!",
+                    text = "NetMirror / OTT stream security tokens (t_hash_t) are being generated in the background. This process takes ~37 seconds to complete.\n\nWhile we prepare your streams, please watch our sponsor video for at least 15 seconds to help cover app maintenance & server costs!",
                     fontSize = 13.sp,
                     color = Color.White.copy(alpha = 0.8f),
                     textAlign = TextAlign.Center,

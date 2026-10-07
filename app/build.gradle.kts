@@ -27,8 +27,8 @@ android {
         applicationId = "com.cinetheta.app"
         minSdk = 24
         targetSdk = 34
-        versionCode = 9
-        versionName = "1.0.4"
+        versionCode = 10
+        versionName = "1.0.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -100,6 +100,7 @@ android {
 }
 
 dependencies {
+    implementation("com.startapp:inapp-sdk:5.0.2")
     // --- Core Android ---
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
@@ -168,3 +169,8 @@ dependencies {
 }
 
 
+
+// tasks.register<JavaExec>("runMovieBoxTest") {
+//     classpath = sourceSets["test"].runtimeClasspath
+//     mainClass.set("com.cinetheta.app.MovieBoxMainTestKt")
+// }

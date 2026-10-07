@@ -16,7 +16,12 @@ import com.cinetheta.providers.toonstream.ToonStreamConfig
 import com.cinetheta.providers.toonstream.ToonStreamMapper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.net.URI
 
 class ToonStreamExtractor : BaseExtractor() {
@@ -99,40 +104,41 @@ class ToonStreamExtractor : BaseExtractor() {
         val extractedStreams = mutableListOf<StreamLink>()
         val extractedSources = mutableListOf<ProviderSource>()
 
-        for ((index, embedUrl) in embedUrls.withIndex()) {
-            if (index > 0) delay(100)
+        val mutex = kotlinx.coroutines.sync.Mutex()
+        coroutineScope {
+            embedUrls.mapIndexed { index, embedUrl ->
+                async {
+                    if (index > 0) delay(index * 100L)
 
             if (embedUrl.startsWith("https://www.youtube.com/", ignoreCase = true)) {
-                continue
+                return@async
             }
 
             // Direct media check (.m3u8 or .mp4)
             if (embedUrl.contains(".m3u8") || embedUrl.contains(".mp4")) {
-                extractedStreams.add(
-                    StreamLink(
+                mutex.withLock { extractedStreams.add(StreamLink(
                         name = "ToonStream \u2022 Server ${index + 1}",
                         url = embedUrl,
                         quality = source.quality,
                         host = HostType.DIRECT,
                         referer = pageUrl
                     )
-                )
-                continue
+                ) }
+                return@async
             }
 
             // 1. Check if embedUrl is directly recognized by HostDetector
             val directType = HostDetector.detect(embedUrl)
             if (directType != HostType.UNKNOWN && directType != HostType.REDIRECT) {
                 Logger.d("[ToonStreamExtractor] Server ${index + 1} directly handled: $embedUrl -> $directType", TAG)
-                extractedSources.add(
-                    ToonStreamMapper.toProviderSource(
+                mutex.withLock { extractedSources.add(ToonStreamMapper.toProviderSource(
                         iframeUrl = embedUrl,
                         hostType  = directType,
                         referer   = pageUrl,
                         metadata  = mapOf("server" to (index + 1).toString(), "baseUrl" to baseUrl)
                     )
-                )
-                continue
+                ) }
+                return@async
             }
 
             // 2. If not handled directly (e.g. internal wrapper /player/?id=... or proxy player),
@@ -141,16 +147,15 @@ class ToonStreamExtractor : BaseExtractor() {
             Logger.d("[ToonStreamExtractor] Server ${index + 1}: $embedUrl -> resolved: $resolvedUrl", TAG)
 
             if (resolvedUrl.contains(".m3u8") || resolvedUrl.contains(".mp4")) {
-                extractedStreams.add(
-                    StreamLink(
+                mutex.withLock { extractedStreams.add(StreamLink(
                         name = "ToonStream \u2022 Server ${index + 1}",
                         url = resolvedUrl,
                         quality = source.quality,
                         host = HostType.DIRECT,
                         referer = embedUrl
                     )
-                )
-                continue
+                ) }
+                return@async
             }
 
             val resolvedType = HostDetector.detect(resolvedUrl)
@@ -164,14 +169,15 @@ class ToonStreamExtractor : BaseExtractor() {
                 resolvedType
             }
 
-            extractedSources.add(
-                ToonStreamMapper.toProviderSource(
+            mutex.withLock { extractedSources.add(ToonStreamMapper.toProviderSource(
                     iframeUrl = resolvedUrl,
                     hostType  = finalType,
                     referer   = embedUrl,
                     metadata  = mapOf("server" to (index + 1).toString(), "baseUrl" to baseUrl)
                 )
-            )
+            ) }
+                }
+            }.awaitAll()
         }
 
         Logger.i("[ToonStreamExtractor] Extracted ${extractedStreams.size} direct streams, ${extractedSources.size} next sources", TAG)
@@ -227,6 +233,7 @@ class ToonStreamExtractor : BaseExtractor() {
             .header("Referer", referer)
             .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
             .header("User-Agent", Constants.DEFAULT_USER_AGENT)
+            .timeout(5000L) // Reduce timeout to 5 seconds to prevent hanging
             .build()
         return when (val res = HttpClient.execute(req)) {
             is NetworkResult.Success -> res.data.bodyAsString()
