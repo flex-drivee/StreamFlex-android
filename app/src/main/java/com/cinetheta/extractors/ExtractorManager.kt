@@ -57,6 +57,7 @@ object ExtractorManager {
 
         // Phase 3 — HDHub4U complete extractors
         DoodExtractor(),
+        com.cinetheta.providers.castletv.CastleTvExtractor(),
 
         PixelDrainExtractor(),
         com.cinetheta.extractors.vidstack.VidStackExtractor(),

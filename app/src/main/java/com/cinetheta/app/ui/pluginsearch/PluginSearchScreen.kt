@@ -121,7 +121,7 @@ fun PluginSearchScreen(
                             onDismissRequest = { expanded = false },
                             modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
                         ) {
-                            state.providers.forEach { provider ->
+                            viewModel.getProviders().forEach { provider ->
                                 val isSelected = provider.id == state.selectedProvider?.id
                                 DropdownMenuItem(
                                     text = { 

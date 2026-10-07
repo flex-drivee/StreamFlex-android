@@ -64,12 +64,20 @@ class PlaybackProgressManager(context: Context) {
         }
     }
 
-    fun saveLastStream(progressKey: String, streamName: String) {
+        fun saveLastStream(progressKey: String, streamName: String) {
         prefs.edit().putString("stream_$progressKey", streamName).apply()
     }
     
     fun getLastStream(progressKey: String): String? {
         return prefs.getString("stream_$progressKey", null)
+    }
+
+    fun saveLastAudioTrack(progressKey: String, audioLangOrLabel: String) {
+        prefs.edit().putString("audio_$progressKey", audioLangOrLabel).apply()
+    }
+    
+    fun getLastAudioTrack(progressKey: String): String? {
+        return prefs.getString("audio_$progressKey", null)
     }
 
     fun removeFromHistory(mediaId: String) {

@@ -401,7 +401,7 @@ fun SettingsScreen(
                     SettingsTile(
                         icon = Icons.Outlined.PersonOutline,
                         title = "Developer",
-                        subtitle = "Developed by Mani-Balouch.",
+                        subtitle = "Developed by Mani (flex-drivee).",
                         trailing = { Spacer(modifier = Modifier.width(0.dp)) },
                         onTap = { /* No external link */ }
                     )
@@ -725,8 +725,8 @@ fun SettingsScreen(
                                 Column(modifier = Modifier.weight(1f)) {
                                     androidx.compose.material3.Text(provider.name)
                                     val badgeText = when(provider.id) {
-                                        "moviebox", "all_otts", "animedekho", "toonstream" -> "Recommended"
-                                        "hdhub4u", "fourkhdhub" -> "Backup Plugin"
+                                        "moviebox", "toonstream", "animedekho", "all_otts" -> "Recommended"
+                                        "hdhub4u", "fourkhdhub" -> "Backup"
                                         "youtube" -> "100% Working"
                                         else -> null
                                     }

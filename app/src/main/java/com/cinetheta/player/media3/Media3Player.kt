@@ -22,6 +22,7 @@ import com.cinetheta.player.core.StreamPlayer
 import com.cinetheta.player.quality.QualityOption
 import com.cinetheta.player.tracks.AudioTrack
 import com.cinetheta.player.tracks.SubtitleTrack
+import androidx.compose.runtime.collectAsState
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
@@ -597,6 +598,7 @@ class Media3Player(
 
     @androidx.compose.runtime.Composable
     override fun Surface(modifier: androidx.compose.ui.Modifier, isFullScreen: Boolean) {
+        val playerState = state.collectAsState()
         androidx.compose.ui.viewinterop.AndroidView(
             factory = { ctx ->
                 android.widget.FrameLayout(ctx).apply {
@@ -649,6 +651,7 @@ class Media3Player(
             update = { frameLayout ->
                 val playerView = frameLayout.getChildAt(0) as androidx.media3.ui.PlayerView
                 playerView.resizeMode = if (isFullScreen) androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_ZOOM else androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FIT
+                playerView.keepScreenOn = playerState.value.isPlaying
             },
             modifier = modifier
         )

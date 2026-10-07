@@ -12,6 +12,9 @@ import coil.ImageLoaderFactory
 import com.cinetheta.app.di.AppModule
 import com.cinetheta.app.di.NetworkModule
 
+import com.startapp.sdk.adsbase.StartAppSDK
+import com.startapp.sdk.adsbase.StartAppAd
+
 /**
  * Application entry point for CineTheta.
  *
@@ -39,6 +42,9 @@ class CineThetaApplication : Application(), ImageLoaderFactory {
 
     override fun onCreate() {
         super.onCreate()
+
+        
+
         instance = this
 
         registerActivityLifecycleCallbacks(object : android.app.Application.ActivityLifecycleCallbacks {
@@ -54,6 +60,16 @@ class CineThetaApplication : Application(), ImageLoaderFactory {
             override fun onActivitySaveInstanceState(activity: android.app.Activity, outState: android.os.Bundle) {}
             override fun onActivityDestroyed(activity: android.app.Activity) {}
         })
+
+        // Initialize Start.io Ads
+        try {
+            com.startapp.sdk.adsbase.StartAppSDK.setUserConsent(this, "pas", System.currentTimeMillis(), true)
+            StartAppSDK.init(this, "209537758", false)
+            
+            StartAppAd.disableSplash()
+        } catch (e: Exception) {
+            android.util.Log.e("CineThetaApplication", "Error initializing StartApp", e)
+        }
 
         initializeModules()
     }

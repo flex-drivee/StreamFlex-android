@@ -228,7 +228,7 @@ fun PlayerScreen(
                 showSettingsDialog = false 
             },
             onAudioSelected = { 
-                controller.player.setAudioTrack(it)
+                controller.setAudioTrack(it)
                 showSettingsDialog = false 
             },
             onSubtitleSelected = { 
@@ -275,8 +275,8 @@ fun SettingsDialog(
     Dialog(onDismissRequest = onDismiss) {
         Surface(
             shape = RoundedCornerShape(12.dp),
-            color = Color(0xFF1E1E1E), // Dark pop-up background
-            modifier = Modifier.fillMaxWidth().height(350.dp) // Fixed height to prevent resizing
+            color = Color(0xE6121212), // 90% opaque very dark background (transparent)
+            modifier = Modifier.fillMaxWidth().height(420.dp) // Taller so items aren't cramped
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 // Top Tab Row
@@ -301,12 +301,12 @@ fun SettingsDialog(
                         onClick = { currentTab = 2 }
                     )
                     TabButton(
-                        icon = Icons.Default.Dns, // Servers Tab
+                        text = "Server",
                         isSelected = currentTab == 3, 
                         onClick = { currentTab = 3 }
                     )
                     TabButton(
-                        icon = Icons.Default.PlayArrow, // Speed Tab
+                        text = "Speed",
                         isSelected = currentTab == 4, 
                         onClick = { currentTab = 4 }
                     )
@@ -400,10 +400,21 @@ fun SettingsDialog(
 }
 
 @Composable
-private fun TabButton(icon: androidx.compose.ui.graphics.vector.ImageVector, isSelected: Boolean, onClick: () -> Unit) {
+private fun TabButton(
+    icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
+    text: String? = null,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
     val color = if (isSelected) Color.White else Color.Gray
-    IconButton(onClick = onClick) {
-        Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(28.dp))
+    if (text != null) {
+        androidx.compose.material3.TextButton(onClick = onClick, modifier = Modifier.height(48.dp)) {
+            Text(text, color = color, fontWeight = if (isSelected) androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal)
+        }
+    } else if (icon != null) {
+        IconButton(onClick = onClick) {
+            Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(28.dp))
+        }
     }
 }
 

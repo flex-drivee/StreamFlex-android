@@ -28,6 +28,7 @@ object ProviderModule {
     val providers: List<Provider> by lazy {
 
         listOf(
+            com.cinetheta.providers.castletv.CastleTvProvider(),
             MovieBoxProvider(),
             NetMirrorProvider(),
             AnimeDekhoProvider(),

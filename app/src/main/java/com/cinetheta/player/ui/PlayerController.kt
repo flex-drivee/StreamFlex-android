@@ -1,4 +1,5 @@
 package com.cinetheta.player.ui
+import kotlinx.coroutines.flow.first
 
 import android.util.Log
 import com.cinetheta.domain.models.StreamLink
@@ -156,6 +157,15 @@ class PlayerController(
         }
     }
     
+
+    fun setAudioTrack(track: com.cinetheta.player.tracks.AudioTrack) {
+        player.setAudioTrack(track)
+        val langToSave = track.language?.takeIf { it.isNotBlank() && it != "und" } ?: track.label
+        if (!langToSave.isNullOrBlank()) {
+            progressManager.saveLastAudioTrack(progressKey, langToSave)
+        }
+    }
+    
     private fun loadCurrentStream() {
         val index = _currentStreamIndex.value
         val streams = _allStreams.value
@@ -165,12 +175,41 @@ class PlayerController(
             player.load(selectedStream)
             
             // Restore progress
-            val savedPos = progressManager.getProgress(progressKey)
+                        val savedPos = progressManager.getProgress(progressKey)
             if (savedPos > 10000L) {
                 savedPosToResume = savedPos
                 showResumeDialog.value = true
             } else {
                 player.play()
+            }
+            
+            // Restore audio track dynamically
+            scope.launch {
+                val savedAudio = progressManager.getLastAudioTrack(progressKey)
+                if (savedAudio != null) {
+                    player.state.first { it.audioTracks.isNotEmpty() }
+                    val currentTracks = player.state.value.audioTracks
+                    val p = savedAudio.trim().lowercase()
+                    val matched = currentTracks.find { track ->
+                        val lang = (track.language ?: "").trim().lowercase()
+                        val label = (track.label ?: "").trim().lowercase()
+                        
+                        if (lang == p || label == p) return@find true
+                        if (p.startsWith("hin") || p.contains("hindi")) {
+                            return@find lang.startsWith("hi") || lang.startsWith("hin") || label.contains("hindi")
+                        }
+                        if (p.startsWith("eng") || p.contains("english")) {
+                            return@find lang.startsWith("en") || lang.startsWith("eng") || label.contains("english")
+                        }
+                        if (p.startsWith("jap") || p.contains("japanese")) {
+                            return@find lang.startsWith("ja") || lang.startsWith("jp") || label.contains("japanese")
+                        }
+                        (lang.isNotBlank() && (lang.startsWith(p) || p.startsWith(lang))) || label.contains(p)
+                    }
+                    if (matched != null) {
+                        player.setAudioTrack(matched)
+                    }
+                }
             }
         }
     }
