@@ -70,7 +70,7 @@ object HostDetector {
             host.contains("mixdrop") ->
                 return HostType.MIXDROP
 
-            host.contains("filemoon") || host.contains("moonplayer") ->
+            host.contains("filemoon") || host.contains("moonplayer") || host.contains("bysezejataos") ->
                 return HostType.FILEMOON
 
             host.contains("dood") ->

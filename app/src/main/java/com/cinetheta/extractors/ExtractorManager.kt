@@ -70,6 +70,7 @@ object ExtractorManager {
         NetMirrorExtractor(),
         
         MovieBoxExtractor(),
+        com.cinetheta.providers.piratexplay.PirateXplayExtractor(),
         
         // Phase 3+ providers
         com.cinetheta.extractors.streamtape.StreamTapeExtractor(),

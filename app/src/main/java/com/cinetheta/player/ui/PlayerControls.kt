@@ -298,9 +298,15 @@ fun PlayerControls(
 
                         // Right: Server, Quality, Audio, Subtitles, PIP, Fullscreen
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            // Server Icon (tab 3)
-                            IconButton(onClick = { onSettingsClick(3) }, modifier = Modifier.size(44.dp)) {
-                                Icon(Icons.Outlined.Dns, contentDescription = "Servers", tint = Color.White, modifier = Modifier.size(26.dp))
+                            // Server word (tab 3)
+                            androidx.compose.foundation.layout.Box(
+                                modifier = Modifier
+                                    .height(44.dp)
+                                    .padding(horizontal = 8.dp)
+                                    .clickable { onSettingsClick(3) },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text("Server", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                             }
                             // Quality / Multiprint (tab 0)
                             IconButton(onClick = { onSettingsClick(0) }, modifier = Modifier.size(44.dp)) {

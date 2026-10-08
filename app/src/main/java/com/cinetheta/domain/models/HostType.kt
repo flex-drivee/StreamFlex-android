@@ -23,6 +23,7 @@ enum class HostType {
     MOVIEBOX,
     HDSTREAM4U,
     CASTLETV,
+    PIRATEXPLAY,
 
     // AnimeDekho extractors
     ANIMEDEKHO,

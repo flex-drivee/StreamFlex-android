@@ -21,6 +21,9 @@ object ContentTypeDetector {
 
         return when {
 
+            value.startsWith("data:application/x-mpegurl") ->
+                ContentType.HLS
+
             value.endsWith(".m3u8") ->
                 ContentType.HLS
 

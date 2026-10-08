@@ -16,17 +16,31 @@ class CastleTvExtractor : BaseExtractor() {
     
     override val hostType = HostType.CASTLETV
     
+    private fun getLangCode(name: String): String {
+        return when (name.lowercase()) {
+            "english" -> "eng"
+            "hindi" -> "hin"
+            "kannada" -> "kan"
+            "malayalam" -> "mal"
+            "tamil" -> "tam"
+            "telugu" -> "tel"
+            "bengali" -> "ben"
+            "marathi" -> "mar"
+            "gujarati" -> "guj"
+            "punjabi" -> "pan"
+            else -> name.take(3).lowercase()
+        }
+    }
+
     override suspend fun extract(source: ProviderSource): ExtractionResult {
         return withContext(Dispatchers.IO) {
             try {
                 val uri = Uri.parse(source.url)
                 val movieId = uri.getQueryParameter("movieId") ?: return@withContext emptyResult()
                 val episodeId = uri.getQueryParameter("episodeId") ?: return@withContext emptyResult()
-                val languageId = uri.getQueryParameter("languageId")
+                val langsStr = uri.getQueryParameter("langs")
                 
                 val videoApiUrl = "https://api.hlowb.com/film-api/v2.0.1/movie/getVideo2?clientType=1&packageName=com.external.castle&channel=IndiaA&lang=en-US"
-                
-                val langStr = if (languageId != null) ",\n  \"languageId\": $languageId" else ""
                 
                 val jsonBody = """
                 {
@@ -39,7 +53,8 @@ class CastleTvExtractor : BaseExtractor() {
                   "movieId": "$movieId",
                   "episodeId": "$episodeId",
                   "isNewUser": "true",
-                  "resolution": ""$langStr
+                  "resolution": "",
+                  "packageName": "com.external.castle"
                 }
                 """.trimIndent()
                 
