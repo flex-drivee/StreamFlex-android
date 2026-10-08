@@ -15,7 +15,7 @@ import kotlinx.coroutines.awaitAll
 
 class CastleTvProvider : Provider {
     override val id = "castletv"
-    override val name = "Castle TV"
+    override val name = "Castle TV (Use VLC for Multi Language)"
     override val baseUrl = "https://api.hlowb.com"
     override val supportedMedia = setOf(MediaType.MOVIE, MediaType.TV)
     
@@ -66,28 +66,18 @@ class CastleTvProvider : Provider {
         val tracks = epObj["tracks"]?.jsonArray
         
         if (tracks != null && tracks.isNotEmpty()) {
-            for (track in tracks) {
-                val tObj = track.jsonObject
-                val langId = tObj["languageId"]?.jsonPrimitive?.content ?: continue
-                val langName = tObj["languageName"]?.jsonPrimitive?.content ?: "Unknown"
-                val existIndividual = tObj["existIndividualVideo"]?.jsonPrimitive?.content?.toBooleanStrictOrNull() ?: false
-                
-                val playerUri = if (existIndividual) {
-                    "castletv://player?movieId=$movieId&episodeId=$episodeId&languageId=$langId"
-                } else {
-                    "castletv://player?movieId=$movieId&episodeId=$episodeId"
-                }
-                
-                sources.add(
-                    ProviderSource(
-                        provider = "${this@CastleTvProvider.name} - $langName",
-                        host = "Castle",
-                        hostType = HostType.CASTLETV,
-                        url = playerUri,
-                        quality = Quality.UNKNOWN
-                    )
+            val langNames = tracks.mapNotNull { it.jsonObject["languageName"]?.jsonPrimitive?.content }.joinToString(",")
+            val playerUri = "castletv://player?movieId=$movieId&episodeId=$episodeId&langs=${Uri.encode(langNames)}"
+            
+            sources.add(
+                ProviderSource(
+                    provider = this@CastleTvProvider.name,
+                    host = "Castle",
+                    hostType = HostType.CASTLETV,
+                    url = playerUri,
+                    quality = Quality.UNKNOWN
                 )
-            }
+            )
         } else {
             val playerUri = "castletv://player?movieId=$movieId&episodeId=$episodeId"
             sources.add(
@@ -100,7 +90,7 @@ class CastleTvProvider : Provider {
                 )
             )
         }
-        return sources.distinctBy { it.url } // Prevent duplicates if multiple languages share the default video
+        return sources
     }
     
     override suspend fun load(searchResult: SearchResult): ProviderResult? {
