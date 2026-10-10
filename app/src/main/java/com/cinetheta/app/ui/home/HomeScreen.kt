@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.border
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.pager.HorizontalPager
@@ -78,10 +79,10 @@ fun HomeScreen(
 
     LaunchedEffect(providerRepository.selectedProviderId) {
         val pid = providerRepository.selectedProviderId
-        if (pid == "animedekho" || pid == "toonstream") {
+        if (pid == "animedekho" || pid == "toonstream" || pid == "piratexplay") {
             selectedTab = 3
             viewModel.selectedTabIndex = 3
-        } else if (pid == "moviebox" || pid == "all_otts" || pid == "hdhub4u" || pid == "fourkhdhub" || pid == "youtube") {
+        } else if (pid == "moviebox" || pid == "netmirror" || pid == "castletv" || pid == "hdhub4u" || pid == "fourkhdhub" || pid == "youtube") {
             // Optional: reset to Home if switching back from an anime provider to a general provider
             if (selectedTab == 3) {
                 selectedTab = 0
@@ -361,6 +362,46 @@ fun HomeScreen(
 //                }
 //            )
 //        }
+
+        // ── Floating Provider Selector (FAB) ──────────────────────────────────
+        var showProviderSelector by remember { mutableStateOf(false) }
+        var showMovieBoxSettings by remember { mutableStateOf(false) }
+
+        if (showMovieBoxSettings) {
+            MovieBoxSettingsDialog(
+                onDismiss = { showMovieBoxSettings = false },
+                context = context
+            )
+        }
+
+        if (showProviderSelector) {
+            ProviderSelectorSheet(
+                providerRepository = providerRepository,
+                onDismiss = { showProviderSelector = false },
+                onProviderSelected = { pid ->
+                    providerRepository.selectedProviderId = pid
+                    context.getSharedPreferences("cinetheta_settings", android.content.Context.MODE_PRIVATE)
+                        .edit().putString("selected_provider", pid).apply()
+                    showProviderSelector = false
+                    viewModel.loadHomeData()
+                },
+                onSettingsClick = {
+                    showProviderSelector = false
+                    showMovieBoxSettings = true
+                }
+            )
+        }
+
+        androidx.compose.material3.SmallFloatingActionButton(
+            onClick = { showProviderSelector = true },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(end = 16.dp, bottom = 100.dp),
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary
+        ) {
+            Icon(Icons.Outlined.Extension, contentDescription = "Select Provider")
+        }
     }
 }
 
@@ -373,7 +414,7 @@ private fun SFTopBar(
     alpha: Float,
     selectedTab: Int,
     tabs: List<String>,
-    providerRepository: ProviderRepository,
+    providerRepository: com.cinetheta.domain.repositories.ProviderRepository,
     onTabSelected: (Int) -> Unit,
     onSearchClick: () -> Unit,
     onProfileClick: () -> Unit,
@@ -384,7 +425,6 @@ private fun SFTopBar(
         modifier = Modifier
             .fillMaxWidth()
             .drawWithContent {
-                // gradient from black → transparent as we near fully scrolled
                 drawRect(
                     brush = Brush.verticalGradient(
                         colors = listOf(
@@ -431,151 +471,37 @@ private fun SFTopBar(
                         Icon(Icons.Outlined.Search, "Search",
                             tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(20.dp))
                     }
-
-                    // Provider Selector (Icon only)
-                    var showProviderDropdown by remember { mutableStateOf(false) }
-                    var selectedProviderName by remember { 
-                        mutableStateOf(providerRepository.provider(providerRepository.selectedProviderId ?: "")?.name ?: "None") 
-                    }
-                    var showMovieBoxSettings by remember { mutableStateOf(false) }
-                    val context = androidx.compose.ui.platform.LocalContext.current
-                    
-                    if (showMovieBoxSettings) {
-                        MovieBoxSettingsDialog(
-                            onDismiss = { showMovieBoxSettings = false },
-                            context = context
-                        )
-                    }
-
-                    Box {
-                        Row(
-                            modifier = Modifier
-                                .height(36.dp)
-                                .clip(RoundedCornerShape(18.dp))
-                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f))
-                                .clickable { showProviderDropdown = true }
-                                .padding(horizontal = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.Extension,
-                                contentDescription = "Provider",
-                                tint = MaterialTheme.colorScheme.onBackground,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Text(
-                                text = selectedProviderName,
-                                color = MaterialTheme.colorScheme.onBackground,
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-
-                        DropdownMenu(
-                            expanded = showProviderDropdown,
-                            onDismissRequest = { showProviderDropdown = false },
-                            modifier = Modifier.background(MaterialTheme.colorScheme.surface)
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text("None", color = MaterialTheme.colorScheme.onSurface) },
-                                onClick = {
-                                    val oldId = providerRepository.selectedProviderId
-                                    providerRepository.selectedProviderId = null
-                                    selectedProviderName = "None"
-                                    showProviderDropdown = false
-                                    
-                                    context.getSharedPreferences("cinetheta_settings", android.content.Context.MODE_PRIVATE)
-                                        .edit().putString("selected_provider", null).apply()
-                                        
-                                    // UI state is updated smoothly. No restart needed.
-                                    onProviderChanged()
-                                }
-                            )
-                            providerRepository.enabledProviders().forEach { provider ->
-                                DropdownMenuItem(
-                                    text = { Text(provider.name, color = MaterialTheme.colorScheme.onSurface) },
-                                    onClick = {
-                                        val oldId = providerRepository.selectedProviderId
-                                        providerRepository.selectedProviderId = provider.id
-                                        selectedProviderName = provider.name
-                                        showProviderDropdown = false
-                                        
-                                        context.getSharedPreferences("cinetheta_settings", android.content.Context.MODE_PRIVATE)
-                                            .edit().putString("selected_provider", provider.id).apply()
-                                            
-                                        // UI state is updated smoothly. No restart needed.
-                                        onProviderChanged()
-                                    },
-                                    trailingIcon = {
-                                        if (provider.id == "moviebox") {
-                                            IconButton(onClick = {
-                                                showProviderDropdown = false
-                                                showMovieBoxSettings = true
-                                            }) {
-                                                Icon(
-                                                    Icons.Default.Settings,
-                                                    contentDescription = "Settings",
-                                                    tint = MaterialTheme.colorScheme.onSurface
-                                                )
-                                            }
-                                        }
-                                    }
-                                )
-                            }
-                        }
-                    }
                 }
             }
 
-            // Row 2: Tab navigation (fixed full-width alignment, never clips or shifts sideways)
-            TabRow(
-                selectedTabIndex = selectedTab,
-                containerColor   = Color.Transparent,
-                contentColor     = MaterialTheme.colorScheme.onBackground,
-                divider          = {},
-                indicator        = { tabPositions ->
-                    if (selectedTab < tabPositions.size) {
-                        val pos = tabPositions[selectedTab]
-                        val indicatorWidth = 28.dp
-                        val currentTabLeft = pos.left
-                        val currentTabWidth = pos.width
-                        val offsetAnim by animateDpAsState(
-                            targetValue = currentTabLeft + (currentTabWidth - indicatorWidth) / 2,
-                            animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing),
-                            label = "tabIndicatorOffset"
-                        )
-                        Box(
-                            Modifier
-                                .fillMaxWidth()
-                                .wrapContentSize(Alignment.BottomStart)
-                                .offset(x = offsetAnim)
-                                .width(indicatorWidth)
-                                .height(3.dp)
-                                .clip(RoundedCornerShape(1.5.dp))
-                                .background(MaterialTheme.colorScheme.primary)
-                        )
-                    }
-                },
+            // Row 2: Tab navigation with transparent boxes
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp)
+                    .padding(horizontal = 12.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 tabs.forEachIndexed { index, title ->
-                    Tab(
-                        selected = selectedTab == index,
-                        onClick  = { onTabSelected(index) },
-                        selectedContentColor = MaterialTheme.colorScheme.primary,
-                        unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    val isSelected = selectedTab == index
+                    val bgColor = if (isSelected) Color(0xFFE62117).copy(alpha = 0.45f) else Color.White.copy(alpha = 0.2f)
+                    val textColor = if (isSelected) Color.White else Color.White.copy(alpha = 0.8f)
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 4.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(bgColor)
+                            .clickable { onTabSelected(index) }
+                            .padding(vertical = 8.dp),
+                        contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text  = title,
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Medium,
-                                fontSize   = 15.sp
-                            ),
-                            color = if (selectedTab == index) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(vertical = 6.dp)
+                            text = title,
+                            color = textColor,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                            fontSize = 14.sp
                         )
                     }
                 }
@@ -1182,3 +1108,118 @@ private class SafePagerState(
     override val pageCount: Int get() = pageCountProvider()
 }
 
+
+@Composable
+fun ProviderSelectorSheet(
+    providerRepository: com.cinetheta.domain.repositories.ProviderRepository,
+    onDismiss: () -> Unit,
+    onProviderSelected: (String?) -> Unit,
+    onSettingsClick: () -> Unit
+) {
+    androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(16.dp)
+        ) {
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                item {
+                    Text(
+                        text = "Select Provider",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
+
+                val order = listOf(
+                    "moviebox", "netmirror", "castletv", "animedekho",
+                    "toonstream", "piratexplay", "hdhub4u", "fourkhdhub", "youtube"
+                )
+                
+                val sortedProviders = providerRepository.enabledProviders().sortedBy { provider ->
+                    val idx = order.indexOf(provider.id)
+                    if (idx != -1) idx else 999
+                }
+
+                item {
+                    ProviderBox(
+                        name = "None",
+                        hint = "Disable specific provider",
+                        isSelected = providerRepository.selectedProviderId == null,
+                        onClick = { onProviderSelected(null) }
+                    )
+                }
+
+                items(sortedProviders) { provider ->
+                    val isSelected = providerRepository.selectedProviderId == provider.id
+                    val hint = when (provider.id) {
+                        "moviebox", "netmirror" -> "Movie, show and anime in multi audio"
+                        "castletv" -> "Indian native languages\nUse VLC for Multi audio"
+                        "animedekho", "toonstream", "piratexplay" -> "Hindi dub anime"
+                        "hdhub4u", "fourkhdhub" -> "Dual Audio Movies & Shows"
+                        else -> null
+                    }
+                    
+                    ProviderBox(
+                        name = provider.name,
+                        hint = hint,
+                        isSelected = isSelected,
+                        onClick = { onProviderSelected(provider.id) },
+                        onSettingsClick = if (provider.id == "moviebox") onSettingsClick else null
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ProviderBox(
+    name: String,
+    hint: String?,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    onSettingsClick: (() -> Unit)? = null
+) {
+    val borderColor = if (isSelected) Color(0xFFE62117) else Color.Transparent
+    val bgColor = if (isSelected) Color(0xFFE62117).copy(alpha = 0.1f) else MaterialTheme.colorScheme.surfaceVariant
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(bgColor)
+            .border(1.dp, borderColor, RoundedCornerShape(12.dp))
+            .clickable { onClick() }
+            .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = name,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp
+            )
+            if (hint != null) {
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = hint,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 12.sp,
+                    lineHeight = 16.sp
+                )
+            }
+        }
+        
+        if (onSettingsClick != null) {
+            IconButton(onClick = onSettingsClick) {
+                Icon(Icons.Default.Settings, contentDescription = "Settings", tint = MaterialTheme.colorScheme.onSurface)
+            }
+        }
+    }
+}

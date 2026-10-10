@@ -74,12 +74,16 @@ class NetMirrorSearch : SearchResultParser {
             .header("X-Requested-With", "app.netmirror.netmirrornew")
             .header("Cookie", cookieStr)
             .header("Referer", referer)
-            .header("Accept", "*/*")
+            .header("Accept", "application/json")
             .header("Accept-Language", "en-IN,en-US;q=0.9,en;q=0.8")
             .build()
 
         when (val response = HttpClient.execute(request)) {
             is NetworkResult.Success -> {
+                if (!response.data.isSuccessful) {
+                    StreamLogger.error(TAG, "Search request failed: HTTP ${response.data.code}")
+                    return@withContext emptyList()
+                }
                 val jsonStr = response.data.body?.toString(Charsets.UTF_8)
                 if (jsonStr.isNullOrBlank()) {
                     StreamLogger.error(TAG, "Empty search response")

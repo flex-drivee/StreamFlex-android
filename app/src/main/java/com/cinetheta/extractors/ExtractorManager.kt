@@ -88,7 +88,12 @@ object ExtractorManager {
         com.cinetheta.extractors.streamup.StreamUpExtractor(),
         com.cinetheta.extractors.xerver.XerverExtractor(),
         com.cinetheta.extractors.awsstream.AWSStreamExtractor(),
-        com.cinetheta.extractors.blakite.BlakiteExtractor()
+        com.cinetheta.extractors.blakite.BlakiteExtractor(),
+        
+        // UHDMovies extractors
+        com.cinetheta.extractors.thenaukriadda.TheNaukriAddaExtractor(),
+        com.cinetheta.extractors.driveleech.DriveleechExtractor(),
+        com.cinetheta.extractors.driveseed.DriveseedExtractor()
     )
 
     /**

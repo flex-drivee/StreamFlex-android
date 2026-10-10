@@ -34,6 +34,7 @@ import kotlinx.coroutines.launch
 fun SettingsScreen(
     onBackClick: () -> Unit,
     onNavigateToDownloads: () -> Unit = {},
+    onNavigateToExtensionTest: () -> Unit = {},
     onPluginChanged: () -> Unit = {},
     viewModel: SettingsViewModel = viewModel()
 ) {
@@ -294,8 +295,15 @@ fun SettingsScreen(
                         icon = Icons.Outlined.Extension,
                         title = "Manage Extensions",
                         subtitle = "Current: $selectedProviderName",
-                        isLast = true,
                         onTap = { showProviderDialog = true }
+                    )
+                    SettingsDivider()
+                    SettingsTile(
+                        icon = Icons.Outlined.CheckCircleOutline,
+                        title = "Test Extensions",
+                        subtitle = "Run automated tests on installed providers",
+                        isLast = true,
+                        onTap = onNavigateToExtensionTest
                     )
                 }
             }

@@ -112,9 +112,10 @@ fun PluginDetailScreen(
                                 poster = result.poster ?: searchResult.poster,
                                 title = result.title,
                                 year = result.year ?: searchResult.year,
-                                rating = searchResult.rating,
+                                rating = searchResult.rating ?: result.metadata["rating"]?.toDoubleOrNull(),
+                                runtime = result.metadata["runtime"],
                                 isShow = isShow,
-                                genres = searchResult.genres
+                                genres = searchResult.genres.ifEmpty { result.metadata["genres"]?.split(Regex(",\\s*")) ?: emptyList() }
                             )
                         }
                         
@@ -179,15 +180,38 @@ fun PluginDetailScreen(
                             }
                         }
 
-                        // ── 3. OVERVIEW ──────────
+                        // ── 3. OVERVIEW & METADATA ──────────
                         item {
-                            if (!result.overview.isNullOrBlank()) {
-                                Text(
-                                    text = result.overview!!,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
-                                )
+                            Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+                                if (!result.overview.isNullOrBlank()) {
+                                    Text(
+                                        text = result.overview!!,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
+                                    )
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                }
+                                
+                                result.metadata["cast"]?.let { cast ->
+                                    if (cast.isNotBlank()) {
+                                        Text(
+                                            text = "Cast: $cast",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                    }
+                                }
+                                
+                                result.metadata["runtime"]?.let { runtime ->
+                                    if (runtime.isNotBlank()) {
+                                        Text(
+                                            text = "Runtime: $runtime",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                                        )
+                                    }
+                                }
                             }
                         }
 
@@ -492,6 +516,7 @@ private fun PluginDetailHero(
     title: String,
     year: Int?,
     rating: Double?,
+    runtime: String?,
     isShow: Boolean,
     genres: List<String>
 ) {
@@ -581,6 +606,9 @@ private fun PluginDetailHero(
                 ) {
                     if (year != null && year > 0) {
                         Text(year.toString(), style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(0.8f))
+                    }
+                    if (!runtime.isNullOrBlank()) {
+                        Text(runtime, style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(0.8f))
                     }
                     SFBadge("HD", SFHDTag, Color.Black)
                     if (isShow) SFBadge("SERIES", SFDubBg, Color.White)

@@ -14,4 +14,5 @@ sealed class Screen(val route: String) {
 
     object PluginDetail : Screen("plugin_detail")
     object ContinueWatching : Screen("continue_watching")
+    object ExtensionTest : Screen("extension_test")
 }
