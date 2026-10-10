@@ -39,5 +39,8 @@ enum class HostType {
     AWS_STREAM,
     BLAKITE,
 
+    DRIVELEECH,
+    DRIVESEED,
+    THENAUKRIADDA,
     UNKNOWN,
 }

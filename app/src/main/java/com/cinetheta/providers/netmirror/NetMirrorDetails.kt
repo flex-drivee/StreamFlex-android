@@ -8,6 +8,7 @@ import com.cinetheta.core.parser.JsonParser
 import com.cinetheta.core.utils.StreamLogger
 import com.cinetheta.domain.models.*
 import com.cinetheta.extractors.netmirror.NetMirrorBypassManager
+import kotlinx.coroutines.*
 
 class NetMirrorDetails {
 
@@ -52,12 +53,12 @@ class NetMirrorDetails {
                     .header("X-Requested-With", "app.netmirror.netmirrornew")
                     .header("Cookie", cookieStr)
                     .header("Referer", referer)
-                    .header("Accept", "*/*")
+                    .header("Accept", "application/json")
                     .build()
             )
 
-            if (response !is NetworkResult.Success) {
-                StreamLogger.error(TAG, "Post load failed with non-success response")
+            if (response !is NetworkResult.Success || !response.data.isSuccessful) {
+                StreamLogger.error(TAG, "Post load failed with non-success response: ${if (response is NetworkResult.Success) response.data.code else response}")
                 return buildFallback(id, ott, base, providerName, result)
             }
 
@@ -107,19 +108,22 @@ class NetMirrorDetails {
                     }
                 }
                 
-                // Fetch other seasons sequentially to prevent "Invalid User" rate limits
+                // Fetch other seasons concurrently to improve loading speed
                 if (otherSeasonIds.isNotEmpty()) {
-                    StreamLogger.debug(TAG, "Fetching ${otherSeasonIds.size} other seasons sequentially...")
-                    var tsOffset = 1L
-                    // Fetch episodes for all missing seasons using episodes.php
-                    for (sId in otherSeasonIds) {
-                        val eps = fetchSeasonEpisodes(sId, id, base, ott, unixTs + tsOffset, cookieStr, referer, providerName)
-                        allSources.addAll(eps)
-                        tsOffset++
-                        StreamLogger.debug(TAG, "Added ${eps.size} episodes from season id $sId")
-                        
-                        if (otherSeasonIds.last() != sId) {
-                            kotlinx.coroutines.delay(200)
+                    StreamLogger.debug(TAG, "Fetching ${otherSeasonIds.size} other seasons concurrently...")
+                    coroutineScope {
+                        val deferredList = otherSeasonIds.mapIndexed { index, sId ->
+                            async(Dispatchers.IO) {
+                                // Small staggered delay to prevent rate limits
+                                if (index > 0) delay(index * 50L)
+                                val eps = fetchSeasonEpisodes(sId, id, base, ott, unixTs + index + 1L, cookieStr, referer, providerName)
+                                StreamLogger.debug(TAG, "Added ${eps.size} episodes from season id $sId")
+                                eps
+                            }
+                        }
+                        deferredList.forEach { deferred -> 
+                            val eps = deferred.await()
+                            allSources.addAll(eps)
                         }
                     }
                 }
@@ -287,10 +291,10 @@ class NetMirrorDetails {
                     .header("X-Requested-With", "app.netmirror.netmirrornew")
                     .header("Cookie", cookieStr)
                     .header("Referer", referer)
-                    .header("Accept", "*/*")
+                    .header("Accept", "application/json")
                     .build()
             )
-            if (response is NetworkResult.Success) {
+            if (response is NetworkResult.Success && response.data.isSuccessful) {
                 val json = response.data.bodyAsString()
                 val root = JsonParser.parse(json)
                 val status = JsonParser.string(root, "status")

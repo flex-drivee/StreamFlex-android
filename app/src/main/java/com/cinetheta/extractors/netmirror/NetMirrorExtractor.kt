@@ -75,14 +75,14 @@ class NetMirrorExtractor : BaseExtractor() {
                 .header("X-Requested-With", "app.netmirror.netmirrornew")
                 .header("Cookie", cookieStr)
                 .header("Referer", referer)
-                .header("Accept", "*/*")
+                .header("Accept", "application/json")
                 .header("Accept-Language", "en-IN,en-US;q=0.9,en;q=0.8")
                 .header("Connection", "keep-alive")
                 .build()
 
             val response = HttpClient.execute(request)
-            if (response !is NetworkResult.Success) {
-                StreamLogger.error(TAG, "playlist.php request failed: $response")
+            if (response !is NetworkResult.Success || !response.data.isSuccessful) {
+                StreamLogger.error(TAG, "playlist.php request failed: ${if (response is NetworkResult.Success) response.data.code else response}")
                 // Token may be stale — clear cache; next request will re-bypass
                 NetMirrorBypassManager.refreshToken(baseUrl)
                 return@withContext emptyResult()
@@ -180,7 +180,8 @@ class NetMirrorExtractor : BaseExtractor() {
                         headers     = mapOf(
                             "Cookie"     to "hd=on; t_hash_t=$tHashT; ott=$ott",
                             "Referer"    to referer,
-                            "User-Agent" to NetMirrorBypassManager.NATIVE_UA
+                            "User-Agent" to NetMirrorBypassManager.NATIVE_UA,
+                            "X-Requested-With" to "app.netmirror.netmirrornew"
                         ),
                         quality     = quality,
                         subtitles   = subtitles

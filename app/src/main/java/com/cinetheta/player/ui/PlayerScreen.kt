@@ -2,8 +2,7 @@
 
 package com.cinetheta.player.ui
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -27,7 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.Dialog
 import com.cinetheta.domain.models.StreamLink
 import com.cinetheta.player.core.PlayerState
@@ -281,22 +280,25 @@ fun SettingsDialog(
             Column(modifier = Modifier.fillMaxSize()) {
                 // Top Tab Row
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(12.dp),
-                    horizontalArrangement = Arrangement.SpaceAround,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(androidx.compose.foundation.rememberScrollState())
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     TabButton(
-                        icon = Icons.Default.HighQuality, 
+                        text = "Quality", 
                         isSelected = currentTab == 0, 
                         onClick = { currentTab = 0 }
                     )
                     TabButton(
-                        icon = Icons.Default.Audiotrack, 
+                        text = "Audio", 
                         isSelected = currentTab == 1, 
                         onClick = { currentTab = 1 }
                     )
                     TabButton(
-                        icon = Icons.Default.ClosedCaption, 
+                        text = "Subtitles", 
                         isSelected = currentTab == 2, 
                         onClick = { currentTab = 2 }
                     )
@@ -311,6 +313,7 @@ fun SettingsDialog(
                         onClick = { currentTab = 4 }
                     )
 
+                    Spacer(modifier = Modifier.weight(1f))
                     // Close button
                     IconButton(onClick = onDismiss) {
                         Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.Gray)
@@ -401,20 +404,30 @@ fun SettingsDialog(
 
 @Composable
 private fun TabButton(
-    icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
-    text: String? = null,
+    text: String,
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val color = if (isSelected) Color.White else Color.Gray
-    if (text != null) {
-        androidx.compose.material3.TextButton(onClick = onClick, modifier = Modifier.height(48.dp)) {
-            Text(text, color = color, fontWeight = if (isSelected) androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal)
-        }
-    } else if (icon != null) {
-        IconButton(onClick = onClick) {
-            Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(28.dp))
-        }
+    val color = if (isSelected) Color(0xFFE62117) else Color.White.copy(alpha = 0.7f)
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .clickable { onClick() }
+            .padding(horizontal = 8.dp, vertical = 8.dp)
+    ) {
+        Text(
+            text = text, 
+            color = color, 
+            fontWeight = if (isSelected) androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal,
+            fontSize = 15.sp
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Box(
+            modifier = Modifier
+                .width(20.dp)
+                .height(3.dp)
+                .background(if (isSelected) Color(0xFFE62117) else Color.Transparent)
+        )
     }
 }
 

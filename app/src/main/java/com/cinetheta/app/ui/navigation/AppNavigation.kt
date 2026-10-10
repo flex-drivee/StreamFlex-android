@@ -215,7 +215,15 @@ fun AppNavigation(
             composable(route = Screen.Settings.route) {
                 com.cinetheta.app.ui.settings.SettingsScreen(
                     onBackClick = { navController.popBackStack() },
-                    onNavigateToDownloads = { navController.navigate(Screen.Downloads.route) }
+                    onNavigateToDownloads = { navController.navigate(Screen.Downloads.route) },
+                    onNavigateToExtensionTest = { navController.navigate(Screen.ExtensionTest.route) }
+                )
+            }
+
+            // --- EXTENSION TEST ---
+            composable(route = Screen.ExtensionTest.route) {
+                com.cinetheta.app.ui.settings.testing.ExtensionTestScreen(
+                    onBackClick = { navController.popBackStack() }
                 )
             }
 

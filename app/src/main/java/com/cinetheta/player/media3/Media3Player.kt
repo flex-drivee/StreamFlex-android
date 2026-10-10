@@ -352,8 +352,9 @@ class Media3Player(
                 .addInterceptor { chain ->
                     val request = chain.request()
                     if (request.url.toString().contains(".m3u8")) {
-                        val newRequest = request.newBuilder().header("Cookie", "hd=on").build()
-                        val response = chain.proceed(newRequest)
+                        // Do NOT overwrite the Cookie header here!
+                        // requestHeaders already contains the correct t_hash_t and ott cookies.
+                        val response = chain.proceed(request)
                         val body = response.body
                         if (body != null && response.isSuccessful) {
                             val bodyString = body.string()
