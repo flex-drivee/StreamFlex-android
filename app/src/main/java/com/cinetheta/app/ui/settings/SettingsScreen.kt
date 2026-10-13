@@ -7,6 +7,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -41,16 +43,14 @@ fun SettingsScreen(
     val appTheme by viewModel.appTheme.collectAsState()
     val autoPlayNext by viewModel.autoPlayNext.collectAsState()
     val enableSubtitles by viewModel.enableSubtitles.collectAsState()
+    val subtitleTextColor by viewModel.subtitleTextColor.collectAsState()
+    val subtitleBgColor by viewModel.subtitleBgColor.collectAsState()
     val cellularData by viewModel.cellularData.collectAsState()
     val developerMode by viewModel.developerMode.collectAsState()
     val decoderMode by viewModel.decoderMode.collectAsState()
     val dohProvider by viewModel.dohProvider.collectAsState()
-    val wifiOnlyDownloads by viewModel.wifiOnlyDownloads.collectAsState()
-    val downloadQuality by viewModel.downloadQuality.collectAsState()
     val playerVideoQuality by viewModel.playerVideoQuality.collectAsState()
     val preferredPlayer by viewModel.preferredPlayer.collectAsState()
-    val smartDownloads by viewModel.smartDownloads.collectAsState()
-    val storageStats by viewModel.storageStats.collectAsState()
 
     val scrollState = rememberLazyListState()
     var showThemeDialog by remember { mutableStateOf(false) }
@@ -59,9 +59,9 @@ fun SettingsScreen(
     var showDohDialog by remember { mutableStateOf(false) }
     var showProviderDialog by remember { mutableStateOf(false) }
     var showMovieBoxSettings by remember { mutableStateOf(false) }
-    var showQualityDialog by remember { mutableStateOf(false) }
     var showPlayerQualityDialog by remember { mutableStateOf(false) }
-    var showDeleteAllDialog by remember { mutableStateOf(false) }
+    var showSubtitleTextColorDialog by remember { mutableStateOf(false) }
+    var showSubtitleBgColorDialog by remember { mutableStateOf(false) }
     var showSupportDialog by remember { mutableStateOf(false) }
     var showThankYouDialog by remember { mutableStateOf(false) }
     var showIssueReportDialog by remember { mutableStateOf(false) }
@@ -166,18 +166,6 @@ fun SettingsScreen(
                     )
                     SettingsDivider()
                     SettingsTile(
-                        icon = Icons.Outlined.Subtitles,
-                        title = "Enable Subtitles by Default",
-                        subtitle = if (enableSubtitles) "Enabled" else "Disabled",
-                        trailing = { Switch(
-                            checked = enableSubtitles,
-                            onCheckedChange = { viewModel.setEnableSubtitles(it) },
-                            colors = appSwitchColors()
-                        ) },
-                        onTap = { viewModel.setEnableSubtitles(!enableSubtitles) }
-                    )
-                    SettingsDivider()
-                    SettingsTile(
                         icon = Icons.Outlined.Memory,
                         title = "Decoder Mode",
                         subtitle = com.cinetheta.player.core.DecoderMode.fromKey(decoderMode).title,
@@ -187,61 +175,100 @@ fun SettingsScreen(
                 }
             }
 
+            // --- Subtitles ---
+            item {
+                SettingsGroup("Subtitles") {
+                    SettingsTile(
+                        icon = Icons.Outlined.Subtitles,
+                        title = "Enable Subtitles by Default",
+                        subtitle = if (enableSubtitles) "Always show subtitles when available" else "Disabled",
+                        trailing = { Switch(
+                            checked = enableSubtitles,
+                            onCheckedChange = { viewModel.setEnableSubtitles(it) },
+                            colors = appSwitchColors()
+                        ) },
+                        onTap = { viewModel.setEnableSubtitles(!enableSubtitles) }
+                    )
+                    SettingsDivider()
+                    SettingsTile(
+                        icon = Icons.Outlined.FormatColorText,
+                        title = "Subtitle Text Color",
+                        subtitle = getSubtitleColorName(subtitleTextColor),
+                        trailing = {
+                            Box(
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .clip(CircleShape)
+                                    .background(parseColorHex(subtitleTextColor, Color.White))
+                                    .border(1.5.dp, MaterialTheme.colorScheme.outline, CircleShape)
+                            )
+                        },
+                        onTap = { showSubtitleTextColorDialog = true }
+                    )
+                    SettingsDivider()
+                    SettingsTile(
+                        icon = Icons.Outlined.FormatColorFill,
+                        title = "Subtitle Background Color",
+                        subtitle = getSubtitleBgColorName(subtitleBgColor),
+                        trailing = {
+                            Box(
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .clip(CircleShape)
+                                    .background(parseColorHex(subtitleBgColor, Color(0x80000000)))
+                                    .border(1.5.dp, MaterialTheme.colorScheme.outline, CircleShape)
+                            )
+                        },
+                        onTap = { showSubtitleBgColorDialog = true }
+                    )
+                    SettingsDivider()
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Text(
+                            text = "Live Subtitle Preview",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(90.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(Color(0xFF0F172A))
+                                .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(12.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "The quick brown fox jumps over the lazy dog.",
+                                color = parseColorHex(subtitleTextColor, Color.White),
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .background(parseColorHex(subtitleBgColor, Color(0x80000000)))
+                                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                            )
+                        }
+                    }
+                }
+            }
+
 
             // --- Downloads ---
             item {
                 SettingsGroup("Downloads") {
                     SettingsTile(
                         icon = Icons.Outlined.Folder,
-                        title = "Downloads Manager",
+                        title = "SaveTheta Download Manager",
                         subtitle = "Manage active downloads, pause, continue & offline videos",
-                        onTap = onNavigateToDownloads
-                    )
-                    SettingsDivider()
-                    SettingsTile(
-                        icon = Icons.Outlined.AutoAwesome,
-                        title = "Smart Downloads",
-                        subtitle = if (smartDownloads) "Auto-download next episode" else "Disabled",
-                        trailing = { Switch(
-                            checked = smartDownloads,
-                            onCheckedChange = { viewModel.setSmartDownloads(it) },
-                            colors = appSwitchColors()
-                        ) },
-                        onTap = { viewModel.setSmartDownloads(!smartDownloads) }
-                    )
-                    SettingsDivider()
-                    SettingsTile(
-                        icon = Icons.Outlined.Wifi,
-                        title = "Download on Wi-Fi Only",
-                        subtitle = if (wifiOnlyDownloads) "Save mobile data" else "Download on any network",
-                        trailing = { Switch(
-                            checked = wifiOnlyDownloads,
-                            onCheckedChange = { viewModel.setWifiOnlyDownloads(it) },
-                            colors = appSwitchColors()
-                        ) },
-                        onTap = { viewModel.setWifiOnlyDownloads(!wifiOnlyDownloads) }
-                    )
-                    SettingsDivider()
-                    SettingsTile(
-                        icon = Icons.Outlined.HighQuality,
-                        title = "Video Quality",
-                        subtitle = "Current: $downloadQuality",
-                        onTap = { showQualityDialog = true }
-                    )
-                    SettingsDivider()
-                    SettingsTile(
-                        icon = Icons.Outlined.SdStorage,
-                        title = "Storage Usage",
-                        subtitle = "CineTheta: ${storageStats.formattedCineThetaUsed} • Free: ${storageStats.formattedFree}",
-                        onTap = onNavigateToDownloads
-                    )
-                    SettingsDivider()
-                    SettingsTile(
-                        icon = Icons.Outlined.DeleteSweep,
-                        title = "Delete All Downloads",
-                        subtitle = "Remove all offline movies and episodes",
                         isLast = true,
-                        onTap = { showDeleteAllDialog = true }
+                        onTap = onNavigateToDownloads
                     )
                 }
             }
@@ -560,37 +587,6 @@ fun SettingsScreen(
             )
         }
 
-        if (showQualityDialog) {
-            val qualities = listOf("1080p", "720p", "480p")
-            AlertDialog(
-                onDismissRequest = { showQualityDialog = false },
-                title = { Text("Download Video Quality", color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold) },
-                containerColor = MaterialTheme.colorScheme.surface,
-                text = {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        qualities.forEach { q ->
-                            ThemeOptionRow(
-                                title = when (q) {
-                                    "1080p" -> "High (1080p) • Best Quality"
-                                    "720p" -> "Standard (720p) • Balanced"
-                                    else -> "Data Saver (480p) • Small File"
-                                },
-                                isSelected = downloadQuality == q,
-                                onClick = {
-                                    viewModel.setDownloadQuality(q)
-                                    showQualityDialog = false
-                                }
-                            )
-                        }
-                    }
-                },
-                confirmButton = {
-                    TextButton(onClick = { showQualityDialog = false }) {
-                        Text("Cancel", color = MaterialTheme.colorScheme.primary)
-                    }
-                }
-            )
-        }
 
         if (showPlayerQualityDialog) {
             val qualities = listOf("Auto", "1080p", "720p", "480p")
@@ -653,31 +649,59 @@ fun SettingsScreen(
             )
         }
 
-        if (showDeleteAllDialog) {
-            AlertDialog(
-                onDismissRequest = { showDeleteAllDialog = false },
-                title = { Text("Delete All Downloads?", color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold) },
-                containerColor = MaterialTheme.colorScheme.surface,
-                text = {
-                    Text(
-                        "This will permanently delete all downloaded movies, episodes, and offline files from your device.",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            viewModel.deleteAllDownloads()
-                            showDeleteAllDialog = false
-                        }
-                    ) {
-                        Text("Delete All", color = Color.Red, fontWeight = FontWeight.Bold)
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { showDeleteAllDialog = false }) {
-                        Text("Cancel", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
+
+
+        if (showSubtitleTextColorDialog) {
+            val textColorPresets = listOf(
+                "White" to "#FFFFFF",
+                "Yellow" to "#FFEE58",
+                "Bright Yellow" to "#FFFF00",
+                "Green" to "#66BB6A",
+                "Cyan" to "#26C6DA",
+                "Light Blue" to "#42A5F5",
+                "Red" to "#EF5350",
+                "Orange" to "#FFA726",
+                "Amber" to "#FFCA28",
+                "Pink" to "#EC407A",
+                "Lime" to "#D4E157"
+            )
+            SubtitleColorPickerDialog(
+                title = "Subtitle Text Color",
+                initialHex = subtitleTextColor,
+                presets = textColorPresets,
+                isBackgroundPicker = false,
+                currentTextColorHex = subtitleTextColor,
+                currentBgColorHex = subtitleBgColor,
+                onDismiss = { showSubtitleTextColorDialog = false },
+                onSelectColor = { newColor ->
+                    viewModel.setSubtitleTextColor(newColor)
+                    showSubtitleTextColorDialog = false
+                }
+            )
+        }
+
+        if (showSubtitleBgColorDialog) {
+            val bgColorPresets = listOf(
+                "Translucent Black (50%)" to "#80000000",
+                "Transparent (None)" to "#00000000",
+                "Solid Black" to "#FF000000",
+                "Dark Charcoal (75%)" to "#C0000000",
+                "Light Charcoal (25%)" to "#40000000",
+                "Deep Navy (50%)" to "#800D1B2A",
+                "Dark Gray" to "#80212121",
+                "Solid Dark Gray" to "#FF212121"
+            )
+            SubtitleColorPickerDialog(
+                title = "Subtitle Background Color",
+                initialHex = subtitleBgColor,
+                presets = bgColorPresets,
+                isBackgroundPicker = true,
+                currentTextColorHex = subtitleTextColor,
+                currentBgColorHex = subtitleBgColor,
+                onDismiss = { showSubtitleBgColorDialog = false },
+                onSelectColor = { newColor ->
+                    viewModel.setSubtitleBgColor(newColor)
+                    showSubtitleBgColorDialog = false
                 }
             )
         }
@@ -709,8 +733,14 @@ fun SettingsScreen(
                         ) {
                             androidx.compose.material3.Text("None", modifier = Modifier.weight(1f))
                         }
-                        
-                        providerRepository.enabledProviders().forEach { provider ->
+                        val order = listOf(
+                            "moviebox", "netmirror", "castletv", "uhdmovies", "animedekho",
+                            "toonstream", "piratexplay", "hdhub4u", "fourkhdhub", "youtube"
+                        )
+                        providerRepository.enabledProviders().sortedBy { provider ->
+                            val idx = order.indexOf(provider.id)
+                            if (idx != -1) idx else 999
+                        }.forEach { provider ->
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -733,6 +763,7 @@ fun SettingsScreen(
                                 Column(modifier = Modifier.weight(1f)) {
                                     androidx.compose.material3.Text(provider.name)
                                     val badgeText = when(provider.id) {
+                                        "uhdmovies" -> "MultiAudio Movies & Shows in 4K"
                                         "moviebox", "toonstream", "animedekho", "all_otts" -> "Recommended"
                                         "hdhub4u", "fourkhdhub" -> "Backup"
                                         "youtube" -> "100% Working"
@@ -742,7 +773,7 @@ fun SettingsScreen(
                                         androidx.compose.material3.Text(
                                             badgeText,
                                             fontSize = 11.sp,
-                                            color = if (badgeText == "Recommended") Color(0xFF00C853) else if (badgeText == "100% Working") Color(0xFF29B6F6) else Color.Gray,
+                                            color = if (badgeText == "Recommended") Color(0xFF00C853) else if (badgeText.contains("4K", ignoreCase = true)) Color(0xFFFFB300) else if (badgeText == "100% Working") Color(0xFF29B6F6) else Color.Gray,
                                             fontWeight = FontWeight.Medium
                                         )
                                     }
@@ -1028,4 +1059,231 @@ fun appSwitchColors(): SwitchColors {
         uncheckedBorderColor = Color.Transparent
     )
 }
+
+@Composable
+fun SubtitleColorPickerDialog(
+    title: String,
+    initialHex: String,
+    presets: List<Pair<String, String>>,
+    isBackgroundPicker: Boolean,
+    currentTextColorHex: String,
+    currentBgColorHex: String,
+    onDismiss: () -> Unit,
+    onSelectColor: (String) -> Unit
+) {
+    var selectedHex by remember { mutableStateOf(initialHex) }
+    var customHexInput by remember { mutableStateOf(initialHex) }
+
+    val effectiveTextColor = if (isBackgroundPicker) {
+        parseColorHex(currentTextColorHex, Color.White)
+    } else {
+        parseColorHex(selectedHex, Color.White)
+    }
+
+    val effectiveBgColor = if (isBackgroundPicker) {
+        parseColorHex(selectedHex, Color(0x80000000))
+    } else {
+        parseColorHex(currentBgColorHex, Color(0x80000000))
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = title,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        },
+        containerColor = MaterialTheme.colorScheme.surface,
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                // Interactive Preview Card
+                Column {
+                    Text(
+                        text = "Preview",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(72.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Color(0xFF0F172A))
+                            .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(8.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Sample Subtitle Text",
+                            color = effectiveTextColor,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(effectiveBgColor)
+                                .padding(horizontal = 10.dp, vertical = 4.dp)
+                        )
+                    }
+                }
+
+                // Preset options list
+                Text(
+                    text = "Presets",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    presets.forEach { (label, hex) ->
+                        val isSelected = selectedHex.equals(hex, ignoreCase = true)
+                        val chipColor = parseColorHex(hex, Color.White)
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(
+                                    if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                                    else Color.Transparent
+                                )
+                                .clickable {
+                                    selectedHex = hex
+                                    customHexInput = hex
+                                }
+                                .padding(horizontal = 10.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .clip(CircleShape)
+                                    .background(chipColor)
+                                    .border(
+                                        width = if (isSelected) 2.dp else 1.dp,
+                                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+                                        shape = CircleShape
+                                    )
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                text = label,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontSize = 14.sp,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                modifier = Modifier.weight(1f)
+                            )
+                            if (isSelected) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Custom Hex Input Field
+                OutlinedTextField(
+                    value = customHexInput,
+                    onValueChange = { input ->
+                        val formatted = if (input.startsWith("#")) input else "#$input"
+                        customHexInput = formatted
+                        if (formatted.matches(Regex("^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"))) {
+                            selectedHex = formatted
+                        }
+                    },
+                    label = { Text("Custom Hex Color (#RRGGBB / #AARRGGBB)") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(10.dp)
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { onSelectColor(selectedHex) }
+            ) {
+                Text("Apply")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+fun parseColorHex(hex: String, defaultColor: Color): Color {
+    return try {
+        val cleanHex = hex.trim().removePrefix("#")
+        when (cleanHex.length) {
+            6 -> {
+                val colorInt = cleanHex.toLong(16)
+                Color(0xFF000000 or colorInt)
+            }
+            8 -> {
+                val colorInt = cleanHex.toLong(16)
+                Color(colorInt)
+            }
+            3 -> {
+                val r = cleanHex.substring(0, 1).repeat(2)
+                val g = cleanHex.substring(1, 2).repeat(2)
+                val b = cleanHex.substring(2, 3).repeat(2)
+                val colorInt = "$r$g$b".toLong(16)
+                Color(0xFF000000 or colorInt)
+            }
+            else -> defaultColor
+        }
+    } catch (_: Exception) {
+        defaultColor
+    }
+}
+
+fun getSubtitleColorName(hex: String): String {
+    return when (hex.uppercase()) {
+        "#FFFFFF", "#FFFFFFFF" -> "White (#FFFFFF)"
+        "#FFEE58", "#FFFFEE58" -> "Yellow (#FFEE58)"
+        "#FFFF00", "#FFFFFF00" -> "Bright Yellow (#FFFF00)"
+        "#66BB6A", "#FF66BB6A" -> "Green (#66BB6A)"
+        "#26C6DA", "#FF26C6DA" -> "Cyan (#26C6DA)"
+        "#42A5F5", "#FF42A5F5" -> "Light Blue (#42A5F5)"
+        "#EF5350", "#FFEF5350" -> "Red (#EF5350)"
+        "#FFA726", "#FFFFA726" -> "Orange (#FFA726)"
+        "#FFCA28", "#FFFFCA28" -> "Amber (#FFCA28)"
+        "#EC407A", "#FFEC407A" -> "Pink (#EC407A)"
+        "#D4E157", "#FFD4E157" -> "Lime (#D4E157)"
+        else -> hex.uppercase()
+    }
+}
+
+fun getSubtitleBgColorName(hex: String): String {
+    return when (hex.uppercase()) {
+        "#80000000" -> "Translucent Black (50%)"
+        "#00000000" -> "Transparent (None)"
+        "#FF000000" -> "Solid Black"
+        "#C0000000" -> "Dark Charcoal (75%)"
+        "#40000000" -> "Light Charcoal (25%)"
+        "#800D1B2A" -> "Deep Navy (50%)"
+        "#80212121" -> "Dark Gray"
+        "#FF212121" -> "Solid Dark Gray"
+        else -> hex.uppercase()
+    }
+}
+
 

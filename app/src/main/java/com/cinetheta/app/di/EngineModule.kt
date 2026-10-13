@@ -14,24 +14,4 @@ object EngineModule {
      */
     val streamEngine: StreamEngine
         get() = StreamEngine
-
-    /**
-     * Shared DownloadEngine.
-     */
-    val downloadEngine: com.cinetheta.engine.download.DownloadEngine by lazy {
-        com.cinetheta.engine.download.DownloadEngine(
-            storageManager = RepositoryModule.downloadStorageManager
-        )
-    }
-
-    /**
-     * Shared DownloadQueueManager.
-     */
-    val downloadQueueManager: com.cinetheta.engine.download.DownloadQueueManager by lazy {
-        com.cinetheta.engine.download.DownloadQueueManager(
-            context = com.cinetheta.app.CineThetaApplication.instance,
-            repository = RepositoryModule.downloadRepository,
-            downloadEngine = downloadEngine
-        )
-    }
 }

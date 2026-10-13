@@ -76,6 +76,8 @@ fun HomeScreen(
     var showHomeSupportDialog by remember { mutableStateOf(false) }
     var showFullDonationDialog by remember { mutableStateOf(false) }
     var showThankYouDialog by remember { mutableStateOf(false) }
+    var isResolvingLiveSport by remember { mutableStateOf(false) }
+    var resolvingSportTitle by remember { mutableStateOf("") }
 
     LaunchedEffect(providerRepository.selectedProviderId) {
         val pid = providerRepository.selectedProviderId
@@ -174,7 +176,7 @@ fun HomeScreen(
         LazyColumn(
             state = scrollState,
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(bottom = 90.dp) // nav bar space
+            contentPadding = PaddingValues(bottom = 100.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()) // nav bar space
         ) {
             // ── HERO (Swipeable Carousel) ─────────────────────────────────────
             item {
@@ -281,6 +283,42 @@ fun HomeScreen(
                 }
             }
 
+            // ── CONTENT ROW — Live Sports & Channels ──────
+            if (selectedTab == 0 && state.liveSports.isNotEmpty()) {
+                item {
+                    SFLiveSportsRow(
+                        items = state.liveSports,
+                        onItemClick = { sportItem ->
+                            if (isResolvingLiveSport) return@SFLiveSportsRow
+                            isResolvingLiveSport = true
+                            resolvingSportTitle = sportItem.title
+                            coroutineScope.launch {
+                                try {
+                                    val stream = com.cinetheta.app.data.sports.LiveSportsRepository.resolveStream(sportItem.id)
+                                    if (stream != null) {
+                                        val intent = android.content.Intent(context, com.cinetheta.player.PlayerActivity::class.java).apply {
+                                            putExtra("MEDIA_ID", "live_sport_${sportItem.id}")
+                                            putExtra("VIDEO_TITLE", sportItem.title)
+                                            putExtra("IS_SHOW", false)
+                                            putExtra("DIRECT_STREAM_URL", stream.url)
+                                            putExtra("STREAM_HEADERS", HashMap(stream.headers))
+                                            putExtra("POSTER_PATH", sportItem.poster)
+                                        }
+                                        context.startActivity(intent)
+                                    } else {
+                                        android.widget.Toast.makeText(context, "Stream currently offline or buffering. Try another live channel.", android.widget.Toast.LENGTH_SHORT).show()
+                                    }
+                                } catch (e: Exception) {
+                                    android.widget.Toast.makeText(context, "Failed to load live stream: ${e.localizedMessage}", android.widget.Toast.LENGTH_SHORT).show()
+                                } finally {
+                                    isResolvingLiveSport = false
+                                }
+                            }
+                        }
+                    )
+                }
+            }
+
             // ── DYNAMIC CONTENT ROWS ──────────────────────────────────────────
             items(filteredSections) { section ->
                 SFSectionRow(
@@ -347,6 +385,44 @@ fun HomeScreen(
             )
         }
 
+        if (isResolvingLiveSport) {
+            androidx.compose.ui.window.Dialog(onDismissRequest = { isResolvingLiveSport = false }) {
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.surface,
+                    tonalElevation = 8.dp,
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                ) {
+                    Row(
+                        modifier = Modifier.padding(20.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(28.dp),
+                            color = MaterialTheme.colorScheme.primary,
+                            strokeWidth = 3.dp
+                        )
+                        Column {
+                            Text(
+                                text = "Connecting to Live Stream...",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = resolvingSportTitle,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
 //        // Listens for return from ad: shows big ThankYouSupportDialog if >= 20s, or Toast if < 20s
 //        com.cinetheta.app.utils.AdReturnLifecycleTracker(
 //            context = context,
@@ -396,7 +472,8 @@ fun HomeScreen(
             onClick = { showProviderSelector = true },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(end = 16.dp, bottom = 100.dp),
+                .windowInsetsPadding(WindowInsets.navigationBars)
+                .padding(end = 16.dp, bottom = 96.dp),
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary
         ) {
@@ -1135,7 +1212,7 @@ fun ProviderSelectorSheet(
                 }
 
                 val order = listOf(
-                    "moviebox", "netmirror", "castletv", "animedekho",
+                    "moviebox", "netmirror", "castletv", "uhdmovies", "animedekho",
                     "toonstream", "piratexplay", "hdhub4u", "fourkhdhub", "youtube"
                 )
                 
@@ -1158,6 +1235,7 @@ fun ProviderSelectorSheet(
                     val hint = when (provider.id) {
                         "moviebox", "netmirror" -> "Movie, show and anime in multi audio"
                         "castletv" -> "Indian native languages\nUse VLC for Multi audio"
+                        "uhdmovies" -> "MultiAudio Movies & Shows in 4K"
                         "animedekho", "toonstream", "piratexplay" -> "Hindi dub anime"
                         "hdhub4u", "fourkhdhub" -> "Dual Audio Movies & Shows"
                         else -> null
@@ -1223,3 +1301,302 @@ private fun ProviderBox(
         }
     }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LIVE SPORTS & LIVE TV ROW
+// ─────────────────────────────────────────────────────────────────────────────
+
+@Composable
+fun SFLiveSportsRow(
+    items: List<com.cinetheta.app.data.sports.LiveSportItem>,
+    onItemClick: (com.cinetheta.app.data.sports.LiveSportItem) -> Unit
+) {
+    if (items.isEmpty()) return
+
+    val categories = remember(items) {
+        val cats = items.map { it.category.lowercase() }.distinct().sorted()
+        listOf("all") + cats
+    }
+    var selectedCategory by remember { mutableStateOf("all") }
+
+    val filteredItems = remember(items, selectedCategory) {
+        if (selectedCategory == "all") items
+        else items.filter { it.category.equals(selectedCategory, ignoreCase = true) }
+    }
+
+    Column(modifier = Modifier.padding(vertical = 14.dp)) {
+        // Section header with glowing LIVE badge
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(10.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFFE50914))
+                )
+                Text(
+                    text = "Live Sports & Channels",
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            }
+
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = Color(0xFFE50914).copy(alpha = 0.15f),
+                border = BorderStroke(1.dp, Color(0xFFE50914).copy(alpha = 0.4f))
+            ) {
+                Text(
+                    text = "${items.count { it.isLive }} LIVE",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                    color = Color(0xFFE50914),
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                )
+            }
+        }
+
+        Spacer(Modifier.height(10.dp))
+
+        // Category filter chips
+        if (categories.size > 2) {
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(categories) { cat ->
+                    val isSelected = selectedCategory == cat
+                    val label = when (cat) {
+                        "all" -> "All Sports"
+                        "football" -> "⚽ Football"
+                        "cricket" -> "🏏 Cricket"
+                        "basketball" -> "🏀 Basketball"
+                        "american-football" -> "🏈 NFL"
+                        "fight" -> "🥊 Combat"
+                        "hockey" -> "🏒 Hockey"
+                        "motor-sports" -> "🏎️ Motorsport"
+                        "tennis" -> "🎾 Tennis"
+                        "golf" -> "⛳ Golf"
+                        "24/7-streams" -> "📺 24/7 TV"
+                        else -> cat.replaceFirstChar { it.uppercase() }
+                    }
+
+                    Surface(
+                        shape = RoundedCornerShape(16.dp),
+                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+                        border = if (isSelected) null else BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
+                        modifier = Modifier.clickable { selectedCategory = cat }
+                    ) {
+                        Text(
+                            text = label,
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                            ),
+                            color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                        )
+                    }
+                }
+            }
+            Spacer(Modifier.height(12.dp))
+        }
+
+        // Horizontal match cards
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(filteredItems) { item ->
+                LiveSportCard(
+                    item = item,
+                    onClick = { onItemClick(item) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun LiveSportCard(
+    item: com.cinetheta.app.data.sports.LiveSportItem,
+    onClick: () -> Unit
+) {
+    val cardGradient = Brush.verticalGradient(
+        colors = listOf(
+            Color.Transparent,
+            Color.Black.copy(alpha = 0.5f),
+            Color.Black.copy(alpha = 0.95f)
+        )
+    )
+
+    Card(
+        modifier = Modifier
+            .width(220.dp)
+            .height(130.dp)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF1E222B)),
+        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.08f))
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            if (!item.poster.isNullOrBlank()) {
+                SubcomposeAsyncImage(
+                    model = item.poster,
+                    contentDescription = item.title,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.linearGradient(
+                                colors = when (item.category.lowercase()) {
+                                    "football" -> listOf(Color(0xFF0F3820), Color(0xFF051C0F))
+                                    "cricket" -> listOf(Color(0xFF1E3A5F), Color(0xFF0B192C))
+                                    "basketball" -> listOf(Color(0xFF5A2E12), Color(0xFF261205))
+                                    "fight" -> listOf(Color(0xFF4A1212), Color(0xFF210505))
+                                    "american-football" -> listOf(Color(0xFF382312), Color(0xFF190E05))
+                                    else -> listOf(Color(0xFF1F2937), Color(0xFF111827))
+                                }
+                            )
+                        )
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(cardGradient)
+            )
+
+            // Top Badges
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (item.isLive) {
+                    Surface(
+                        shape = RoundedCornerShape(6.dp),
+                        color = Color(0xFFE50914),
+                        tonalElevation = 4.dp
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(6.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.White)
+                            )
+                            Text(
+                                text = "LIVE",
+                                color = Color.White,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.ExtraBold
+                            )
+                        }
+                    }
+                } else {
+                    Surface(
+                        shape = RoundedCornerShape(6.dp),
+                        color = Color.Black.copy(alpha = 0.6f)
+                    ) {
+                        Text(
+                            text = "SOON",
+                            color = Color(0xFF9CA3AF),
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                        )
+                    }
+                }
+
+                val badgeText = item.league ?: when (item.category.lowercase()) {
+                    "football" -> "Football"
+                    "cricket" -> "Cricket"
+                    "basketball" -> "Basketball"
+                    "american-football" -> "NFL"
+                    "fight" -> "Combat"
+                    "hockey" -> "Hockey"
+                    "golf" -> "Golf"
+                    "tennis" -> "Tennis"
+                    "24/7-streams" -> "24/7 TV"
+                    else -> item.category.replaceFirstChar { it.uppercase() }
+                }
+
+                Surface(
+                    shape = RoundedCornerShape(6.dp),
+                    color = Color.Black.copy(alpha = 0.65f),
+                    border = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.2f))
+                ) {
+                    Text(
+                        text = badgeText,
+                        color = Color(0xFFE2E8F0),
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Medium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                    )
+                }
+            }
+
+            // Bottom Info (Title & Watch Action)
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(horizontal = 10.dp, vertical = 8.dp)
+            ) {
+                Text(
+                    text = item.title,
+                    color = Color.White,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    lineHeight = 16.sp
+                )
+
+                Spacer(modifier = Modifier.height(2.dp))
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.PlayCircle,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(12.dp)
+                    )
+                    Text(
+                        text = "Watch Live Stream",
+                        color = Color(0xFFCBD5E1),
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+        }
+    }
+}
+

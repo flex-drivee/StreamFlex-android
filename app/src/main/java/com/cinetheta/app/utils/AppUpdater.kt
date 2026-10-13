@@ -386,12 +386,11 @@ object AppUpdater {
                                 } else {
                                     -1f
                                 }
-                                val mbRead = totalBytesRead / (1024f * 1024f)
-                                val mbTotal = if (contentLength > 0) contentLength / (1024f * 1024f) else 0f
                                 val progressText = if (contentLength > 0) {
-                                    String.format(java.util.Locale.US, "%.1f MB / %.1f MB (%.0f%%)", mbRead, mbTotal, progress * 100)
+                                    val percent = (progress * 100).toInt().coerceIn(0, 100)
+                                    "$percent% downloaded"
                                 } else {
-                                    String.format(java.util.Locale.US, "%.1f MB downloaded", mbRead)
+                                    "Downloading..."
                                 }
                                 withContext(Dispatchers.Main) {
                                     onProgress(progress, progressText)

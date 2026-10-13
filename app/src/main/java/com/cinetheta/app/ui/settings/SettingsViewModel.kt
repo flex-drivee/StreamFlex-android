@@ -3,28 +3,21 @@ package com.cinetheta.app.ui.settings
 import android.app.Application
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.viewModelScope
-import com.cinetheta.app.di.EngineModule
-import com.cinetheta.app.di.RepositoryModule
 import com.cinetheta.core.cache.CacheManager
-import com.cinetheta.data.local.download.DownloadStorageManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 
 enum class VideoPlayer(val title: String, val packageName: String?) {
-    SYSTEM("Built-in Player", null),
+    SYSTEM("Native Player (Media3)", null),
     VLC("VLC Player", "org.videolan.vlc"),
     MX_PLAYER("MX Player", "com.mxtech.videoplayer.ad"),
+    MX_PLAYER_PRO("MX Player Pro", "com.mxtech.videoplayer.pro"),
     JUST_PLAYER("Just (Video) Player", "com.brouken.player")
 }
 
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
     private val prefs = application.getSharedPreferences("cinetheta_settings", Context.MODE_PRIVATE)
-    private val storageManager = RepositoryModule.downloadStorageManager
-    private val downloadRepository = RepositoryModule.downloadRepository
-    private val downloadQueueManager = EngineModule.downloadQueueManager
     private val cacheManager = CacheManager()
 
     private val _appTheme = MutableStateFlow(prefs.getString("app_theme", "SYSTEM") ?: "SYSTEM")
@@ -35,6 +28,12 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     private val _enableSubtitles = MutableStateFlow(prefs.getBoolean("enable_subtitles", true))
     val enableSubtitles: StateFlow<Boolean> = _enableSubtitles.asStateFlow()
+
+    private val _subtitleTextColor = MutableStateFlow(prefs.getString("subtitle_text_color", "#FFFFFF") ?: "#FFFFFF")
+    val subtitleTextColor: StateFlow<String> = _subtitleTextColor.asStateFlow()
+
+    private val _subtitleBgColor = MutableStateFlow(prefs.getString("subtitle_bg_color", "#80000000") ?: "#80000000")
+    val subtitleBgColor: StateFlow<String> = _subtitleBgColor.asStateFlow()
     
     private val _cellularData = MutableStateFlow(prefs.getBoolean("cellular_data", true))
     val cellularData: StateFlow<Boolean> = _cellularData.asStateFlow()
@@ -55,13 +54,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     )
     val dohProvider: StateFlow<String> = _dohProvider.asStateFlow()
 
-    // --- Downloads Settings ---
-    private val _wifiOnlyDownloads = MutableStateFlow(prefs.getBoolean("wifi_only_downloads", false))
-    val wifiOnlyDownloads: StateFlow<Boolean> = _wifiOnlyDownloads.asStateFlow()
-
-    private val _downloadQuality = MutableStateFlow(prefs.getString("download_quality", "1080p") ?: "1080p")
-    val downloadQuality: StateFlow<String> = _downloadQuality.asStateFlow()
-    
     private val _playerVideoQuality = MutableStateFlow(prefs.getString("player_video_quality", "Auto") ?: "Auto")
     val playerVideoQuality: StateFlow<String> = _playerVideoQuality.asStateFlow()
     
@@ -69,20 +61,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         VideoPlayer.valueOf(prefs.getString("preferred_player", VideoPlayer.SYSTEM.name) ?: VideoPlayer.SYSTEM.name)
     )
     val preferredPlayer: StateFlow<VideoPlayer> = _preferredPlayer.asStateFlow()
-
-    private val _smartDownloads = MutableStateFlow(prefs.getBoolean("smart_downloads", true))
-    val smartDownloads: StateFlow<Boolean> = _smartDownloads.asStateFlow()
-
-    private val _storageStats = MutableStateFlow(storageManager.getStorageStats())
-    val storageStats: StateFlow<DownloadStorageManager.StorageStats> = _storageStats.asStateFlow()
-
-    init {
-        refreshStorageStats()
-    }
-
-    fun refreshStorageStats() {
-        _storageStats.value = storageManager.getStorageStats()
-    }
 
     fun setAppTheme(theme: String) {
         prefs.edit().putString("app_theme", theme).apply()
@@ -97,6 +75,16 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun setEnableSubtitles(enabled: Boolean) {
         prefs.edit().putBoolean("enable_subtitles", enabled).apply()
         _enableSubtitles.value = enabled
+    }
+
+    fun setSubtitleTextColor(colorHex: String) {
+        prefs.edit().putString("subtitle_text_color", colorHex).apply()
+        _subtitleTextColor.value = colorHex
+    }
+
+    fun setSubtitleBgColor(colorHex: String) {
+        prefs.edit().putString("subtitle_bg_color", colorHex).apply()
+        _subtitleBgColor.value = colorHex
     }
     
     fun setCellularData(enabled: Boolean) {
@@ -119,16 +107,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         _dohProvider.value = provider
     }
 
-    fun setWifiOnlyDownloads(enabled: Boolean) {
-        prefs.edit().putBoolean("wifi_only_downloads", enabled).apply()
-        _wifiOnlyDownloads.value = enabled
-    }
-
-    fun setDownloadQuality(quality: String) {
-        prefs.edit().putString("download_quality", quality).apply()
-        _downloadQuality.value = quality
-    }
-
     fun setPlayerVideoQuality(quality: String) {
         prefs.edit().putString("player_video_quality", quality).apply()
         _playerVideoQuality.value = quality
@@ -137,21 +115,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun setPreferredPlayer(player: VideoPlayer) {
         prefs.edit().putString("preferred_player", player.name).apply()
         _preferredPlayer.value = player
-    }
-
-    fun setSmartDownloads(enabled: Boolean) {
-        prefs.edit().putBoolean("smart_downloads", enabled).apply()
-        _smartDownloads.value = enabled
-    }
-
-    fun deleteAllDownloads() {
-        viewModelScope.launch {
-            val all = downloadRepository.allDownloads.value
-            all.forEach { item ->
-                downloadQueueManager.cancelDownload(item.id)
-            }
-            refreshStorageStats()
-        }
     }
 
     /**
@@ -165,7 +128,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             // Also clear Cloudflare bypass cookies
             android.webkit.CookieManager.getInstance().removeAllCookies(null)
             android.webkit.CookieManager.getInstance().flush()
-            refreshStorageStats()
             true
         } catch (e: Exception) {
             false
@@ -190,14 +152,12 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             _appTheme.value = "SYSTEM"
             _autoPlayNext.value = true
             _enableSubtitles.value = true
+            _subtitleTextColor.value = "#FFFFFF"
+            _subtitleBgColor.value = "#80000000"
             _cellularData.value = true
             _developerMode.value = false
-            _wifiOnlyDownloads.value = false
-            _downloadQuality.value = "1080p"
             _playerVideoQuality.value = "Auto"
             _preferredPlayer.value = VideoPlayer.SYSTEM
-            _smartDownloads.value = true
-            refreshStorageStats()
             true
         } catch (e: Exception) {
             false

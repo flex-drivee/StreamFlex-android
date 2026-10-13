@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.async
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import com.cinetheta.app.data.providers.hdhub4u.Hdhub4uProvider
@@ -25,6 +26,7 @@ data class HomeUiState(
     val continueWatching: List<com.cinetheta.player.resume.HistoryItem> = emptyList(),
     val popularMovies: List<SearchResult> = emptyList(), // For hero section
     val sections: List<HomeSection> = emptyList(),
+    val liveSports: List<com.cinetheta.app.data.sports.LiveSportItem> = emptyList(),
     val errorMessage: String? = null
 )
 
@@ -65,6 +67,15 @@ class HomeViewModel(
             lastLoadedProviderId = currentProviderId
             
             try {
+                // Fetch live sports concurrently
+                val sportsDeferred = async(Dispatchers.IO) {
+                    try {
+                        com.cinetheta.app.data.sports.LiveSportsRepository.getLiveSports()
+                    } catch (e: Exception) {
+                        emptyList()
+                    }
+                }
+
                 val history = progressManager.getHistory()
                 val popMovies = repository.getPopularMovies()
                 
@@ -82,11 +93,14 @@ class HomeViewModel(
                     }
                 }
 
+                val sports = sportsDeferred.await()
+
                 _uiState.value = HomeUiState(
                     isLoading = false,
                     continueWatching = history,
                     popularMovies = popMovies,
-                    sections = loadedSections
+                    sections = loadedSections,
+                    liveSports = sports
                 )
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(

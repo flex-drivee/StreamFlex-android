@@ -50,10 +50,12 @@ fun PluginDetailScreen(
     onPlayClick: (List<ProviderSource>, ProviderEpisode?) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val isShow = searchResult.mediaType.name == "TV" || searchResult.mediaType.name == "ANIME"
+    val isShow = searchResult.mediaType.name == "TV" || 
+        searchResult.mediaType.name == "ANIME" || 
+        uiState.result?.seasons?.isNotEmpty() == true || 
+        uiState.result?.mediaType?.name == "TV"
     var showComingSoonDialog by remember { mutableStateOf(false) }
     var showSaveThetaPrompt by remember { mutableStateOf(false) }
-    var selectedStreamForSaveTheta by remember { mutableStateOf<com.cinetheta.domain.models.StreamLink?>(null) }
     val context = androidx.compose.ui.platform.LocalContext.current
     val progressManager = remember { com.cinetheta.player.resume.PlaybackProgressManager(context) }
     val historyItem = remember(searchResult.id) {
@@ -103,7 +105,10 @@ fun PluginDetailScreen(
             } else {
                 val result = uiState.result
                 if (result != null) {
-                    LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = 40.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
+                    ) {
                         
                         // ── 1. HERO BACKDROP (Actual App Detail Style) ──────────
                         item {
@@ -347,7 +352,16 @@ fun PluginDetailScreen(
                                     Card(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .clickable { selectedStreamForSaveTheta = stream },
+                                            .clickable {
+                                                com.cinetheta.app.utils.SaveThetaLauncher.launchDownload(
+                                                    context = context,
+                                                    stream = stream,
+                                                    title = uiState.result?.title ?: "Unknown",
+                                                    episodeNumber = uiState.pendingDownloadEpisode?.number,
+                                                    onNotInstalled = { showSaveThetaPrompt = true }
+                                                )
+                                                viewModel.cancelDownloadDialog()
+                                            },
                                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                                     ) {
                                         Column(modifier = Modifier.padding(12.dp)) {
@@ -367,89 +381,6 @@ fun PluginDetailScreen(
                     }
                 )
             }
-
-            selectedStreamForSaveTheta?.let { stream ->
-                AlertDialog(
-                    onDismissRequest = { selectedStreamForSaveTheta = null },
-                    title = { Text("Choose Downloader", fontWeight = FontWeight.Bold) },
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    text = {
-                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            Card(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable {
-                                        try {
-                                            val encodedUrl = java.net.URLEncoder.encode(stream.url, "UTF-8")
-                                            var uriString = "savetheta://download?url=$encodedUrl"
-                                            
-                                            val ref = stream.referer ?: stream.headers.entries.find { it.key.equals("Referer", ignoreCase = true) }?.value
-                                            if (ref != null) uriString += "&referer=${java.net.URLEncoder.encode(ref, "UTF-8")}"
-                                            
-                                            val ua = stream.headers.entries.find { it.key.equals("User-Agent", ignoreCase = true) }?.value ?: com.cinetheta.core.constants.Constants.DEFAULT_USER_AGENT
-                                            if (ua != null) uriString += "&userAgent=${java.net.URLEncoder.encode(ua, "UTF-8")}"
-                                            
-                                            val movieTitle = uiState.result?.title ?: "Unknown"
-                                            val pendingEp = uiState.pendingDownloadEpisode
-                                            val epStr = if (pendingEp != null) " - E${pendingEp.number}" else ""
-                                            val fullTitle = "$movieTitle$epStr"
-                                            uriString += "&title=${java.net.URLEncoder.encode(fullTitle, "UTF-8")}"
-
-                                            try {
-                                                val jsonHeaders = org.json.JSONObject()
-                                                stream.headers.forEach { (key, value) -> jsonHeaders.put(key, value) }
-                                                if (stream.cookies.isNotEmpty()) {
-                                                    val cookieStr = stream.cookies.entries.joinToString("; ") { "${it.key}=${it.value}" }
-                                                    jsonHeaders.put("Cookie", cookieStr)
-                                                }
-                                                uriString += "&headers=${java.net.URLEncoder.encode(jsonHeaders.toString(), "UTF-8")}"
-                                                
-                                                // Pass subtitles to SaveTheta!
-                                                if (stream.subtitles.isNotEmpty()) {
-                                                    val subsJson = org.json.JSONArray()
-                                                    stream.subtitles.forEach { sub ->
-                                                        val subObj = org.json.JSONObject()
-                                                        subObj.put("language", sub.language)
-                                                        subObj.put("url", sub.url)
-                                                        subObj.put("label", sub.label)
-                                                        subsJson.put(subObj)
-                                                    }
-                                                    uriString += "&subtitles=${java.net.URLEncoder.encode(subsJson.toString(), "UTF-8")}"
-                                                }
-                                            } catch (e: Exception) {}
-
-                                            val intent = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
-                                                data = android.net.Uri.parse(uriString)
-                                            }
-                                            context.startActivity(intent)
-                                            viewModel.cancelDownloadDialog()
-                                        } catch (e: Exception) {
-                                            showSaveThetaPrompt = true
-                                        }
-                                        selectedStreamForSaveTheta = null
-                                    },
-                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-                            ) {
-                                Column(modifier = Modifier.padding(16.dp)) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(Icons.Filled.CloudDownload, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
-                                        Spacer(Modifier.width(8.dp))
-                                        Text("Download from SaveTheta", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer, fontSize = 16.sp)
-                                    }
-                                    Spacer(Modifier.height(6.dp))
-                                    Text("Safe, Secure & Fast • ⭐ Recommended", color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f), fontSize = 13.sp)
-                                }
-                            }
-                        }
-                    },
-                    confirmButton = {
-                        TextButton(onClick = { selectedStreamForSaveTheta = null }) {
-                            Text("Cancel")
-                        }
-                    }
-                )
-            }
-        }
         
         // --- SAVE THETA PROMPT ---
         if (showSaveThetaPrompt) {
@@ -503,6 +434,7 @@ fun PluginDetailScreen(
             )
         }
     }
+}
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

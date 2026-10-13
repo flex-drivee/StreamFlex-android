@@ -3,16 +3,9 @@ package com.cinetheta.app.ui.movies
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.cinetheta.app.di.EngineModule
-import com.cinetheta.app.di.RepositoryModule
 import com.cinetheta.app.domain.models.*
 import com.cinetheta.app.domain.repository.ContentRepository
-import com.cinetheta.domain.models.Quality
-import com.cinetheta.domain.models.download.DownloadItem
-import com.cinetheta.domain.models.download.DownloadStatus
-import com.cinetheta.domain.repositories.DownloadRepository
 import com.cinetheta.domain.repositories.StreamRepository
-import com.cinetheta.engine.download.DownloadQueueManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -35,16 +28,12 @@ data class MovieDetailUiState(
 class MovieDetailViewModel(
     private val contentRepository: ContentRepository,
     private val streamRepository: StreamRepository,
-    private val downloadRepository: DownloadRepository = RepositoryModule.downloadRepository,
-    private val downloadQueueManager: DownloadQueueManager = EngineModule.downloadQueueManager,
     private val contentId: String,
     private val contentType: String
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MovieDetailUiState())
     val uiState: StateFlow<MovieDetailUiState> = _uiState.asStateFlow()
-
-    val allDownloads: StateFlow<List<DownloadItem>> = downloadRepository.allDownloads
 
     init {
         loadContent()
@@ -65,42 +54,37 @@ class MovieDetailViewModel(
                 } else {
                     val show = contentRepository.getShowDetails(contentId)
                     val similar = contentRepository.getSimilarContent(contentId, ContentType.SHOW)
-                    val episodes = contentRepository.getSeasonEpisodes(contentId, 1) // Load Season 1 by default
                     _uiState.value = MovieDetailUiState(
                         isLoading = false,
                         show = show,
-                        similarContent = similar,
-                        episodes = episodes
+                        similarContent = similar
                     )
+                    loadEpisodes(seasonNumber = 1)
                 }
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    errorMessage = "Failed to load content"
+                    errorMessage = e.localizedMessage ?: "Failed to load content"
                 )
             }
         }
     }
 
-    fun loadSeason(seasonNumber: Int) {
-        val showId = _uiState.value.show?.id ?: return
-
+    fun selectSeason(seasonNumber: Int) {
+        if (_uiState.value.selectedSeason == seasonNumber) return
         _uiState.value = _uiState.value.copy(selectedSeason = seasonNumber)
+        loadEpisodes(seasonNumber)
+    }
 
+    fun loadSeason(seasonNumber: Int) = selectSeason(seasonNumber)
+
+    private fun loadEpisodes(seasonNumber: Int) {
         viewModelScope.launch {
             try {
-                val eps = contentRepository.getSeasonEpisodes(
-                    showId,
-                    seasonNumber
-                )
-
-                if (eps.isNotEmpty()) {
-                    _uiState.value = _uiState.value.copy(
-                        selectedSeason = seasonNumber,
-                        episodes = eps
-                    )
-                }
+                val episodes = contentRepository.getSeasonEpisodes(contentId, seasonNumber)
+                _uiState.value = _uiState.value.copy(episodes = episodes)
             } catch (e: Exception) {
+                // If loading episodes fails, retain UI state with empty episode list
             }
         }
     }
@@ -156,71 +140,6 @@ class MovieDetailViewModel(
         }
     }
 
-    fun startSelectedDownload(selectedStream: com.cinetheta.domain.models.StreamLink) {
-        val state = _uiState.value
-        
-        if (selectedStream.name.contains("MovieBox", ignoreCase = true) ||
-            selectedStream.url.contains("moviebox", ignoreCase = true) ||
-            selectedStream.url.contains("wefeed", ignoreCase = true)
-        ) {
-            _uiState.value = state.copy(
-                downloadStreamsAvailable = null,
-                pendingDownloadEpisode = null,
-                showMovieBoxComingSoon = true
-            )
-            return
-        }
-
-        val allStreams = state.downloadStreamsAvailable ?: return
-        val fallbacks = allStreams.filter { it.url != selectedStream.url }
-
-        val movie = state.movie
-        val show = state.show
-        val episode = state.pendingDownloadEpisode
-
-        if (movie != null) {
-            val downloadItem = DownloadItem(
-                id = "${movie.id}_movie",
-                mediaId = movie.id,
-                title = movie.title,
-                year = movie.year,
-                isShow = false,
-                posterUrl = movie.poster ?: movie.backdrop,
-                quality = selectedStream.quality,
-                streamLink = selectedStream,
-                fallbackLinks = fallbacks,
-                subtitles = selectedStream.subtitles,
-                status = DownloadStatus.QUEUED
-            )
-            downloadQueueManager.enqueueDownload(downloadItem)
-        } else if (show != null && episode != null) {
-            val sNum = state.selectedSeason
-            val sPad = sNum.toString().padStart(2, '0')
-            val ePad = episode.episodeNumber.toString().padStart(2, '0')
-
-            val downloadItem = DownloadItem(
-                id = "${show.id}_s${sNum}_e${episode.episodeNumber}",
-                mediaId = show.id,
-                title = show.title,
-                subtitle = "S$sPad E$ePad - ${episode.title}",
-                year = show.year,
-                isShow = true,
-                seasonNumber = sNum,
-                episodeNumber = episode.episodeNumber,
-                posterUrl = episode.stillPath ?: show.poster,
-                quality = selectedStream.quality,
-                streamLink = selectedStream,
-                fallbackLinks = fallbacks,
-                subtitles = selectedStream.subtitles,
-                status = DownloadStatus.QUEUED
-            )
-            downloadQueueManager.enqueueDownload(downloadItem)
-        }
-
-        // Clear dialog state
-        _uiState.value = state.copy(downloadStreamsAvailable = null, pendingDownloadEpisode = null)
-    }
-
     fun dismissMovieBoxNotice() {
         _uiState.value = _uiState.value.copy(showMovieBoxComingSoon = false)
     }
@@ -228,23 +147,11 @@ class MovieDetailViewModel(
     fun cancelDownloadDialog() {
         _uiState.value = _uiState.value.copy(downloadStreamsAvailable = null, pendingDownloadEpisode = null)
     }
-
-    fun cancelDownload(id: String) {
-        downloadQueueManager.cancelDownload(id)
-    }
-
-    fun getDownloadItem(mediaId: String, season: Int? = null, episode: Int? = null): DownloadItem? {
-        return allDownloads.value.firstOrNull {
-            it.mediaId == mediaId && it.seasonNumber == season && it.episodeNumber == episode
-        }
-    }
 }
 
 class MovieDetailViewModelFactory(
     private val contentRepository: ContentRepository,
     private val streamRepository: StreamRepository,
-    private val downloadRepository: DownloadRepository = RepositoryModule.downloadRepository,
-    private val downloadQueueManager: DownloadQueueManager = EngineModule.downloadQueueManager,
     private val contentId: String,
     private val contentType: String
 ) : ViewModelProvider.Factory {
@@ -253,8 +160,6 @@ class MovieDetailViewModelFactory(
         return MovieDetailViewModel(
             contentRepository = contentRepository,
             streamRepository = streamRepository,
-            downloadRepository = downloadRepository,
-            downloadQueueManager = downloadQueueManager,
             contentId = contentId,
             contentType = contentType
         ) as T

@@ -63,9 +63,8 @@ class CineThetaApplication : Application(), ImageLoaderFactory {
 
         // Initialize Start.io Ads
         try {
-            com.startapp.sdk.adsbase.StartAppSDK.setUserConsent(this, "pas", System.currentTimeMillis(), true)
             StartAppSDK.init(this, "209537758", false)
-            
+            StartAppSDK.setUserConsent(this, "pas", System.currentTimeMillis(), true)
             StartAppAd.disableSplash()
         } catch (e: Exception) {
             android.util.Log.e("CineThetaApplication", "Error initializing StartApp", e)

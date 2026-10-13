@@ -1,64 +1,58 @@
 package com.cinetheta.app.ui.downloads
 
 import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
-import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissBoxValue
-import androidx.compose.material3.rememberSwipeToDismissBoxState
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
-import com.cinetheta.data.local.download.DownloadStorageManager
-import com.cinetheta.domain.models.download.DownloadItem
-import com.cinetheta.domain.models.download.DownloadStatus
-import com.cinetheta.player.PlayerActivity
+import com.cinetheta.app.utils.SaveThetaLauncher
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DownloadsScreen(
     onBackClick: () -> Unit,
-    showTopBar: Boolean = true,
-    viewModel: DownloadsViewModel = viewModel(factory = DownloadsViewModelFactory())
+    showTopBar: Boolean = true
 ) {
-    val downloads by viewModel.allDownloads.collectAsState()
-    val storageStats by viewModel.storageStats.collectAsState()
-    val isSmartDownloadsEnabled by viewModel.smartDownloadsEnabled.collectAsState()
     val context = LocalContext.current
+    var isSaveThetaInstalled by remember { mutableStateOf(SaveThetaLauncher.isInstalled(context)) }
 
     Scaffold(
         topBar = {
             if (showTopBar) {
                 TopAppBar(
-                    title = { Text("Downloads", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground) },
+                    title = {
+                        Text(
+                            text = "Download Manager",
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    },
                     navigationIcon = {
                         IconButton(onClick = onBackClick) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colorScheme.onBackground)
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back",
+                                tint = MaterialTheme.colorScheme.onBackground
+                            )
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
@@ -70,518 +64,209 @@ fun DownloadsScreen(
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = paddingValues.calculateTopPadding()),
-            contentPadding = PaddingValues(bottom = 110.dp)
+                .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp, vertical = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Smart Downloads Toggle
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .size(36.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(Icons.Outlined.AutoAwesome, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
-                        }
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column {
-                            Text("Smart Downloads", color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
-                            Text(
-                                "Auto-downloads next episodes", 
-                                color = MaterialTheme.colorScheme.onSurfaceVariant, 
-                                fontSize = 13.sp
-                            )
-                        }
-                    }
-                    Switch(
-                        checked = isSmartDownloadsEnabled,
-                        onCheckedChange = { viewModel.toggleSmartDownloads(it) },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = Color.White,
-                            checkedTrackColor = MaterialTheme.colorScheme.primary,
-                            uncheckedThumbColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            uncheckedTrackColor = MaterialTheme.colorScheme.outline,
-                            uncheckedBorderColor = Color.Transparent
-                        )
-                    )
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-            }
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // Storage Indicator
-            item {
-                StorageIndicator(storageStats)
-                Spacer(modifier = Modifier.height(16.dp))
-                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), thickness = 1.dp)
-            }
-
-            // Downloads List
-            if (downloads.isEmpty()) {
-                item {
-                    EmptyDownloadsState(onFindClick = onBackClick)
-                }
-            } else {
-                items(downloads, key = { it.id }) { item ->
-                    DownloadListItem(
-                        item = item,
-                        onPlayClick = {
-                            if (item.status == DownloadStatus.COMPLETED) {
-                                val intent = Intent(context, PlayerActivity::class.java).apply {
-                                    putExtra("MEDIA_ID", item.mediaId)
-                                    putExtra("VIDEO_TITLE", item.title)
-                                    putExtra("VIDEO_YEAR", item.year ?: 0)
-                                    putExtra("IS_SHOW", item.isShow)
-                                    putExtra("POSTER_PATH", item.posterUrl)
-                                    putExtra("DOWNLOAD_ITEM_ID", item.id)
-                                    putExtra("LOCAL_FILE_PATH", item.localFilePath)
-                                    if (item.isShow && item.episodeNumber != null) {
-                                        putExtra("CURRENT_EPISODE_ID", item.id)
-                                        putExtra("CURRENT_EPISODE_SEASON", item.seasonNumber ?: 1)
-                                        putExtra("CURRENT_EPISODE_NUMBER", item.episodeNumber ?: 1)
-                                        putExtra("CURRENT_EPISODE_TITLE", item.subtitle ?: "Episode ${item.episodeNumber}")
-                                    }
-                                }
-                                context.startActivity(intent)
-                            } else if (item.status == DownloadStatus.PAUSED) {
-                                viewModel.resumeDownload(item.id)
-                            }
-                        },
-                        onPause = { viewModel.pauseDownload(item.id) },
-                        onResume = { viewModel.resumeDownload(item.id) },
-                        onRetry = { viewModel.retryDownload(item.id) },
-                        onDelete = { viewModel.deleteDownload(item.id) }
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun StorageIndicator(stats: DownloadStorageManager.StorageStats) {
-    val total = stats.totalBytes.toFloat().coerceAtLeast(1f)
-    val appUsedRatio = (stats.cineThetaUsedBytes.toFloat() / total).coerceIn(0f, 1f)
-    val otherUsedRatio = ((stats.usedBytes - stats.cineThetaUsedBytes).toFloat() / total).coerceIn(0f, 1f)
-
-    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Bottom
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Outlined.SdStorage, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
-                Spacer(modifier = Modifier.width(6.dp))
-                Text("Internal Storage", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp, fontWeight = FontWeight.Medium)
-            }
-            Text("${stats.formattedFree} Free", color = MaterialTheme.colorScheme.onBackground, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-        }
-        Spacer(modifier = Modifier.height(12.dp))
-        
-        // Progress Bar
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(8.dp)
-                .clip(RoundedCornerShape(4.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-        ) {
-            // Other apps
-            if (otherUsedRatio > 0f) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(otherUsedRatio)
-                        .height(8.dp)
-                        .background(MaterialTheme.colorScheme.outline)
-                )
-            }
-            // CineTheta used
-            if (appUsedRatio > 0f) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(appUsedRatio)
-                        .height(8.dp)
-                        .background(MaterialTheme.colorScheme.primary)
-                )
-            }
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary))
-            Spacer(modifier = Modifier.width(6.dp))
-            Text("CineTheta (${stats.formattedCineThetaUsed})", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
-        }
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
-@Composable
-fun DownloadListItem(
-    item: DownloadItem,
-    onPlayClick: () -> Unit,
-    onPause: () -> Unit,
-    onResume: () -> Unit,
-    onRetry: () -> Unit,
-    onDelete: () -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
-    var showDeleteConfirm by remember { mutableStateOf(false) }
-
-    val dismissState = rememberSwipeToDismissBoxState(
-        confirmValueChange = {
-            if (it == SwipeToDismissBoxValue.EndToStart) {
-                showDeleteConfirm = true
-                false
-            } else {
-                false
-            }
-        }
-    )
-
-    if (showDeleteConfirm) {
-        AlertDialog(
-            onDismissRequest = { showDeleteConfirm = false },
-            title = { Text("Delete Video") },
-            text = { Text("Are you sure you want to delete this video?") },
-            confirmButton = {
-                TextButton(onClick = { 
-                    showDeleteConfirm = false
-                    onDelete() 
-                }) {
-                    Text("Yes", color = Color.Red)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeleteConfirm = false }) {
-                    Text("No")
-                }
-            }
-        )
-    }
-
-    SwipeToDismissBox(
-        state = dismissState,
-        enableDismissFromStartToEnd = false,
-        backgroundContent = {
-            val color = if (dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart) Color.Red.copy(alpha = 0.8f) else Color.Transparent
+            // Large Icon container
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .background(color)
-                    .padding(end = 24.dp),
-                contentAlignment = Alignment.CenterEnd
-            ) {
-                Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White)
-            }
-        }
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.background)
-                .combinedClickable(
-                    onClick = {
-                        when (item.status) {
-                            DownloadStatus.COMPLETED -> onPlayClick()
-                            DownloadStatus.PAUSED -> onResume()
-                            DownloadStatus.FAILED -> onRetry()
-                            else -> expanded = !expanded
-                        }
-                    },
-                    onLongClick = { showDeleteConfirm = true }
-                )
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Thumbnail with Interactive Play/Pause/Resume overlay
-            Box(
-                modifier = Modifier
-                    .width(120.dp)
-                    .height(72.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-            ) {
-                if (!item.posterUrl.isNullOrBlank()) {
-                    AsyncImage(
-                        model = item.posterUrl,
-                        contentDescription = item.title,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
-                
-                if (item.status.isActive) {
-                    Box(
-                        modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.55f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(
-                            progress = { item.progress },
-                            color = MaterialTheme.colorScheme.primary,
-                            trackColor = Color.White.copy(alpha = 0.3f),
-                            strokeWidth = 3.dp,
-                            modifier = Modifier.size(28.dp)
-                        )
-                        Icon(
-                            Icons.Default.Pause,
-                            contentDescription = "Pause",
-                            tint = Color.White,
-                            modifier = Modifier.size(13.dp)
-                        )
-                    }
-                } else if (item.status.isPaused) {
-                    Box(
-                        modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.60f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(34.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primary),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                Icons.Default.PlayArrow,
-                                contentDescription = "Resume",
-                                tint = Color.White,
-                                modifier = Modifier.size(22.dp)
-                            )
-                        }
-                    }
-                } else if (item.status == DownloadStatus.FAILED) {
-                    Box(
-                        modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.60f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(34.dp)
-                                .clip(CircleShape)
-                                .background(Color.Red.copy(alpha = 0.85f)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                Icons.Default.Refresh,
-                                contentDescription = "Retry",
-                                tint = Color.White,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
-                    }
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(4.dp)
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(Color.Black.copy(alpha = 0.75f))
-                            .padding(horizontal = 4.dp, vertical = 2.dp)
-                    ) {
-                        Text(item.formattedSize, color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.width(14.dp))
-
-            // Title, Subtitle, Progress
-            Column(modifier = Modifier.weight(1f)) {
-                val displayTitle = if (item.isShow && item.seasonNumber != null) {
-                    "${item.title} S${item.seasonNumber} Ep${item.episodeNumber ?: 1}"
-                } else {
-                    item.title
-                }
-                Text(
-                    text = displayTitle,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = if (expanded) 3 else 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-
-                val subtext = when (item.status) {
-                    DownloadStatus.COMPLETED -> "${item.formattedSize} • ${item.quality.label}"
-                    DownloadStatus.DOWNLOADING -> {
-                        val speed = if (item.speedBytesPerSec > 0) {
-                            val mb = item.speedBytesPerSec.toDouble() / (1024 * 1024)
-                            String.format("%.1f MB/s", mb)
-                        } else "Downloading..."
-                        val eta = if (item.etaSeconds > 0) " (${item.etaSeconds / 60}m left)" else ""
-                        "${item.progressPercent}% • $speed$eta"
-                    }
-                    DownloadStatus.CONNECTING -> "Connecting to mirror..."
-                    DownloadStatus.QUEUED -> "Queued..."
-                    DownloadStatus.PAUSED -> "Paused (${item.progressPercent}%) • Tap to resume"
-                    DownloadStatus.FAILED -> "Failed • Tap to retry"
-                    DownloadStatus.CANCELLED -> "Cancelled"
-                }
-
-                Text(
-                    text = subtext,
-                    color = when {
-                        item.status.isActive -> MaterialTheme.colorScheme.primary
-                        item.status.isPaused -> MaterialTheme.colorScheme.tertiary
-                        item.status == DownloadStatus.FAILED -> Color.Red
-                        else -> MaterialTheme.colorScheme.onSurfaceVariant
-                    },
-                    fontSize = 13.sp,
-                    maxLines = if (expanded) 2 else 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                
-                if (item.status.isActive || item.status.isPaused) {
-                    Spacer(modifier = Modifier.height(6.dp))
-                    LinearProgressIndicator(
-                        progress = { item.progress },
-                        modifier = Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)),
-                        color = if (item.status.isPaused) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
-                        trackColor = MaterialTheme.colorScheme.surfaceVariant
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            // Dedicated Action Button on the right
-            Box(
-                modifier = Modifier.align(Alignment.CenterVertically),
+                    .size(90.dp)
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                    .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f), RoundedCornerShape(24.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                when {
-                    item.status.isActive -> {
-                        IconButton(
-                            onClick = onPause,
-                            modifier = Modifier
-                                .size(36.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.surfaceVariant)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Pause,
-                                contentDescription = "Pause",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
-                    }
-                    item.status.isPaused -> {
-                        IconButton(
-                            onClick = onResume,
-                            modifier = Modifier
-                                .size(36.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primary)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.PlayArrow,
-                                contentDescription = "Resume",
-                                tint = Color.White,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                    }
-                    item.status == DownloadStatus.FAILED -> {
-                        IconButton(
-                            onClick = onRetry,
-                            modifier = Modifier
-                                .size(36.dp)
-                                .clip(CircleShape)
-                                .background(Color.Red.copy(alpha = 0.15f))
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Refresh,
-                                contentDescription = "Retry",
-                                tint = Color.Red,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
-                    }
-                    item.status == DownloadStatus.COMPLETED -> {
-                        IconButton(
-                            onClick = onPlayClick,
-                            modifier = Modifier
-                                .size(36.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.PlayArrow,
-                                contentDescription = "Play",
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
-                    }
+                Icon(
+                    imageVector = Icons.Filled.CloudDownload,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(46.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Text(
+                text = "SaveTheta Download Manager",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground,
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "All offline downloads, paused queues, and multi-threaded video downloads are powered by SaveTheta.",
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                lineHeight = 20.sp,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Installation status chip
+            Surface(
+                shape = RoundedCornerShape(20.dp),
+                color = if (isSaveThetaInstalled) Color(0xFF1B382B) else Color(0xFF3E2723),
+                modifier = Modifier.padding(bottom = 24.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = if (isSaveThetaInstalled) Icons.Default.CheckCircle else Icons.Default.Info,
+                        contentDescription = null,
+                        tint = if (isSaveThetaInstalled) Color(0xFF4CAF50) else Color(0xFFFFB74D),
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = if (isSaveThetaInstalled) "SaveTheta is Installed & Ready" else "SaveTheta is Not Installed",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = if (isSaveThetaInstalled) Color(0xFF81C784) else Color(0xFFFFCC80)
+                    )
                 }
             }
+
+            // Main Action Button
+            Button(
+                onClick = {
+                    if (isSaveThetaInstalled) {
+                        SaveThetaLauncher.openSaveTheta(context, "downloads")
+                    } else {
+                        try {
+                            val intent = Intent(
+                                Intent.ACTION_VIEW,
+                                Uri.parse("https://cinetheta.github.io")
+                            ).apply {
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
+                            context.startActivity(intent)
+                        } catch (_: Exception) {}
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
+            ) {
+                Icon(
+                    imageVector = if (isSaveThetaInstalled) Icons.Default.OpenInNew else Icons.Default.Download,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = if (isSaveThetaInstalled) "Open SaveTheta Downloads" else "Install SaveTheta",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Feature Highlights Card
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                border = androidx.compose.foundation.BorderStroke(
+                    1.dp,
+                    MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+                )
+            ) {
+                Column(
+                    modifier = Modifier.padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Text(
+                        text = "Why SaveTheta?",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+
+                    FeatureRow(
+                        icon = Icons.Outlined.FlashOn,
+                        title = "Multi-Chunk Accelerated Speed",
+                        description = "Downloads movies and series in parallel chunks for maximum network speed."
+                    )
+
+                    FeatureRow(
+                        icon = Icons.Outlined.PauseCircle,
+                        title = "Full Pause & Resume Support",
+                        description = "Resume downloads anytime without losing progress, even after network disconnects."
+                    )
+
+                    FeatureRow(
+                        icon = Icons.Outlined.Subtitles,
+                        title = "Multi-Audio & Subtitles Saved",
+                        description = "Audio tracks and subtitles are passed and saved directly with your video."
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(60.dp))
         }
     }
 }
 
 @Composable
-fun EmptyDownloadsState(onFindClick: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 80.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+private fun FeatureRow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    title: String,
+    description: String
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.Top
     ) {
         Box(
             modifier = Modifier
-                .size(100.dp)
+                .size(36.dp)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surfaceVariant),
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = Icons.Outlined.DownloadForOffline,
-                contentDescription = "No Downloads",
-                modifier = Modifier.size(50.dp),
-                tint = MaterialTheme.colorScheme.primary
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(20.dp)
             )
         }
-        Spacer(modifier = Modifier.height(24.dp))
-        Text(
-            text = "No Downloads Yet",
-            color = MaterialTheme.colorScheme.onBackground,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = "Movies and TV shows you download\nwill appear here for offline viewing.",
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            fontSize = 15.sp,
-            textAlign = TextAlign.Center,
-            lineHeight = 22.sp
-        )
-        Spacer(modifier = Modifier.height(32.dp))
-        Button(
-            onClick = onFindClick,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-                contentColor = MaterialTheme.colorScheme.primary
-            ),
-            shape = RoundedCornerShape(8.dp),
-            modifier = Modifier.border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
-        ) {
-            Text("Find Something to Download", fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
+        Spacer(modifier = Modifier.width(14.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = description,
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                lineHeight = 16.sp
+            )
         }
     }
 }

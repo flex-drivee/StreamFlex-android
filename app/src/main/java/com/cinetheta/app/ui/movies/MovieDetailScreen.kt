@@ -54,7 +54,6 @@ fun MovieDetailScreen(
     onNavigateToDetail: (String, String) -> Unit = { _, _ -> }
 ) {
     val state by viewModel.uiState.collectAsState()
-    val allDownloads by viewModel.allDownloads.collectAsState()
 
     val context = LocalContext.current
     val progressManager = remember { PlaybackProgressManager(context) }
@@ -82,7 +81,6 @@ fun MovieDetailScreen(
     var showNoProviderDialog by remember { mutableStateOf(false) }
     var showProviderSelectorDialog by remember { mutableStateOf(false) }
     var pendingPlayAction by remember { mutableStateOf<(() -> Unit)?>(null) }
-    var selectedStreamForSaveTheta by remember { mutableStateOf<com.cinetheta.domain.models.StreamLink?>(null) }
     var showSaveThetaPrompt by remember { mutableStateOf(false) }
 
     LaunchedEffect(state.selectedSeason) { areAllEpisodesVisible = false }
@@ -100,7 +98,7 @@ fun MovieDetailScreen(
             LazyColumn(
                 state   = scrollState,
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(bottom = 40.dp)
+                contentPadding = PaddingValues(bottom = 40.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
             ) {
 
                 // ── 1. HERO BACKDROP ─────────────────────────────────────────
@@ -157,18 +155,14 @@ fun MovieDetailScreen(
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            val movieDownloadItem = allDownloads.firstOrNull { it.mediaId == (state.movie?.id ?: "") && !it.isShow }
-
-                            // Download Button (Netflix Style)
+                            // Download Button (SaveTheta Delegated)
                             OutlinedButton(
                                 onClick = {
                                     if (providerRepository.isNoneSelected) {
                                         pendingPlayAction = { viewModel.downloadMovie() }
                                         showNoProviderDialog = true
                                     } else {
-                                        if (movieDownloadItem == null || movieDownloadItem.status == com.cinetheta.domain.models.download.DownloadStatus.FAILED) {
-                                            viewModel.downloadMovie()
-                                        }
+                                        viewModel.downloadMovie()
                                     }
                                 },
                                 modifier = Modifier.weight(1f).height(46.dp),
@@ -176,28 +170,18 @@ fun MovieDetailScreen(
                                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                                 colors = ButtonDefaults.outlinedButtonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                             ) {
-                                when {
-                                    movieDownloadItem?.status == com.cinetheta.domain.models.download.DownloadStatus.COMPLETED -> {
-                                        Icon(Icons.Filled.CheckCircle, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
-                                        Spacer(Modifier.width(6.dp))
-                                        Text("Downloaded", color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
-                                    }
-                                    movieDownloadItem?.status?.isActive == true || state.isResolvingDownload -> {
-                                        CircularProgressIndicator(
-                                            progress = { movieDownloadItem?.progress ?: 0f },
-                                            color = MaterialTheme.colorScheme.primary,
-                                            strokeWidth = 2.dp,
-                                            modifier = Modifier.size(18.dp)
-                                        )
-                                        Spacer(Modifier.width(8.dp))
-                                        val percent = movieDownloadItem?.progressPercent ?: 0
-                                        Text(if (percent > 0) "Downloading ($percent%)" else "Resolving...", color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.bodyMedium)
-                                    }
-                                    else -> {
-                                        Icon(Icons.Outlined.DownloadForOffline, null, tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(20.dp))
-                                        Spacer(Modifier.width(6.dp))
-                                        Text("Download", color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.bodyMedium)
-                                    }
+                                if (state.isResolvingDownload) {
+                                    CircularProgressIndicator(
+                                        color = MaterialTheme.colorScheme.primary,
+                                        strokeWidth = 2.dp,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Spacer(Modifier.width(8.dp))
+                                    Text("Resolving...", color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.bodyMedium)
+                                } else {
+                                    Icon(Icons.Outlined.DownloadForOffline, null, tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(20.dp))
+                                    Spacer(Modifier.width(6.dp))
+                                    Text("Download", color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.bodyMedium)
                                 }
                             }
 
@@ -311,14 +295,8 @@ fun MovieDetailScreen(
                         state.episodes.take(10)
 
                     items(episodesToShow, key = { it.episodeNumber }) { ep ->
-                        val epDownloadItem = allDownloads.firstOrNull { 
-                            it.mediaId == (state.show?.id ?: "") && 
-                            it.seasonNumber == state.selectedSeason && 
-                            it.episodeNumber == ep.episodeNumber 
-                        }
                         SFEpisodeItem(
                             episode = ep,
-                            downloadItem = epDownloadItem,
                             onDownloadClick = {
                                 if (providerRepository.isNoneSelected) {
                                     pendingPlayAction = { viewModel.downloadEpisode(ep) }
@@ -437,7 +415,17 @@ fun MovieDetailScreen(
                                 Card(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .clickable { selectedStreamForSaveTheta = stream },
+                                        .clickable {
+                                            com.cinetheta.app.utils.SaveThetaLauncher.launchDownload(
+                                                context = context,
+                                                stream = stream,
+                                                title = title,
+                                                seasonNumber = if (state.show != null) state.selectedSeason else null,
+                                                episodeNumber = state.pendingDownloadEpisode?.episodeNumber,
+                                                onNotInstalled = { showSaveThetaPrompt = true }
+                                            )
+                                            viewModel.cancelDownloadDialog()
+                                        },
                                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                                 ) {
                                     Column(modifier = Modifier.padding(12.dp)) {
@@ -461,109 +449,6 @@ fun MovieDetailScreen(
                 confirmButton = {
                     TextButton(onClick = { viewModel.cancelDownloadDialog() }) {
                         Text("Cancel", color = MaterialTheme.colorScheme.primary)
-                    }
-                }
-            )
-        }
-
-
-        // --- DOWNLOADER CHOICE DIALOG ---
-        selectedStreamForSaveTheta?.let { stream ->
-            AlertDialog(
-                onDismissRequest = { selectedStreamForSaveTheta = null },
-                title = { Text("Choose Downloader", fontWeight = FontWeight.Bold) },
-                containerColor = MaterialTheme.colorScheme.surface,
-                text = {
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        // Option 1: SaveTheta (Recommended)
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    try {
-                                        val encodedUrl = java.net.URLEncoder.encode(stream.url, "UTF-8")
-                                        var uriString = "savetheta://download?url=$encodedUrl"
-                                        
-                                        val ref = stream.referer ?: stream.headers.entries.find { it.key.equals("Referer", ignoreCase = true) }?.value
-                                        if (ref != null) uriString += "&referer=${java.net.URLEncoder.encode(ref, "UTF-8")}"
-                                        
-                                        val ua = stream.headers.entries.find { it.key.equals("User-Agent", ignoreCase = true) }?.value ?: com.cinetheta.core.constants.Constants.DEFAULT_USER_AGENT
-                                        if (ua != null) uriString += "&userAgent=${java.net.URLEncoder.encode(ua, "UTF-8")}"
-                                        
-                                        val movieTitle = title
-                                        val pendingEp = state.pendingDownloadEpisode
-                                        val epStr = if (pendingEp != null) " - S${state.selectedSeason}E${pendingEp.episodeNumber}" else ""
-                                        val fullTitle = "$movieTitle$epStr"
-                                        uriString += "&title=${java.net.URLEncoder.encode(fullTitle, "UTF-8")}"
-
-                                        // Pass all other headers! (MovieBox needs Cookie, Origin, etc)
-                                        try {
-                                            val jsonHeaders = org.json.JSONObject()
-                                            stream.headers.forEach { (key, value) -> jsonHeaders.put(key, value) }
-                                            if (stream.cookies.isNotEmpty()) {
-                                                val cookieStr = stream.cookies.entries.joinToString("; ") { "${it.key}=${it.value}" }
-                                                jsonHeaders.put("Cookie", cookieStr)
-                                            }
-                                            uriString += "&headers=${java.net.URLEncoder.encode(jsonHeaders.toString(), "UTF-8")}"
-                                            
-                                            // Pass subtitles to SaveTheta!
-                                            if (stream.subtitles.isNotEmpty()) {
-                                                val subsJson = org.json.JSONArray()
-                                                stream.subtitles.forEach { sub ->
-                                                    val subObj = org.json.JSONObject()
-                                                    subObj.put("language", sub.language)
-                                                    subObj.put("url", sub.url)
-                                                    subObj.put("label", sub.label)
-                                                    subsJson.put(subObj)
-                                                }
-                                                uriString += "&subtitles=${java.net.URLEncoder.encode(subsJson.toString(), "UTF-8")}"
-                                            }
-                                        } catch (e: Exception) {}
-
-                                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW).apply {
-                                            data = android.net.Uri.parse(uriString)
-                                        }
-                                        context.startActivity(intent)
-                                        viewModel.cancelDownloadDialog()
-                                    } catch (e: Exception) {
-                                        showSaveThetaPrompt = true
-                                    }
-                                    selectedStreamForSaveTheta = null
-                                },
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-                        ) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(Icons.Filled.Star, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
-                                    Spacer(Modifier.width(8.dp))
-                                    Text("Download from SaveTheta", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer, fontSize = 16.sp)
-                                }
-                                Spacer(Modifier.height(6.dp))
-                                Text("Safe, Secure & Fast • ⭐ Recommended", color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f), fontSize = 13.sp)
-                            }
-                        }
-
-                        // Option 2: Built-in Downloader
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    viewModel.startSelectedDownload(stream)
-                                    selectedStreamForSaveTheta = null
-                                },
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-                        ) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                Text("Built-in Download", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 15.sp)
-                                Spacer(Modifier.height(4.dp))
-                                Text("Standard background download", color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f), fontSize = 13.sp)
-                            }
-                        }
-                    }
-                },
-                confirmButton = {
-                    TextButton(onClick = { selectedStreamForSaveTheta = null }) {
-                        Text("Cancel")
                     }
                 }
             )
@@ -978,7 +863,6 @@ private fun SFSeasonSelector(
 @Composable
 fun SFEpisodeItem(
     episode: Episode,
-    downloadItem: com.cinetheta.domain.models.download.DownloadItem? = null,
     onDownloadClick: () -> Unit = {},
     onClick: () -> Unit
 ) {
@@ -1069,43 +953,17 @@ fun SFEpisodeItem(
 
         Spacer(Modifier.width(8.dp))
 
-        // Download Button (Netflix Style)
-        Box(
-            modifier = Modifier.size(40.dp),
-            contentAlignment = Alignment.Center
+        // Download Button (SaveTheta Delegated)
+        IconButton(
+            onClick = onDownloadClick,
+            modifier = Modifier.size(36.dp)
         ) {
-            when {
-                downloadItem?.status == com.cinetheta.domain.models.download.DownloadStatus.COMPLETED -> {
-                    Icon(
-                        Icons.Filled.CheckCircle,
-                        contentDescription = "Downloaded",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-                downloadItem?.status?.isActive == true -> {
-                    CircularProgressIndicator(
-                        progress = { downloadItem.progress },
-                        color = MaterialTheme.colorScheme.primary,
-                        trackColor = Color.White.copy(alpha = 0.2f),
-                        strokeWidth = 2.5.dp,
-                        modifier = Modifier.size(22.dp)
-                    )
-                }
-                else -> {
-                    IconButton(
-                        onClick = onDownloadClick,
-                        modifier = Modifier.size(36.dp)
-                    ) {
-                        Icon(
-                            Icons.Outlined.DownloadForOffline,
-                            contentDescription = "Download Episode",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                }
-            }
+            Icon(
+                Icons.Outlined.DownloadForOffline,
+                contentDescription = "Download Episode",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(24.dp)
+            )
         }
     }
 }

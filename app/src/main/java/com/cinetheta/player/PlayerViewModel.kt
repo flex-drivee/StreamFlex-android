@@ -5,8 +5,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.cinetheta.domain.models.HostType
 import com.cinetheta.domain.models.StreamLink
-import com.cinetheta.domain.models.download.DownloadStatus
-import com.cinetheta.domain.repositories.DownloadRepository
 import com.cinetheta.domain.repositories.StreamRepository
 import com.cinetheta.player.episodes.PlayerEpisode
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,7 +22,8 @@ data class PlayerSession(
     val currentEpisode: PlayerEpisode?,
     val pluginProviderId: String? = null,
     val localFilePath: String? = null,
-    val downloadItemId: String? = null
+    val directStreamUrl: String? = null,
+    val streamHeaders: Map<String, String>? = null
 )
 
 data class PlayerUiState(
@@ -36,8 +35,7 @@ data class PlayerUiState(
 )
 
 class PlayerViewModel(
-    private val streamRepository: StreamRepository,
-    private val downloadRepository: DownloadRepository = com.cinetheta.app.di.RepositoryModule.downloadRepository
+    private val streamRepository: StreamRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(PlayerUiState())
@@ -65,20 +63,27 @@ class PlayerViewModel(
         
         viewModelScope.launch {
             try {
-                // 1. Check if offline download exists on disk
-                val sNum = if (session.isShow) session.currentEpisode?.seasonNumber else null
-                val eNum = if (session.isShow) session.currentEpisode?.episodeNumber else null
-                
-                val downloadedItem = if (!session.downloadItemId.isNullOrBlank()) {
-                    downloadRepository.getDownloadById(session.downloadItemId)
-                } else {
-                    downloadRepository.getDownloadForMedia(session.mediaId, sNum, eNum)
+                // Direct stream URL (e.g. Live Sports / TV Channels)
+                if (!session.directStreamUrl.isNullOrBlank()) {
+                    val liveStream = StreamLink(
+                        name = "Live Stream",
+                        url = session.directStreamUrl,
+                        quality = com.cinetheta.domain.models.Quality.P1080,
+                        headers = session.streamHeaders ?: emptyMap(),
+                        host = HostType.DIRECT,
+                        adaptive = true,
+                        contentType = com.cinetheta.core.network.detector.ContentType.HLS
+                    )
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        streams = listOf(liveStream),
+                        isOffline = false
+                    )
+                    return@launch
                 }
-                val filePath = if (downloadedItem != null && downloadedItem.status == DownloadStatus.COMPLETED && !downloadedItem.localFilePath.isNullOrBlank()) {
-                    downloadedItem.localFilePath
-                } else if (!session.localFilePath.isNullOrBlank()) {
-                    session.localFilePath
-                } else null
+
+                // 1. Check if offline file exists
+                val filePath = session.localFilePath
 
                 if (!filePath.isNullOrBlank()) {
                     if (filePath.startsWith("content://")) {
@@ -118,15 +123,10 @@ class PlayerViewModel(
                             }
                         }
 
-                        if (localSubtitles.isEmpty() && downloadedItem?.subtitles?.isNotEmpty() == true) {
-                            localSubtitles.addAll(downloadedItem.subtitles)
-                        }
-
-                        val quality = downloadedItem?.quality ?: com.cinetheta.domain.models.Quality.P1080
                         val offlineStream = StreamLink(
-                            name = "Offline Download • ${quality.label}",
+                            name = "Local File",
                             url = localFile.absolutePath,
-                            quality = quality,
+                            quality = com.cinetheta.domain.models.Quality.P1080,
                             host = HostType.DIRECT,
                             contentType = com.cinetheta.core.network.detector.ContentType.VIDEO,
                             subtitles = localSubtitles
@@ -273,11 +273,10 @@ class PlayerViewModel(
 }
 
 class PlayerViewModelFactory(
-    private val streamRepository: StreamRepository,
-    private val downloadRepository: DownloadRepository = com.cinetheta.app.di.RepositoryModule.downloadRepository
+    private val streamRepository: StreamRepository
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         @Suppress("UNCHECKED_CAST")
-        return PlayerViewModel(streamRepository, downloadRepository) as T
+        return PlayerViewModel(streamRepository) as T
     }
 }

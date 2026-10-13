@@ -16,8 +16,9 @@ class ContentRepositoryImpl(
     private val tmdbApi: TmdbApi
 ) : ContentRepository {
 
-    // SECURE: Reading from the generated BuildConfig
-    private val apiKey: String = BuildConfig.TMDB_API_KEY
+    // Rotates automatically through the TMDB API key pool
+    private val apiKey: String
+        get() = com.cinetheta.app.data.metadata.TmdbApiKeyPool.getNextKey()
 
     override suspend fun search(query: String): List<SearchResult> = withContext(Dispatchers.IO) {
         val movies = tmdbApi.searchMovies(apiKey, query).results.map { TmdbMapper.toDomain(it) }

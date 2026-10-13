@@ -132,6 +132,7 @@ fun PluginSearchScreen(
                                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                                             )
                                             val badgeText = when(provider.id) {
+                                                "uhdmovies" -> "MultiAudio Movies & Shows in 4K"
                                                 "moviebox", "all_otts", "animedekho", "toonstream" -> "Recommended"
                                                 "hdhub4u", "fourkhdhub" -> "Backup Plugin"
                                                 "youtube" -> "100% Working"
@@ -141,7 +142,7 @@ fun PluginSearchScreen(
                                                 Text(
                                                     badgeText,
                                                     fontSize = 10.sp,
-                                                    color = if (badgeText == "Recommended") Color(0xFF00C853) else if (badgeText == "100% Working") Color(0xFF29B6F6) else Color.Gray,
+                                                    color = if (badgeText == "Recommended") Color(0xFF00C853) else if (badgeText.contains("4K", ignoreCase = true)) Color(0xFFFFB300) else if (badgeText == "100% Working") Color(0xFF29B6F6) else Color.Gray,
                                                     fontWeight = FontWeight.Medium
                                                 )
                                             }
