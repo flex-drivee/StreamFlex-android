@@ -108,8 +108,9 @@ class PlayerController(
                     _activeSkipSegment.value = currentSeg
                 }
 
-                // Periodically save progress every ~10 seconds of playback
-                if (st.isPlaying && (st.positionMs - lastSavedPosition > 10000L || st.positionMs < lastSavedPosition)) {
+                // Periodically save progress every ~10 seconds of playback (skip live streams)
+                val isLiveStream = viewModel.uiState.value.session?.directStreamUrl != null || _allStreams.value.getOrNull(_currentStreamIndex.value)?.adaptive == true
+                if (!isLiveStream && st.isPlaying && (st.positionMs - lastSavedPosition > 10000L || st.positionMs < lastSavedPosition)) {
                     progressManager.saveProgress(mediaId, progressKey, title, type, posterPath, st.positionMs, st.durationMs, viewModel.uiState.value.session?.currentEpisode?.id)
                     lastSavedPosition = st.positionMs
                 }
@@ -174,8 +175,9 @@ class PlayerController(
             progressManager.saveLastStream(progressKey, selectedStream.name)
             player.load(selectedStream)
             
-            // Restore progress
-                        val savedPos = progressManager.getProgress(progressKey)
+            // Restore progress (only for non-live content)
+            val isLive = selectedStream.adaptive || viewModel.uiState.value.session?.directStreamUrl != null
+            val savedPos = if (isLive) 0L else progressManager.getProgress(progressKey)
             if (savedPos > 10000L) {
                 savedPosToResume = savedPos
                 showResumeDialog.value = true

@@ -44,9 +44,31 @@ class Media3Player(
     
     private val renderersFactory = decoderMode.createRenderersFactory(context)
 
+    private val defaultExtractorsFactory = androidx.media3.extractor.DefaultExtractorsFactory()
+        .setConstantBitrateSeekingEnabled(true)
+        .setMatroskaExtractorFlags(androidx.media3.extractor.mkv.MatroskaExtractor.FLAG_DISABLE_SEEK_FOR_CUES)
+
+    private val loadControl = androidx.media3.exoplayer.DefaultLoadControl.Builder()
+        .setBufferDurationsMs(
+            /* minBufferMs = */ 15_000,
+            /* maxBufferMs = */ 60_000,
+            /* bufferForPlaybackMs = */ 1_500,
+            /* bufferForPlaybackAfterRebufferMs = */ 3_000
+        )
+        .setPrioritizeTimeOverSizeThresholds(true)
+        .build()
+
+    private val livePlaybackSpeedControl = androidx.media3.exoplayer.DefaultLivePlaybackSpeedControl.Builder()
+        .setFallbackMaxPlaybackSpeed(1.20f)
+        .setFallbackMinPlaybackSpeed(0.95f)
+        .build()
+
     internal val exoPlayer: ExoPlayer = ExoPlayer.Builder(context)
         .setRenderersFactory(renderersFactory)
         .setTrackSelector(trackSelector)
+        .setLoadControl(loadControl)
+        .setLivePlaybackSpeedControl(livePlaybackSpeedControl)
+        .setMediaSourceFactory(DefaultMediaSourceFactory(context, defaultExtractorsFactory))
         .build()
 
     private val mediaSession: MediaSession = MediaSession.Builder(context, exoPlayer).build()
@@ -104,6 +126,18 @@ class Media3Player(
             }
 
             override fun onPlayerError(error: PlaybackException) {
+                // --- LIVE STREAM BEHIND-WINDOW AUTO RECOVERY ---
+                // If network jitter causes live playback to fall behind the sliding window,
+                // ExoPlayer throws BehindLiveWindowException.
+                // Standard Media3 recovery: jump back to live edge and re-prepare seamlessly.
+                if (error.errorCode == PlaybackException.ERROR_CODE_BEHIND_LIVE_WINDOW ||
+                    error.cause is androidx.media3.exoplayer.source.BehindLiveWindowException) {
+                    com.cinetheta.core.utils.StreamLogger.warn("Media3Player", "Behind live window detected. Re-seeking to live edge...")
+                    exoPlayer.seekToDefaultPosition()
+                    exoPlayer.prepare()
+                    return
+                }
+
                 stopProgressTracking()
                 
                 val playerError = when (error.errorCode) {
@@ -348,7 +382,7 @@ class Media3Player(
         // 2. High-performance HTTP Data Source with redirect, fast failover timeout, and custom headers
         val isNetMirror = stream.name.contains("NetMirror", ignoreCase = true)
         val okHttpClient = if (isNetMirror) {
-            com.cinetheta.core.network.CineThetaHttpClient.okHttpClient.newBuilder()
+            com.cinetheta.core.network.CineThetaHttpClient.streamingOkHttpClient.newBuilder()
                 .addInterceptor { chain ->
                     val request = chain.request()
                     if (request.url.toString().contains(".m3u8")) {
@@ -379,18 +413,36 @@ class Media3Player(
                 }
                 .build()
         } else {
-            com.cinetheta.core.network.CineThetaHttpClient.okHttpClient
+            com.cinetheta.core.network.CineThetaHttpClient.streamingOkHttpClient
         }
 
         val httpDataSourceFactory = androidx.media3.datasource.okhttp.OkHttpDataSource.Factory(okHttpClient)
             .setUserAgent(userAgent)
             .setDefaultRequestProperties(requestHeaders)
 
+        val isContentUri = stream.url.startsWith("content://")
+        val isLocalFile = stream.url.startsWith("/") || stream.url.startsWith("file:")
+
         // 3. Wrap in DefaultDataSource.Factory to support file://, content://, rawresource:// as well as http/https
         val dataSourceFactory = androidx.media3.datasource.DefaultDataSource.Factory(context, httpDataSourceFactory)
 
-        // 4. Build MediaSourceFactory
-        val mediaSourceFactory = DefaultMediaSourceFactory(context)
+        // 4. Build MediaSourceFactory with MatroskaExtractor.FLAG_DISABLE_SEEK_FOR_CUES
+        // Critical for progressive MKV HTTP streams (e.g. Google Drive/Usercontent, Driveseed, GDFlix).
+        // By default, MatroskaExtractor seeks to the end of multi-gigabyte MKV files to parse Cues.
+        // If the HTTP server does not support HTTP Range requests (returns HTTP 200 instead of 206),
+        // OkHttpDataSource attempts to skip/download the entire file sequentially (e.g. 8+ GB),
+        // causing 1.6-2 MB/s network saturation and indefinite buffering without playback starting.
+        val extractorsFactory = androidx.media3.extractor.DefaultExtractorsFactory()
+            .setConstantBitrateSeekingEnabled(true)
+            .setMatroskaExtractorFlags(
+                if (!isLocalFile && !isContentUri) {
+                    androidx.media3.extractor.mkv.MatroskaExtractor.FLAG_DISABLE_SEEK_FOR_CUES
+                } else {
+                    0
+                }
+            )
+
+        val mediaSourceFactory = DefaultMediaSourceFactory(context, extractorsFactory)
             .setDataSourceFactory(dataSourceFactory)
 
         // 5. Detect container / MIME type for links without standard file extensions (e.g. Pixeldrain, BuzzServer)
@@ -420,8 +472,6 @@ class Media3Player(
             }
         }
 
-        val isContentUri = stream.url.startsWith("content://")
-        val isLocalFile = stream.url.startsWith("/") || stream.url.startsWith("file:")
         val mediaUri = when {
             isContentUri -> android.net.Uri.parse(stream.url)   // content:// must be parsed as-is, NOT via fromFile
             isLocalFile -> {
@@ -439,6 +489,20 @@ class Media3Player(
         // For remote streams, attach mimeType if detected.
         if (!isLocalFile && !isContentUri && mimeType != null) {
             mediaItemBuilder.setMimeType(mimeType)
+        }
+
+        // Live HLS streams: configure a safe 8-second buffer cushion behind the live edge
+        // and allow slight playback speed adjustment (0.95x - 1.20x) to avoid falling behind the live window.
+        val isLiveOrAdaptive = stream.adaptive || mimeType == androidx.media3.common.MimeTypes.APPLICATION_M3U8
+        if (isLiveOrAdaptive && !isLocalFile && !isContentUri) {
+            val liveConfig = MediaItem.LiveConfiguration.Builder()
+                .setMaxPlaybackSpeed(1.20f)
+                .setMinPlaybackSpeed(0.95f)
+                .setTargetOffsetMs(8_000L)
+                .setMinOffsetMs(2_000L)
+                .setMaxOffsetMs(30_000L)
+                .build()
+            mediaItemBuilder.setLiveConfiguration(liveConfig)
         }
 
         // Reset track selector overrides from previous stream/server
@@ -623,7 +687,21 @@ class Media3Player(
                     ))
                     
                     val customSubtitleView = androidx.media3.ui.SubtitleView(ctx).apply {
-                        setUserDefaultStyle()
+                        val prefs = ctx.getSharedPreferences("cinetheta_settings", android.content.Context.MODE_PRIVATE)
+                        val textColorHex = prefs.getString("subtitle_text_color", "#FFFFFF") ?: "#FFFFFF"
+                        val bgColorHex = prefs.getString("subtitle_bg_color", "#80000000") ?: "#80000000"
+                        val textColor = try { android.graphics.Color.parseColor(textColorHex) } catch (e: Exception) { android.graphics.Color.WHITE }
+                        val bgColor = try { android.graphics.Color.parseColor(bgColorHex) } catch (e: Exception) { android.graphics.Color.TRANSPARENT }
+
+                        val customStyle = androidx.media3.ui.CaptionStyleCompat(
+                            textColor,
+                            bgColor,
+                            android.graphics.Color.TRANSPARENT,
+                            androidx.media3.ui.CaptionStyleCompat.EDGE_TYPE_OUTLINE,
+                            android.graphics.Color.BLACK,
+                            null
+                        )
+                        setStyle(customStyle)
                         setUserDefaultTextSize()
                         setBottomPaddingFraction(0.08f)
                     }
@@ -652,6 +730,26 @@ class Media3Player(
             update = { frameLayout ->
                 val playerView = frameLayout.getChildAt(0) as androidx.media3.ui.PlayerView
                 playerView.resizeMode = if (isFullScreen) androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_ZOOM else androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FIT
+                if (frameLayout.childCount > 1) {
+                    val subView = frameLayout.getChildAt(1) as? androidx.media3.ui.SubtitleView
+                    if (subView != null) {
+                        val prefs = subView.context.getSharedPreferences("cinetheta_settings", android.content.Context.MODE_PRIVATE)
+                        val textColorHex = prefs.getString("subtitle_text_color", "#FFFFFF") ?: "#FFFFFF"
+                        val bgColorHex = prefs.getString("subtitle_bg_color", "#80000000") ?: "#80000000"
+                        val textColor = try { android.graphics.Color.parseColor(textColorHex) } catch (e: Exception) { android.graphics.Color.WHITE }
+                        val bgColor = try { android.graphics.Color.parseColor(bgColorHex) } catch (e: Exception) { android.graphics.Color.TRANSPARENT }
+                        subView.setStyle(
+                            androidx.media3.ui.CaptionStyleCompat(
+                                textColor,
+                                bgColor,
+                                android.graphics.Color.TRANSPARENT,
+                                androidx.media3.ui.CaptionStyleCompat.EDGE_TYPE_OUTLINE,
+                                android.graphics.Color.BLACK,
+                                null
+                            )
+                        )
+                    }
+                }
                 playerView.keepScreenOn = playerState.value.isPlaying
             },
             modifier = modifier

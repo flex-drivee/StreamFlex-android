@@ -115,6 +115,15 @@ object HostDetector {
 
             host.contains("strmup.to") ->
                 return HostType.STREAMUP
+
+            host.contains("driveseed") ->
+                return HostType.DRIVESEED
+
+            host.contains("driveleech") ->
+                return HostType.DRIVELEECH
+
+            host.contains("thenaukriadda") ->
+                return HostType.THENAUKRIADDA
         }
 
         // File locker hosting pages that should not be queued as direct raw video streams

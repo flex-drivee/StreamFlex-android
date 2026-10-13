@@ -49,12 +49,20 @@ class CloudflareKiller : Interceptor {
 
         var response = chain.proceed(request)
 
-        // Do not attempt WebView challenge solving for HEAD probes, JSON APIs, or manifests
+        // Do not attempt WebView challenge solving for HEAD probes, JSON APIs, manifests, or shorteners/direct file hosts
         if (request.method.equals("HEAD", ignoreCase = true) ||
             urlString.contains("/collections/post/documents/search") ||
             urlString.contains("raw.githubusercontent.com") ||
             urlString.endsWith(".json") ||
-            request.header("Accept")?.contains("application/json") == true) {
+            request.header("Accept")?.contains("application/json") == true ||
+            urlString.contains("driveseed.org") ||
+            urlString.contains("driveleech.org") ||
+            urlString.contains("video-seed.xyz") ||
+            urlString.contains("video-leech.xyz") ||
+            urlString.contains("video-plex.xyz") ||
+            urlString.contains("video-gen.xyz") ||
+            urlString.contains("thenaukriadda.in") ||
+            urlString.contains("gadgetsweb.xyz")) {
             return@runBlocking response
         }
 
@@ -81,10 +89,13 @@ class CloudflareKiller : Interceptor {
             } else if (response.code == 200) {
                 try {
                     val bodyString = response.peekBody(1024 * 30).string()
-                    isChallenge = bodyString.contains("cf-turnstile") ||
-                                  bodyString.contains("cf-browser-verification") ||
-                                  (bodyString.contains("challenges.cloudflare.com") && bodyString.contains("turnstile")) ||
-                                  (bodyString.contains("just a moment", ignoreCase = true) && bodyString.contains("cloudflare", ignoreCase = true))
+                    val hasChallengeTitle = bodyString.contains("<title>Just a moment...</title>", ignoreCase = true) ||
+                                            bodyString.contains("<title>Attention Required", ignoreCase = true)
+                    val hasChallengeBody = bodyString.contains("cf-browser-verification") ||
+                                           bodyString.contains("challenge-stage") ||
+                                           bodyString.contains("challenge-running") ||
+                                           (bodyString.contains("challenges.cloudflare.com") && bodyString.contains("turnstile"))
+                    isChallenge = hasChallengeTitle && hasChallengeBody
                 } catch (_: Exception) {
                     isChallenge = false
                 }

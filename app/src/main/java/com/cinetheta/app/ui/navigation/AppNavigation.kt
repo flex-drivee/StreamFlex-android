@@ -394,6 +394,7 @@ fun AppNavigation(
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
+                    .windowInsetsPadding(WindowInsets.navigationBars)
                     .padding(bottom = 16.dp)
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp) // Make the bar physically wider

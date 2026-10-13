@@ -4,14 +4,15 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
 
     <queries>
+        <package android:name="com.savetheta" />
         <package android:name="org.videolan.vlc" />
         <package android:name="com.mxtech.videoplayer.ad" />
         <package android:name="com.mxtech.videoplayer.pro" />
@@ -34,6 +35,19 @@
         android:theme="@style/Theme.CineTheta"
         android:name="com.cinetheta.app.CineThetaApplication"
         tools:targetApi="31">
+
+        <!-- Start.io Application ID -->
+        <meta-data
+            android:name="com.startapp.sdk.APPLICATION_ID"
+            android:value="209537758" />
+        <meta-data
+            android:name="com.startapp.sdk.RETURN_ADS_ENABLED"
+            android:value="false" />
+
+        <!-- Suppress Start.io built-in Consent Dialog (Pre-consented in code) -->
+        <activity
+            android:name="com.startapp.sdk.adsbase.consent.ConsentActivity"
+            tools:node="remove" />
 
         <activity
             android:name=".MainActivity"
@@ -66,19 +80,7 @@
             </intent-filter>
         </activity>
 
-        <!-- Download Foreground Service -->
-        <service
-            android:name="com.cinetheta.engine.download.service.CineThetaDownloadService"
-            android:icon="@mipmap/ic_launcher"
-            android:roundIcon="@mipmap/ic_launcher_round"
-            android:stopWithTask="false"
-            android:foregroundServiceType="dataSync"
-            android:exported="false" />
 
-        <!-- Download Notification Action Receiver -->
-        <receiver
-            android:name="com.cinetheta.engine.download.service.DownloadActionReceiver"
-            android:exported="false" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

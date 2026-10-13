@@ -263,7 +263,12 @@ fun SearchScreen(
 
                         LazyVerticalGrid(
                             columns               = GridCells.Fixed(cols),
-                            contentPadding        = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                            contentPadding        = PaddingValues(
+                                start = 16.dp,
+                                end = 16.dp,
+                                top = 12.dp,
+                                bottom = 100.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+                            ),
                             verticalArrangement   = Arrangement.spacedBy(12.dp),
                             horizontalArrangement = Arrangement.spacedBy(10.dp),
                             modifier              = Modifier.fillMaxSize()
@@ -480,7 +485,7 @@ private fun SFBrowseCategories(
 
     LazyColumn(
         modifier       = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(bottom = 100.dp)
+        contentPadding = PaddingValues(bottom = 100.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
     ) {
 
         // ── Recent Searches ──────────────────────────────────────────────────
@@ -657,7 +662,12 @@ private fun SFSearchShimmerGrid() {
     )
     LazyVerticalGrid(
         columns               = GridCells.Fixed(3),
-        contentPadding        = PaddingValues(16.dp),
+        contentPadding        = PaddingValues(
+            start = 16.dp,
+            end = 16.dp,
+            top = 16.dp,
+            bottom = 100.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+        ),
         verticalArrangement   = Arrangement.spacedBy(12.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {

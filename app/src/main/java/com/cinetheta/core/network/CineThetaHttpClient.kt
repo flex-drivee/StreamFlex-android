@@ -137,6 +137,21 @@ object CineThetaHttpClient {
         com.cinetheta.core.network.DohProviders.applyDoh(builder).build()
     }
 
+    /**
+     * Dedicated, high-performance OkHttpClient for media streaming (ExoPlayer).
+     * Bypasses heavy scraping/logging/CAPTCHA interceptors and uses a keep-alive
+     * connection pool for ultra-fast consecutive segment retrieval.
+     */
+    val streamingOkHttpClient: OkHttpClient by lazy {
+        val builder = OkHttpClient.Builder()
+            .followRedirects(true)
+            .followSslRedirects(true)
+            .connectTimeout(15_000L, TimeUnit.MILLISECONDS)
+            .readTimeout(25_000L, TimeUnit.MILLISECONDS)
+            .connectionPool(okhttp3.ConnectionPool(16, 5, TimeUnit.MINUTES))
+        com.cinetheta.core.network.DohProviders.applyDoh(builder).build()
+    }
+
     // ─── NoCookieJar ──────────────────────────────────────────────────────────
     private object NoCookieJar : okhttp3.CookieJar {
         override fun saveFromResponse(url: okhttp3.HttpUrl, cookies: List<okhttp3.Cookie>) = Unit
@@ -270,7 +285,9 @@ object CineThetaHttpClient {
         }
 
         // HTTP method + body
-        val mediaType = "application/octet-stream".toMediaTypeOrNull()
+        val contentTypeHeader = request.headers.entries
+            .firstOrNull { it.key.equals("Content-Type", ignoreCase = true) }?.value
+        val mediaType = (contentTypeHeader ?: "application/octet-stream").toMediaTypeOrNull()
 
         when (request.method) {
             HttpMethod.GET     -> builder.get()

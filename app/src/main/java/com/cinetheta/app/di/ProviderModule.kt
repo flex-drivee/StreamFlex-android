@@ -29,8 +29,8 @@ object ProviderModule {
 
         listOf(
             com.cinetheta.providers.castletv.CastleTvProvider(),
-            com.cinetheta.providers.piratexplay.PirateXplayProvider(),
             com.cinetheta.providers.uhdmovies.UHDMoviesProvider(),
+            com.cinetheta.providers.piratexplay.PirateXplayProvider(),
             MovieBoxProvider(),
             NetMirrorProvider(),
             AnimeDekhoProvider(),

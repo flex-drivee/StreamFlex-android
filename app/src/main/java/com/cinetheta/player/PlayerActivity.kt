@@ -116,8 +116,6 @@ class PlayerActivity : ComponentActivity() {
         val epSeasonNum = intent.getIntExtra("CURRENT_EPISODE_SEASON", 1)
         val epEpisodeNum = intent.getIntExtra("CURRENT_EPISODE_NUMBER", 1)
         val epTitle = intent.getStringExtra("CURRENT_EPISODE_TITLE") ?: "Episode $epEpisodeNum"
-        val downloadItemId = intent.getStringExtra("DOWNLOAD_ITEM_ID")
-        
         if (currentEpisode == null && currentEpisodeId != null && isShow) {
             currentEpisode = PlayerEpisode(
                 id = currentEpisodeId, 
@@ -128,6 +126,10 @@ class PlayerActivity : ComponentActivity() {
             episodes.add(currentEpisode)
         }
         
+        val directStreamUrl = intent.getStringExtra("DIRECT_STREAM_URL")
+        @Suppress("UNCHECKED_CAST")
+        val streamHeaders = intent.getSerializableExtra("STREAM_HEADERS") as? Map<String, String>
+
         val session = PlayerSession(
             mediaId = mediaId,
             title = videoTitle,
@@ -137,7 +139,8 @@ class PlayerActivity : ComponentActivity() {
             currentEpisode = currentEpisode,
             pluginProviderId = intent.getStringExtra("PLUGIN_PROVIDER_ID"),
             localFilePath = localFilePath,
-            downloadItemId = downloadItemId
+            directStreamUrl = directStreamUrl,
+            streamHeaders = streamHeaders
         )
         
         viewModel.initializeSession(session)
