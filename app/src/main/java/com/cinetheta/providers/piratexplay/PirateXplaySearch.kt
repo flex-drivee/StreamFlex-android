@@ -55,7 +55,12 @@ class PirateXplaySearch {
                         posterUrl = imgElem?.attr("data-src") ?: ""
                     }
 
-                    val isSeries = element.hasClass("series")
+                    val isSeries = element.hasClass("series") ||
+                        element.hasClass("tvshows") ||
+                        url.contains("/series", ignoreCase = true) ||
+                        url.contains("/serie", ignoreCase = true) ||
+                        url.contains("/tv", ignoreCase = true) ||
+                        url.contains("/show", ignoreCase = true)
                     val mediaType = if (isSeries) MediaType.TV else MediaType.MOVIE
 
                     results.add(

@@ -13,11 +13,50 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 
-class CastleTvProvider : Provider {
+class CastleTvProvider(
+    private val cacheManager: com.cinetheta.core.cache.CacheManager = com.cinetheta.core.cache.CacheManager(),
+    private val resolver: com.cinetheta.core.network.DomainResolver = com.cinetheta.core.network.DomainResolver(cacheManager)
+) : Provider {
     override val id = "castletv"
     override val name = "Castle TV (Use VLC for Multi Language)"
-    override val baseUrl = "https://api.hlowb.com"
+
+    companion object {
+        const val DEFAULT_DOMAIN = "https://api.hlowb.com"
+        const val MANIFEST_PATH = "providers/castletv.json"
+    }
+
+    @Volatile
+    private var resolvedDomain: String? = null
+
+    override val baseUrl: String
+        get() = resolvedDomain ?: DEFAULT_DOMAIN
+
     override val supportedMedia = setOf(MediaType.MOVIE, MediaType.TV)
+
+    suspend fun ensureDomain(): String {
+        resolvedDomain?.let { return it }
+
+        val result = resolver.resolve(
+            providerId = id,
+            hardcoded = DEFAULT_DOMAIN,
+            manifestPath = MANIFEST_PATH
+        )
+
+        val domain = when (result) {
+            is com.cinetheta.core.network.DomainResult.Resolved -> result.domain
+            is com.cinetheta.core.network.DomainResult.Mirror -> result.domain
+            is com.cinetheta.core.network.DomainResult.Hardcoded -> result.domain
+            is com.cinetheta.core.network.DomainResult.Offline -> DEFAULT_DOMAIN
+        }
+
+        resolvedDomain = domain
+        return domain
+    }
+
+    fun resetDomain() {
+        resolvedDomain = null
+        resolver.invalidate(id)
+    }
     
     override suspend fun search(query: String): List<SearchResult> {
         return search(query, 1)
@@ -25,6 +64,7 @@ class CastleTvProvider : Provider {
     
     override suspend fun search(query: String, page: Int): List<SearchResult> {
         return withContext(Dispatchers.IO) {
+            ensureDomain()
             val url = "$baseUrl/film-api/v1.1.0/movie/searchByKeyword?channel=IndiaA&clientType=1&clientType=1&keyword=$query"
             try {
                 val decryptedObj = CastleTvCrypto.fetchAndDecrypt(url)
@@ -96,12 +136,23 @@ class CastleTvProvider : Provider {
     override suspend fun load(searchResult: SearchResult): ProviderResult? {
         return withContext(Dispatchers.IO) {
             try {
-                val isTvShow = searchResult.mediaType == MediaType.TV
-                val detailsObj = CastleTvCrypto.fetchAndDecrypt(searchResult.url)
+                ensureDomain()
+                val loadUrl = if (searchResult.url.startsWith("http")) {
+                    val uri = Uri.parse(searchResult.url)
+                    val pathAndQuery = buildString {
+                        append(uri.encodedPath ?: "")
+                        if (!uri.encodedQuery.isNullOrBlank()) append("?${uri.encodedQuery}")
+                    }
+                    if (pathAndQuery.isNotBlank() && pathAndQuery != "/") "$baseUrl$pathAndQuery" else searchResult.url
+                } else {
+                    searchResult.url
+                }
+                val detailsObj = CastleTvCrypto.fetchAndDecrypt(loadUrl)
                 val dataObj = detailsObj["data"]?.jsonObject ?: throw Exception("No data object")
+                val seasonsArr = dataObj["seasons"]?.jsonArray
+                val isTvShow = searchResult.mediaType == MediaType.TV || (!seasonsArr.isNullOrEmpty())
                 
                 if (isTvShow) {
-                    val seasonsArr = dataObj["seasons"]?.jsonArray
                     val providerSeasons = mutableListOf<ProviderSeason>()
                     
                     if (seasonsArr != null) {
@@ -152,7 +203,7 @@ class CastleTvProvider : Provider {
                         providerId = this@CastleTvProvider.id,
                         title = searchResult.title,
                         detailUrl = searchResult.url,
-                        mediaType = searchResult.mediaType,
+                        mediaType = MediaType.TV,
                         seasons = providerSeasons,
                         poster = searchResult.poster,
                         success = providerSeasons.isNotEmpty()

@@ -7,11 +7,11 @@ object AnimeDekhoConfig {
     const val PROVIDER_ID   = "animedekho"
     const val PROVIDER_NAME = "Animedekho"
 
-    /** Hardcoded fallback domain — used if remote manifest cannot be fetched. */
-    const val DEFAULT_DOMAIN = "https://animedekho.app"
+    /** Hardcoded fallback domain — primary Multi-Audio Hindi/Tamil/Telugu domain */
+    const val DEFAULT_DOMAIN = "https://animedekho.tv"
 
-    /** Mirror domain — no Cloudflare on the /?trdekho= stream endpoint. */
-    const val MIRROR_DOMAIN  = "https://hindisubanime.co"
+    /** Mirror domain */
+    const val MIRROR_DOMAIN  = "https://animedekho.tv"
 
     /** Path in streamflex-providers repo for the remote domain manifest. */
     const val MANIFEST_PATH    = "providers/animedekho.json"

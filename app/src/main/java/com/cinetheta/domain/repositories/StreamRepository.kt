@@ -41,8 +41,22 @@ class StreamRepository(
         return streamEngine.resolve(sources, onStreamFound)
     }
 
-    suspend fun resolveMovie(title: String, year: Int? = null, onStreamFound: suspend (FinalStreams) -> Unit = {}): FinalStreams = coroutineScope {
+    suspend fun resolveMovie(
+        title: String,
+        year: Int? = null,
+        tmdbId: String? = null,
+        onStreamFound: suspend (FinalStreams) -> Unit = {}
+    ): FinalStreams = coroutineScope {
         if (providerRepository.isNoneSelected) return@coroutineScope FinalStreams.EMPTY
+
+        val subsDeferred = async {
+            SubtitleRepository.getSubtitles(
+                mediaId = tmdbId,
+                title = title,
+                year = year
+            )
+        }
+
         val cleanTitle = title.replace(Regex("[:\\-–—_.'!?()]+"), " ").replace(Regex("\\s+"), " ").trim()
         val baseResults = search(title)
         val cleanResults = if (cleanTitle.lowercase() != title.lowercase()) search(cleanTitle) else emptyList()
@@ -94,12 +108,62 @@ class StreamRepository(
         }
 
         if (allSources.isEmpty()) return@coroutineScope FinalStreams.EMPTY
-        return@coroutineScope streamEngine.resolve(allSources, onStreamFound)
+
+        val resolved = streamEngine.resolve(allSources) { intermediate ->
+            val hasSubs = intermediate.streams.any { it.subtitles.isNotEmpty() }
+            if (!hasSubs && subsDeferred.isCompleted) {
+                val subs = try { subsDeferred.await() } catch (_: Exception) { emptyList() }
+                if (subs.isNotEmpty()) {
+                    val enriched = intermediate.streams.map { it.copy(subtitles = subs) }
+                    onStreamFound(intermediate.copy(
+                        streams = enriched,
+                        defaultStream = intermediate.defaultStream?.copy(subtitles = subs),
+                        fallbackStream = intermediate.fallbackStream?.copy(subtitles = subs)
+                    ))
+                    return@resolve
+                }
+            }
+            onStreamFound(intermediate)
+        }
+
+        val hasSubtitles = resolved.streams.any { it.subtitles.isNotEmpty() }
+        if (!hasSubtitles && resolved.streams.isNotEmpty()) {
+            val subs = subsDeferred.await()
+            if (subs.isNotEmpty()) {
+                val enriched = resolved.streams.map { it.copy(subtitles = subs) }
+                val enrichedFinal = resolved.copy(
+                    streams = enriched,
+                    defaultStream = resolved.defaultStream?.copy(subtitles = subs),
+                    fallbackStream = resolved.fallbackStream?.copy(subtitles = subs)
+                )
+                onStreamFound(enrichedFinal)
+                return@coroutineScope enrichedFinal
+            }
+        }
+        return@coroutineScope resolved
     }
 
-    suspend fun resolveEpisode(title: String, season: Int, episode: Int, year: Int? = null, pluginProviderId: String? = null, onStreamFound: suspend (FinalStreams) -> Unit = {}): FinalStreams = coroutineScope {
+    suspend fun resolveEpisode(
+        title: String,
+        season: Int,
+        episode: Int,
+        year: Int? = null,
+        pluginProviderId: String? = null,
+        tmdbId: String? = null,
+        onStreamFound: suspend (FinalStreams) -> Unit = {}
+    ): FinalStreams = coroutineScope {
         if (pluginProviderId == null && providerRepository.isNoneSelected) return@coroutineScope FinalStreams.EMPTY
         Logger.d("resolveEpisode called: title=$title, season=$season, episode=$episode", "StreamRepository")
+
+        val subsDeferred = async {
+            SubtitleRepository.getSubtitles(
+                mediaId = tmdbId,
+                title = title,
+                year = year,
+                season = season,
+                episode = episode
+            )
+        }
         
         suspend fun doSearch(query: String): List<SearchResult> {
             return if (pluginProviderId != null) searchProvider(pluginProviderId, query) else search(query)
@@ -202,7 +266,38 @@ class StreamRepository(
         Logger.d("All collected sources: ${allSources.size}", "StreamRepository")
         if (allSources.isEmpty()) return@coroutineScope FinalStreams.EMPTY
         
-        return@coroutineScope streamEngine.resolve(allSources, onStreamFound)
+        val resolved = streamEngine.resolve(allSources) { intermediate ->
+            val hasSubs = intermediate.streams.any { it.subtitles.isNotEmpty() }
+            if (!hasSubs && subsDeferred.isCompleted) {
+                val subs = try { subsDeferred.await() } catch (_: Exception) { emptyList() }
+                if (subs.isNotEmpty()) {
+                    val enriched = intermediate.streams.map { it.copy(subtitles = subs) }
+                    onStreamFound(intermediate.copy(
+                        streams = enriched,
+                        defaultStream = intermediate.defaultStream?.copy(subtitles = subs),
+                        fallbackStream = intermediate.fallbackStream?.copy(subtitles = subs)
+                    ))
+                    return@resolve
+                }
+            }
+            onStreamFound(intermediate)
+        }
+
+        val hasSubtitles = resolved.streams.any { it.subtitles.isNotEmpty() }
+        if (!hasSubtitles && resolved.streams.isNotEmpty()) {
+            val subs = subsDeferred.await()
+            if (subs.isNotEmpty()) {
+                val enriched = resolved.streams.map { it.copy(subtitles = subs) }
+                val enrichedFinal = resolved.copy(
+                    streams = enriched,
+                    defaultStream = resolved.defaultStream?.copy(subtitles = subs),
+                    fallbackStream = resolved.fallbackStream?.copy(subtitles = subs)
+                )
+                onStreamFound(enrichedFinal)
+                return@coroutineScope enrichedFinal
+            }
+        }
+        return@coroutineScope resolved
     }
 
     private fun pruneNetMirrorMatches(matches: List<SearchResult>): List<SearchResult> {

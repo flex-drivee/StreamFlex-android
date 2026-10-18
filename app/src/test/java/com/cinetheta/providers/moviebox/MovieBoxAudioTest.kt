@@ -55,8 +55,8 @@ class MovieBoxAudioTest {
             }
         }
 
-        // Now call play-info with se=1&ep=1
-        val playUrl = "https://api6.aoneroom.com/wefeed-mobile-bff/subject-api/play-info?subjectId=${first.id}&se=1&ep=1"
+        // Now call play-info/v2 with se=1&ep=1 (updated endpoint)
+        val playUrl = "https://api6.aoneroom.com/wefeed-mobile-bff/subject-api/play-info/v2?subjectId=${first.id}&se=1&ep=1"
         headers = MovieBoxCrypto.getHeaders(method = "GET", url = playUrl)
         
         req = RequestBuilder()

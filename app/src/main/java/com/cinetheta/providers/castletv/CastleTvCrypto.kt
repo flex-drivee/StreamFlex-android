@@ -20,10 +20,11 @@ object CastleTvCrypto {
     private var cachedAesKey: ByteArray? = null
     private val baseUrl = "https://api.hlowb.com"
     
-    private val client = OkHttpClient.Builder()
-        .connectTimeout(30, TimeUnit.SECONDS)
-        .readTimeout(30, TimeUnit.SECONDS)
-        .build()
+    private val client = com.cinetheta.core.network.DohProviders.applyDoh(
+        OkHttpClient.Builder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+    ).build()
 
     private fun get(url: String): String {
         val request = Request.Builder().url(url).header("User-Agent", "Mozilla/5.0").build()

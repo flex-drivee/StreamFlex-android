@@ -76,9 +76,14 @@ object StreamSorter {
         val url = stream.url.lowercase()
 
         return when {
-            stream.adaptive || stream.contentType == ContentType.HLS || stream.contentType == ContentType.M3U8 || url.contains(".m3u8") -> 0
-            url.endsWith(".mp4") || url.endsWith(".mkv") -> 1
-            stream.contentType == ContentType.DASH || url.endsWith(".mpd") -> 2
+            stream.adaptive ||
+            stream.contentType == ContentType.HLS ||
+            stream.contentType == ContentType.M3U8 ||
+            url.contains(".m3u8") ||
+            stream.contentType == ContentType.DASH ||
+            url.contains(".mpd") -> 0
+
+            url.contains(".mp4") || url.contains(".mkv") -> 1
             else -> 5
         }
     }
@@ -142,10 +147,11 @@ object StreamSorter {
             HostType.HUBCDN -> 12
             HostType.HBLINKS -> 13
             HostType.PIXELDRAIN -> 14
-            HostType.DIRECT -> 15
-            HostType.M3U8 -> 16
-            HostType.DASH -> 17
-            HostType.STREAMTAPE -> 18
+            HostType.MOVIEBOX -> 15
+            HostType.DIRECT -> 16
+            HostType.M3U8 -> 17
+            HostType.DASH -> 18
+            HostType.STREAMTAPE -> 19
             HostType.FILEMOON -> 19
             HostType.MIXDROP -> 20
             HostType.DOOD -> 21

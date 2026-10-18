@@ -7,14 +7,85 @@ import java.util.Locale
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 import kotlin.random.Random
+import com.cinetheta.core.network.HttpClient
+import com.cinetheta.core.network.NetworkResult
+import com.cinetheta.core.network.RequestBuilder
+import com.cinetheta.core.parser.JsonParser
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 object MovieBoxCrypto {
 
     private val random = java.security.SecureRandom()
     val deviceId = generateDeviceId()
 
-    // Pick a persistent brand/model for this session
-    val currentBrandModel by lazy { randomBrandModel() }
+    // Session-persistent spoofed IP (Indian prefix, matches MovieBox-Tui random_spoofed_ip)
+    val spoofedIp: String by lazy { randomSpoofedIp() }
+
+    // Pick a persistent Android version + build for this session (from ANDROID_VERSIONS pool)
+    private val currentAndroid: Pair<String, String> by lazy {
+        MovieBoxConfig.ANDROID_VERSIONS.random(Random.Default)
+    }
+
+    // Pick a persistent Redmi device (model, brand) for this session
+    private val currentRedmi: Pair<String, String> by lazy {
+        MovieBoxConfig.REDMI_MODELS.random(Random.Default)
+    }
+
+    // Pick a persistent version_code for this session
+    private val currentVersionCode: Int by lazy {
+        MovieBoxConfig.VERSION_CODES.random(Random.Default)
+    }
+
+    // GAID — random UUID per session
+    private val gaid: String by lazy { randomUuid() }
+
+    /**
+     * The User-Agent string, matching MovieBox-Tui crypto.rs format exactly:
+     *   com.community.oneroom/<version_code> (Linux; U; Android <os>; en_US; <model>; Build/<build>; Cronet/135.0.7012.3)
+     */
+    val userAgent: String by lazy {
+        val (osVer, build) = currentAndroid
+        val (model, _) = currentRedmi
+        "${MovieBoxConfig.PACKAGE_NAME}/$currentVersionCode " +
+                "(Linux; U; Android $osVer; en_US; $model; Build/$build; Cronet/135.0.7012.3)"
+    }
+
+    /**
+     * The x-client-info JSON blob matching MovieBox-Tui crypto.rs format:
+     *   package_name = com.community.oneroom
+     *   version_name = 4.0.01.0813.03
+     *   install_ch   = "ps"
+     *   install_store= "ps"
+     *   region       = "US"
+     *   sp_code      = "40401"
+     *   X-Play-Mode  = "2"    ← new field required by updated API
+     */
+    val clientInfo: String by lazy {
+        val (osVer, _)      = currentAndroid
+        val (model, brand)  = currentRedmi
+        buildString {
+            append("{")
+            append("\"package_name\":\"${MovieBoxConfig.PACKAGE_NAME}\",")
+            append("\"version_name\":\"${MovieBoxConfig.VERSION_NAME}\",")
+            append("\"version_code\":$currentVersionCode,")
+            append("\"os\":\"android\",")
+            append("\"os_version\":\"$osVer\",")
+            append("\"install_ch\":\"ps\",")
+            append("\"device_id\":\"$deviceId\",")
+            append("\"install_store\":\"ps\",")
+            append("\"gaid\":\"$gaid\",")
+            append("\"brand\":\"$brand\",")
+            append("\"model\":\"$model\",")
+            append("\"system_language\":\"en\",")
+            append("\"net\":\"NETWORK_WIFI\",")
+            append("\"region\":\"US\",")
+            append("\"timezone\":\"Asia/Kolkata\",")
+            append("\"sp_code\":\"${MovieBoxConfig.SP_CODE}\",")
+            append("\"X-Play-Mode\":\"2\"")
+            append("}")
+        }
+    }
 
     private fun generateDeviceId(): String {
         val bytes = ByteArray(16)
@@ -22,12 +93,16 @@ object MovieBoxCrypto {
         return bytes.joinToString("") { "%02x".format(it) }
     }
 
-    private fun randomBrandModel(): Pair<String, String> {
-        val brands = MovieBoxConfig.BRAND_MODELS.keys.toList()
-        val brand = brands.random(Random.Default)
-        val models = MovieBoxConfig.BRAND_MODELS[brand]!!
-        val model = models.random(Random.Default)
-        return Pair(brand, model)
+    private fun randomSpoofedIp(): String {
+        val prefix = MovieBoxConfig.INDIAN_IP_PREFIXES.random(Random.Default)
+        val c = (1..253).random()
+        val d = (1..253).random()
+        return "$prefix.$c.$d"
+    }
+
+    private fun randomUuid(): String {
+        fun hex(len: Int) = (0 until len).joinToString("") { "%x".format((0..15).random()) }
+        return "${hex(8)}-${hex(4)}-${hex(4)}-${hex(4)}-${hex(12)}"
     }
 
     private fun md5(input: ByteArray): String {
@@ -128,8 +203,11 @@ object MovieBoxCrypto {
     var xUserToken: String? = null
 
     /**
-     * IMPORTANT: accept MUST always be "application/json" to pass signature validation.
-     * The server validates the Accept header in the canonical string at position [1].
+     * IMPORTANT: accept and contentType MUST always be "application/json" to pass signature validation.
+     * The server validates the Accept and Content-Type headers in the canonical string at positions [1] and [2].
+     * Passing null or omitting contentType for GET causes HTTP 407 Signature invalid.
+     *
+     * Added X-Forwarded-For with a spoofed Indian IP (per MovieBox-Tui crypto.rs).
      */
     private const val ACCEPT_JSON = "application/json"
 
@@ -140,11 +218,9 @@ object MovieBoxCrypto {
         body: String? = null,
         useAltKey: Boolean = false
     ): Map<String, String> {
-        // For GET requests, Content-Type is null (not sent); for POST it's application/json
-        val actualContentType = if (method.uppercase(Locale.ROOT) == "GET") null else contentType
-        val clientInfo = "{\"package_name\":\"com.community.mbox.in\",\"version_name\":\"4.0.03.0920.03\",\"version_code\":50020130,\"os\":\"android\",\"os_version\":\"14\",\"device_id\":\"$deviceId\",\"install_store\":\"official\",\"gaid\":\"1b2212c1-dadf-43c3-a0c8-bd6ce48ae22d\",\"brand\":\"${currentBrandModel.first}\",\"model\":\"${currentBrandModel.second}\",\"system_language\":\"en\",\"net\":\"NETWORK_WIFI\",\"region\":\"IN\",\"timezone\":\"Asia/Calcutta\",\"sp_code\":\"\"}"
+        val actualContentType = contentType ?: ACCEPT_JSON
         val xClientToken = generateXClientToken()
-        // Always pass ACCEPT_JSON as accept parameter — required for valid signature
+        // Always pass ACCEPT_JSON as accept and contentType — required for valid signature
         val xTrSignature = generateXTrSignature(method, ACCEPT_JSON, actualContentType, url, body, useAltKey)
 
         val map = mutableMapOf(
@@ -152,14 +228,71 @@ object MovieBoxCrypto {
             "x-client-status" to "0",
             "x-client-token"  to xClientToken,
             "x-tr-signature"  to xTrSignature,
-            "user-agent"      to "com.community.mbox.in/50020130 (Linux; U; Android 14; en_IN; ${currentBrandModel.second}; Build/UD1A.230803.041; Cronet/145.0.7582.0)",
+            "x-forwarded-for" to spoofedIp,
+            "user-agent"      to userAgent,
             "accept"          to ACCEPT_JSON,
+            "content-type"    to ACCEPT_JSON,
             "connection"      to "keep-alive"
         )
-        if (actualContentType != null) {
-            map["content-type"] = actualContentType
-        }
         xUserToken?.let { map["authorization"] = "Bearer $it" }
         return map
+    }
+
+    /**
+     * Ensure a valid anonymous token is available for authenticated requests.
+     * Tries visitor-login first (universal), then falls back to ranking-list x-user header.
+     */
+    suspend fun ensureToken(baseUrl: String = MovieBoxConfig.DEFAULT_DOMAIN): String? {
+        val existing = xUserToken
+        if (!existing.isNullOrBlank()) return existing
+
+        return withContext(Dispatchers.IO) {
+            // Method 1: visitor-login (POST /wefeed-mobile-bff/user-api/visitor-login)
+            try {
+                val loginUrl = "$baseUrl/wefeed-mobile-bff/user-api/visitor-login"
+                val body = "{}"
+                val headers = getHeaders("POST", ACCEPT_JSON, loginUrl, body)
+                val req = RequestBuilder()
+                    .url(loginUrl)
+                    .post(body.toByteArray(Charsets.UTF_8))
+                    .headers(headers)
+                    .build()
+                when (val resp = HttpClient.execute(req)) {
+                    is NetworkResult.Success -> {
+                        val json = resp.data.bodyAsString()
+                        val root = JsonParser.parse(json)
+                        val data = root?.let { JsonParser.objectOf(it, "data") }
+                        val token = data?.let { JsonParser.string(it, "token") }
+                        if (!token.isNullOrBlank()) {
+                            xUserToken = token
+                            return@withContext token
+                        }
+                    }
+                    else -> {}
+                }
+            } catch (_: Exception) {}
+
+            // Method 2: ranking-list fallback on apig.inmoviebox.com
+            try {
+                val rankingUrl = "https://apig.inmoviebox.com/wefeed-mobile-bff/tab/ranking-list?tabId=0&categoryType=4516404531735022304&page=1&perPage=1"
+                val headers = getHeaders("GET", ACCEPT_JSON, rankingUrl)
+                val req = RequestBuilder().url(rankingUrl).get().headers(headers).build()
+                when (val resp = HttpClient.execute(req)) {
+                    is NetworkResult.Success -> {
+                        resp.data.header("x-user")?.let { xUser ->
+                            val root = JsonParser.parse(xUser)
+                            val token = root?.let { JsonParser.string(it, "token") }
+                            if (!token.isNullOrBlank()) {
+                                xUserToken = token
+                                return@withContext token
+                            }
+                        }
+                    }
+                    else -> {}
+                }
+            } catch (_: Exception) {}
+
+            null
+        }
     }
 }

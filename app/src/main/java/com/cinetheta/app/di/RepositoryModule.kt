@@ -56,4 +56,18 @@ object RepositoryModule {
             streamEngine = EngineModule.streamEngine
         )
     }
+
+    /**
+     * Download storage manager.
+     */
+    val downloadStorageManager: com.cinetheta.data.local.download.DownloadStorageManager by lazy {
+        com.cinetheta.data.local.download.DownloadStorageManager(context = com.cinetheta.app.CineThetaApplication.instance)
+    }
+
+    /**
+     * Download repository.
+     */
+    val downloadRepository: com.cinetheta.domain.repositories.DownloadRepository by lazy {
+        com.cinetheta.data.local.download.JsonDownloadRepository(context = com.cinetheta.app.CineThetaApplication.instance)
+    }
 }

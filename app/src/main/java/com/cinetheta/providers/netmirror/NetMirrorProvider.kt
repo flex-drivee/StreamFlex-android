@@ -2,6 +2,8 @@ package com.cinetheta.providers.netmirror
 
 import com.cinetheta.core.cache.CacheManager
 import com.cinetheta.core.logger.Logger
+import com.cinetheta.core.network.DomainResolver
+import com.cinetheta.core.network.DomainResult
 import com.cinetheta.domain.models.MediaType
 import com.cinetheta.domain.models.ProviderResult
 import com.cinetheta.domain.models.SearchResult
@@ -11,21 +13,27 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 
 class NetMirrorProvider(
-    private val cacheManager: CacheManager = CacheManager()
+    private val cacheManager: CacheManager = CacheManager(),
+    private val resolver: DomainResolver = DomainResolver(cacheManager)
 ) : Provider {
 
     override val id = "netmirror"
     override val name = "All OTTs"
 
     override val supportedMedia = setOf(MediaType.MOVIE, MediaType.TV)
-    
-    override val baseUrl: String = NetMirrorConfig.DEFAULT_DOMAIN
+
+    @Volatile
+    private var resolvedDomain: String? = null
+
+    override val baseUrl: String
+        get() = resolvedDomain ?: NetMirrorConfig.DEFAULT_DOMAIN
 
     private val searchImpl = NetMirrorSearch()
     private val detailsImpl = NetMirrorDetails()
 
     companion object {
         private const val TAG = "NetMirrorProvider"
+        const val MANIFEST_PATH = "providers/netmirror.json"
         val OTT_LIST = listOf(
             NetMirrorConfig.OTT_NETFLIX,
             NetMirrorConfig.OTT_PRIME,
@@ -34,7 +42,46 @@ class NetMirrorProvider(
         )
     }
 
+    suspend fun ensureDomain(): String {
+        resolvedDomain?.let { return it }
+
+        val result = resolver.resolve(
+            providerId = id,
+            hardcoded = NetMirrorConfig.DEFAULT_DOMAIN,
+            manifestPath = MANIFEST_PATH
+        )
+
+        val domain = when (result) {
+            is DomainResult.Resolved -> {
+                Logger.i("[$id] Domain resolved (${result.step}): ${result.domain}", TAG)
+                result.domain
+            }
+            is DomainResult.Mirror -> {
+                Logger.i("[$id] Using mirror [${result.mirrorIndex}]: ${result.domain}", TAG)
+                result.domain
+            }
+            is DomainResult.Hardcoded -> {
+                Logger.w("[$id] Using hardcoded fallback: ${result.domain}", TAG)
+                result.domain
+            }
+            is DomainResult.Offline -> {
+                Logger.e("[$id] Provider OFFLINE — tried: ${result.tried}", TAG)
+                NetMirrorConfig.DEFAULT_DOMAIN
+            }
+        }
+
+        resolvedDomain = domain
+        return domain
+    }
+
+    fun resetDomain() {
+        resolvedDomain = null
+        resolver.invalidate(id)
+    }
+
     override suspend fun search(query: String): List<SearchResult> = coroutineScope {
+        ensureDomain()
+        val currentBaseUrl = baseUrl
         val deferredResults = OTT_LIST.map { ott ->
             async {
                 runCatching {
@@ -47,7 +94,7 @@ class NetMirrorProvider(
                     }
                     searchImpl.search(
                         query = query, 
-                        baseUrl = baseUrl, 
+                        baseUrl = currentBaseUrl, 
                         ott = ott, 
                         providerId = id, 
                         providerName = displayName
@@ -86,6 +133,7 @@ class NetMirrorProvider(
     }
 
     override suspend fun load(searchResult: SearchResult): ProviderResult? {
+        ensureDomain()
         return runCatching {
             // NetMirrorSearch constructs detail URLs as: netmirror://<ott>/<id>
             // We need to extract the OTT value to fetch the details correctly.
@@ -103,6 +151,7 @@ class NetMirrorProvider(
             )
         }.onFailure {
             Logger.e("[$id] Load failed for '${searchResult.title}': ${it.message}", TAG)
+            resetDomain()
         }.getOrNull()
     }
 }

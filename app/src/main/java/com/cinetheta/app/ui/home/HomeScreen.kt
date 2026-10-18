@@ -272,18 +272,7 @@ fun HomeScreen(
                 }
             }
 
-            // ── CONTENT ROW — Continue Watching ──────
-            if (state.continueWatching.isNotEmpty()) {
-                item {
-                    SFContinueWatchingRow(
-                        items    = state.continueWatching,
-                        onItemClick = onContinueWatchingClick,
-                        onSeeAllClick = onNavigateToContinueWatching
-                    )
-                }
-            }
-
-            // ── CONTENT ROW — Live Sports & Channels ──────
+            // ── CONTENT ROW — Live Sports & Channels (Directly below Hero) ──────
             if (selectedTab == 0 && state.liveSports.isNotEmpty()) {
                 item {
                     SFLiveSportsRow(
@@ -301,6 +290,9 @@ fun HomeScreen(
                                             putExtra("VIDEO_TITLE", sportItem.title)
                                             putExtra("IS_SHOW", false)
                                             putExtra("DIRECT_STREAM_URL", stream.url)
+                                            if (stream.backupUrls.isNotEmpty()) {
+                                                putStringArrayListExtra("BACKUP_STREAM_URLS", ArrayList(stream.backupUrls))
+                                            }
                                             putExtra("STREAM_HEADERS", HashMap(stream.headers))
                                             putExtra("POSTER_PATH", sportItem.poster)
                                         }
@@ -315,6 +307,17 @@ fun HomeScreen(
                                 }
                             }
                         }
+                    )
+                }
+            }
+
+            // ── CONTENT ROW — Continue Watching ──────
+            if (state.continueWatching.isNotEmpty()) {
+                item {
+                    SFContinueWatchingRow(
+                        items    = state.continueWatching,
+                        onItemClick = onContinueWatchingClick,
+                        onSeeAllClick = onNavigateToContinueWatching
                     )
                 }
             }
@@ -1313,9 +1316,13 @@ fun SFLiveSportsRow(
 ) {
     if (items.isEmpty()) return
 
+    val preferredOrder = listOf("all", "cricket", "football", "news", "movies", "entertainment", "fight", "basketball", "24/7-streams")
     val categories = remember(items) {
-        val cats = items.map { it.category.lowercase() }.distinct().sorted()
-        listOf("all") + cats
+        val cats = items.map { it.category.lowercase() }.distinct()
+        listOf("all") + cats.sortedBy { cat ->
+            val idx = preferredOrder.indexOf(cat)
+            if (idx >= 0) idx else 99
+        }
     }
     var selectedCategory by remember { mutableStateOf("all") }
 
@@ -1344,7 +1351,7 @@ fun SFLiveSportsRow(
                         .background(Color(0xFFE50914))
                 )
                 Text(
-                    text = "Live Sports & Channels",
+                    text = "Live TV & Sports",
                     style = MaterialTheme.typography.headlineMedium.copy(
                         fontSize = 17.sp,
                         fontWeight = FontWeight.Bold
@@ -1378,9 +1385,12 @@ fun SFLiveSportsRow(
                 items(categories) { cat ->
                     val isSelected = selectedCategory == cat
                     val label = when (cat) {
-                        "all" -> "All Sports"
-                        "football" -> "⚽ Football"
+                        "all" -> "All Channels"
                         "cricket" -> "🏏 Cricket"
+                        "football" -> "⚽ Football"
+                        "news" -> "📰 News"
+                        "movies" -> "🎬 Movies"
+                        "entertainment" -> "🎭 Entertainment"
                         "basketball" -> "🏀 Basketball"
                         "american-football" -> "🏈 NFL"
                         "fight" -> "🥊 Combat"
@@ -1427,11 +1437,152 @@ fun SFLiveSportsRow(
     }
 }
 
+private data class MatchStatusInfo(
+    val badgeLabel: String,
+    val badgeColor: Color,
+    val hasDot: Boolean,
+    val isBreak: Boolean,
+    val statusText: String
+)
+
+private fun getMatchStatusInfo(item: com.cinetheta.app.data.sports.LiveSportItem): MatchStatusInfo {
+    val now = System.currentTimeMillis()
+    val is247 = item.isAlwaysLive || item.category.equals("24/7-streams", ignoreCase = true) || item.category.equals("24/7", ignoreCase = true)
+
+    if (is247) {
+        return MatchStatusInfo(
+            badgeLabel = "24/7 LIVE",
+            badgeColor = Color(0xFFE50914),
+            hasDot = true,
+            isBreak = false,
+            statusText = "24/7 Continuous Broadcast"
+        )
+    }
+
+    if (item.isLive) {
+        val cat = item.category.lowercase()
+        val isFootball = cat in listOf("football", "soccer")
+
+        if (isFootball && item.date != null && item.date > 0) {
+            val elapsedMin = ((now - item.date) / 60000L).toInt()
+            return when {
+                elapsedMin in 0..45 -> MatchStatusInfo(
+                    badgeLabel = "1st Half ${elapsedMin}'",
+                    badgeColor = Color(0xFFE50914),
+                    hasDot = true,
+                    isBreak = false,
+                    statusText = "1st Half in progress"
+                )
+                elapsedMin in 46..60 -> {
+                    val remaining = (60 - elapsedMin).coerceAtLeast(1)
+                    MatchStatusInfo(
+                        badgeLabel = "⏸ Break (${remaining}m left)",
+                        badgeColor = Color(0xFFF59E0B),
+                        hasDot = false,
+                        isBreak = true,
+                        statusText = "Half-Time Break ($remaining mins remaining)"
+                    )
+                }
+                elapsedMin in 61..105 -> {
+                    val secondHalfMin = (elapsedMin - 15).coerceAtLeast(46)
+                    MatchStatusInfo(
+                        badgeLabel = "2nd Half ${secondHalfMin}'",
+                        badgeColor = Color(0xFFE50914),
+                        hasDot = true,
+                        isBreak = false,
+                        statusText = "2nd Half in progress"
+                    )
+                }
+                elapsedMin > 105 -> MatchStatusInfo(
+                    badgeLabel = "LIVE (ET/FT)",
+                    badgeColor = Color(0xFFDC2626),
+                    hasDot = true,
+                    isBreak = false,
+                    statusText = "Extra time / Match concluding"
+                )
+                else -> MatchStatusInfo(
+                    badgeLabel = "LIVE",
+                    badgeColor = Color(0xFFE50914),
+                    hasDot = true,
+                    isBreak = false,
+                    statusText = "Live match in progress"
+                )
+            }
+        } else if (item.date != null && item.date > 0) {
+            val elapsedMin = ((now - item.date) / 60000L).toInt()
+            val timeBadge = if (elapsedMin in 1..480) {
+                val h = elapsedMin / 60
+                val m = elapsedMin % 60
+                if (h > 0) "${h}h ${m}m" else "${m}m"
+            } else null
+
+            return MatchStatusInfo(
+                badgeLabel = if (timeBadge != null) "LIVE ($timeBadge)" else "LIVE",
+                badgeColor = Color(0xFFE50914),
+                hasDot = true,
+                isBreak = false,
+                statusText = "Live stream in progress"
+            )
+        } else {
+            return MatchStatusInfo(
+                badgeLabel = "LIVE",
+                badgeColor = Color(0xFFE50914),
+                hasDot = true,
+                isBreak = false,
+                statusText = "Live stream"
+            )
+        }
+    } else {
+        // Upcoming
+        if (item.date != null && item.date > 0) {
+            val diffMs = item.date - now
+            if (diffMs > 0) {
+                val totalMin = (diffMs / 60000L).toInt()
+                val hours = totalMin / 60
+                val mins = totalMin % 60
+                val days = hours / 24
+                val remHours = hours % 24
+
+                val badge = when {
+                    days > 0 -> "In ${days}d ${remHours}h"
+                    hours > 0 -> "In ${hours}h ${mins}m"
+                    mins > 0 -> "In ${mins}m"
+                    else -> "Starts Soon"
+                }
+
+                val timeFormatter = java.text.SimpleDateFormat("hh:mm a", java.util.Locale.getDefault())
+                val startTimeStr = try {
+                    timeFormatter.format(java.util.Date(item.date))
+                } catch (e: Exception) {
+                    ""
+                }
+
+                return MatchStatusInfo(
+                    badgeLabel = badge,
+                    badgeColor = Color(0xFF2563EB).copy(alpha = 0.9f),
+                    hasDot = false,
+                    isBreak = false,
+                    statusText = if (startTimeStr.isNotBlank()) "Starts at $startTimeStr" else "Starting soon"
+                )
+            }
+        }
+        return MatchStatusInfo(
+            badgeLabel = "UPCOMING",
+            badgeColor = Color.Black.copy(alpha = 0.6f),
+            hasDot = false,
+            isBreak = false,
+            statusText = "Scheduled match"
+        )
+    }
+}
+
 @Composable
 fun LiveSportCard(
     item: com.cinetheta.app.data.sports.LiveSportItem,
     onClick: () -> Unit
 ) {
+    val statusInfo = remember(item) { getMatchStatusInfo(item) }
+
     val cardGradient = Brush.verticalGradient(
         colors = listOf(
             Color.Transparent,
@@ -1442,8 +1593,8 @@ fun LiveSportCard(
 
     Card(
         modifier = Modifier
-            .width(220.dp)
-            .height(130.dp)
+            .width(230.dp)
+            .height(135.dp)
             .clickable { onClick() },
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFF1E222B)),
@@ -1466,6 +1617,9 @@ fun LiveSportCard(
                                 colors = when (item.category.lowercase()) {
                                     "football" -> listOf(Color(0xFF0F3820), Color(0xFF051C0F))
                                     "cricket" -> listOf(Color(0xFF1E3A5F), Color(0xFF0B192C))
+                                    "news" -> listOf(Color(0xFF3E1F1F), Color(0xFF1C0A0A))
+                                    "movies" -> listOf(Color(0xFF4A2A0C), Color(0xFF221104))
+                                    "entertainment" -> listOf(Color(0xFF381E48), Color(0xFF1A0A26))
                                     "basketball" -> listOf(Color(0xFF5A2E12), Color(0xFF261205))
                                     "fight" -> listOf(Color(0xFF4A1212), Color(0xFF210505))
                                     "american-football" -> listOf(Color(0xFF382312), Color(0xFF190E05))
@@ -1490,42 +1644,36 @@ fun LiveSportCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (item.isLive) {
-                    Surface(
-                        shape = RoundedCornerShape(6.dp),
-                        color = Color(0xFFE50914),
-                        tonalElevation = 4.dp
+                Surface(
+                    shape = RoundedCornerShape(6.dp),
+                    color = statusInfo.badgeColor,
+                    tonalElevation = 4.dp
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
+                        if (statusInfo.hasDot) {
                             Box(
                                 modifier = Modifier
                                     .size(6.dp)
                                     .clip(CircleShape)
                                     .background(Color.White)
                             )
-                            Text(
-                                text = "LIVE",
-                                color = Color.White,
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.ExtraBold
+                        } else if (!statusInfo.isBreak && !item.isLive) {
+                            Icon(
+                                imageVector = Icons.Outlined.Schedule,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(10.dp)
                             )
                         }
-                    }
-                } else {
-                    Surface(
-                        shape = RoundedCornerShape(6.dp),
-                        color = Color.Black.copy(alpha = 0.6f)
-                    ) {
                         Text(
-                            text = "SOON",
-                            color = Color(0xFF9CA3AF),
+                            text = statusInfo.badgeLabel,
+                            color = Color.White,
                             fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            fontWeight = FontWeight.ExtraBold
                         )
                     }
                 }
@@ -1533,6 +1681,9 @@ fun LiveSportCard(
                 val badgeText = item.league ?: when (item.category.lowercase()) {
                     "football" -> "Football"
                     "cricket" -> "Cricket"
+                    "news" -> "Live News"
+                    "movies" -> "Movies"
+                    "entertainment" -> "Entertainment"
                     "basketball" -> "Basketball"
                     "american-football" -> "NFL"
                     "fight" -> "Combat"
@@ -1560,7 +1711,7 @@ fun LiveSportCard(
                 }
             }
 
-            // Bottom Info (Title & Watch Action)
+            // Bottom Info (Title & Status Action)
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
@@ -1576,23 +1727,25 @@ fun LiveSportCard(
                     lineHeight = 16.sp
                 )
 
-                Spacer(modifier = Modifier.height(2.dp))
+                Spacer(modifier = Modifier.height(3.dp))
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Outlined.PlayCircle,
+                        imageVector = if (item.isLive) Icons.Outlined.PlayCircle else Icons.Outlined.AccessTime,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = if (statusInfo.isBreak) Color(0xFFF59E0B) else MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(12.dp)
                     )
                     Text(
-                        text = "Watch Live Stream",
-                        color = Color(0xFFCBD5E1),
+                        text = statusInfo.statusText,
+                        color = if (statusInfo.isBreak) Color(0xFFFCD34D) else Color(0xFFCBD5E1),
                         fontSize = 10.sp,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Medium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }

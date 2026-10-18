@@ -39,12 +39,59 @@ class VidStackExtractor : BaseExtractor() {
         val hlsRegex = Regex("""["']?(https?://[^"']+\.m3u8[^"']*)["']?""")
         val mp4Regex = Regex("""["']?(https?://[^"']+\.mp4[^"']*)["']?""")
 
+        val subtitles = mutableListOf<com.cinetheta.domain.models.Subtitle>()
+        
+        // 1. Scan for <track ...> HTML tags
+        val trackTagRegex = Regex("""<track\s+([^>]+)>""", RegexOption.IGNORE_CASE)
+        val srcAttrRegex = Regex("""src=["']([^"']+)["']""", RegexOption.IGNORE_CASE)
+        val labelAttrRegex = Regex("""label=["']([^"']+)["']""", RegexOption.IGNORE_CASE)
+        val srclangAttrRegex = Regex("""srclang=["']([^"']+)["']""", RegexOption.IGNORE_CASE)
+
+        trackTagRegex.findAll(html).forEach { match ->
+            val attrs = match.groupValues[1]
+            val subUrl = srcAttrRegex.find(attrs)?.groupValues?.get(1)
+            if (!subUrl.isNullOrBlank()) {
+                val resolvedUrl = if (subUrl.startsWith("http")) subUrl else try {
+                    java.net.URI(source.url).resolve(subUrl).toString()
+                } catch (_: Exception) { subUrl }
+                val label = labelAttrRegex.find(attrs)?.groupValues?.get(1) ?: "Subtitle"
+                val srclang = srclangAttrRegex.find(attrs)?.groupValues?.get(1) ?: label
+                subtitles.add(
+                    com.cinetheta.domain.models.Subtitle(
+                        url = resolvedUrl,
+                        language = srclang,
+                        label = label
+                    )
+                )
+            }
+        }
+
+        // 2. Scan for JSON tracks: [...]
+        val jsonTrackRegex = Regex("""["']?file["']?\s*:\s*["']([^"']+\.(?:vtt|srt)[^"']*)["'](?:\s*,\s*["']?label["']?\s*:\s*["']([^"']+)["'])?""", RegexOption.IGNORE_CASE)
+        jsonTrackRegex.findAll(html).forEach { match ->
+            val subUrl = match.groupValues[1]
+            val label = match.groupValues.getOrNull(2)?.takeIf { it.isNotBlank() } ?: "Subtitle"
+            val resolvedUrl = if (subUrl.startsWith("http")) subUrl else try {
+                java.net.URI(source.url).resolve(subUrl).toString()
+            } catch (_: Exception) { subUrl }
+            if (subtitles.none { it.url == resolvedUrl }) {
+                subtitles.add(
+                    com.cinetheta.domain.models.Subtitle(
+                        url = resolvedUrl,
+                        language = label,
+                        label = label
+                    )
+                )
+            }
+        }
+
         // 1. Check for standard <source src="..."> tags
         val sourceMatch = sourceRegex.find(html)
         if (sourceMatch != null) {
             streams += createStream(
                 source = source,
-                url = sourceMatch.groupValues[1]
+                url = sourceMatch.groupValues[1],
+                subtitles = subtitles
             )
         }
         
@@ -54,7 +101,8 @@ class VidStackExtractor : BaseExtractor() {
             if (hlsMatch != null) {
                 streams += createStream(
                     source = source,
-                    url = hlsMatch.groupValues[1]
+                    url = hlsMatch.groupValues[1],
+                    subtitles = subtitles
                 )
             }
         }
@@ -65,7 +113,8 @@ class VidStackExtractor : BaseExtractor() {
             if (mp4Match != null) {
                 streams += createStream(
                     source = source,
-                    url = mp4Match.groupValues[1]
+                    url = mp4Match.groupValues[1],
+                    subtitles = subtitles
                 )
             }
         }

@@ -56,8 +56,11 @@ class HdStream4uExtractor : BaseExtractor() {
         }
 
         val streams = mutableListOf<StreamLink>()
+        val subtitles = mutableListOf<com.cinetheta.domain.models.Subtitle>()
         val doc = HtmlParser.parse(html)
         val scripts = doc.select("script")
+
+        val subRegex = Regex("""["']?file["']?\s*:\s*["']([^"']+\.(?:vtt|srt)[^"']*)["'](?:\s*,\s*["']?label["']?\s*:\s*["']([^"']+)["'])?""", RegexOption.IGNORE_CASE)
 
         for (script in scripts) {
             val scriptData = script.data()
@@ -65,6 +68,23 @@ class HdStream4uExtractor : BaseExtractor() {
 
             // Unpack if packed JS is detected
             val unpacked = JsUnpacker.unpack(scriptData) ?: scriptData
+
+            subRegex.findAll(unpacked).forEach { match ->
+                val subUrl = match.groupValues[1]
+                val label = match.groupValues.getOrNull(2)?.takeIf { it.isNotBlank() } ?: "Subtitle"
+                val resolvedUrl = if (subUrl.startsWith("http")) subUrl else try {
+                    java.net.URI(embedUrl).resolve(subUrl).toString()
+                } catch (_: Exception) { subUrl }
+                if (subtitles.none { it.url == resolvedUrl }) {
+                    subtitles.add(
+                        com.cinetheta.domain.models.Subtitle(
+                            url = resolvedUrl,
+                            language = label,
+                            label = label
+                        )
+                    )
+                }
+            }
 
             // Search for direct m3u8 or video file inside script
             val m3u8Matches = M3U8_REGEX.findAll(unpacked).map { it.groupValues[1] }.toList()
@@ -93,7 +113,8 @@ class HdStream4uExtractor : BaseExtractor() {
                         )
                     ),
                     url = cleanUrl,
-                    quality = finalQuality
+                    quality = finalQuality,
+                    subtitles = subtitles
                 )
             }
         }

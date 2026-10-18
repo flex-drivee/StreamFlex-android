@@ -271,6 +271,11 @@ class CacheManager(
         Logger.i(message = "Cache: cleared all provider manifests", tag = TAG)
     }
 
+    fun clearDomain(providerId: String) {
+        domainPrefs?.edit()?.remove("domain_$providerId")?.remove("domain_${providerId}_ts")?.apply()
+        Logger.i(message = "Cache: cleared domain for [$providerId]", tag = TAG)
+    }
+
     fun clearDomains() {
         domainPrefs?.edit()?.clear()?.apply()
         Logger.i(message = "Cache: cleared all domains", tag = TAG)

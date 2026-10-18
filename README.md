@@ -7,11 +7,23 @@
   <strong>A sleek, modern, multi-provider video streaming & downloading app for Android.</strong>
 </p>
 
+
+## 📝 Changelog v1.0.4
+- **HDHub4u Fixes:** Subtitles now correctly load via HubCloud/VidStack track extraction.
+- **NetMirror Improvements:** Implemented silent background pre-warming for Cloudflare verification. No more 37-second waits when clicking a movie!
+- **Smooth Plugin Switcher:** Removed hard app reloads. Changing plugins now smoothly refreshes the UI without a black screen.
+- **Home Screen Overhaul:** 
+  - Added *Pakistani TV Shows (Use MovieBox)*
+  - Filtered *Indian Web Series* to strictly exclude daily TV soaps
+  - Added *USA Series*, *English Series*, and *English Movies* sections.
+- **Anime Renames:** Rebranded internal anime plugins to *Animedekho* and *Toonstream*.
+
 ## ✨ Features
 
 - 🎬 **Multi-Provider Scraping:** Automatically aggregates streams from various providers (MovieBox, NetMirror, etc.) to ensure the highest quality links.
 - ⚡ **Native Player:** Seamless playback experience with advanced controls, built on ExoPlayer/Media3.
 - 📥 **Background Downloading:** Download your favorite movies and episodes directly to your device (`Downloads/CineTheta`) with auto-resume support.
+- 🚀 **SaveTheta Integration:** Fully integrated with the official **[SaveTheta](https://github.com/cinetheta/SaveTheta)** downloader—an all-in-one yt-dlp & FFmpeg engine that can download from CineTheta and 1000+ external websites like YouTube, TikTok, Instagram, and Reddit!
 - 🎨 **Modern UI:** A beautiful, buttery-smooth user interface built entirely with Jetpack Compose and Material 3.
 - 🔄 **In-App Updater:** Stay up-to-date with seamless, OTA (Over-The-Air) automatic updates directly from GitHub Releases.
 - 🚫 **No Ads:** Completely ad-free, uninterrupted streaming experience.
@@ -107,6 +119,17 @@ Pull requests are welcome! If you'd like to add a new provider or fix a bug:
 3. Commit your changes (`git commit -m 'Add some feature'`).
 4. Push to the branch (`git push origin feature/NewProvider`).
 5. Open a Pull Request.
+
+
+## 🙌 Acknowledgements & Credits
+
+A massive thank you to the developers and projects that made this possible through open-source inspiration and learning:
+- **[phisher](https://github.com/phisher)**
+- **[nivinCNC](https://github.com/nivinCNC)**
+- **[Cloudstream](https://github.com/recloudstream/cloudstream)**
+- **[Skystream](https://github.com/recloudstream/cloudstream)** (and related forks)
+
+We deeply appreciate your incredible work, which has been an invaluable resource for learning and building CineTheta.
 
 ---
 <p align="center">Made with ❤️ for the open-source community.</p>

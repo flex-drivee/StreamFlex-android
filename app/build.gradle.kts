@@ -45,6 +45,15 @@ android {
             abiFilters.addAll(listOf("arm64-v8a", "armeabi-v7a"))
         }
     }
+
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("armeabi-v7a", "arm64-v8a")
+            isUniversalApk = true
+        }
+    }
     
 
     signingConfigs {
@@ -97,6 +106,15 @@ android {
         checkDependencies = false
         ignoreWarnings = true
     }
+
+    packaging {
+        resources {
+            pickFirsts += "**/libc++_shared.so"
+        }
+        jniLibs {
+            pickFirsts += "**/libc++_shared.so"
+        }
+    }
 }
 
 dependencies {
@@ -139,6 +157,9 @@ dependencies {
     
     // --- Nextlib FFmpeg Software Decoder ---
     implementation("io.github.anilbeesetti:nextlib-media3ext:1.10.1-0.13.0")
+
+    // --- LibVLC (Live TV, Multi-Audio & IPTV Engine) ---
+    implementation("org.videolan.android:libvlc-all:3.6.2")
 
     // --- Compose ---
     implementation(platform("androidx.compose:compose-bom:2024.02.00"))

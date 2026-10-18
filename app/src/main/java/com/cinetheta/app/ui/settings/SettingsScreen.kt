@@ -51,10 +51,12 @@ fun SettingsScreen(
     val dohProvider by viewModel.dohProvider.collectAsState()
     val playerVideoQuality by viewModel.playerVideoQuality.collectAsState()
     val preferredPlayer by viewModel.preferredPlayer.collectAsState()
+    val playerEngine by viewModel.playerEngine.collectAsState()
 
     val scrollState = rememberLazyListState()
     var showThemeDialog by remember { mutableStateOf(false) }
     var showPlayerDialog by remember { mutableStateOf(false) }
+    var showPlayerEngineDialog by remember { mutableStateOf(false) }
     var showDecoderDialog by remember { mutableStateOf(false) }
     var showDohDialog by remember { mutableStateOf(false) }
     var showProviderDialog by remember { mutableStateOf(false) }
@@ -163,6 +165,13 @@ fun SettingsScreen(
                         title = "Preferred Player",
                         subtitle = preferredPlayer.title,
                         onTap = { showPlayerDialog = true }
+                    )
+                    SettingsDivider()
+                    SettingsTile(
+                        icon = Icons.Outlined.Tune,
+                        title = "Built-in Player Engine",
+                        subtitle = "${playerEngine.title} (${playerEngine.key})",
+                        onTap = { showPlayerEngineDialog = true }
                     )
                     SettingsDivider()
                     SettingsTile(
@@ -643,6 +652,40 @@ fun SettingsScreen(
                 },
                 confirmButton = {
                     TextButton(onClick = { showPlayerDialog = false }) {
+                        Text("Cancel", color = MaterialTheme.colorScheme.primary)
+                    }
+                }
+            )
+        }
+
+        if (showPlayerEngineDialog) {
+            val engines = PlayerEngine.values().toList()
+            AlertDialog(
+                onDismissRequest = { showPlayerEngineDialog = false },
+                title = { Text("Built-in Player Engine", color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold) },
+                containerColor = MaterialTheme.colorScheme.surface,
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        engines.forEach { eng ->
+                            ThemeOptionRow(
+                                title = eng.title,
+                                isSelected = playerEngine == eng,
+                                onClick = {
+                                    viewModel.setPlayerEngine(eng)
+                                    showPlayerEngineDialog = false
+                                }
+                            )
+                            Text(
+                                text = eng.description,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.Gray,
+                                modifier = Modifier.padding(start = 36.dp, bottom = 4.dp)
+                            )
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showPlayerEngineDialog = false }) {
                         Text("Cancel", color = MaterialTheme.colorScheme.primary)
                     }
                 }

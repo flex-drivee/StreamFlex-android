@@ -8,15 +8,55 @@ import okhttp3.Request
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class UHDMoviesProvider : Provider {
+class UHDMoviesProvider(
+    private val cacheManager: com.cinetheta.core.cache.CacheManager = com.cinetheta.core.cache.CacheManager(),
+    private val resolver: com.cinetheta.core.network.DomainResolver = com.cinetheta.core.network.DomainResolver(cacheManager)
+) : Provider {
     override val name: String = "UHDMovies"
     override val id: String = "uhdmovies"
-    override val baseUrl: String = "https://uhdmovies.my"
+
+    companion object {
+        const val DEFAULT_DOMAIN = "https://uhdmovies.my"
+        const val MANIFEST_PATH = "providers/uhdmovies.json"
+    }
+
+    @Volatile
+    private var resolvedDomain: String? = null
+
+    override val baseUrl: String
+        get() = resolvedDomain ?: DEFAULT_DOMAIN
+
     override val supportedMedia: Set<MediaType> = setOf(MediaType.MOVIE, MediaType.TV)
     
-    private val client = OkHttpClient.Builder().build()
+    private val client = com.cinetheta.core.network.CineThetaHttpClient.okHttpClient
+
+    suspend fun ensureDomain(): String {
+        resolvedDomain?.let { return it }
+
+        val result = resolver.resolve(
+            providerId = id,
+            hardcoded = DEFAULT_DOMAIN,
+            manifestPath = MANIFEST_PATH
+        )
+
+        val domain = when (result) {
+            is com.cinetheta.core.network.DomainResult.Resolved -> result.domain
+            is com.cinetheta.core.network.DomainResult.Mirror -> result.domain
+            is com.cinetheta.core.network.DomainResult.Hardcoded -> result.domain
+            is com.cinetheta.core.network.DomainResult.Offline -> DEFAULT_DOMAIN
+        }
+
+        resolvedDomain = domain
+        return domain
+    }
+
+    fun resetDomain() {
+        resolvedDomain = null
+        resolver.invalidate(id)
+    }
     
     override suspend fun search(query: String): List<SearchResult> = withContext(Dispatchers.IO) {
+        ensureDomain()
         val searchUrl = "$baseUrl/?s=${query.replace(" ", "+")}"
         
         try {
@@ -103,16 +143,30 @@ class UHDMoviesProvider : Provider {
     }
 
     override suspend fun load(searchResult: SearchResult): ProviderResult? = withContext(Dispatchers.IO) {
+        ensureDomain()
+        val loadUrl = if (searchResult.url.startsWith("http")) {
+            val uri = android.net.Uri.parse(searchResult.url)
+            val pathAndQuery = buildString {
+                append(uri.encodedPath ?: "")
+                if (!uri.encodedQuery.isNullOrBlank()) append("?${uri.encodedQuery}")
+            }
+            if (pathAndQuery.isNotBlank() && pathAndQuery != "/") "$baseUrl$pathAndQuery" else searchResult.url
+        } else {
+            searchResult.url
+        }
         try {
-            val request = Request.Builder().url(searchResult.url)
+            val request = Request.Builder().url(loadUrl)
                 .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
                 .build()
                 
             val response = client.newCall(request).execute()
             if (!response.isSuccessful) {
+                if (response.code == 404 || response.code == 503) {
+                    resetDomain()
+                }
                 return@withContext ProviderResult(
                     id = searchResult.id, providerId = id, title = searchResult.title,
-                    detailUrl = searchResult.url, mediaType = searchResult.mediaType,
+                    detailUrl = loadUrl, mediaType = searchResult.mediaType,
                     success = false, error = "HTTP ${response.code}"
                 )
             }

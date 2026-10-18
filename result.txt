@@ -1,88 +1,1625 @@
-.../AndroidIDEProjects/StreamFlex-android $ sh gradlew assembleRelease
-Starting a Gradle Daemon, 14 busy and 1 incompatible Daemons could not be reused, use --status for details
+13:02:47.282 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:47.287 [D] TransactionExecutor: Token :android.os.BinderProxy@c6a839b has ActivityClientRecord : com.cinetheta.app
+13:02:47.330 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:47.350 [I] BLASTBufferQueue: [ViewRootImpl[MainActivity]#3] constructor()
+13:02:47.525 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:47.556 [D] InsetsController: show(ime(), fromIme=true)
+13:02:47.563 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=606}   /alpha:1.0   /fraction:1.0   /allowWhenFinished:true
+13:02:47.629 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:47.809 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:47.892 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:47.906 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:48.358 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:48.540 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:49.178 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:49.287 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:49.313 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:50.008 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:50.183 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:50.505 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:50.607 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:50.759 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:50.856 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:51.334 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:51.435 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:51.820 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:51.930 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:52.475 [D] DomainResolver: [animedekho] Steps 1–2 missed — fetching manifest from GitHub
+13:02:52.489 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:52.492 [D] HTTP: → [GET] https://raw.githubusercontent.com/flex-drivee/streamflex-providers/main/providers/animedekho.json
+13:02:52.662 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=606}   /alpha:1.0   /fraction:0.0   /allowWhenFinished:false
+13:02:52.936 [D] HTTP: ← [200] https://raw.githubusercontent.com/flex-drivee/streamflex-providers/main/providers/animedekho.json (450ms)
+13:02:52.957 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=606}   /alpha:1.0   /fraction:0.0   /allowWhenFinished:false
+13:02:52.966 [D] CacheManager: Cache: put manifest [animedekho]
+13:02:52.973 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:52.980 [D] HTTP: → [HEAD] https://animedekho.app/
+13:02:53.084 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=566}   /alpha:1.0   /fraction:0.07017544   /allowWhenFinished:false
+13:02:53.121 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:53.168 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=39}   /alpha:1.0   /fraction:0.61403507   /allowWhenFinished:false
+13:02:53.186 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:53.267 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=8}   /alpha:1.0   /fraction:0.8105263   /allowWhenFinished:false
+13:02:53.299 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:53.384 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:1.0   /allowWhenFinished:false
+13:02:53.387 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:1.0   /allowWhenFinished:true
+13:02:53.424 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:53.539 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:53.651 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:53.700 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:53.726 [E] HTTP: ← [ERROR] https://animedekho.app/ (749ms) — connection closed
+13:02:53.735 [E] CineThetaHttpClient: Request failed: https://animedekho.app
+13:02:53.738 [E] CineThetaHttpClient: javax.net.ssl.SSLHandshakeException: connection closed
+13:02:53.740 [E] CineThetaHttpClient: at com.android.org.conscrypt.SSLUtils.toSSLHandshakeException(SSLUtils.java:372)
+13:02:53.745 [E] CineThetaHttpClient: at com.android.org.conscrypt.ConscryptEngineSocket.doHandshake(ConscryptEngineSocket.java:247)
+13:02:53.746 [E] CineThetaHttpClient: at com.android.org.conscrypt.ConscryptEngineSocket.startHandshake(ConscryptEngineSocket.java:226)
+13:02:53.749 [E] CineThetaHttpClient: at okhttp3.internal.connection.RealConnection.connectTls(RealConnection.kt:379)
+13:02:53.753 [E] CineThetaHttpClient: at okhttp3.internal.connection.RealConnection.establishProtocol(RealConnection.kt:337)
+13:02:53.761 [E] CineThetaHttpClient: at okhttp3.internal.connection.RealConnection.connect(RealConnection.kt:209)
+13:02:53.764 [E] CineThetaHttpClient: at okhttp3.internal.connection.ExchangeFinder.findConnection(ExchangeFinder.kt:226)
+13:02:53.767 [E] CineThetaHttpClient: at okhttp3.internal.connection.ExchangeFinder.findHealthyConnection(ExchangeFinder.kt:106)
+13:02:53.770 [E] CineThetaHttpClient: at okhttp3.internal.connection.ExchangeFinder.find(ExchangeFinder.kt:74)
+13:02:53.774 [E] CineThetaHttpClient: at okhttp3.internal.connection.RealCall.initExchange$okhttp(RealCall.kt:255)
+13:02:53.775 [E] CineThetaHttpClient: at okhttp3.internal.connection.ConnectInterceptor.intercept(ConnectInterceptor.kt:32)
+13:02:53.776 [E] CineThetaHttpClient: at okhttp3.internal.http.RealInterceptorChain.proceed(RealInterceptorChain.kt:109)
+13:02:53.778 [E] CineThetaHttpClient: at okhttp3.internal.cache.CacheInterceptor.intercept(CacheInterceptor.kt:95)
+13:02:53.779 [E] CineThetaHttpClient: at okhttp3.internal.http.RealInterceptorChain.proceed(RealInterceptorChain.kt:109)
+13:02:53.780 [E] CineThetaHttpClient: at okhttp3.internal.http.BridgeInterceptor.intercept(BridgeInterceptor.kt:83)
+13:02:53.781 [E] CineThetaHttpClient: at okhttp3.internal.http.RealInterceptorChain.proceed(RealInterceptorChain.kt:109)
+13:02:53.782 [E] CineThetaHttpClient: at okhttp3.internal.http.RetryAndFollowUpInterceptor.intercept(RetryAndFollowUpInterceptor.kt:76)
+13:02:53.783 [E] CineThetaHttpClient: at okhttp3.internal.http.RealInterceptorChain.proceed(RealInterceptorChain.kt:109)
+13:02:53.784 [E] CineThetaHttpClient: at com.cinetheta.core.network.interceptor.CloudflareKiller$intercept$1.invokeSuspend(CloudflareKiller.kt:50)
+13:02:53.785 [E] CineThetaHttpClient: at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
+13:02:53.788 [E] CineThetaHttpClient: at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
+13:02:53.790 [E] CineThetaHttpClient: at kotlinx.coroutines.EventLoopImplBase.processNextEvent(EventLoop.common.kt:263)
+13:02:53.791 [E] CineThetaHttpClient: at kotlinx.coroutines.BlockingCoroutine.joinBlocking(Builders.kt:95)
+13:02:53.792 [E] CineThetaHttpClient: at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking(Builders.kt:69)
+13:02:53.793 [E] CineThetaHttpClient: at kotlinx.coroutines.BuildersKt.runBlocking(dex-id-55a65d7acfbed0499eee37c9693763269b1c342a:1)
+13:02:53.795 [E] CineThetaHttpClient: at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking$default(Builders.kt:47)
+13:02:53.796 [E] CineThetaHttpClient: at kotlinx.coroutines.BuildersKt.runBlocking$default(dex-id-55a65d7acfbed0499eee37c9693763269b1c342a:1)
+13:02:53.798 [E] CineThetaHttpClient: at com.cinetheta.core.network.interceptor.CloudflareKiller.intercept(CloudflareKiller.kt:26)
+13:02:53.800 [E] CineThetaHttpClient: at okhttp3.internal.http.RealInterceptorChain.proceed(RealInterceptorChain.kt:109)
+13:02:53.806 [E] CineThetaHttpClient: at com.cinetheta.core.network.interceptor.RetryInterceptor.intercept(RetryInterceptor.kt:31)
+13:02:53.809 [E] CineThetaHttpClient: at okhttp3.internal.http.RealInterceptorChain.proceed(RealInterceptorChain.kt:109)
+13:02:53.811 [E] CineThetaHttpClient: at com.cinetheta.core.network.interceptor.LoggingInterceptor.intercept(LoggingInterceptor.kt:42)
+13:02:53.812 [E] CineThetaHttpClient: at okhttp3.internal.http.RealInterceptorChain.proceed(RealInterceptorChain.kt:109)
+13:02:53.814 [E] CineThetaHttpClient: at com.cinetheta.core.network.interceptor.RefererInterceptor.intercept(RefererInterceptor.kt:48)
+13:02:53.815 [E] CineThetaHttpClient: at okhttp3.internal.http.RealInterceptorChain.proceed(RealInterceptorChain.kt:109)
+13:02:53.817 [E] CineThetaHttpClient: at com.cinetheta.core.network.interceptor.UserAgentInterceptor.intercept(UserAgentInterceptor.kt:33)
+13:02:53.818 [E] CineThetaHttpClient: at okhttp3.internal.http.RealInterceptorChain.proceed(RealInterceptorChain.kt:109)
+13:02:53.820 [E] CineThetaHttpClient: at com.cinetheta.core.network.interceptor.SecurityInterceptor.intercept(SecurityInterceptor.kt:72)
+13:02:53.821 [E] CineThetaHttpClient: at okhttp3.internal.http.RealInterceptorChain.proceed(RealInterceptorChain.kt:109)
+13:02:53.823 [E] CineThetaHttpClient: at okhttp3.internal.connection.RealCall.getResponseWithInterceptorChain$okhttp(RealCall.kt:201)
+13:02:53.824 [E] CineThetaHttpClient: at okhttp3.internal.connection.RealCall.execute(RealCall.kt:154)
+13:02:53.826 [E] CineThetaHttpClient: at com.cinetheta.core.network.CineThetaHttpClient$execute$2.invokeSuspend(CineThetaHttpClient.kt:206)
+13:02:53.828 [E] CineThetaHttpClient: at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
+13:02:53.831 [E] CineThetaHttpClient: at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
+13:02:53.832 [E] CineThetaHttpClient: at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:113)
+13:02:53.835 [E] CineThetaHttpClient: at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)
+13:02:53.837 [E] CineThetaHttpClient: at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:589)
+13:02:53.839 [E] CineThetaHttpClient: at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:823)
+13:02:53.840 [E] CineThetaHttpClient: at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:720)
+13:02:53.844 [E] CineThetaHttpClient: at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:707)
+13:02:53.845 [E] CineThetaHttpClient: Caused by: java.io.EOFException: connection closed
+13:02:53.847 [E] CineThetaHttpClient: ... 49 more
+13:02:53.849 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:53.852 [W] DomainResolver: [animedekho] Step 3 — primary unreachable: https://animedekho.app
+13:02:53.854 [D] DomainResolver: [animedekho] Step 4 — probing mirror 0: https://hindisubanime.co
+13:02:53.856 [D] HTTP: → [HEAD] https://hindisubanime.co/
+13:02:53.858 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:53.886 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:53.962 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:54.066 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:54.163 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:54.257 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:54.359 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:54.448 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:54.556 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:54.603 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:54.687 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:54.786 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:54.827 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:54.874 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:54.915 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:54.956 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:54.998 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:55.103 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:55.189 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:55.271 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:55.303 [D] HTTP: ← [200] https://hindisubanime.co/ (1496ms)
+13:02:55.315 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:55.402 [I] DomainResolver: [animedekho] Step 4 — mirror 0 live: https://hindisubanime.co
+13:02:55.404 [D] CacheManager: Cache: put domain [animedekho] = https://hindisubanime.co
+13:02:55.410 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:55.413 [D] HTTP: → [GET] https://hindisubanime.co/browse/?q=solo+leveling
+13:02:55.500 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:55.596 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:55.670 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:55.759 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:55.839 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:55.892 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:55.929 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:56.021 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:56.096 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:56.178 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:56.259 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:56.335 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:56.418 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:56.497 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:56.582 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:56.665 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:56.749 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:56.830 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:56.910 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:56.989 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:57.071 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:57.155 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:57.239 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:57.278 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:57.316 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:57.349 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:57.428 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:57.506 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:57.542 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:57.628 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:57.724 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:57.779 [W] HTTP: ← [404] https://hindisubanime.co/browse/?q=solo+leveling (2365ms)
+13:02:57.800 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:57.836 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:57.881 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:57.919 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:57.992 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:58.073 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:58.150 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:58.183 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:58.259 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:58.342 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:58.404 [D] HTTP: → [GET] https://hindisubanime.co/?s=solo+leveling
+13:02:58.467 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:58.506 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:58.540 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:58.600 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:58.635 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:58.665 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:58.699 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:58.774 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:58.847 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:58.892 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:58.964 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:59.035 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:59.097 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:59.166 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:59.202 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:59.256 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:59.288 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:59.321 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:59.393 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:59.450 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:59.481 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:59.485 [D] HTTP: ← [200] https://hindisubanime.co/?s=solo+leveling (1083ms)
+13:02:59.532 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:59.597 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:59.658 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:59.693 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:59.761 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:59.790 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:59.817 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:59.879 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:02:59.907 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:00.088 [E] OpenGLRenderer: Device claims wide gamut support, cannot find matching config, error = EGL_SUCCESS
+13:03:00.089 [W] OpenGLRenderer: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+13:03:00.095 [E] OpenGLRenderer: EglManager::makeCurrent mED = 0xb4000072145ad710, surface = 0x0, mEC = 0xb4000071b45eeb20, error = EGL_SUCCESS
+13:03:00.132 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:00.174 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:00.202 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:02.086 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:04.940 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.111 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.115 [D] HTTP: → [GET] https://hindisubanime.co/serie/solo-leveling/
+13:03:05.127 [E] BLASTBufferQueue: [ViewRootImpl[MainActivity]#3](f:0,a:2) isEGL=1, mPendingRelease.size()=1, mMaxAcquiredBuffers=4, currentMaxAcquiredBufferCount=2
+13:03:05.179 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.194 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.218 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.231 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.244 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.257 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.272 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.285 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.296 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.319 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.331 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.345 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.359 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.373 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.390 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.404 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.426 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.442 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.470 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.485 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.497 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.513 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.526 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.540 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.554 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.564 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.581 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.606 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.617 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.628 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.642 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.659 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.673 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.686 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.704 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.717 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.730 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.759 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.777 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.804 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.831 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:05.940 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:06.019 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:06.059 [D] HTTP: ← [200] https://hindisubanime.co/serie/solo-leveling/ (943ms)
+13:03:06.434 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:06.828 [D] HTTP: → [GET] https://hindisubanime.co/wp-json/dgt/v1/episodes?series=89944834&season=1
+13:03:07.655 [W] HTTP: ← [404] https://hindisubanime.co/wp-json/dgt/v1/episodes?series=89944834&season=1 (827ms)
+13:03:07.829 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:07.926 [E] OpenGLRenderer: Device claims wide gamut support, cannot find matching config, error = EGL_SUCCESS
+13:03:07.927 [W] OpenGLRenderer: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+13:03:07.931 [E] OpenGLRenderer: EglManager::makeCurrent mED = 0xb4000072145ad710, surface = 0x0, mEC = 0xb4000071b4608fe0, error = EGL_SUCCESS
+13:03:08.295 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:08.429 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:09.983 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:10.046 [E] BLASTBufferQueue: [ViewRootImpl[MainActivity]#3](f:0,a:3) isEGL=1, mPendingRelease.size()=1, mMaxAcquiredBuffers=4, currentMaxAcquiredBufferCount=2
+13:03:10.092 [D] TransactionExecutor: Token :android.os.BinderProxy@c6a839b has ActivityClientRecord : com.cinetheta.app
+13:03:10.095 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:10.150 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:10.151 [D] ActivityThread: performLaunchActivity: com.cinetheta.app
+13:03:10.157 [D] libMEOW: meow new tls: 0xb4000073449b1430
+13:03:10.158 [D] libMEOW: applied 1 plugins for [com.cinetheta.app]:
+13:03:10.161 [D] libMEOW: plugin 1: [libMEOW_gift.so]: 0xb400007304585010
+13:03:10.166 [D] libMEOW: rebuild call chain: 0xb4000073449a1420
+13:03:10.169 [D] ApplicationPackageManager: [getText] isMxtcMarket: false, isCoclmarket: false, isWomStkSupport: true
+13:03:10.171 [D] libMEOW: meow delete tls: 0xb4000073449b1430
+13:03:10.193 [I] WhiteNavigationLice: Modify naviBarColor to 0xFFF0F0F0, and windowBackgroundColor is -13619152   /windowIsTranslucent:false
+13:03:10.215 [I] STREAM_PIPELINE: [StreamEngine] Starting stream resolution
+13:03:10.216 [D] STREAM_PIPELINE: [StreamEngine] Received 1 provider source(s)
+13:03:10.217 [D] STREAM_PIPELINE: [StreamEngine] Source 1: Animedekho | ANIMEDEKHO | https://hindisubanime.co/epi/solo-leveling-1x1/
+13:03:10.220 [I] STREAM_PIPELINE: [StreamCollector] Resolving 1 provider source(s) via ResolverEngine
+13:03:10.226 [I] STREAM_PIPELINE: [ResolverEngine] Starting resolver pipeline for 1 source(s)
+13:03:10.230 [D] STREAM_PIPELINE: [ResolverEngine] Hop 0: Resolving [ANIMEDEKHO] -> https://hindisubanime.co/epi/solo-leveling-1x1/
+13:03:10.257 [I] STREAM_PIPELINE: [ExtractorManager] Starting extraction pipeline
+13:03:10.259 [D] ActivityThread: ++ activityComponent:com.cinetheta.app/com.cinetheta.player.PlayerActivity counts:1 trigger:null
+13:03:10.275 [D] ViewRootImpl[PlayerActivity]: hardware acceleration = true, sRendererEnabled = true, forceHwAccelerated = false
+13:03:10.286 [D] TransactionExecutor: Token :android.os.BinderProxy@97cd8ee has ActivityClientRecord : com.cinetheta.app
+13:03:10.426 [I] ExoPlayerImpl: Init bf7110e [AndroidXMedia3/1.10.1] [Infinix-X6817, Infinix X6817, INFINIX, 31]
+13:03:10.458 [I] NextRenderersFactory: Loaded FfmpegVideoRenderer.
+13:03:10.505 [I] NextRenderersFactory: Loaded FfmpegAudioRenderer.
+13:03:10.596 [I] MediaSessionImpl: Init ae833e6 [AndroidXMedia3/1.10.1] [Infinix-X6817, Infinix X6817, INFINIX, 31]
+13:03:10.623 [D] CompatibilityChangeReporter: Compat change id reported: 160794467; UID 10366; state: ENABLED
+13:03:10.631 [I] MediaSessionCompat: Couldn't find a unique registered media button receiver in the given context.
+13:03:10.734 [I] BLASTBufferQueue: [ViewRootImpl[PlayerActivity]#4] constructor()
+13:03:10.782 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:10.793 [D] STREAM_PIPELINE: [ExtractorManager] Processing ANIMEDEKHO -> https://hindisubanime.co/epi/solo-leveling-1x1/
+13:03:10.796 [D] STREAM_PIPELINE: [ExtractorManager] Using AnimeDekhoExtractor
+13:03:10.809 [D] HTTP: → [POST] https://hindisubanime.co/wp-json/dgt/v1/watch
+13:03:10.821 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=72, right=0, bottom=1}   /alpha:1.0   /fraction:0.0   /allowWhenFinished:false
+13:03:10.822 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:10.823 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1544.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:10.825 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 0.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:10.827 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=72, right=0, bottom=1}   /alpha:1.0   /fraction:0.0   /allowWhenFinished:false
+13:03:10.828 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:10.829 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1544.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:10.830 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 0.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:10.832 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=71, right=0, bottom=0}   /alpha:1.0   /fraction:0.029411765   /allowWhenFinished:false
+13:03:10.836 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:10.841 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:10.842 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -1.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:10.850 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=71, right=0, bottom=0}   /alpha:1.0   /fraction:0.061764706   /allowWhenFinished:false
+13:03:10.851 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:10.856 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:10.859 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -1.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:10.866 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=70, right=0, bottom=0}   /alpha:1.0   /fraction:0.09411765   /allowWhenFinished:false
+13:03:10.882 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:10.894 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:10.897 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -2.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:10.899 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=68, right=0, bottom=0}   /alpha:1.0   /fraction:0.13235295   /allowWhenFinished:false
+13:03:10.906 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:10.912 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:10.916 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -4.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:10.922 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=65, right=0, bottom=0}   /alpha:1.0   /fraction:0.16470589   /allowWhenFinished:false
+13:03:10.924 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:10.932 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:10.937 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -7.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:10.942 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=62, right=0, bottom=0}   /alpha:1.0   /fraction:0.19705883   /allowWhenFinished:false
+13:03:10.946 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:10.954 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:10.971 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -10.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:10.975 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=57, right=0, bottom=0}   /alpha:1.0   /fraction:0.23235294   /allowWhenFinished:false
+13:03:10.985 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:11.009 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:11.014 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -15.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:11.016 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=52, right=0, bottom=0}   /alpha:1.0   /fraction:0.2647059   /allowWhenFinished:false
+13:03:11.016 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:11.024 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:11.025 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -20.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:11.028 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=46, right=0, bottom=0}   /alpha:1.0   /fraction:0.29705882   /allowWhenFinished:false
+13:03:11.030 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:11.032 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:11.033 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -26.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:11.036 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=39, right=0, bottom=0}   /alpha:1.0   /fraction:0.32941177   /allowWhenFinished:false
+13:03:11.037 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:11.039 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:11.040 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -33.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:11.043 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=34, right=0, bottom=0}   /alpha:1.0   /fraction:0.35882354   /allowWhenFinished:false
+13:03:11.044 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:11.046 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:11.047 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -38.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:11.048 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=28, right=0, bottom=0}   /alpha:1.0   /fraction:0.39411765   /allowWhenFinished:false
+13:03:11.049 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:11.050 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:11.051 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -44.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:11.053 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:11.055 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=17, right=0, bottom=0}   /alpha:1.0   /fraction:0.49117646   /allowWhenFinished:false
+13:03:11.057 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:11.058 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:11.059 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -55.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:11.061 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=11, right=0, bottom=0}   /alpha:1.0   /fraction:0.5617647   /allowWhenFinished:false
+13:03:11.061 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:11.062 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:11.064 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -61.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:11.065 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=6, right=0, bottom=0}   /alpha:1.0   /fraction:0.65   /allowWhenFinished:false
+13:03:11.066 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:11.067 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:11.068 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -66.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:11.068 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=5, right=0, bottom=0}   /alpha:1.0   /fraction:0.68235296   /allowWhenFinished:false
+13:03:11.069 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:11.070 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:11.071 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -67.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:11.076 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=4, right=0, bottom=0}   /alpha:1.0   /fraction:0.7147059   /allowWhenFinished:false
+13:03:11.078 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:11.079 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:11.079 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -68.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:11.085 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=2, right=0, bottom=0}   /alpha:1.0   /fraction:0.7794118   /allowWhenFinished:false
+13:03:11.089 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:11.091 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:11.092 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -70.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:11.095 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=1, right=0, bottom=0}   /alpha:1.0   /fraction:0.8117647   /allowWhenFinished:false
+13:03:11.097 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:11.099 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:11.101 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -71.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:11.106 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=1, right=0, bottom=0}   /alpha:1.0   /fraction:0.84705883   /allowWhenFinished:false
+13:03:11.110 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:11.113 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:11.115 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -71.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:11.120 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.87941176   /allowWhenFinished:false
+13:03:11.122 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:11.126 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:11.130 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -72.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:11.133 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.9117647   /allowWhenFinished:false
+13:03:11.135 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:11.147 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:11.150 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -72.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:11.154 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.94411767   /allowWhenFinished:false
+13:03:11.157 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:11.177 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:11.181 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:11.189 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -72.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:11.192 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.9764706   /allowWhenFinished:false
+13:03:11.196 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:11.208 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:11.214 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -72.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:11.219 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:1.0   /allowWhenFinished:false
+13:03:11.222 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:11.225 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:11.229 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -72.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:11.232 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:11.235 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:1.0   /allowWhenFinished:true
+13:03:11.248 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:11.253 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:11.264 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -72.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:11.288 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:11.298 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:11.309 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:11.311 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:11.315 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:11.361 [I] BLASTBufferQueue: [ViewRootImpl[MainActivity]#3] destructor()
+13:03:11.429 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:11.451 [I] BLASTBufferQueue: releaseBufferCallbackThunk bufferId:69295002353698 framenumber:440 blastBufferQueue is dead
+13:03:11.499 [E] OpenGLRenderer: EglManager::makeCurrent mED = 0xb4000072145ad710, surface = 0x0, mEC = 0xb4000071b45c84e0, error = EGL_SUCCESS
+13:03:11.572 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:11.597 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:11.622 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:11.629 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:11.657 [W] HTTP: ← [404] https://hindisubanime.co/wp-json/dgt/v1/watch (854ms)
+13:03:11.685 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:11.690 [D] HTTP: → [GET] https://hindisubanime.co/?trdekho=4&trid=89944834&trtype=2
+13:03:11.699 [D] HTTP: → [GET] https://hindisubanime.co/?trdekho=1&trid=89944834&trtype=2
+13:03:11.705 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:11.707 [D] HTTP: → [GET] https://hindisubanime.co/?trdekho=2&trid=89944834&trtype=2
+13:03:11.711 [D] HTTP: → [GET] https://hindisubanime.co/?trdekho=7&trid=89944834&trtype=2
+13:03:11.713 [D] HTTP: → [GET] https://hindisubanime.co/?trdekho=5&trid=89944834&trtype=2
+13:03:11.721 [D] HTTP: → [GET] https://hindisubanime.co/?trdekho=3&trid=89944834&trtype=2
+13:03:11.724 [D] HTTP: → [GET] https://hindisubanime.co/?trdekho=6&trid=89944834&trtype=2
+13:03:11.726 [D] HTTP: → [GET] https://hindisubanime.co/?trdekho=8&trid=89944834&trtype=2
+13:03:11.731 [D] HTTP: → [GET] https://hindisubanime.co/?trdekho=10&trid=89944834&trtype=2
+13:03:11.735 [D] HTTP: → [GET] https://hindisubanime.co/?trdekho=9&trid=89944834&trtype=2
+13:03:11.737 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:11.747 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:11.833 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:13.325 [I] SubtitleRepository: Successfully loaded 30 subtitles from OpenSubtitles for tt21209876
+13:03:13.401 [D] HTTP: ← [200] https://hindisubanime.co/?trdekho=4&trid=89944834&trtype=2 (1726ms)
+13:03:13.413 [D] HTTP: ← [200] https://hindisubanime.co/?trdekho=7&trid=89944834&trtype=2 (1715ms)
+13:03:13.424 [D] HTTP: ← [200] https://hindisubanime.co/?trdekho=10&trid=89944834&trtype=2 (1731ms)
+13:03:13.434 [D] HTTP: ← [200] https://hindisubanime.co/?trdekho=8&trid=89944834&trtype=2 (1727ms)
+13:03:13.468 [D] HTTP: ← [200] https://hindisubanime.co/?trdekho=1&trid=89944834&trtype=2 (1787ms)
+13:03:13.477 [D] HTTP: ← [200] https://hindisubanime.co/?trdekho=5&trid=89944834&trtype=2 (1768ms)
+13:03:13.480 [D] HTTP: ← [200] https://hindisubanime.co/?trdekho=9&trid=89944834&trtype=2 (1752ms)
+13:03:13.481 [D] HTTP: ← [200] https://hindisubanime.co/?trdekho=3&trid=89944834&trtype=2 (1780ms)
+13:03:13.483 [D] HTTP: ← [200] https://hindisubanime.co/?trdekho=2&trid=89944834&trtype=2 (1799ms)
+13:03:13.488 [D] HTTP: ← [200] https://hindisubanime.co/?trdekho=6&trid=89944834&trtype=2 (1780ms)
+13:03:13.529 [D] STREAM_PIPELINE: [ExtractorManager] Streams: 0, Next Sources: 0
+13:03:13.533 [I] STREAM_PIPELINE: [ExtractorManager] Extraction finished. Total streams: 0
+13:03:13.536 [W] STREAM_PIPELINE: [ResolverEngine] No streams extracted for https://hindisubanime.co/epi/solo-leveling-1x1/
+13:03:13.539 [I] STREAM_PIPELINE: [ResolverEngine] Resolver pipeline complete. Produced 0 playable stream(s)
+13:03:13.540 [I] STREAM_PIPELINE: [StreamCollector] Collected 0 total stream(s) across all sources
+13:03:13.542 [D] STREAM_PIPELINE: [StreamEngine] Collected 0 raw stream(s)
+13:03:13.544 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:13.545 [I] STREAM_PIPELINE: [StreamEngine] Finished. Final playable streams: 0
+13:03:13.546 [W] STREAM_PIPELINE: [StreamEngine] No playable streams produced
+13:03:13.600 [D] ViewRootImpl[PlayerActivity]: hardware acceleration = true, sRendererEnabled = true, forceHwAccelerated = false
+13:03:13.607 [I] m.cinetheta.ap: Background young concurrent copying GC freed 7976KB AllocSpace bytes, 24(1028KB) LOS objects, 35% free, 16MB/24MB, paused 549us,429us total 120.179ms
+13:03:13.715 [I] BLASTBufferQueue: [ViewRootImpl[PlayerActivity]#5] constructor()
+13:03:13.718 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.0   /fraction:0.0   /allowWhenFinished:false
+13:03:13.719 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:13.729 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.0   /fraction:0.0   /allowWhenFinished:false
+13:03:13.731 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:13.737 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.0023526957   /fraction:0.024   /allowWhenFinished:false
+13:03:13.740 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:13.749 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.007324831   /fraction:0.046   /allowWhenFinished:false
+13:03:13.750 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:13.760 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.0141958995   /fraction:0.068   /allowWhenFinished:false
+13:03:13.762 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:13.764 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:13.775 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.023094956   /fraction:0.09   /allowWhenFinished:false
+13:03:13.776 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:13.784 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.034073614   /fraction:0.112   /allowWhenFinished:false
+13:03:13.786 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:13.794 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.04599736   /fraction:0.134   /allowWhenFinished:false
+13:03:13.796 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:13.798 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:13.805 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.059599563   /fraction:0.156   /allowWhenFinished:false
+13:03:13.807 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:13.815 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.07423706   /fraction:0.178   /allowWhenFinished:false
+13:03:13.817 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:13.827 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.089694895   /fraction:0.2   /allowWhenFinished:false
+13:03:13.828 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:13.838 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.107089624   /fraction:0.222   /allowWhenFinished:false
+13:03:13.839 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:13.849 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.124874264   /fraction:0.244   /allowWhenFinished:false
+13:03:13.851 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:13.860 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.14265889   /fraction:0.266   /allowWhenFinished:false
+13:03:13.862 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:13.871 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.16103464   /fraction:0.288   /allowWhenFinished:false
+13:03:13.872 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:13.882 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.18132624   /fraction:0.31   /allowWhenFinished:false
+13:03:13.883 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:13.893 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.2016178   /fraction:0.332   /allowWhenFinished:false
+13:03:13.894 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:13.905 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.2219094   /fraction:0.354   /allowWhenFinished:false
+13:03:13.907 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:13.916 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.24523847   /fraction:0.378   /allowWhenFinished:false
+13:03:13.918 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:13.928 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.26752838   /fraction:0.4   /allowWhenFinished:false
+13:03:13.931 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:13.937 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.28981826   /fraction:0.422   /allowWhenFinished:false
+13:03:13.939 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:13.949 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.31210816   /fraction:0.444   /allowWhenFinished:false
+13:03:13.950 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:13.959 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.33625445   /fraction:0.466   /allowWhenFinished:false
+13:03:13.961 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:13.970 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.36084422   /fraction:0.488   /allowWhenFinished:false
+13:03:13.972 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:13.981 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.38543397   /fraction:0.51   /allowWhenFinished:false
+13:03:13.983 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:13.992 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.41002378   /fraction:0.532   /allowWhenFinished:false
+13:03:13.993 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:14.003 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.4346136   /fraction:0.554   /allowWhenFinished:false
+13:03:14.004 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:14.014 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.4592033   /fraction:0.576   /allowWhenFinished:false
+13:03:14.015 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:14.025 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.48379308   /fraction:0.598   /allowWhenFinished:false
+13:03:14.026 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:14.036 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.5090066   /fraction:0.62   /allowWhenFinished:false
+13:03:14.037 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:14.048 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.535426   /fraction:0.642   /allowWhenFinished:false
+13:03:14.049 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:14.058 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.56424713   /fraction:0.666   /allowWhenFinished:false
+13:03:14.060 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:14.069 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.59066653   /fraction:0.688   /allowWhenFinished:false
+13:03:14.070 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:14.080 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.6179685   /fraction:0.71   /allowWhenFinished:false
+13:03:14.082 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:14.092 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.64536667   /fraction:0.732   /allowWhenFinished:false
+13:03:14.093 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:14.103 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.6727649   /fraction:0.754   /allowWhenFinished:false
+13:03:14.104 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:14.113 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.70067513   /fraction:0.776   /allowWhenFinished:false
+13:03:14.115 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:14.124 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.72892   /fraction:0.798   /allowWhenFinished:false
+13:03:14.126 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:14.135 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.7571649   /fraction:0.82   /allowWhenFinished:false
+13:03:14.136 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:14.147 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.7858638   /fraction:0.842   /allowWhenFinished:false
+13:03:14.148 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:14.158 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.81484807   /fraction:0.864   /allowWhenFinished:false
+13:03:14.159 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:14.169 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.84383374   /fraction:0.886   /allowWhenFinished:false
+13:03:14.170 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:14.180 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.8733241   /fraction:0.908   /allowWhenFinished:false
+13:03:14.181 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:14.191 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.9030789   /fraction:0.93   /allowWhenFinished:false
+13:03:14.192 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:14.202 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.93312   /fraction:0.952   /allowWhenFinished:false
+13:03:14.203 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:14.213 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.96630543   /fraction:0.976   /allowWhenFinished:false
+13:03:14.214 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:14.224 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.99715585   /fraction:0.998   /allowWhenFinished:false
+13:03:14.225 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:14.236 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:1.0   /allowWhenFinished:false
+13:03:14.237 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:14.238 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:1.0   /allowWhenFinished:true
+13:03:14.239 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:15.208 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:15.368 [D] TransactionExecutor: Token :android.os.BinderProxy@97cd8ee has ActivityClientRecord : com.cinetheta.app
+13:03:15.374 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:15.443 [D] TransactionExecutor: Token :android.os.BinderProxy@c6a839b has ActivityClientRecord : com.cinetheta.app
+13:03:15.465 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.0   /allowWhenFinished:false
+13:03:15.468 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:15.474 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:15.486 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.0   /allowWhenFinished:false
+13:03:15.494 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:15.498 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.032352943   /allowWhenFinished:false
+13:03:15.505 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:15.516 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.064705886   /allowWhenFinished:false
+13:03:15.519 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:15.522 [I] BLASTBufferQueue: [ViewRootImpl[MainActivity]#6] constructor()
+13:03:15.523 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.097058825   /allowWhenFinished:false
+13:03:15.524 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:15.532 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.13235295   /allowWhenFinished:false
+13:03:15.535 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:15.548 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.16470589   /allowWhenFinished:false
+13:03:15.550 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:15.574 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.22352941   /allowWhenFinished:false
+13:03:15.575 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:15.576 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.25588235   /allowWhenFinished:false
+13:03:15.577 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:15.590 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.2882353   /allowWhenFinished:false
+13:03:15.592 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:15.593 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.32647058   /allowWhenFinished:false
+13:03:15.596 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:15.601 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.35882354   /allowWhenFinished:false
+13:03:15.602 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:15.607 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.39117646   /allowWhenFinished:false
+13:03:15.609 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:15.618 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.42352942   /allowWhenFinished:false
+13:03:15.619 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:15.629 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.45588234   /allowWhenFinished:false
+13:03:15.630 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:15.635 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:15.658 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:15.696 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.0   /fraction:0.0   /allowWhenFinished:false
+13:03:15.734 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.0   /fraction:0.0   /allowWhenFinished:false
+13:03:15.742 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:15.763 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.008922344   /fraction:0.052   /allowWhenFinished:false
+13:03:15.775 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.012577889   /fraction:0.064   /allowWhenFinished:false
+13:03:15.783 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.021476947   /fraction:0.086   /allowWhenFinished:false
+13:03:15.800 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.043524228   /fraction:0.13   /allowWhenFinished:false
+13:03:15.812 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.059599563   /fraction:0.156   /allowWhenFinished:false
+13:03:15.830 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.0728318   /fraction:0.176   /allowWhenFinished:false
+13:03:15.845 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.107089624   /fraction:0.222   /allowWhenFinished:false
+13:03:15.861 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.12325747   /fraction:0.242   /allowWhenFinished:false
+13:03:15.877 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.14104211   /fraction:0.264   /allowWhenFinished:false
+13:03:15.889 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.17948155   /fraction:0.308   /allowWhenFinished:false
+13:03:15.899 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.19977315   /fraction:0.33   /allowWhenFinished:false
+13:03:15.908 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.22006471   /fraction:0.352   /allowWhenFinished:false
+13:03:15.919 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.24118577   /fraction:0.374   /allowWhenFinished:false
+13:03:15.930 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.26347566   /fraction:0.396   /allowWhenFinished:false
+13:03:15.941 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:15.949 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.28576556   /fraction:0.418   /allowWhenFinished:false
+13:03:15.957 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:15.972 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.30805546   /fraction:0.44   /allowWhenFinished:false
+13:03:15.979 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.35860878   /fraction:0.486   /allowWhenFinished:false
+13:03:15.991 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.3831986   /fraction:0.508   /allowWhenFinished:false
+13:03:16.002 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:16.004 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.4077883   /fraction:0.53   /allowWhenFinished:false
+13:03:16.014 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:16.019 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.4323781   /fraction:0.552   /allowWhenFinished:false
+13:03:16.047 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.48379308   /fraction:0.598   /allowWhenFinished:false
+13:03:16.058 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.5090066   /fraction:0.62   /allowWhenFinished:false
+13:03:16.060 [E] OpenGLRenderer: EglManager::makeCurrent mED = 0xb4000072145ad710, surface = 0x0, mEC = 0xb4000071b45c84e0, error = EGL_SUCCESS
+13:03:16.067 [D] OpenGLRenderer: endAllActiveAnimators on 0xb40000725467fd30 (UnprojectedRipple) with handle 0xb400007164629fe0
+13:03:16.127 [I] BLASTBufferQueue: [ViewRootImpl[PlayerActivity]#5] destructor()
+13:03:16.154 [I] BLASTBufferQueue: [ViewRootImpl[PlayerActivity]#4] destructor()
+13:03:16.165 [D] ActivityThread: -- comp:com.cinetheta.app/com.cinetheta.player.PlayerActivity
+13:03:16.184 [D] View: [Warning] assignParent to null: this = DecorView@92dc36[PlayerActivity]
+13:03:16.209 [I] BLASTBufferQueue: releaseBufferCallbackThunk bufferId:69295002353729 framenumber:53 blastBufferQueue is dead
+13:03:16.213 [I] MediaSessionImpl: Release ae833e6 [AndroidXMedia3/1.10.1] [Infinix-X6817, Infinix X6817, INFINIX, 31] [media3.common, media3.exoplayer, media3.decoder, media3.session]
+13:03:16.217 [I] ExoPlayerImpl: Release bf7110e [AndroidXMedia3/1.10.1] [Infinix-X6817, Infinix X6817, INFINIX, 31] [media3.common, media3.exoplayer, media3.decoder, media3.session]
+13:03:16.224 [D] View: [Warning] assignParent to null: this = DecorView@eef820d[PlayerActivity]
+13:03:16.236 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.99715585   /fraction:0.998   /allowWhenFinished:false
+13:03:16.245 [I] BLASTBufferQueue: releaseBufferCallbackThunk bufferId:69295002353718 framenumber:212 blastBufferQueue is dead
+13:03:16.333 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:1.0   /fraction:1.0   /allowWhenFinished:false
+13:03:16.339 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:1.0   /fraction:1.0   /allowWhenFinished:true
+13:03:16.353 [E] OpenGLRenderer: EglManager::makeCurrent mED = 0xb4000072145ad710, surface = 0x0, mEC = 0xb4000071b45c84e0, error = EGL_SUCCESS
+13:03:17.610 [D] TransactionExecutor: Token :android.os.BinderProxy@c6a839b has ActivityClientRecord : com.cinetheta.app
+13:03:17.656 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:17.673 [D] ActivityThread: performLaunchActivity: com.cinetheta.app
+13:03:17.702 [D] ApplicationPackageManager: [getText] isMxtcMarket: false, isCoclmarket: false, isWomStkSupport: true
+13:03:17.703 [I] WhiteNavigationLice: Modify naviBarColor to 0xFFF0F0F0, and windowBackgroundColor is -13619152   /windowIsTranslucent:false
+13:03:17.713 [I] STREAM_PIPELINE: [StreamEngine] Starting stream resolution
+13:03:17.716 [D] STREAM_PIPELINE: [StreamEngine] Received 1 provider source(s)
+13:03:17.719 [D] STREAM_PIPELINE: [StreamEngine] Source 1: Animedekho | ANIMEDEKHO | https://hindisubanime.co/epi/solo-leveling-1x2/
+13:03:17.724 [I] STREAM_PIPELINE: [StreamCollector] Resolving 1 provider source(s) via ResolverEngine
+13:03:17.731 [I] STREAM_PIPELINE: [ResolverEngine] Starting resolver pipeline for 1 source(s)
+13:03:17.732 [D] libMEOW: meow new tls: 0xb400007344a11490
+13:03:17.733 [D] libMEOW: applied 1 plugins for [com.cinetheta.app]:
+13:03:17.734 [D] libMEOW: plugin 1: [libMEOW_gift.so]: 0xb400007304585010
+13:03:17.748 [D] libMEOW: rebuild call chain: 0xb400007344a01480
+13:03:17.751 [D] libMEOW: meow delete tls: 0xb400007344a11490
+13:03:17.755 [D] STREAM_PIPELINE: [ResolverEngine] Hop 0: Resolving [ANIMEDEKHO] -> https://hindisubanime.co/epi/solo-leveling-1x2/
+13:03:17.756 [I] STREAM_PIPELINE: [ExtractorManager] Starting extraction pipeline
+13:03:17.758 [D] ActivityThread: ++ activityComponent:com.cinetheta.app/com.cinetheta.player.PlayerActivity counts:1 trigger:1
+13:03:17.760 [D] ViewRootImpl[PlayerActivity]: hardware acceleration = true, sRendererEnabled = true, forceHwAccelerated = false
+13:03:17.762 [D] TransactionExecutor: Token :android.os.BinderProxy@27d3c0e has ActivityClientRecord : com.cinetheta.app
+13:03:17.766 [I] ExoPlayerImpl: Init a1aaef6 [AndroidXMedia3/1.10.1] [Infinix-X6817, Infinix X6817, INFINIX, 31]
+13:03:17.772 [I] NextRenderersFactory: Loaded FfmpegVideoRenderer.
+13:03:17.786 [I] NextRenderersFactory: Loaded FfmpegAudioRenderer.
+13:03:17.794 [I] MediaSessionImpl: Init 27c83cd [AndroidXMedia3/1.10.1] [Infinix-X6817, Infinix X6817, INFINIX, 31]
+13:03:17.807 [I] MediaSessionCompat: Couldn't find a unique registered media button receiver in the given context.
+13:03:17.881 [I] BLASTBufferQueue: [ViewRootImpl[PlayerActivity]#7] constructor()
+13:03:17.933 [D] STREAM_PIPELINE: [ExtractorManager] Processing ANIMEDEKHO -> https://hindisubanime.co/epi/solo-leveling-1x2/
+13:03:17.938 [D] STREAM_PIPELINE: [ExtractorManager] Using AnimeDekhoExtractor
+13:03:17.946 [D] HTTP: → [POST] https://hindisubanime.co/wp-json/dgt/v1/watch
+13:03:17.947 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:17.982 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:17.984 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=72, right=0, bottom=1}   /alpha:1.0   /fraction:0.0   /allowWhenFinished:false
+13:03:17.986 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:17.991 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1544.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:17.991 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 0.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:18.002 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=72, right=0, bottom=1}   /alpha:1.0   /fraction:0.0   /allowWhenFinished:false
+13:03:18.003 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:18.005 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1544.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:18.005 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 0.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:18.016 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=71, right=0, bottom=0}   /alpha:1.0   /fraction:0.032352943   /allowWhenFinished:false
+13:03:18.023 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:18.023 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:18.024 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -1.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:18.025 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=71, right=0, bottom=0}   /alpha:1.0   /fraction:0.055882353   /allowWhenFinished:false
+13:03:18.025 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:18.026 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:18.027 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -1.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:18.027 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=70, right=0, bottom=0}   /alpha:1.0   /fraction:0.0882353   /allowWhenFinished:false
+13:03:18.031 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:18.031 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:18.035 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -2.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:18.041 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=69, right=0, bottom=0}   /alpha:1.0   /fraction:0.120588236   /allowWhenFinished:false
+13:03:18.042 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:18.043 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:18.045 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -3.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:18.046 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:18.054 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=66, right=0, bottom=0}   /alpha:1.0   /fraction:0.15294118   /allowWhenFinished:false
+13:03:18.057 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:18.065 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:18.070 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -6.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:18.075 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=64, right=0, bottom=0}   /alpha:1.0   /fraction:0.18235295   /allowWhenFinished:false
+13:03:18.077 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:18.082 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:18.091 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -8.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:18.094 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=59, right=0, bottom=0}   /alpha:1.0   /fraction:0.21764706   /allowWhenFinished:false
+13:03:18.094 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:18.096 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:18.097 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -13.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:18.098 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:18.102 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=53, right=0, bottom=0}   /alpha:1.0   /fraction:0.25588235   /allowWhenFinished:false
+13:03:18.104 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:18.105 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:18.106 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -19.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:18.108 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=48, right=0, bottom=0}   /alpha:1.0   /fraction:0.28529412   /allowWhenFinished:false
+13:03:18.109 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:18.109 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:18.113 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -24.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:18.115 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:18.123 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=42, right=0, bottom=0}   /alpha:1.0   /fraction:0.31764707   /allowWhenFinished:false
+13:03:18.124 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:18.125 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:18.125 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -30.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:18.126 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=36, right=0, bottom=0}   /alpha:1.0   /fraction:0.35   /allowWhenFinished:false
+13:03:18.134 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:18.137 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:18.138 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -36.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:18.139 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:18.142 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=30, right=0, bottom=0}   /alpha:1.0   /fraction:0.38235295   /allowWhenFinished:false
+13:03:18.143 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:18.143 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:18.144 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -42.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:18.153 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=25, right=0, bottom=0}   /alpha:1.0   /fraction:0.41470587   /allowWhenFinished:false
+13:03:18.159 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:18.160 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:18.160 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -47.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:18.170 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=21, right=0, bottom=0}   /alpha:1.0   /fraction:0.44705883   /allowWhenFinished:false
+13:03:18.170 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:18.176 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:18.177 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -51.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:18.184 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=18, right=0, bottom=0}   /alpha:1.0   /fraction:0.47941175   /allowWhenFinished:false
+13:03:18.185 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:18.192 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:18.193 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -54.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:18.205 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=15, right=0, bottom=0}   /alpha:1.0   /fraction:0.5117647   /allowWhenFinished:false
+13:03:18.207 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:18.210 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:18.214 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -57.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:18.219 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=12, right=0, bottom=0}   /alpha:1.0   /fraction:0.5441176   /allowWhenFinished:false
+13:03:18.220 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:18.223 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:18.224 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -60.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:18.236 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:18.241 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=9, right=0, bottom=0}   /alpha:1.0   /fraction:0.5852941   /allowWhenFinished:false
+13:03:18.243 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:18.248 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:18.261 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -63.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:18.263 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=8, right=0, bottom=0}   /alpha:1.0   /fraction:0.61764705   /allowWhenFinished:false
+13:03:18.266 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:18.268 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:18.273 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -64.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:18.275 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=6, right=0, bottom=0}   /alpha:1.0   /fraction:0.64117646   /allowWhenFinished:false
+13:03:18.282 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:18.290 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:18.293 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -66.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:18.307 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=4, right=0, bottom=0}   /alpha:1.0   /fraction:0.7058824   /allowWhenFinished:false
+13:03:18.312 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:18.316 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:18.318 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -68.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:18.320 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=3, right=0, bottom=0}   /alpha:1.0   /fraction:0.7382353   /allowWhenFinished:false
+13:03:18.323 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:18.343 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:18.343 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -69.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:18.345 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=2, right=0, bottom=0}   /alpha:1.0   /fraction:0.7705882   /allowWhenFinished:false
+13:03:18.346 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:18.356 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:18.359 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -70.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:18.363 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:18.367 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=1, right=0, bottom=0}   /alpha:1.0   /fraction:0.8029412   /allowWhenFinished:false
+13:03:18.377 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:18.382 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:18.384 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -71.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:18.386 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=1, right=0, bottom=0}   /alpha:1.0   /fraction:0.8352941   /allowWhenFinished:false
+13:03:18.391 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:18.392 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:18.393 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -71.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:true
+13:03:18.394 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.86764705   /allowWhenFinished:false
+13:03:18.394 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:18.396 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:18.402 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -72.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:18.403 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.9   /allowWhenFinished:false
+13:03:18.404 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:18.406 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:18.408 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -72.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:18.410 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:18.413 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.9382353   /allowWhenFinished:false
+13:03:18.417 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:18.425 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:18.432 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -72.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:18.436 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.9705882   /allowWhenFinished:false
+13:03:18.442 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:18.458 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:18.462 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:18.463 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -72.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:18.467 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:1.0   /allowWhenFinished:false
+13:03:18.471 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:18.472 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:18.475 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -72.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:18.498 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:1.0   /allowWhenFinished:true
+13:03:18.521 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:2
+13:03:18.527 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, 1545.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:18.529 [I] DEBUG_NAV_InsetsAnimThreadRunner: printSurfaceParams: FLAG_MATRIX:Matrix{[1.0, 0.0, 0.0][0.0, 1.0, -72.0][0.0, 0.0, 1.0]} FLAG_ALPHA:1.0 FLAG_VISIBILITY:false
+13:03:18.530 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:18.533 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:18.538 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:18.541 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:18.551 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:18.553 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:18.563 [I] BLASTBufferQueue: [ViewRootImpl[MainActivity]#6] destructor()
+13:03:18.610 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:18.615 [I] BLASTBufferQueue: releaseBufferCallbackThunk bufferId:69295002353747 framenumber:84 blastBufferQueue is dead
+13:03:18.641 [E] OpenGLRenderer: EglManager::makeCurrent mED = 0xb4000072145ad710, surface = 0x0, mEC = 0xb4000071b45c84e0, error = EGL_SUCCESS
+13:03:18.665 [I] SubtitleRepository: Successfully loaded 25 subtitles from OpenSubtitles for tt21209876
+13:03:18.690 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:18.724 [W] HTTP: ← [404] https://hindisubanime.co/wp-json/dgt/v1/watch (790ms)
+13:03:18.731 [D] HTTP: → [GET] https://hindisubanime.co/?trdekho=1&trid=89944834&trtype=2
+13:03:18.763 [D] HTTP: → [GET] https://hindisubanime.co/?trdekho=4&trid=89944834&trtype=2
+13:03:18.769 [D] HTTP: → [GET] https://hindisubanime.co/?trdekho=5&trid=89944834&trtype=2
+13:03:18.782 [D] HTTP: → [GET] https://hindisubanime.co/?trdekho=2&trid=89944834&trtype=2
+13:03:18.787 [D] HTTP: → [GET] https://hindisubanime.co/?trdekho=8&trid=89944834&trtype=2
+13:03:18.790 [D] HTTP: → [GET] https://hindisubanime.co/?trdekho=3&trid=89944834&trtype=2
+13:03:18.793 [D] HTTP: → [GET] https://hindisubanime.co/?trdekho=6&trid=89944834&trtype=2
+13:03:18.795 [D] HTTP: → [GET] https://hindisubanime.co/?trdekho=10&trid=89944834&trtype=2
+13:03:18.798 [D] HTTP: → [GET] https://hindisubanime.co/?trdekho=9&trid=89944834&trtype=2
+13:03:18.806 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:18.832 [D] HTTP: → [GET] https://hindisubanime.co/?trdekho=7&trid=89944834&trtype=2
+13:03:18.842 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:18.924 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:19.498 [D] HTTP: ← [200] https://hindisubanime.co/?trdekho=1&trid=89944834&trtype=2 (764ms)
+13:03:19.816 [D] HTTP: ← [200] https://hindisubanime.co/?trdekho=2&trid=89944834&trtype=2 (1080ms)
+13:03:19.828 [D] HTTP: ← [200] https://hindisubanime.co/?trdekho=6&trid=89944834&trtype=2 (1086ms)
+13:03:19.837 [D] HTTP: ← [200] https://hindisubanime.co/?trdekho=10&trid=89944834&trtype=2 (1089ms)
+13:03:19.840 [D] HTTP: ← [200] https://hindisubanime.co/?trdekho=3&trid=89944834&trtype=2 (1097ms)
+13:03:19.866 [D] HTTP: ← [200] https://hindisubanime.co/?trdekho=7&trid=89944834&trtype=2 (1088ms)
+13:03:19.911 [D] HTTP: ← [200] https://hindisubanime.co/?trdekho=5&trid=89944834&trtype=2 (1120ms)
+13:03:19.917 [D] HTTP: ← [200] https://hindisubanime.co/?trdekho=8&trid=89944834&trtype=2 (1128ms)
+13:03:19.919 [D] HTTP: ← [200] https://hindisubanime.co/?trdekho=4&trid=89944834&trtype=2 (1144ms)
+13:03:19.923 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:19.927 [D] HTTP: ← [200] https://hindisubanime.co/?trdekho=9&trid=89944834&trtype=2 (1147ms)
+13:03:19.929 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:19.941 [D] STREAM_PIPELINE: [ExtractorManager] Streams: 0, Next Sources: 0
+13:03:19.951 [I] STREAM_PIPELINE: [ExtractorManager] Extraction finished. Total streams: 0
+13:03:19.952 [W] STREAM_PIPELINE: [ResolverEngine] No streams extracted for https://hindisubanime.co/epi/solo-leveling-1x2/
+13:03:19.954 [I] STREAM_PIPELINE: [ResolverEngine] Resolver pipeline complete. Produced 0 playable stream(s)
+13:03:19.956 [I] STREAM_PIPELINE: [StreamCollector] Collected 0 total stream(s) across all sources
+13:03:19.957 [D] STREAM_PIPELINE: [StreamEngine] Collected 0 raw stream(s)
+13:03:19.958 [I] STREAM_PIPELINE: [StreamEngine] Finished. Final playable streams: 0
+13:03:19.959 [W] STREAM_PIPELINE: [StreamEngine] No playable streams produced
+13:03:19.965 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:20.000 [D] ViewRootImpl[PlayerActivity]: hardware acceleration = true, sRendererEnabled = true, forceHwAccelerated = false
+13:03:20.122 [I] BLASTBufferQueue: [ViewRootImpl[PlayerActivity]#8] constructor()
+13:03:20.128 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.0   /fraction:0.0   /allowWhenFinished:false
+13:03:20.129 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.134 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.0   /fraction:0.0   /allowWhenFinished:false
+13:03:20.136 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.156 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.0023526957   /fraction:0.024   /allowWhenFinished:false
+13:03:20.169 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.170 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.006792327   /fraction:0.044   /allowWhenFinished:false
+13:03:20.172 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.180 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.013386892   /fraction:0.066   /allowWhenFinished:false
+13:03:20.181 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.184 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:20.189 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.02228595   /fraction:0.088   /allowWhenFinished:false
+13:03:20.189 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.194 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.03303334   /fraction:0.11   /allowWhenFinished:false
+13:03:20.195 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.199 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.044760793   /fraction:0.132   /allowWhenFinished:false
+13:03:20.202 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.212 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.058362998   /fraction:0.154   /allowWhenFinished:false
+13:03:20.216 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.227 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:20.232 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.0728318   /fraction:0.176   /allowWhenFinished:false
+13:03:20.239 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.243 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.08828963   /fraction:0.198   /allowWhenFinished:false
+13:03:20.244 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.245 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.10547284   /fraction:0.22   /allowWhenFinished:false
+13:03:20.247 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.254 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.12325747   /fraction:0.242   /allowWhenFinished:false
+13:03:20.255 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.265 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.14265889   /fraction:0.266   /allowWhenFinished:false
+13:03:20.266 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.276 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.16103464   /fraction:0.288   /allowWhenFinished:false
+13:03:20.277 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.288 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.18132624   /fraction:0.31   /allowWhenFinished:false
+13:03:20.289 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.299 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.2016178   /fraction:0.332   /allowWhenFinished:false
+13:03:20.300 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.310 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.2219094   /fraction:0.354   /allowWhenFinished:false
+13:03:20.311 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.321 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.2432121   /fraction:0.376   /allowWhenFinished:false
+13:03:20.324 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.333 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.265502   /fraction:0.398   /allowWhenFinished:false
+13:03:20.334 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.343 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.2877919   /fraction:0.42   /allowWhenFinished:false
+13:03:20.345 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.354 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.3100818   /fraction:0.442   /allowWhenFinished:false
+13:03:20.355 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.364 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.334019   /fraction:0.464   /allowWhenFinished:false
+13:03:20.365 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.375 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.35860878   /fraction:0.486   /allowWhenFinished:false
+13:03:20.376 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.386 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.3831986   /fraction:0.508   /allowWhenFinished:false
+13:03:20.386 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.399 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.41002378   /fraction:0.532   /allowWhenFinished:false
+13:03:20.401 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.409 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.4346136   /fraction:0.554   /allowWhenFinished:false
+13:03:20.411 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.420 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.4592033   /fraction:0.576   /allowWhenFinished:false
+13:03:20.422 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.432 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.48379308   /fraction:0.598   /allowWhenFinished:false
+13:03:20.434 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.442 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.5090066   /fraction:0.62   /allowWhenFinished:false
+13:03:20.448 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.455 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.535426   /fraction:0.642   /allowWhenFinished:false
+13:03:20.457 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.464 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.5618453   /fraction:0.664   /allowWhenFinished:false
+13:03:20.465 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.476 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.5882647   /fraction:0.686   /allowWhenFinished:false
+13:03:20.478 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.487 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.6154778   /fraction:0.708   /allowWhenFinished:false
+13:03:20.489 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.498 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.64287597   /fraction:0.73   /allowWhenFinished:false
+13:03:20.500 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.509 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.6702741   /fraction:0.752   /allowWhenFinished:false
+13:03:20.511 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.521 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.69810736   /fraction:0.774   /allowWhenFinished:false
+13:03:20.523 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.531 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.7263523   /fraction:0.796   /allowWhenFinished:false
+13:03:20.536 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.546 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.7571649   /fraction:0.82   /allowWhenFinished:false
+13:03:20.547 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.564 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.7858638   /fraction:0.842   /allowWhenFinished:false
+13:03:20.565 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.583 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.84383374   /fraction:0.886   /allowWhenFinished:false
+13:03:20.585 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.593 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.8733241   /fraction:0.908   /allowWhenFinished:false
+13:03:20.596 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.605 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.9030789   /fraction:0.93   /allowWhenFinished:false
+13:03:20.615 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.619 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.93312   /fraction:0.952   /allowWhenFinished:false
+13:03:20.622 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.636 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:0.99432945   /fraction:0.996   /allowWhenFinished:false
+13:03:20.638 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.655 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:1.0   /allowWhenFinished:false
+13:03:20.656 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:20.658 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:1.0   /allowWhenFinished:true
+13:03:20.660 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:21.208 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:21.302 [D] TransactionExecutor: Token :android.os.BinderProxy@27d3c0e has ActivityClientRecord : com.cinetheta.app
+13:03:21.345 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:21.359 [D] TransactionExecutor: Token :android.os.BinderProxy@c6a839b has ActivityClientRecord : com.cinetheta.app
+13:03:21.377 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.0   /allowWhenFinished:false
+13:03:21.378 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:21.393 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.0   /allowWhenFinished:false
+13:03:21.401 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:21.409 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.064705886   /allowWhenFinished:false
+13:03:21.414 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:21.419 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.10294118   /allowWhenFinished:false
+13:03:21.421 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:21.427 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.13529412   /allowWhenFinished:false
+13:03:21.429 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:21.444 [I] BLASTBufferQueue: [ViewRootImpl[MainActivity]#9] constructor()
+13:03:21.448 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.16470589   /allowWhenFinished:false
+13:03:21.450 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:21.457 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.19705883   /allowWhenFinished:false
+13:03:21.460 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:21.462 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.22941177   /allowWhenFinished:false
+13:03:21.463 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:21.474 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.2647059   /allowWhenFinished:false
+13:03:21.475 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:21.484 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.29705882   /allowWhenFinished:false
+13:03:21.487 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:21.496 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.32647058   /allowWhenFinished:false
+13:03:21.499 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:21.507 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.3617647   /allowWhenFinished:false
+13:03:21.509 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:21.519 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.39117646   /allowWhenFinished:false
+13:03:21.523 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:21.525 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:21.527 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.42647058   /allowWhenFinished:false
+13:03:21.528 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:21.537 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.45882353   /allowWhenFinished:false
+13:03:21.542 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:21.552 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=0, right=0, bottom=0}   /alpha:1.0   /fraction:0.49117646   /allowWhenFinished:false
+13:03:21.553 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:21.554 [D] DEBUG_NAV_InsetsAnimThreadRunner: applySurfaceParams:0
+13:03:21.561 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:21.585 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.0   /fraction:0.0   /allowWhenFinished:false
+13:03:21.596 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.0   /fraction:0.0   /allowWhenFinished:false
+13:03:21.610 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.0023526957   /fraction:0.024   /allowWhenFinished:false
+13:03:21.618 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.007324831   /fraction:0.046   /allowWhenFinished:false
+13:03:21.629 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.0141958995   /fraction:0.068   /allowWhenFinished:false
+13:03:21.641 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.02228595   /fraction:0.088   /allowWhenFinished:false
+13:03:21.650 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.03303334   /fraction:0.11   /allowWhenFinished:false
+13:03:21.662 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.044760793   /fraction:0.132   /allowWhenFinished:false
+13:03:21.672 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.058362998   /fraction:0.154   /allowWhenFinished:false
+13:03:21.683 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:21.689 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.0728318   /fraction:0.176   /allowWhenFinished:false
+13:03:21.699 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:21.702 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.08828963   /fraction:0.198   /allowWhenFinished:false
+13:03:21.709 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:21.715 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.10547284   /fraction:0.22   /allowWhenFinished:false
+13:03:21.723 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.12325747   /fraction:0.242   /allowWhenFinished:false
+13:03:21.732 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:21.734 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.14104211   /fraction:0.264   /allowWhenFinished:false
+13:03:21.738 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.15918998   /fraction:0.286   /allowWhenFinished:false
+13:03:21.750 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.17948155   /fraction:0.308   /allowWhenFinished:false
+13:03:21.761 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.2016178   /fraction:0.332   /allowWhenFinished:false
+13:03:21.772 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.2219094   /fraction:0.354   /allowWhenFinished:false
+13:03:21.783 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.2432121   /fraction:0.376   /allowWhenFinished:false
+13:03:21.794 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.265502   /fraction:0.398   /allowWhenFinished:false
+13:03:21.805 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.2877919   /fraction:0.42   /allowWhenFinished:false
+13:03:21.816 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.3100818   /fraction:0.442   /allowWhenFinished:false
+13:03:21.827 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.334019   /fraction:0.464   /allowWhenFinished:false
+13:03:21.838 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.35860878   /fraction:0.486   /allowWhenFinished:false
+13:03:21.850 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.3831986   /fraction:0.508   /allowWhenFinished:false
+13:03:21.863 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.4077883   /fraction:0.53   /allowWhenFinished:false
+13:03:21.871 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.4323781   /fraction:0.552   /allowWhenFinished:false
+13:03:21.883 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.4569679   /fraction:0.574   /allowWhenFinished:false
+13:03:21.896 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.48155767   /fraction:0.596   /allowWhenFinished:false
+13:03:21.919 [D] ActivityThread: -- comp:com.cinetheta.app/com.cinetheta.player.PlayerActivity
+13:03:21.964 [I] BLASTBufferQueue: [ViewRootImpl[PlayerActivity]#8] destructor()
+13:03:21.975 [D] OpenGLRenderer: endAllActiveAnimators on 0xb400007254601160 (UnprojectedRipple) with handle 0xb4000071645f0ef0
+13:03:21.988 [D] View: [Warning] assignParent to null: this = DecorView@244e070[PlayerActivity]
+13:03:21.989 [I] BLASTBufferQueue: releaseBufferCallbackThunk bufferId:69295002353772 framenumber:43 blastBufferQueue is dead
+13:03:21.990 [I] MediaSessionImpl: Release 27c83cd [AndroidXMedia3/1.10.1] [Infinix-X6817, Infinix X6817, INFINIX, 31] [media3.common, media3.exoplayer, media3.decoder, media3.session]
+13:03:21.995 [I] ExoPlayerImpl: Release a1aaef6 [AndroidXMedia3/1.10.1] [Infinix-X6817, Infinix X6817, INFINIX, 31] [media3.common, media3.exoplayer, media3.decoder, media3.session]
+13:03:22.001 [I] BLASTBufferQueue: [ViewRootImpl[PlayerActivity]#7] destructor()
+13:03:22.003 [D] View: [Warning] assignParent to null: this = DecorView@d39170f[PlayerActivity]
+13:03:22.011 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.7545972   /fraction:0.818   /allowWhenFinished:false
+13:03:22.017 [I] BLASTBufferQueue: releaseBufferCallbackThunk bufferId:69295002353765 framenumber:148 blastBufferQueue is dead
+13:03:22.034 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:22.081 [I] DEBUG_NAV_InsetsAnimationCtrlImpl: setInsetsAndAlpha-insets:Insets{left=0, top=56, right=0, bottom=0}   /alpha:0.9303849   /fraction:0.95   /allowWhenFinished:false
+13:03:22.101 [E] OpenGLRenderer: EglManager::makeCurrent mED = 0xb4000072145ad710, surface = 0x0, mEC = 0xb4000071b45c84e0, error = EGL_SUCCESS
+13:03:22.108 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:22.773 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:22.788 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:22.811 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:22.860 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:23.544 [D] TransactionExecutor: Token :android.os.BinderProxy@c6a839b has ActivityClientRecord : com.cinetheta.app
+13:03:23.617 [E] OpenGLRenderer: EglManager::makeCurrent mED = 0xb4000072145ad710, surface = 0x0, mEC = 0xb4000071b45c84e0, error = EGL_SUCCESS
+13:03:23.643 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:03:23.656 [I] BLASTBufferQueue: [ViewRootImpl[MainActivity]#9] destructor()
+13:03:23.666 [I] GED: ged_boost_gpu_freq, level 100, eOrigin 2, final_idx 31, oppidx_max 31, oppidx_min 0
+13:03:23.717 [I] BLASTBufferQueue: releaseBufferCallbackThunk bufferId:69295002353794 framenumber:35 blastBufferQueue is dead
+13:03:25.788 [I] FA: Application backgrounded at: timestamp_millis: 17923106
 
-> Configure project :app
-w: file:///storage/emulated/0/AndroidIDEProjects/StreamFlex-android/app/build.gradle.kts:69:9: 'jvmTarget: String' is deprecated. Please migrate to the compilerOptions DSL. More details are here: https://kotl.in/u1r8ln
-WARNING: The following problems were found when resolving the SDK location:
-Where: sdk.dir property in local.properties file. Problem: Directory does not exist
-
-
-> Task :app:preBuild UP-TO-DATE
-> Task :app:preReleaseBuild UP-TO-DATE
-> Task :app:mergeReleaseJniLibFolders
-> Task :app:buildKotlinToolingMetadata UP-TO-DATE
-> Task :app:mergeReleaseNativeLibs
-> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
-> Task :app:checkReleaseDuplicateClasses
-
-> Task :app:stripReleaseDebugSymbols
-Unable to strip the following libraries, packaging them as they are: libavcodec.so, libavutil.so, libmedia3ext.so, libswresample.so, libswscale.so. Run with --info option to learn more.
-
-> Task :app:extractReleaseNativeSymbolTables UP-TO-DATE
-> Task :app:dataBindingMergeDependencyArtifactsRelease
-> Task :app:mergeReleaseNativeDebugMetadata NO-SOURCE
-> Task :app:generateReleaseResValues UP-TO-DATE
-> Task :app:generateReleaseResources
-> Task :app:mergeReleaseResources
-
-AAPT2 aapt2-8.13.2-14304508-linux Daemon #0: Unexpected error output: /data/user/0/com.tom.rv2ide/files/home/.gradle/caches/8.13/transforms/1992e3b35605379226e7ce0a02c44bfa/transformed/aapt2-8.13.2-14304508-linux/aapt2: 1: Syntax error: ")" unexpected
-
-> Task :app:packageReleaseResources
-AAPT2 aapt2-8.13.2-14304508-linux Daemon #1: Unexpected error output: /data/user/0/com.tom.rv2ide/files/home/.gradle/caches/8.13/transforms/1992e3b35605379226e7ce0a02c44bfa/transformed/aapt2-8.13.2-14304508-linux/aapt2: 1: Syntax error: ")" unexpected
-AAPT2 aapt2-8.13.2-14304508-linux Daemon #2: Unexpected error output: /data/user/0/com.tom.rv2ide/files/home/.gradle/caches/8.13/transforms/1992e3b35605379226e7ce0a02c44bfa/transformed/aapt2-8.13.2-14304508-linux/aapt2: 1: Syntax error: ")" unexpected
-AAPT2 aapt2-8.13.2-14304508-linux Daemon #3: Unexpected error output: /data/user/0/com.tom.rv2ide/files/home/.gradle/caches/8.13/transforms/1992e3b35605379226e7ce0a02c44bfa/transformed/aapt2-8.13.2-14304508-linux/aapt2: 1: Syntax error: ")" unexpected
-AAPT2 aapt2-8.13.2-14304508-linux Daemon #4: Unexpected error output: /data/user/0/com.tom.rv2ide/files/home/.gradle/caches/8.13/transforms/1992e3b35605379226e7ce0a02c44bfa/transformed/aapt2-8.13.2-14304508-linux/aapt2: 1: Syntax error: ")" unexpected
-AAPT2 aapt2-8.13.2-14304508-linux Daemon #6: Unexpected error output: /data/user/0/com.tom.rv2ide/files/home/.gradle/caches/8.13/transforms/1992e3b35605379226e7ce0a02c44bfa/transformed/aapt2-8.13.2-14304508-linux/aapt2: 1: Syntax error: ")" unexpected
-AAPT2 aapt2-8.13.2-14304508-linux Daemon #5: Unexpected error output: /data/user/0/com.tom.rv2ide/files/home/.gradle/caches/8.13/transforms/1992e3b35605379226e7ce0a02c44bfa/transformed/aapt2-8.13.2-14304508-linux/aapt2: 1: Syntax error: ")" unexpected
-> Task :app:processReleaseNavigationResources
-> Task :app:generateReleaseBuildConfig
-> Task :app:parseReleaseLocalResources
-> Task :app:compileReleaseNavigationResources
-> Task :app:mapReleaseSourceSetPaths
-> Task :app:createReleaseCompatibleScreenManifests
-> Task :app:extractDeepLinksRelease
-> Task :app:checkReleaseAarMetadata
-> Task :app:processReleaseMainManifest
-> Task :app:processReleaseManifest
-> Task :app:javaPreCompileRelease
-> Task :app:mergeReleaseResources FAILED
-> Task :app:mergeReleaseArtProfile UP-TO-DATE
-> Task :app:extractProguardFiles UP-TO-DATE
-> Task :app:mergeReleaseStartupProfile UP-TO-DATE
-> Task :app:processReleaseManifestForPackage
-
-FAILURE: Build failed with an exception.
-
-* What went wrong:
-Execution failed for task ':app:mergeReleaseResources'.
-> Multiple task action failures occurred:
-   > A failure occurred while executing com.android.build.gradle.internal.res.Aapt2CompileRunnable
-      > AAPT2 aapt2-8.13.2-14304508-linux Daemon #0: Daemon startup failed
-        This should not happen under normal circumstances, please file an issue if it does.
-   > A failure occurred while executing com.android.build.gradle.internal.res.Aapt2CompileRunnable
-      > AAPT2 aapt2-8.13.2-14304508-linux Daemon #1: Daemon startup failed
-        This should not happen under normal circumstances, please file an issue if it does.
-   > A failure occurred while executing com.android.build.gradle.internal.res.Aapt2CompileRunnable
-      > AAPT2 aapt2-8.13.2-14304508-linux Daemon #2: Daemon startup failed
-        This should not happen under normal circumstances, please file an issue if it does.
-   > A failure occurred while executing com.android.build.gradle.internal.res.Aapt2CompileRunnable
-      > AAPT2 aapt2-8.13.2-14304508-linux Daemon #3: Daemon startup failed
-        This should not happen under normal circumstances, please file an issue if it does.
-   > A failure occurred while executing com.android.build.gradle.internal.res.Aapt2CompileRunnable
-      > AAPT2 aapt2-8.13.2-14304508-linux Daemon #4: Daemon startup failed
-        This should not happen under normal circumstances, please file an issue if it does.
-   > A failure occurred while executing com.android.build.gradle.internal.res.Aapt2CompileRunnable
-      > AAPT2 aapt2-8.13.2-14304508-linux Daemon #5: Daemon startup failed
-        This should not happen under normal circumstances, please file an issue if it does.
-   > A failure occurred while executing com.android.build.gradle.internal.res.Aapt2CompileRunnable
-      > AAPT2 aapt2-8.13.2-14304508-linux Daemon #6: Daemon startup failed
-        This should not happen under normal circumstances, please file an issue if it does.
-
-* Try:
-> Run with --stacktrace option to get the stack trace.
-> Run with --info or --debug option to get more log output.
-> Run with --scan to get full insights.
-> Get more help at https://help.gradle.org.
-
-BUILD FAILED in 2m 52s
-26 actionable tasks: 20 executed, 6 up-to-date
+-----_-
+04:37.499 [I] AudioEffect: setParameter(): 0xb400007224616740, param: 101, param2: -1
+13:04:37.499 [E] VLC: [b400007244838420/474b] libvlc decoder: output: 2130708361 unknown, 480x270 stride 0 0, crop 0 0 0 0
+13:04:37.500 [E] VLC: [b4000072045fdb40/4741] libvlc window: request 1 not implemented
+13:04:37.502 [I] AudioEffect: setParameter(): 0xb400007224616740, param: 112, param2: 1
+13:04:37.503 [E] VLC: [b4000072045fdb40/4741] libvlc window: request 0 not implemented
+13:04:37.504 [E] VLC: [b4000072045fdb40/4741] libvlc window: request 0 not implemented
+13:04:37.505 [D] AudioTrack: start(1885): 0xb4000072546d7220, prior state:STATE_STOPPED
+13:04:37.506 [E] VLC: [b4000072045fdb40/4741] libvlc window: request 1 not implemented
+13:04:37.508 [D] AudioTrack: setVolume(1885): 0xb4000072546d7220, left = 1.000000, right = 1.000000
+13:04:37.510 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:38.286 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:38.331 [E] VLC: [b4000072045fdb40/4741] libvlc window: request 3 not implemented
+13:04:38.950 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:39.191 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:39.206 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:39.242 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:39.312 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:39.527 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:39.797 [I] m.cinetheta.ap: Background young concurrent copying GC freed 11MB AllocSpace bytes, 22(768KB) LOS objects, 44% free, 16MB/28MB, paused 616us,313us total 267.011ms
+13:04:39.946 [E] VLC: [b40000727463ce00/470b] libvlc input: ES_OUT_SET_(GROUP_)PCR  is called too late (pts_delay increased to 1000 ms)
+13:04:39.950 [E] NdkMediaCodec: sf error code: -38
+13:04:39.960 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:39.962 [D] PipelineWatcher: onWorkDone: frameIndex not found (18446744073709551615); ignored
+13:04:39.964 [D] PipelineWatcher: onWorkDone: frameIndex not found (18446744073709551615); ignored
+13:04:39.965 [D] PipelineWatcher: onWorkDone: frameIndex not found (18446744073709551615); ignored
+13:04:39.967 [D] PipelineWatcher: onWorkDone: frameIndex not found (18446744073709551615); ignored
+13:04:39.968 [D] PipelineWatcher: onWorkDone: frameIndex not found (18446744073709551615); ignored
+13:04:39.969 [D] PipelineWatcher: onWorkDone: frameIndex not found (18446744073709551615); ignored
+13:04:39.971 [D] PipelineWatcher: onWorkDone: frameIndex not found (18446744073709551615); ignored
+13:04:39.972 [D] PipelineWatcher: onWorkDone: frameIndex not found (18446744073709551615); ignored
+13:04:39.974 [D] PipelineWatcher: onWorkDone: frameIndex not found (18446744073709551615); ignored
+13:04:39.975 [D] PipelineWatcher: onWorkDone: frameIndex not found (18446744073709551615); ignored
+13:04:39.977 [D] PipelineWatcher: onWorkDone: frameIndex not found (18446744073709551615); ignored
+13:04:39.979 [I] CCodecConfig: query failed after returning 17 values (BAD_INDEX)
+13:04:39.979 [D] CCodecConfig: c2 config diff is   c2::u32 output.delay.value = 12
+13:04:39.980 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#771] flushed work; ignored.
+13:04:39.982 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#771] Discard frames from previous generation.
+13:04:39.985 [D] PipelineWatcher: onWorkDone: frameIndex not found (18446744073709551615); ignored
+13:04:39.987 [W] Codec2Client: query -- param skipped: index = 1342179345.
+13:04:39.988 [W] Codec2Client: query -- param skipped: index = 2415921170.
+13:04:39.989 [W] Codec2Client: query -- param skipped: index = 1610614798.
+13:04:39.990 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#771] flushed work; ignored.
+13:04:39.991 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#771] Discard frames from previous generation.
+13:04:39.991 [D] PipelineWatcher: onWorkDone: frameIndex not found (18446744073709551615); ignored
+13:04:39.993 [E] VLC: [b400007244838420/470b] libvlc decoder: buffer deadlock prevented
+13:04:39.994 [D] AudioTrack: pause(1885): 0xb4000072546d7220, prior state:STATE_ACTIVE
+13:04:39.995 [D] AudioTrackShared: this(0xb4000071f460dc10), mCblk(0x73ef450000), front(109740), mIsOut 1, interrupt() FUTEX_WAKE
+13:04:39.996 [D] AudioTrack: flush(1885): 0xb4000072546d7220, prior state:STATE_PAUSED
+13:04:39.997 [D] AudioTrack: start(1885): 0xb4000072546d7220, prior state:STATE_FLUSHED
+13:04:41.019 [D] BufferPoolAccessor2.0: bufferpool2 0xb400007224623e78 : 0(0 size) total buffers - 0(0 size) used buffers - 0/8 (recycle/alloc) - 9/86 (fetch/transfer)
+13:04:41.020 [D] BufferPoolAccessor2.0: evictor expired: 1, evicted: 1
+13:04:41.129 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:41.454 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:41.495 [I] VLC: [b4000072046220e0/4732] libvlc demux: Ending demuxer stream. [needrestart]
+13:04:41.598 [E] VLC: [b40000727463ce00/470b] libvlc input: ES_OUT_SET_(GROUP_)PCR  is called too late (pts_delay increased to 1023 ms)
+13:04:41.604 [D] AudioTrack: pause(1885): 0xb4000072546d7220, prior state:STATE_ACTIVE
+13:04:41.609 [D] AudioTrackShared: this(0xb4000071f460dc10), mCblk(0x73ef450000), front(186945), mIsOut 1, interrupt() FUTEX_WAKE
+13:04:41.611 [D] AudioTrack: flush(1885): 0xb4000072546d7220, prior state:STATE_PAUSED
+13:04:41.614 [D] AudioTrack: start(1885): 0xb4000072546d7220, prior state:STATE_FLUSHED
+13:04:41.684 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#771] MediaCodec discarded an unknown buffer
+13:04:41.685 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#771] MediaCodec discarded an unknown buffer
+13:04:41.689 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#771] MediaCodec discarded an unknown buffer
+13:04:41.690 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#771] MediaCodec discarded an unknown buffer
+13:04:41.691 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#771] MediaCodec discarded an unknown buffer
+13:04:41.692 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#771] MediaCodec discarded an unknown buffer
+13:04:41.695 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#771] MediaCodec discarded an unknown buffer
+13:04:41.697 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#771] MediaCodec discarded an unknown buffer
+13:04:41.698 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:41.699 [D] SurfaceUtils: disconnecting from surface 0xb4000072c465cc50, reason disconnectFromSurface
+13:04:41.729 [I] hw-BpHwBinder: onLastStrongRef automatically unlinking death recipients
+13:04:41.730 [D] MediaCodec: flushMediametrics
+13:04:41.734 [D] AudioTrack: pause(1885): 0xb4000072546d7220, prior state:STATE_ACTIVE
+13:04:41.735 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:41.737 [D] AudioTrack: flush(1885): 0xb4000072546d7220, prior state:STATE_PAUSED
+13:04:41.739 [D] AudioTrack: start(1885): 0xb4000072546d7220, prior state:STATE_FLUSHED
+13:04:41.761 [D] AudioTrack: stop(1885): 0xb4000072546d7220, prior state:STATE_ACTIVE
+13:04:41.763 [D] AudioTrack: stop(1885): called with 0 frames delivered
+13:04:41.769 [D] AudioTrack: stop(1885): 0xb4000072546d7220 stop done
+13:04:41.771 [D] AudioTrack: stop(1885): 0xb4000072546d7220, prior state:STATE_STOPPED
+13:04:41.773 [D] AudioTrack: ~AudioTrack(1885): 0xb4000072546d7220
+13:04:41.774 [D] AudioTrack: stop(1885): 0xb4000072546d7220, prior state:STATE_STOPPED
+13:04:41.775 [D] AudioTrack: stopAndJoinCallbacks(1885) done
+13:04:41.782 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:41.817 [I] VLC: [b400007244836a40/4796] libvlc packetizer: AAC channels: 2 samplerate: 48000
+13:04:41.820 [D] libMEOW: meow new tls: 0xb400007344a414c0
+13:04:41.845 [D] libMEOW: applied 1 plugins for [com.cinetheta.app]:
+13:04:41.862 [D] libMEOW: plugin 1: [libMEOW_gift.so]: 0xb400007304585010
+13:04:41.865 [D] libMEOW: rebuild call chain: 0xb400007344ad1550
+13:04:41.868 [D] AudioTrack: INSP: type=audio,case=1,set=0xb40000725471c560,stream_type=-1,sample_rate=48000,format=0x1,channel_mask=0x3,frame_count=3080,flags=0x0,notification_frames=0,session_id=0,transfer_type=3,uid=-1,pid=-1
+13:04:41.869 [D] AudioTrack: INSP: type=audio,case=1,attributes=1,content_type=2,usage=1,source=0,flags=0x800
+13:04:41.870 [D] AudioTrack: set(): Building AudioTrack with attributes: usage = 1, content = 2, flags = 0x800, tags = []
+13:04:41.870 [D] AudioTrack: set(): 0xb40000725471c560, Create AudioTrackThread, tid = 18329
+13:04:41.872 [D] AudioTrack: createTrack_l(1886): 0xb40000725471c560, mCblk = 0x73ef450000, mLatency = 106, mAfLatency = 42, frameCount = 3080, mSampleRate = 48000, mFlags = 0, mReqFrameCount = 3080, mNotificationFramesAct = 1540
+13:04:41.873 [W] AudioTrack: Use of stream types is deprecated for operations other than volume control
+13:04:41.882 [W] AudioTrack: See the documentation of AudioTrack() for what to use instead with android.media.AudioAttributes to qualify your playback use case
+13:04:41.883 [I] AudioEffect: set 0xb4000072245d2610 mUserData: 0xb400007154603e90 uuid: 0x709db27d30 timeLow 7261676f
+13:04:41.884 [I] AudioEffect: set() 0xb4000072245d2610 OK effect: Dynamics Processing id: 1027 status 0 enabled 0 pid 16134
+13:04:41.884 [I] AudioEffect: getParameter: param: 16, param2: -1
+13:04:41.885 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 48, param2: -1
+13:04:41.886 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 32, param2: 0
+13:04:41.887 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 64, param2: 0
+13:04:41.895 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 69, param2: -1
+13:04:41.901 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 69, param2: -1
+13:04:41.902 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 69, param2: -1
+13:04:41.903 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 69, param2: -1
+13:04:41.903 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 69, param2: -1
+13:04:41.904 [E] VLC: [b4000072045fdb40/4741] libvlc window: request 1 not implemented
+13:04:41.904 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 69, param2: -1
+13:04:41.905 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 80, param2: 0
+13:04:41.905 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 85, param2: -1
+13:04:41.906 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 85, param2: -1
+13:04:41.906 [E] VLC: [b4000072045fdb40/4741] libvlc window: request 0 not implemented
+13:04:41.912 [E] VLC: [b4000072045fdb40/4741] libvlc window: request 0 not implemented
+13:04:41.912 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 85, param2: -1
+13:04:41.913 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 85, param2: -1
+13:04:41.913 [E] VLC: [b4000072045fdb40/4741] libvlc window: request 1 not implemented
+13:04:41.914 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 85, param2: -1
+13:04:41.914 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 85, param2: -1
+13:04:41.915 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 96, param2: 0
+13:04:41.915 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 101, param2: -1
+13:04:41.916 [D] CCodec: allocate(c2.mtk.avc.decoder)
+13:04:41.918 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 101, param2: -1
+13:04:41.919 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 101, param2: -1
+13:04:41.921 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 101, param2: -1
+13:04:41.922 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 101, param2: -1
+13:04:41.923 [I] CCodec: setting up 'default' as default (vendor) store
+13:04:41.923 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 101, param2: -1
+13:04:41.926 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 112, param2: 0
+13:04:41.928 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 32, param2: 1
+13:04:41.944 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 64, param2: 1
+13:04:41.951 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 69, param2: -1
+13:04:41.954 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 69, param2: -1
+13:04:41.955 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 69, param2: -1
+13:04:41.956 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 69, param2: -1
+13:04:41.962 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 69, param2: -1
+13:04:41.963 [I] CCodec: Created component [c2.mtk.avc.decoder]
+13:04:41.966 [D] CCodecConfig: read media type: video/avc
+13:04:41.968 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 69, param2: -1
+13:04:41.974 [D] ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.max-count.values
+13:04:41.978 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 80, param2: 1
+13:04:41.979 [D] ReflectedParamUpdater: extent() != 1 for single value type: output.subscribed-indices.values
+13:04:41.981 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:41.981 [D] ReflectedParamUpdater: extent() != 1 for single value type: input.buffers.allocator-ids.values
+13:04:41.983 [D] ReflectedParamUpdater: extent() != 1 for single value type: output.buffers.allocator-ids.values
+13:04:41.983 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 85, param2: -1
+13:04:41.984 [D] ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.allocator-ids.values
+13:04:41.985 [D] ReflectedParamUpdater: extent() != 1 for single value type: output.buffers.pool-ids.values
+13:04:41.988 [D] ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.pool-ids.values
+13:04:41.989 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 85, param2: -1
+13:04:41.990 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 85, param2: -1
+13:04:41.991 [D] ReflectedParamUpdater: ignored struct field coded.color-format.locations
+13:04:41.994 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 85, param2: -1
+13:04:41.998 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 85, param2: -1
+13:04:42.000 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 85, param2: -1
+13:04:42.001 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 96, param2: 1
+13:04:42.006 [D] CCodecConfig: ignoring local param raw.size (0xd2001800) as it is already supported
+13:04:42.012 [D] CCodecConfig: ignoring local param raw.crop (0xd2001801) as it is already supported
+13:04:42.014 [D] CCodecConfig: ignoring local param default.color (0x5200180b) as it is already supported
+13:04:42.019 [D] CCodecConfig: ignoring local param raw.hdr-static-info (0xd200180a) as it is already supported
+13:04:42.023 [I] CCodecConfig: query failed after returning 17 values (BAD_INDEX)
+13:04:42.026 [D] CCodecConfig: c2 config diff is Dict {
+13:04:42.030 [D] CCodecConfig: c2::i32 algo.priority.value = 1
+13:04:42.033 [D] CCodecConfig: c2::float algo.rate.value = 0
+13:04:42.036 [D] CCodecConfig: c2::float coded.frame-rate.value = 30
+13:04:42.044 [D] CCodecConfig: c2::u32 coded.pl.level = 20495
+13:04:42.046 [D] CCodecConfig: c2::u32 coded.pl.profile = 20481
+13:04:42.049 [D] CCodecConfig: c2::u32 coded.vui.color.matrix = 0
+13:04:42.055 [D] CCodecConfig: c2::u32 coded.vui.color.primaries = 0
+13:04:42.073 [D] CCodecConfig: c2::u32 coded.vui.color.range = 2
+13:04:42.078 [D] CCodecConfig: c2::u32 coded.vui.color.transfer = 0
+13:04:42.082 [D] CCodecConfig: c2::u32 default.color.matrix = 0
+13:04:42.089 [D] CCodecConfig: c2::u32 default.color.primaries = 0
+13:04:42.091 [D] CCodecConfig: c2::u32 default.color.range = 0
+13:04:42.091 [D] CCodecConfig: c2::u32 default.color.transfer = 0
+13:04:42.092 [D] CCodecConfig: c2::u32 input.buffers.max-size.value = 2097152
+13:04:42.094 [D] CCodecConfig: c2::u32 input.delay.value = 4
+13:04:42.097 [D] CCodecConfig: string input.media-type.value = "video/avc"
+13:04:42.098 [D] CCodecConfig: c2::u32 output.delay.value = 12
+13:04:42.101 [D] CCodecConfig: string output.media-type.value = "video/raw"
+13:04:42.103 [D] CCodecConfig: c2::u32 raw.color.matrix = 0
+13:04:42.113 [D] CCodecConfig: c2::u32 raw.color.primaries = 0
+13:04:42.115 [D] CCodecConfig: c2::u32 raw.color.range = 2
+13:04:42.116 [D] CCodecConfig: c2::u32 raw.color.transfer = 0
+13:04:42.117 [D] CCodecConfig: c2::u32 raw.crop.height = 239
+13:04:42.122 [D] CCodecConfig: c2::u32 raw.crop.left = 0
+13:04:42.124 [D] CCodecConfig: c2::u32 raw.crop.top = 0
+13:04:42.126 [D] CCodecConfig: c2::u32 raw.crop.width = 319
+13:04:42.127 [D] CCodecConfig: c2::float raw.hdr-static-info.mastering.blue.x = 0
+13:04:42.130 [D] CCodecConfig: c2::float raw.hdr-s
+13:04:42.134 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 101, param2: -1
+13:04:42.142 [W] ColorUtils: expected specified color aspects (2:0:0:0)
+13:04:42.145 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 101, param2: -1
+13:04:42.146 [D] MediaCodec: flushMediametrics
+13:04:42.152 [D] SurfaceUtils: connecting to surface 0xb4000072c465cc50, reason connectToSurface
+13:04:42.155 [I] MediaCodec: [c2.mtk.avc.decoder] setting surface generation to 16521219
+13:04:42.157 [D] SurfaceUtils: disconnecting from surface 0xb4000072c465cc50, reason connectToSurface(reconnect)
+13:04:42.161 [D] SurfaceUtils: connecting to surface 0xb4000072c465cc50, reason connectToSurface(reconnect)
+13:04:42.168 [D] MediaCodec: [c2.mtk.avc.decoder] current pid: 16134, current process name: com.cinetheta.app
+13:04:42.170 [D] CCodec: [c2.mtk.avc.decoder] buffers are bound to CCodec for this session
+13:04:42.181 [D] CCodecConfig: no c2 equivalents for encoder
+13:04:42.182 [D] CCodecConfig: no c2 equivalents for color-standard
+13:04:42.183 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 101, param2: -1
+13:04:42.186 [D] CCodecConfig: no c2 equivalents for feature-adaptive-playback
+13:04:42.188 [D] CCodecConfig: no c2 equivalents for native-window
+13:04:42.189 [D] CCodecConfig: no c2 equivalents for flags
+13:04:42.195 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 101, param2: -1
+13:04:42.197 [D] CCodecConfig: c2 config diff is   c2::u32 default.color.range = 2
+13:04:42.198 [D] CCodecConfig: c2::u32 input.buffers.max-size.value = 4191232
+13:04:42.202 [D] CCodecConfig: c2::u32 raw.pixel-format.value = 34
+13:04:42.204 [D] CCodecConfig: c2::u32 raw.size.height = 1088
+13:04:42.218 [D] CCodecConfig: c2::u32 raw.size.width = 1920
+13:04:42.219 [W] Codec2Client: query -- param skipped: index = 1107298332.
+13:04:42.225 [D] CCodec: setup formats input: AMessage(what = 0x00000000) = {
+13:04:42.229 [D] CCodec: string mime = "video/avc"
+13:04:42.231 [D] CCodec: int32_t width = 1920
+13:04:42.233 [D] CCodec: int32_t profile = 65536
+13:04:42.236 [D] CCodec: int32_t priority = -1
+13:04:42.237 [D] CCodec: int32_t frame-rate = 30
+13:04:42.245 [D] CCodec: int32_t height = 1088
+13:04:42.246 [D] CCodec: int32_t level = 32768
+13:04:42.247 [D] CCodec: int32_t max-input-size = 4191232
+13:04:42.262 [D] CCodec: Rect crop(0, 0, 318, 238)
+13:04:42.265 [D] CCodec: }
+13:04:42.266 [D] CCodec: setup formats output: AMessage(what = 0x00000000) = {
+13:04:42.271 [D] CCodec: int32_t android._color-format = 2130708361
+13:04:42.273 [D] CCodec: int32_t android._video-scaling = 1
+13:04:42.277 [D] CCodec: int32_t sar-width = 1
+13:04:42.285 [D] CCodec: int32_t color-standard = 4
+13:04:42.293 [D] CCodec: int32_t color-range = 2
+13:04:42.297 [D] CCodec: int32_t color-transfer = 3
+13:04:42.298 [D] CCodec: int32_t android._dataspace = 259
+13:04:42.300 [D] CCodec: int32_t width = 1920
+13:04:42.302 [D] CCodec: int32_t rotation-degrees = 0
+13:04:42.321 [D] CCodec: int32_t sar-height = 1
+13:04:42.331 [D] CCodec: int32_t max-width = 320
+13:04:42.340 [D] CCodec: int32_t max-height = 240
+13:04:42.346 [D] CCodec: int32_t priority = -1
+13:04:42.361 [D] CCodec: string mime = "video/raw"
+13:04:42.374 [D] CCodec: Rect crop(0, 0, 318, 238)
+13:04:42.379 [D] CCodec: Buffer hdr-static-info = {
+13:04:42.385 [D] CCodec: 00000000:  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  ................
+13:04:42.388 [D] CCodec: 00000010:  00 00 00 00 00 00 00 00  00                       .........
+13:04:42.393 [D] CCodec: }
+13:04:42.399 [D] CCodec: int32_t frame-rate = 30
+13:04:42.406 [D] CCodec: int32_t height = 1088
+13:04:42.407 [D] CCodec: int32_t color-format = 2130708361
+13:04:42.418 [D] CCodec: }
+13:04:42.421 [I] CCodecConfig: query failed after returning 17 values (BAD_INDEX)
+13:04:42.422 [D] CCodecConfig: c2 config diff is   c2::u32 raw.max-size.height = 1088
+13:04:42.423 [D] CCodecConfig: c2::u32 raw.max-size.width = 1920
+13:04:42.429 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 101, param2: -1
+13:04:42.440 [W] Codec2Client: query -- param skipped: index = 1342179345.
+13:04:42.443 [W] Codec2Client: query -- param skipped: index = 2415921170.
+13:04:42.458 [W] Codec2Client: query -- param skipped: index = 1610614798.
+13:04:42.480 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#194] Created input block pool with allocatorID 16 => poolID 19 - OK (0)
+13:04:42.484 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#194] Query output surface allocator returned 0 params => BAD_INDEX (6)
+13:04:42.493 [I] CCodecBufferChannel: [c2.mtk.avc.decoder#194] Created output block pool with allocatorID 18 => poolID 337 - OK
+13:04:42.500 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#194] Configured output block pool ids 337 => OK
+13:04:42.502 [D] Codec2-OutputBufferQueue: remote graphic buffer migration 0/0
+13:04:42.508 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 101, param2: -1
+13:04:42.511 [D] Codec2Client: setOutputSurface -- generation=16521219 consumer usage=0x900
+13:04:42.513 [I] AudioEffect: setParameter(): 0xb4000072245d2610, param: 112, param2: 1
+13:04:42.520 [D] Codec2Client: Surface configure completed
+13:04:42.523 [D] BufferPoolAccessor2.0: Destruction - bufferpool2 0xb400007224623e78 cached: 0/0M, 0/0% in use; allocs: 8, 0% recycled; transfers: 86, 90% unfetched
+13:04:42.530 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:42.532 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:42.535 [D] AudioTrack: start(1886): 0xb40000725471c560, prior state:STATE_STOPPED
+13:04:42.539 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:42.541 [D] AudioTrack: setVolume(1886): 0xb40000725471c560, left = 1.000000, right = 1.000000
+13:04:42.544 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#194] flushed work; ignored.
+13:04:42.562 [D] CCodecBufferChannel: [c2.mtk.avc.decoder#194] Discard frames from previous generation.
+13:04:42.569 [D] PipelineWatcher: onWorkDone: frameIndex not found (18446744073709551615); ignored
+13:04:42.570 [D] CCodecConfig: c2 config diff is   c2::u32 output.delay.value = 13
+13:04:42.576 [D] Codec2-OutputBufferQueue: set max dequeue count 20 from update
+13:04:42.579 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:42.586 [D] CCodecConfig: c2 config diff is   c2::u32 raw.crop.height = 1080
+13:04:42.590 [D] CCodecConfig: c2::u32 raw.crop.width = 1920
+13:04:42.592 [D] CCodecConfig: c2::u32 raw.pixel-format.value = 2130706433
+13:04:42.595 [D] CCodecConfig: c2::u32 raw.size.height = 1080
+13:04:42.600 [D] CCodecBuffers: [c2.mtk.avc.decoder#194:2D-Output] popFromStashAndRegister: at 3618041001us, output format changed to AMessage(what = 0x00000000) = {
+13:04:42.605 [D] CCodecBuffers: int32_t android._color-format = 2130706433
+13:04:42.608 [D] CCodecBuffers: int32_t android._video-scaling = 1
+13:04:42.618 [D] CCodecBuffers: int32_t sar-width = 1
+13:04:42.622 [D] CCodecBuffers: int32_t color-standard = 1
+13:04:42.626 [D] CCodecBuffers: int32_t color-range = 2
+13:04:42.627 [D] CCodecBuffers: int32_t color-transfer = 3
+13:04:42.632 [D] CCodecBuffers: int32_t android._dataspace = 260
+13:04:42.634 [D] CCodecBuffers: int32_t width = 1920
+13:04:42.639 [D] CCodecBuffers: int32_t rotation-degrees = 0
+13:04:42.644 [D] CCodecBuffers: int32_t sar-height = 1
+13:04:42.653 [D] CCodecBuffers: int32_t max-width = 1920
+13:04:42.656 [D] CCodecBuffers: int32_t max-height = 1088
+13:04:42.662 [D] CCodecBuffers: int32_t priority = -1
+13:04:42.685 [D] CCodecBuffers: string mime = "video/raw"
+13:04:42.690 [D] CCodecBuffers: Rect crop(0, 0, 1919, 1079)
+13:04:42.694 [D] CCodecBuffers: Buffer hdr-static-info = {
+13:04:42.699 [D] CCodecBuffers: 00000000:  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  ................
+13:04:42.703 [D] CCodecBuffers: 00000010:  00 00 00 00 00 00 00 00  00                       .........
+13:04:42.709 [D] CCodecBuffers: }
+13:04:42.712 [D] CCodecBuffers: int32_t frame-rate = 30
+13:04:42.715 [D] CCodecBuffers: int32_t height = 1080
+13:04:42.720 [D] CCodecBuffers: int32_t color-format = 2130708361
+13:04:42.723 [D] CCodecBuffers: }
+13:04:42.729 [E] VLC: [b400007244840e20/47ab] libvlc decoder: output: 2130708361 unknown, 1920x1080 stride 0 0, crop 0 0 0 0
+13:04:42.751 [E] VLC: [b4000072045fdb40/4741] libvlc window: request 1 not implemented
+13:04:42.760 [E] VLC: [b4000072045fdb40/4741] libvlc window: request 0 not implemented
+13:04:42.761 [E] VLC: [b4000072045fdb40/4741] libvlc window: request 0 not implemented
+13:04:42.762 [E] VLC: [b4000072045fdb40/4741] libvlc window: request 1 not implemented
+13:04:42.764 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:42.766 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:42.783 [E] VLC: [b4000072045fdb40/4741] libvlc window: request 1 not implemented
+13:04:42.788 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:42.791 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:42.800 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:42.819 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:42.827 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:42.871 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:42.874 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:42.891 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:43.269 [E] VLC: [b4000072045fdb40/4741] libvlc window: request 3 not implemented
+13:04:43.326 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:43.391 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:43.402 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:43.540 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:43.629 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:43.645 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:43.967 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:44.028 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:44.060 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:44.214 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:44.236 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:44.254 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:44.283 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:44.349 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:44.399 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:44.431 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:44.454 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:44.520 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:44.532 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:44.542 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:44.552 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:44.563 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:44.592 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:44.966 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:45.789 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:47.024 [D] BufferPoolAccessor2.0: bufferpool2 0xb40000722462f9c8 : 8(33529856 size) total buffers - 8(33529856 size) used buffers - 0/8 (recycle/alloc) - 8/11 (fetch/transfer)
+13:04:47.027 [D] BufferPoolAccessor2.0: bufferpool2 0xb4000072245d1cf8 : 0(0 size) total buffers - 0(0 size) used buffers - 0/8 (recycle/alloc) - 9/61 (fetch/transfer)
+13:04:47.029 [D] BufferPoolAccessor2.0: evictor expired: 3, evicted: 2
+13:04:47.185 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:47.259 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:47.388 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:47.882 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:47.908 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:47.927 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:48.008 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:48.108 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:48.129 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:48.142 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:48.159 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:48.173 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:48.191 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:48.220 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:48.237 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:48.771 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:48.815 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:48.875 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:49.146 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:49.803 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:51.655 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:51.707 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:51.737 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:51.783 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:52.050 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:52.090 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:52.116 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:52.229 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:52.263 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:53.232 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:53.379 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:53.416 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:53.447 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:53.541 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:53.597 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:53.670 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:53.886 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:53.905 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:53.917 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:53.933 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:53.951 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:53.968 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:53.977 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:54.547 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:54.557 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:54.578 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:54.595 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:54.937 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:54.963 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:55.212 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:55.273 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:55.446 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:55.509 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:55.589 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:56.801 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:56.820 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:57.752 [E] VLC-std: ../../modules/demux/adaptive/playlist/SegmentList.cpp:133: virtual void adaptive::playlist::SegmentList::updateWith(adaptive::playlist::AbstractMultipleSegmentBaseType *, bool): assertion "duration" failed
+13:04:57.852 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:58.376 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:58.392 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:58.492 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:59.489 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:04:59.521 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:05:00.408 [E] VLC-std: [1018/130500.188431:WARNING:third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc:112] Unknown scheduling policy 1073741824
+13:05:00.415 [E] VLC-std: [1018/130500.200846:WARNING:third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc:112] Unknown scheduling policy 1073741824
+13:05:00.444 [E] VLC-std: [1018/130500.206050:WARNING:third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc:112] Unknown scheduling policy 1073741824
+13:05:00.446 [E] VLC-std: [1018/130500.207268:WARNING:third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc:112] Unknown scheduling policy 1073741824
+13:05:00.511 [E] VLC-std: [1018/130500.209282:WARNING:third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc:112] Unknown scheduling policy 1073741824
+13:05:00.531 [E] VLC-std: [1018/130500.213254:WARNING:third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc:112] Unknown scheduling policy 1073741824
+13:05:00.532 [E] VLC-std: [1018/130500.218829:WARNING:third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc:112] Unknown scheduling policy 1073741824
+13:05:00.717 [E] VLC-std: [1018/130500.221462:WARNING:third_party/cra
+13:05:00.719 [E] VLC-std: hpad/crashpad/snapshot/linux/thread_snapshot_linux.cc:112] Unknown scheduling policy 1073741824
+13:05:00.731 [E] VLC-std: [1018/130500.227793:WARNING:third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc:112] Unknown scheduling policy 1073741824
+13:05:00.734 [E] VLC-std: [1018/130500.241083:WARNING:third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc:112] Unknown scheduling policy 1073741824
+13:05:00.735 [E] VLC-std: [1018/130500.242369:WARNING:third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc:112] Unknown scheduling policy 1073741824
+13:05:00.739 [E] VLC-std: [1018/130500.244692:WARNING:third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc:112] Unknown scheduling policy 1073741824
+13:05:00.745 [E] VLC-std: [1018/130500.245971:WARNING:third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc:112] Unknown scheduling policy 1073741824
+13:05:00.747 [E] VLC-std: [1018/130500.255625:WARNING:third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc:112] Unknown scheduling policy 1073741824
+13:05:00.758 [E] VLC-std: [1018/130500.269931:WARNING:third_party/crashpad/crashpad/snapshot/linux/thread_snapsho
+13:05:00.762 [E] VLC-std: _linux.cc:112] Unknown scheduling policy 1073741824
+13:05:00.768 [E] VLC-std: [1018/130500.281501:WARNING:third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc:112] Unknown scheduling policy 1073741824
+13:05:00.770 [E] VLC-std: [1018/130500.283101:WARNING:third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc:112] Unknown scheduling policy 1073741824
+13:05:00.772 [E] VLC-std: [1018/130500.292905:WARNING:third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc:112] Unknown scheduling policy 1073741824
+13:05:00.778 [E] VLC-std: [1018/130500.299625:WARNING:third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc:112] Unknown scheduling policy 1073741824
+13:05:00.782 [E] VLC-std: [1018/130500.300719:WARNING:third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc:112] Unknown scheduling policy 1073741824
+13:05:00.785 [E] VLC-std: [1018/130500.301834:WARNING:third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc:112] Unknown scheduling policy 1073741824
+13:05:00.793 [E] VLC-std: [1018/130500.303018:WARNING:third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc:112] Unknown scheduling policy 10
+13:05:00.795 [E] VLC-std: 3741824
+13:05:00.797 [E] VLC-std: [1018/130500.310436:WARNING:third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc:112] Unknown scheduling policy 1073741824
+13:05:00.798 [E] VLC-std: [1018/130500.322288:WARNING:third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc:112] Unknown scheduling policy 1073741824
+13:05:00.808 [E] VLC-std: [1018/130500.324129:WARNING:third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc:112] Unknown scheduling policy 1073741824
+13:05:00.809 [E] VLC-std: [1018/130500.339817:WARNING:third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc:112] Unknown scheduling policy 1073741824
+13:05:00.810 [E] VLC-std: [1018/130500.346343:WARNING:third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc:112] Unknown scheduling policy 1073741824
+13:05:00.827 [E] VLC-std: [1018/130500.347875:WARNING:third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc:112] Unknown scheduling policy 1073741824
+13:05:00.829 [E] VLC-std: [1018/130500.349500:WARNING:third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc:112] Unknown scheduling policy 1073741824
+13:05:00.830 [E] VLC-std: [1018/130500.351862:WARNING:third_p
+13:05:00.835 [E] VLC-std: rty/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc:112] Unknown scheduling policy 1073741824
+13:05:00.836 [E] VLC-std: [1018/130500.352831:WARNING:third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc:112] Unknown scheduling policy 1073741824
+13:05:00.837 [E] VLC-std: [1018/130500.359623:WARNING:third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc:112] Unknown scheduling policy 1073741824
+13:05:00.840 [E] VLC-std: [1018/130500.360605:WARNING:third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc:112] Unknown scheduling policy 1073741824
+13:05:00.841 [E] VLC-std: [1018/130500.363390:WARNING:third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc:112] Unknown scheduling policy 1073741824
+13:05:00.847 [E] VLC-std: [1018/130500.364094:WARNING:third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc:112] Unknown scheduling policy 1073741824
+13:05:00.873 [E] VLC-std: [1018/130500.365510:WARNING:third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.cc:112] Unknown scheduling policy 1073741824
+13:05:00.875 [E] VLC-std: [1018/130500.383315:WARNING:third_party/crashpad/crashpad/snapshot/linux/thread
+13:05:00.880 [E] VLC-std: snapshot_linux.cc:112] Unknown scheduling policy 1073741824
+13:05:00.892 [I] OpenGLRenderer: Davey! duration=908ms; Flags=0, FrameTimelineVsyncId=13090000, IntendedVsync=199102162368365, Vsync=199102162368365, InputEventId=0, HandleInputStart=199102167145174, AnimationStart=199102167149712, PerformTraversalsStart=199103062194328, DrawStart=199103062769405, FrameDeadline=199102182368365, FrameInterval=199102167138097, FrameStartTime=11111111, SyncQueued=199103063998097, SyncStart=199103064283559, IssueDrawCommandsStart=199103064400251, SwapBuffers=199103066190713, FrameCompleted=199103071488559, DequeueBufferDuration=66385, QueueBufferDuration=1143154, GpuCompleted=199103068956559, SwapBuffersCompleted=199103071488559, DisplayPresentTime=0,
+13:05:00.898 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:05:00.915 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:05:00.919 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:05:00.928 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:05:00.937 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:05:00.952 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:05:01.299 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:05:02.681 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:05:02.728 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:05:03.566 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:05:04.395 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:05:04.427 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:05:04.451 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:05:04.475 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:05:04.486 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:05:04.500 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:05:04.879 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:05:04.975 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:05:05.023 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:05:05.030 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:05:05.059 [I] libPerfCtl: fbcNotifySbeRescue ret=-1
+13:05:12.519 [I] m.cinetheta.ap: Late-enabling -Xcheck:jni
+13:05:12.531 [I] m.cinetheta.ap: Using generational CollectorTypeCC GC.
+13:05:12.532 [I] LoadedApk: No resource references to update in package com.transsion.theme.icon
+13:05:12.533 [I] FirebaseApp: Device unlocked: initializing all Firebase APIs for app [DEFAULT]
+13:05:12.534 [I] FirebaseInitProvider: FirebaseApp initialization successful
+13:05:12.536 [W] m.cinetheta.ap: ClassLoaderContext classpath size mismatch. expected=1, found=0 (DLC[];PCL[base.apk*4233061809]{PCL[/system/framework/org.apache.http.legacy.jar*126433619]#PCL[/apex/com.android.extservices/javalib/android.ext.adservices.jar*1623750477]#PCL[/system/framework/com.android.location.provider.jar*3633238672]#PCL[/system/framework/com.android.media.remotedisplay.jar*3472798123]#PCL[/apex/com.android.extservices/javalib/android.ext.adservices.jar*1623750477]} | DLC[];PCL[])
+13:05:12.543 [I] DynamiteModule: Considering local module com.google.android.gms.measurement.dynamite:185 and remote module com.google.android.gms.measurement.dynamite:215
+13:05:12.544 [I] DynamiteModule: Selected remote version of com.google.android.gms.measurement.dynamite, version >= 215
+13:05:12.545 [I] StartAppSDK: appId is 209537758
+13:05:12.552 [W] System: ClassLoader referenced unknown path:
+13:05:12.556 [I] m.cinetheta.ap: hiddenapi: Accessing hidden method Ljava/lang/invoke/MethodHandles$Lookup;-><init>(Ljava/lang/Class;I)V (runtime_flags=0, domain=core-platform, api=unsupported) from Lretrofit2/Platform; (domain=app, TargetSdkVersion=34) using reflection: allowed
+13:05:12.563 [W] m.cinetheta.ap: ClassLoaderContext classpath element checksum mismatch. expected=4233061809, found=4003340598 (DLC[];PCL[base.apk*4233061809]{PCL[/system/framework/org.apache.http.legacy.jar*126433619]#PCL[/apex/com.android.extservices/javalib/android.ext.adservices.jar*1623750477]#PCL[/system/framework/com.android.location.provider.jar*3633238672]#PCL[/system/framework/com.android.media.remotedisplay.jar*3472798123]#PCL[/apex/com.android.extservices/javalib/android.ext.adservices.jar*1623750477]} | DLC[];PCL[/data/app/~~Y5p4kHCzB-e894SxEPRYZw==/com.cinetheta.app-DrpH0ueU4xDy1vuNWM0CpQ==/base.apk*4003340598]{PCL[/apex/com.android.extservices/javalib/android.ext.adservices.jar*1623750477]})
+13:05:12.565 [I] PowerHalWrapper: PowerHalWrapper.getInstance
+13:05:12.567 [I] m.cinetheta.ap: hiddenapi: Accessing hidden method Ldalvik/system/VMStack;->getStackClass2()Ljava/lang/Class; (runtime_flags=0, domain=core-platform, api=unsupported) from Lm7/ape; (domain=app, TargetSdkVersion=34) using reflection: allowed
+13:05:12.575 [D] ApplicationPackageManager: [getText] isMxtcMarket: false, isCoclmarket: false, isWomStkSupport: true
+13:05:12.576 [E] m.cinetheta.ap: No package ID 6b found for ID 0x6b0b0013.
+13:05:12.578 [I] FA: App measurement initialized, version: 191008
+13:05:12.580 [I] FA: To enable debug logging run: adb shell setprop log.tag.FA VERBOSE
+13:05:12.581 [I] FA: To enable faster debug mode event logging run:
+13:05:12.595 [I] FA: adb shell setprop debug.firebase.analytics.app com.cinetheta.app
+13:05:12.647 [I] StartAppSDK: StartApp SDK initialized
+13:05:12.883 [W] FeatureFlagsImplExport: java.lang.NoClassDefFoundError: Class not found using the boot class loader; no stack trace available
+13:05:15.128 [W] JobInfo: Requested flex +5m0s0ms for job -784194502 is too small; raising to +1h12m0s0ms
+13:05:15.164 [W] JobInfo: Requested flex +5m0s0ms for job -784194626 is too small; raising to +6m0s0ms
+13:05:15.853 [I] WebViewFactory: Loading com.google.android.webview version 155.0.8059.43 (code 805904303)
+13:05:15.869 [D] ApplicationLoaders: Returning zygote-cached class loader: /system/framework/android.test.base.jar
+13:05:15.875 [W] m.cinetheta.ap: Loading /data/app/~~Xv86yxCXCCohNIEZRG-glA==/com.google.android.webview-zE3TdxjeMdAUPSXIrQzSlw==/oat/arm64/base.odex non-executable as it requires an image which we failed to load
+13:05:15.881 [D] nativeloader: Configuring clns-7 for other apk /data/app/~~Xv86yxCXCCohNIEZRG-glA==/com.google.android.webview-zE3TdxjeMdAUPSXIrQzSlw==/base.apk. target_sdk_version=37, uses_libraries=, library_path=/data/app/~~Xv86yxCXCCohNIEZRG-glA==/com.google.android.webview-zE3TdxjeMdAUPSXIrQzSlw==/lib/arm64:/data/app/~~Xv86yxCXCCohNIEZRG-glA==/com.google.android.webview-zE3TdxjeMdAUPSXIrQzSlw==/base.apk!/lib/arm64-v8a, permitted_path=/data:/mnt/expand
+13:05:16.004 [I] cr_WVCFactoryProvider: version=155.0.8059.43 (805904303) minSdkVersion=29 multiprocess=true packageId=127 splits=<none>
+13:05:16.009 [D] ApplicationPackageManager: [getText] isMxtcMarket: false, isCoclmarket: false, isWomStkSupport: true
+13:05:16.102 [D] nativeloader: Load /data/app/~~Xv86yxCXCCohNIEZRG-glA==/com.google.android.webview-zE3TdxjeMdAUPSXIrQzSlw==/base.apk!/lib/arm64-v8a/libwebviewchromium.so using class loader ns clns-7 (caller=/data/app/~~Xv86yxCXCCohNIEZRG-glA==/com.google.android.webview-zE3TdxjeMdAUPSXIrQzSlw==/base.apk): ok
+13:05:16.121 [D] nativeloader: Load /system/lib64/libwebviewchromium_plat_support.so using class loader ns clns-7 (caller=/data/app/~~Xv86yxCXCCohNIEZRG-glA==/com.google.android.webview-zE3TdxjeMdAUPSXIrQzSlw==/base.apk): ok
+13:05:16.159 [E] chromium: [1018/130516.151687:ERROR:android_webview/browser/variations/variations_seed_loader.cc:36] Seed missing signature.
+13:05:16.290 [D] os.SingleLice: instance successfully. com.transsion.scrollshot.v1.ScrollShotImplLice@ac61bce from com.transsion.scrollshot.ScrollShotImplLiceFactory
+13:05:16.292 [D] os.SingleLiceFactory: instance successfully. com.transsion.scrollshot.v1.ScrollShotImplLice@ac61bce from android.view.IViewLice
+13:05:16.293 [D] os.LiceInfo: instance successfully. com.transsion.view.ViewLice@226caef from android.view.IViewLice
+13:05:16.351 [I] cr_LibraryLoader: Successfully loaded native library
+13:05:16.366 [I] cr_CachingUmaRecorder: Flushed 46 samples from 21 histograms, 0 samples were dropped.
+13:05:16.378 [I] cr_ChildProcLH: ScopedServiceBindingBatch.tryActivate: false
+13:05:16.392 [I] cr_CombinedPProvider: #registerProvider() provider:WV.fj@b35b801 isPolicyCacheEnabled:false policyProvidersSize:0
+13:05:16.402 [I] cr_policy: registerReceiver succeeded after 3ms
+13:05:16.405 [I] cr_PolicyProvider: #setManagerAndSource() 0
+13:05:16.420 [I] cr_DisplayManager: Is Display Topology available: false
+13:05:16.607 [I] cr_CombinedPProvider: #linkNativeInternal() 1
+13:05:16.614 [I] cr_AppResProvider: #getApplicationRestrictionsFromUserManager() Bundle[EMPTY_PARCEL]
+13:05:16.615 [I] cr_PolicyProvider: #notifySettingsAvailable() 0
+13:05:16.617 [I] cr_CombinedPProvider: #onSettingsAvailable() 0
+13:05:16.621 [I] cr_CombinedPProvider: #flushPolicies()
+13:05:17.074 [D] CompatibilityChangeReporter: Compat change id reported: 171228096; UID 10366; state: ENABLED
+13:05:17.308 [I] cr_AppResProvider: #getApplicationRestrictionsFromUserManager() Bundle[EMPTY_PARCEL]
+13:05:17.319 [I] cr_PolicyProvider: #notifySettingsAvailable() 0
+13:05:17.348 [I] cr_CombinedPProvider: #onSettingsAvailable() 0
+13:05:17.391 [I] cr_CombinedPProvider: #flushPolicies()
+13:05:17.397 [I] CameraManagerGlobal: Connecting to camera service
+13:05:17.415 [V] CameraManagerGlobal: ignore id:2
+13:05:17.422 [V] CameraManagerGlobal: ignore id:3
+13:05:17.439 [I] CameraManagerGlobal: onTorchStatusChangedLocked id:2 ignore callback
+13:05:17.441 [I] CameraManagerGlobal: onTorchStatusChangedLocked id:3 ignore callback
+13:05:17.470 [D] libMEOW: meow new tls: 0xb4000073446f1170
+13:05:17.476 [W] cr_media: BLUETOOTH_CONNECT permission is missing.
+13:05:17.480 [W] cr_media: getBluetoothAdapter() requires BLUETOOTH permission
+13:05:17.496 [W] cr_media: registerBluetoothIntentsIfNeeded: Requires BLUETOOTH permission
+13:05:17.502 [D] libMEOW: meow reload base cfg path: na
+13:05:17.505 [D] libMEOW: meow reload overlay cfg path: na
+13:05:17.515 [I] libMEOW_gift: open /data/performance/gift/arc.ini
+13:05:17.518 [E] QT: [QT]file does not exist
+13:05:17.533 [D] libMEOW: applied 1 plugins for [com.cinetheta.app]:
+13:05:17.539 [D] libMEOW: plugin 1: [libMEOW_gift.so]: 0xb400007304585010
+13:05:17.546 [D] libMEOW: rebuild call chain: 0xb400007344681100
+13:05:17.597 [D] hw-ProcessState: Binder ioctl to enable oneway spam detection failed: Invalid argument
+13:05:18.116 [W] AudioCapabilities: Unsupported mime audio/x-adpcm-dvi-ima
+13:05:18.124 [W] AudioCapabilities: Unsupported mime audio/x-adpcm-dvi-ima
+13:05:18.126 [W] AudioCapabilities: Unsupported mime audio/x-adpcm-ms
+13:05:18.127 [W] AudioCapabilities: Unsupported mime audio/x-adpcm-ms
+13:05:18.130 [W] AudioCapabilities: Unsupported mime audio/alac
+13:05:18.132 [W] AudioCapabilities: Unsupported mime audio/alac
+13:05:18.137 [W] AudioCapabilities: Unsupported mime audio/ape
+13:05:18.147 [W] AudioCapabilities: Unsupported mime audio/ape
+13:05:18.583 [W] VideoCapabilities: Unrecognized profile/level 32768/256 for video/mp4v-es
+13:05:18.591 [W] VideoCapabilities: Unrecognized profile/level 32768/256 for video/mp4v-es

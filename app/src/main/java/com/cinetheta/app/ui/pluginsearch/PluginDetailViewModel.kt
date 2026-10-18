@@ -43,8 +43,11 @@ class PluginDetailViewModel(
         }
     }
 
+    private var downloadJob: kotlinx.coroutines.Job? = null
+
     fun downloadContent(episode: com.cinetheta.domain.models.ProviderEpisode? = null) {
-        viewModelScope.launch {
+        downloadJob?.cancel()
+        downloadJob = viewModelScope.launch {
             val result = _uiState.value.result ?: return@launch
             _uiState.value = _uiState.value.copy(
                 isResolvingDownload = true,
@@ -76,6 +79,8 @@ class PluginDetailViewModel(
     }
 
     fun cancelDownloadDialog() {
+        downloadJob?.cancel()
+        downloadJob = null
         _uiState.value = _uiState.value.copy(
             isResolvingDownload = false,
             downloadStreamsAvailable = null,
