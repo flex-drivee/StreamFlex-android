@@ -107,7 +107,13 @@ object SubtitleRepository {
 
     private fun searchImdbFromTmdbTitle(title: String, year: Int?, isShow: Boolean): String? {
         val apiKey = getTmdbKey()
-        val cleanTitle = title.replace(Regex("[:\\-–—_.'!?()]+"), " ").trim()
+        val cleanTitle = title
+            .replace(Regex("\\[.*?\\]"), "")         // Remove [Hindi Dub], [Dual Audio], etc.
+            .replace(Regex("\\(.*?\\)"), "")         // Remove (2024), (Hindi), etc.
+            .replace(Regex("(?i)\\b(Season|Episode|S\\d+E?\\d*|E\\d+|EP\\d+|Hindi|Tamil|Telugu|Malayalam|Kannada|Bengali|Punjabi|Urdu|Dub|Sub|Dubbed|Subbed|Dual\\s+Audio|Multi\\s+Audio|4K|2160p|1080p|720p|480p|360p|WEB-?DL|BluRay|HDRip|DVDRip|HDTV|x264|x265|HEVC|AAC|DD5\\.1|ESub)\\b.*"), "")
+            .replace(Regex("[:\\-–—_.'!?]+"), " ")   // Normalize remaining punctuation
+            .trim()
+            .replace(Regex("\\s+"), " ")
         val encodedQuery = try { URLEncoder.encode(cleanTitle, "UTF-8") } catch (_: Exception) { cleanTitle }
         val yearParam = if (year != null && year > 1900) {
             if (isShow) "&first_air_date_year=$year" else "&year=$year"

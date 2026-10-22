@@ -82,8 +82,8 @@ object HostDetector {
             host.contains("megaup") ->
                 return HostType.UNKNOWN
 
-            // AnimeDekho extractors
-            host.contains("abyssplayer") || host.contains("playhydrax") ->
+            // AnimeDekho & PirateXplay extractors
+            host.contains("abyssplayer") || host.contains("playhydrax") || host.contains("short.icu") ->
                 return HostType.ABYSS
 
             host.contains("xerver") ->

@@ -27,8 +27,8 @@ android {
         applicationId = "com.cinetheta.app"
         minSdk = 24
         targetSdk = 34
-        versionCode = 11
-        versionName = "1.0.6"
+        versionCode = 12
+        versionName = "1.0.7-beta"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -118,7 +118,7 @@ android {
 }
 
 dependencies {
-    implementation("com.startapp:inapp-sdk:5.0.2")
+    implementation("com.startapp:inapp-sdk:5.+")
     // --- Core Android ---
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")

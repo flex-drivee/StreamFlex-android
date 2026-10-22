@@ -57,17 +57,44 @@ object SupportManager {
     fun openAd(context: Context) {
         recordAdClick()
         try {
-            val startAppAd = com.startapp.sdk.adsbase.StartAppAd(context)
-            startAppAd.loadAd(com.startapp.sdk.adsbase.StartAppAd.AdMode.VIDEO, object : com.startapp.sdk.adsbase.adlisteners.AdEventListener {
+            val activity = when (context) {
+                is android.app.Activity -> context
+                is android.content.ContextWrapper -> (context.baseContext as? android.app.Activity) ?: com.cinetheta.app.CineThetaApplication.topActivity
+                else -> com.cinetheta.app.CineThetaApplication.topActivity
+            } ?: context
+
+            // Use AUTOMATIC mode — highest fill rate, serves whatever ad type is available
+            val startAppAd = com.startapp.sdk.adsbase.StartAppAd(activity)
+            startAppAd.loadAd(com.startapp.sdk.adsbase.StartAppAd.AdMode.AUTOMATIC, object : com.startapp.sdk.adsbase.adlisteners.AdEventListener {
                 override fun onReceiveAd(ad: com.startapp.sdk.adsbase.Ad) {
                     startAppAd.showAd()
                 }
                 override fun onFailedToReceiveAd(ad: com.startapp.sdk.adsbase.Ad?) {
-                    Toast.makeText(context, "Sponsor ad unavailable at the moment", Toast.LENGTH_SHORT).show()
+                    android.util.Log.w("SupportManager", "StartApp AUTOMATIC ad failed (${ad?.errorMessage}). Trying FULLPAGE...")
+                    // Secondary attempt: FULLPAGE
+                    val fallbackAd = com.startapp.sdk.adsbase.StartAppAd(activity)
+                    fallbackAd.loadAd(com.startapp.sdk.adsbase.StartAppAd.AdMode.FULLPAGE, object : com.startapp.sdk.adsbase.adlisteners.AdEventListener {
+                        override fun onReceiveAd(adFallback: com.startapp.sdk.adsbase.Ad) {
+                            fallbackAd.showAd()
+                        }
+                        override fun onFailedToReceiveAd(adFallback: com.startapp.sdk.adsbase.Ad?) {
+                            android.util.Log.w("SupportManager", "StartApp FULLPAGE ad failed (${adFallback?.errorMessage}). Trying REWARDED_VIDEO...")
+                            val videoAd = com.startapp.sdk.adsbase.StartAppAd(activity)
+                            videoAd.loadAd(com.startapp.sdk.adsbase.StartAppAd.AdMode.REWARDED_VIDEO, object : com.startapp.sdk.adsbase.adlisteners.AdEventListener {
+                                override fun onReceiveAd(adVideo: com.startapp.sdk.adsbase.Ad) {
+                                    videoAd.showAd()
+                                }
+                                override fun onFailedToReceiveAd(adVideo: com.startapp.sdk.adsbase.Ad?) {
+                                    android.util.Log.e("SupportManager", "StartApp all ad modes failed: ${adVideo?.errorMessage}")
+                                    Toast.makeText(context, "Sponsor ad unavailable at the moment", Toast.LENGTH_SHORT).show()
+                                }
+                            })
+                        }
+                    })
                 }
             })
         } catch (e: Exception) {
-            Toast.makeText(context, "Unable to load sponsor ad", Toast.LENGTH_SHORT).show()
+            android.util.Log.e("SupportManager", "Unable to load sponsor ad", e)
         }
     }
 

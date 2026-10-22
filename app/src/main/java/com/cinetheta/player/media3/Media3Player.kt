@@ -812,7 +812,7 @@ class Media3Player(
                         )
                     }
                 }
-                playerView.keepScreenOn = playerState.value.isPlaying
+                playerView.keepScreenOn = true
             },
             modifier = modifier
         )

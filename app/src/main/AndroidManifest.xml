@@ -39,15 +39,11 @@
         <!-- Start.io Application ID -->
         <meta-data
             android:name="com.startapp.sdk.APPLICATION_ID"
-            android:value="209537758" />
+            android:value="@string/startapp_app_id" />
         <meta-data
             android:name="com.startapp.sdk.RETURN_ADS_ENABLED"
             android:value="false" />
 
-        <!-- Suppress Start.io built-in Consent Dialog (Pre-consented in code) -->
-        <activity
-            android:name="com.startapp.sdk.adsbase.consent.ConsentActivity"
-            tools:node="remove" />
 
         <activity
             android:name=".MainActivity"

@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">CineTheta</string>
+    <string name="startapp_app_id" translatable="false">209537758</string>
 </resources>

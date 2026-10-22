@@ -52,6 +52,47 @@ class PirateXplayTest {
             println(" -> Found Extracted Source: ${s.host} | URL: ${s.url} | HostType: ${s.hostType}")
         }
         
-        assertTrue("Extractor should find inner sources", extractionResult.sources.isNotEmpty())
+        assertTrue("Extractor should find inner sources", extractionResult.sources.isNotEmpty() || extractionResult.streams.isNotEmpty())
+
+        val streams = com.cinetheta.extractors.ExtractorManager.extract(source)
+        println("Playable Streams: ${streams.size}")
+        for (st in streams) {
+            println(" -> Found Playable Stream: ${st.name} | ${st.url}")
+        }
+        assertTrue("ExtractorManager should produce playable stream(s)", streams.isNotEmpty())
+    }
+
+    @Test
+    fun testJujutsuKaisenNoRecommendations() = runBlocking {
+        println("Starting Jujutsu Kaisen Multi-Season & Recommendation Filtering Test...")
+        val details = PirateXplayDetails()
+        val dummyResult = SearchResult(
+            id = "jujutsu-kaisen-season-3-95479",
+            title = "Jujutsu Kaisen",
+            url = "https://piratexplay.cc/series/jujutsu-kaisen-season-3-95479",
+            mediaType = MediaType.TV,
+            providerId = "piratexplay",
+            providerName = "PirateXplay"
+        )
+        val result = details.load(dummyResult, "https://piratexplay.cc")
+        assertNotNull("Result should not be null", result)
+        println("Total seasons loaded: ${result?.seasons?.size}")
+        assertTrue("Should have at least 3 seasons", (result?.seasons?.size ?: 0) >= 3)
+
+        val season1 = result?.seasons?.firstOrNull { it.number == 1 }
+        assertNotNull("Season 1 should exist", season1)
+        println("Season 1 episode count: ${season1?.episodes?.size}")
+        assertTrue("Season 1 should have real episodes (e.g. 24 eps)", (season1?.episodes?.size ?: 0) >= 20)
+
+        // Verify none of the episodes have recommendation titles
+        for (season in result?.seasons.orEmpty()) {
+            for (ep in season.episodes) {
+                org.junit.Assert.assertFalse("Should not contain Doraemon: ${ep.title}", ep.title.contains("Doraemon", ignoreCase = true))
+                org.junit.Assert.assertFalse("Should not contain Tokyo Ghoul: ${ep.title}", ep.title.contains("Tokyo Ghoul", ignoreCase = true))
+                org.junit.Assert.assertFalse("Should not contain Apothecary: ${ep.title}", ep.title.contains("Apothecary", ignoreCase = true))
+                assertTrue("Episode source must contain /episode/: ${ep.sources.firstOrNull()?.url}", ep.sources.firstOrNull()?.url?.contains("/episode/") == true)
+            }
+        }
+        println("All episodes verified successfully! No recommendation videos found.")
     }
 }

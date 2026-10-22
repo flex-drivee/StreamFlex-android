@@ -84,3 +84,13 @@
 -keepattributes Exceptions, InnerClasses, Signature, Deprecated, SourceFile, LineNumberTable, *Annotation*, EnclosingMethod
 -dontwarn android.webkit.JavascriptInterface
 -dontwarn com.startapp.**
+
+# ── 14. LibVLC (Native JNI & Player Bindings) ───────────────────────
+-keep class org.videolan.libvlc.** { *; }
+-dontwarn org.videolan.libvlc.**
+-keep class org.videolan.medialibrary.** { *; }
+-dontwarn org.videolan.medialibrary.**
+-keepclasseswithmembernames class * {
+    native <methods>;
+}
+

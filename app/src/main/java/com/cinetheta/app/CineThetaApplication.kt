@@ -61,11 +61,16 @@ class CineThetaApplication : Application(), ImageLoaderFactory {
             override fun onActivityDestroyed(activity: android.app.Activity) {}
         })
 
-        // Initialize Start.io Ads
+        // Initialize Start.io Ads (SDK 5.x)
+        // disableSplash() MUST be called before init() to prevent splash ad on startup
         try {
-            StartAppSDK.init(this, "209537758", false)
-            StartAppSDK.setUserConsent(this, "pas", System.currentTimeMillis(), true)
             StartAppAd.disableSplash()
+            StartAppSDK.init(this, "209537758", false)
+            if (BuildConfig.DEBUG) {
+                StartAppSDK.setTestAdsEnabled(true)
+            }
+            // Mark user as having given consent (GDPR/CCPA) — required for ad fill in v5+
+            StartAppSDK.setUserConsent(this, "pas", System.currentTimeMillis(), true)
         } catch (e: Exception) {
             android.util.Log.e("CineThetaApplication", "Error initializing StartApp", e)
         }

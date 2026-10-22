@@ -27,6 +27,9 @@ class AnimeDekhoExtractor : BaseExtractor() {
 
     companion object {
         private const val TAG = "AnimeDekhoExtractor"
+
+        @Volatile
+        private var cachedDgtCookie: String? = null
     }
 
     override suspend fun extract(source: ProviderSource): ExtractionResult = coroutineScope {
@@ -43,13 +46,13 @@ class AnimeDekhoExtractor : BaseExtractor() {
             source.url
         }
         var postId = source.metadata["postId"] ?: ""
-        val episodeId = source.metadata["episodeId"]?.toIntOrNull() ?: 0
+        var episodeId = source.metadata["episodeId"]?.toIntOrNull() ?: 0
 
         val extractedSources = mutableListOf<ProviderSource>()
         val extractedStreams = mutableListOf<StreamLink>()
 
-        // 1. If postId is missing, try to resolve from source.url or page HTML
-        if (postId.isBlank()) {
+        // 1. If postId is missing or episodeId is 0, resolve from page HTML
+        if (postId.isBlank() || episodeId == 0) {
             val req = RequestBuilder()
                 .url(safeSourceUrl)
                 .header("Referer", "$baseUrl/")
@@ -61,7 +64,12 @@ class AnimeDekhoExtractor : BaseExtractor() {
                 else -> null
             }
             if (html != null) {
-                postId = extractPostIdFromHtml(html)
+                if (postId.isBlank()) {
+                    postId = extractPostIdFromHtml(html)
+                }
+                if (episodeId == 0) {
+                    episodeId = extractEpisodeIdFromHtml(html)
+                }
             }
         }
 
@@ -110,21 +118,31 @@ class AnimeDekhoExtractor : BaseExtractor() {
     private suspend fun extractFromWatchApi(
         baseUrl: String,
         postId: String,
-        episodeId: Int
+        episodeId: Int,
+        extraCookie: String = ""
     ): Pair<List<ProviderSource>, List<StreamLink>> = coroutineScope {
         val watchUrl = "$baseUrl/wp-json/dgt/v1/watch"
         val bodyJson = "{\"post_id\":${postId.toIntOrNull() ?: 0},\"episode_id\":$episodeId}"
 
-        val req = RequestBuilder()
+        val activeCookie = when {
+            extraCookie.isNotBlank() -> extraCookie
+            !cachedDgtCookie.isNullOrBlank() -> cachedDgtCookie.orEmpty()
+            else -> ""
+        }
+
+        val reqBuilder = RequestBuilder()
             .url(watchUrl)
             .post(bodyJson.toByteArray(Charsets.UTF_8))
             .header("Content-Type", "application/json")
             .header("Referer", "$baseUrl/")
             .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
             .timeout(10_000L)
-            .build()
 
-        val jsonStr = when (val res = HttpClient.execute(req)) {
+        if (activeCookie.isNotBlank()) {
+            reqBuilder.header("Cookie", activeCookie)
+        }
+
+        val jsonStr = when (val res = HttpClient.execute(reqBuilder.build())) {
             is NetworkResult.Success -> res.data.body?.toString(Charsets.UTF_8)
             else -> null
         } ?: return@coroutineScope emptyList<ProviderSource>() to emptyList<StreamLink>()
@@ -134,6 +152,30 @@ class AnimeDekhoExtractor : BaseExtractor() {
 
         try {
             val root = JSONObject(jsonStr)
+
+            // Handle AnimeDekho dgt_gate system — when gated=true, fetch the gate URL to obtain
+            // the dgt_verified cookie, then retry the Watch API with the cookie.
+            val isGated = root.optBoolean("gated", false)
+            if (isGated) {
+                cachedDgtCookie = null
+
+                val gateUrl = root.optString("gate").takeIf { it.isNotBlank() }
+                    ?: root.optString("gate_url").takeIf { it.isNotBlank() }
+                Logger.d("[$TAG] Watch API returned gated=true. Gate URL: $gateUrl")
+
+                if (!gateUrl.isNullOrBlank() && extraCookie.isBlank()) {
+                    val gateCookie = fetchDgtGateCookie(gateUrl, baseUrl)
+                    if (!gateCookie.isNullOrBlank()) {
+                        Logger.d("[$TAG] Got dgt cookie: $gateCookie — retrying Watch API")
+                        return@coroutineScope extractFromWatchApi(baseUrl, postId, episodeId, gateCookie)
+                    } else {
+                        Logger.w("[$TAG] Could not get dgt cookie from gate URL")
+                    }
+                }
+                // Gate failed or retry already failed — fall through and return empty
+                return@coroutineScope emptyList<ProviderSource>() to emptyList<StreamLink>()
+            }
+
             val sourcesArr = root.optJSONArray("sources") ?: JSONArray()
 
             val jobs = (0 until sourcesArr.length()).map { idx ->
@@ -151,23 +193,23 @@ class AnimeDekhoExtractor : BaseExtractor() {
                     // 1. Process Embed URL
                     if (embedUrl.isNotBlank()) {
                         when {
-                            embedUrl.contains("player.php?url=", ignoreCase = true) -> {
+                            embedUrl.contains("player.php?url=", ignoreCase = true) ||
+                            embedUrl.contains("/embed/", ignoreCase = true) -> {
                                 val iframeSrc = fetchIframeFromPlayerPage(embedUrl, baseUrl)
-                                if (iframeSrc != null) {
-                                    val ht = resolveHostType(iframeSrc)
-                                    resolvedSources.add(
-                                        AnimeDekhoMapper.toProviderSource(
-                                            iframeUrl = iframeSrc,
-                                            hostType  = ht,
-                                            referer   = baseUrl,
-                                            quality   = resolveQuality(languageStr),
-                                            metadata  = mapOf(
-                                                "server" to "$serverName ($qualityStr)",
-                                                "quality" to qualityStr
-                                            )
+                                val finalUrl = iframeSrc ?: embedUrl
+                                val ht = resolveHostType(finalUrl)
+                                resolvedSources.add(
+                                    AnimeDekhoMapper.toProviderSource(
+                                        iframeUrl = finalUrl,
+                                        hostType  = ht,
+                                        referer   = baseUrl,
+                                        quality   = resolveQuality(languageStr),
+                                        metadata  = mapOf(
+                                            "server" to "$serverName ($qualityStr)",
+                                            "quality" to qualityStr
                                         )
                                     )
-                                }
+                                )
                             }
                             embedUrl.contains("/aaa/myth/play2.php", ignoreCase = true) -> {
                                 // Extract direct video streams from fetch.php if present
@@ -270,14 +312,115 @@ class AnimeDekhoExtractor : BaseExtractor() {
         sourcesList to streamsList
     }
 
+    /**
+     * Fetches the AnimeDekho dgt_gate page headlessly to obtain the dgt_verified cookie.
+     * The gate page renders an HTML form containing a hidden input `shortlink`
+     * with the verification URL (?dgt_verify=1&e=...&i=...&t=...&next=...).
+     * Requesting that verification shortlink directly returns HTTP 302 Found with
+     * the `Set-Cookie: dgt_verified=<token>; Max-Age=86400; path=/` header.
+     * Caches the cookie in memory and returns it.
+     */
+    private suspend fun fetchDgtGateCookie(gateUrl: String, baseUrl: String): String? {
+        return try {
+            Logger.d("[$TAG] Fetching dgt gate page: $gateUrl")
+            // Step 1: Hit the gate URL to get HTML containing the shortlink
+            val gateReq = RequestBuilder()
+                .url(gateUrl)
+                .header("Referer", "$baseUrl/")
+                .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+                .timeout(12_000L)
+                .build()
+
+            val gateHtml = when (val res = HttpClient.execute(gateReq)) {
+                is NetworkResult.Success -> res.data.body?.toString(Charsets.UTF_8)
+                else -> null
+            } ?: return null
+
+            // Step 2: Extract shortlink value from HTML
+            val shortlinkMatch = Regex("""name=["']shortlink["'][^>]*value=["']([^"']+)["']""", RegexOption.IGNORE_CASE).find(gateHtml)
+                ?: Regex("""value=["']([^"']+)["'][^>]*name=["']shortlink["']""", RegexOption.IGNORE_CASE).find(gateHtml)
+
+            var shortlink = shortlinkMatch?.groupValues?.get(1)
+            if (shortlink.isNullOrBlank()) {
+                val doc = HtmlParser.parse(gateHtml)
+                shortlink = doc.selectFirst("input[name=shortlink]")?.attr("value")
+            }
+
+            if (shortlink.isNullOrBlank()) {
+                val verifyUrlMatch = Regex("""(https?://[^"'\s]+[?&]dgt_verify=1[^"'\s]*)""").find(gateHtml)
+                shortlink = verifyUrlMatch?.groupValues?.get(1)
+            }
+
+            if (shortlink.isNullOrBlank()) {
+                Logger.w("[$TAG] No shortlink found in gate HTML")
+                return null
+            }
+
+            // Step 3: Unescape HTML entities
+            val targetUrl = shortlink
+                .replace("&#038;", "&")
+                .replace("&amp;", "&")
+
+            Logger.d("[$TAG] Requesting shortlink to obtain cookie: $targetUrl")
+
+            // Step 4: GET targetUrl with followRedirects(false) so we capture 302 Set-Cookie
+            val verifyReq = RequestBuilder()
+                .url(targetUrl)
+                .header("Referer", gateUrl)
+                .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+                .followRedirects(false)
+                .timeout(10_000L)
+                .build()
+
+            val cookieFromHeader = when (val res = HttpClient.execute(verifyReq)) {
+                is NetworkResult.Success -> {
+                    val setCookieHeaders = res.data.headers.entries
+                        .filter { it.key.equals("Set-Cookie", ignoreCase = true) }
+                        .flatMap { it.value }
+
+                    setCookieHeaders
+                        .firstOrNull { it.contains("dgt_verified", ignoreCase = true) }
+                        ?.substringBefore(";")
+                        ?.trim()
+                }
+                else -> null
+            }
+
+            // Fallback: check OkHttp CookieJar
+            val finalCookie = if (!cookieFromHeader.isNullOrBlank()) {
+                cookieFromHeader
+            } else {
+                HttpClient.getCookies(baseUrl)
+                    .firstOrNull { it.name.equals("dgt_verified", ignoreCase = true) }
+                    ?.let { "${it.name}=${it.value}" }
+            }
+
+            if (!finalCookie.isNullOrBlank()) {
+                Logger.d("[$TAG] Successfully obtained dgt cookie: $finalCookie")
+                cachedDgtCookie = finalCookie
+                finalCookie
+            } else {
+                Logger.w("[$TAG] Failed to extract dgt_verified cookie from shortlink response")
+                null
+            }
+        } catch (e: Exception) {
+            Logger.w("[$TAG] fetchDgtGateCookie failed: ${e.message}")
+            null
+        }
+    }
+
     private suspend fun fetchIframeFromPlayerPage(url: String, baseUrl: String): String? {
-        val req = RequestBuilder()
+        val reqBuilder = RequestBuilder()
             .url(url)
             .header("Referer", "$baseUrl/")
             .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
             .timeout(6_000L)
-            .build()
-        val html = when (val res = HttpClient.execute(req)) {
+
+        cachedDgtCookie?.let {
+            reqBuilder.header("Cookie", it)
+        }
+
+        val html = when (val res = HttpClient.execute(reqBuilder.build())) {
             is NetworkResult.Success -> res.data.body?.toString(Charsets.UTF_8)
             else -> null
         } ?: return null
@@ -371,19 +514,31 @@ class AnimeDekhoExtractor : BaseExtractor() {
     }
 
     private fun extractPostIdFromHtml(html: String): String {
+        Regex("""data-series=["'](\d+)["']""").find(html)?.let { return it.groupValues[1] }
+        Regex("""data-title=["'](\d+)["']""").find(html)?.let { return it.groupValues[1] }
+        Regex("""data-snapshot=["'][^"']*&quot;id&quot;:(\d+)""").find(html)?.let { return it.groupValues[1] }
+        Regex("""data-snapshot=["'][^"']*"id":(\d+)""").find(html)?.let { return it.groupValues[1] }
         val shortlinkMatch = Regex("""[?&]p=(\d+)""").find(html)
         if (shortlinkMatch != null) return shortlinkMatch.groupValues[1]
 
         val postidMatch = Regex("""postid-(\d+)""").find(html)
         if (postidMatch != null) return postidMatch.groupValues[1]
 
-        val termMatch = Regex("""term-(\d+)""").find(html)
-        if (termMatch != null) return termMatch.groupValues[1]
-
         val commentMatch = Regex("""comment_post_ID['"]\s+value=['"](\d+)['"]""").find(html)
         if (commentMatch != null) return commentMatch.groupValues[1]
 
+        val termMatch = Regex("""term-(\d+)""").find(html)
+        if (termMatch != null) return termMatch.groupValues[1]
+
         return ""
+    }
+
+    private fun extractEpisodeIdFromHtml(html: String): Int {
+        Regex("""data-term=["'](\d+)["']""").find(html)?.let { return it.groupValues[1].toIntOrNull() ?: 0 }
+        Regex("""data-episode=["'][^"']*&quot;id&quot;:(\d+)""").find(html)?.let { return it.groupValues[1].toIntOrNull() ?: 0 }
+        Regex("""data-episode=["'][^"']*"id":(\d+)""").find(html)?.let { return it.groupValues[1].toIntOrNull() ?: 0 }
+        Regex("""term-(\d+)""").find(html)?.let { return it.groupValues[1].toIntOrNull() ?: 0 }
+        return 0
     }
 
     private suspend fun fetchIframeSource(

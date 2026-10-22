@@ -77,7 +77,7 @@ class HybridPlayer(
         return when {
             enginePref.equals("VLC", ignoreCase = true) -> "VLC"
             enginePref.equals("MEDIA3", ignoreCase = true) || enginePref.equals("EXO", ignoreCase = true) -> "MEDIA3"
-            mediaId.contains("castle", ignoreCase = true) || (initialIsLiveOrCastle && mediaId.contains("castle", ignoreCase = true)) -> "VLC"
+            initialIsLiveOrCastle || mediaId.contains("castle", ignoreCase = true) -> "VLC"
             else -> "MEDIA3"
         }
     }

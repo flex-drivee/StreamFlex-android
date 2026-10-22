@@ -9,6 +9,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import com.cinetheta.core.logger.Logger
+import com.cinetheta.domain.models.HostType
 import com.cinetheta.domain.models.StreamLink
 import com.cinetheta.player.core.PlayerError
 import com.cinetheta.player.core.PlayerEvent
@@ -57,16 +58,14 @@ class VlcPlayer(
         // NOTE: Never pass invalid options like --http-timeout or stream-specific referrers here;
         // per-media options belong on the Media instance in load().
         private val VLC_OPTIONS = arrayListOf(
-            "--network-caching=4000",
-            "--live-caching=3000",
-            "--file-caching=3000",
-            "--sout-mux-caching=3000",
+            "--network-caching=2000",
+            "--live-caching=2000",
+            "--file-caching=2000",
+            "--sout-mux-caching=2000",
             "--http-reconnect",
             "--rtsp-tcp",
             "--audio-time-stretch",
-            "--adaptive-logic=rate",
-            "--no-drop-late-frames",
-            "--no-skip-frames"
+            "--adaptive-logic=rate"
         )
     }
 
@@ -173,9 +172,10 @@ class VlcPlayer(
                 reconnectAttempts = 0
                 reconnectJob?.cancel()
                 reconnectJob = null
+                val stillBuffering = mediaPlayer.time <= 0L && _state.value.isBuffering
                 _state.value = _state.value.copy(
                     isPlaying = true,
-                    isBuffering = false,
+                    isBuffering = stillBuffering,
                     durationMs = mediaPlayer.length.coerceAtLeast(0L),
                     error = null
                 )
@@ -243,7 +243,13 @@ class VlcPlayer(
                     emitEvent(PlayerEvent.Error(err))
                 }
             }
+            MediaPlayer.Event.Vout -> {
+                _state.value = _state.value.copy(isBuffering = false)
+            }
             MediaPlayer.Event.TimeChanged -> {
+                if (_state.value.isBuffering) {
+                    _state.value = _state.value.copy(isBuffering = false)
+                }
                 if (pendingSeekPosition == null) {
                     val newPos = mediaPlayer.time.coerceAtLeast(0L)
                     val curPos = _state.value.positionMs
@@ -446,13 +452,26 @@ class VlcPlayer(
             }
 
             // Stream caching & resiliency parameters
+            // Castle TV serves VOD HLS from Google Edge Cache (fast CDN) — use 1500ms caching
+            // to avoid the 4s unnecessary pre-buffering delay that occurs with live-stream caching values.
+            // Live TV / IPTV / Sports still use 4000ms for jitter resilience.
+            val isCastleVodStream = stream.host == HostType.CASTLETV ||
+                stream.name.contains("castle", ignoreCase = true) ||
+                stream.url.contains("hscow.com", ignoreCase = true) ||
+                stream.url.contains("fcxmb.com", ignoreCase = true) ||
+                stream.url.contains("castletv", ignoreCase = true)
+            val networkCaching = if (isCastleVodStream) 1500 else 4000
+            val liveCaching   = if (isCastleVodStream) 1500 else 3000
+
             media.addOption(":adaptive-logic=rate")
             media.addOption(":http-reconnect")
-            media.addOption(":network-caching=4000")
-            media.addOption(":live-caching=3000")
+            media.addOption(":network-caching=$networkCaching")
+            media.addOption(":live-caching=$liveCaching")
             media.addOption(":file-caching=3000")
             media.addOption(":sout-mux-caching=3000")
             media.addOption(":rtsp-tcp")
+            // Suppress "sub-original-fps does not exist" log noise from LibVLC subtitle slave processing
+            media.addOption(":no-subtitle-autodetect")
 
             // Attach external subtitles if present
             stream.subtitles.forEach { sub ->
@@ -669,6 +688,7 @@ class VlcPlayer(
             modifier = modifier,
             factory = { ctx ->
                 FrameLayout(ctx).apply {
+                    keepScreenOn = true
                     layoutParams = ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.MATCH_PARENT
@@ -683,19 +703,34 @@ class VlcPlayer(
 
                     addView(videoLayout)
                     currentVideoLayout = videoLayout
-                    if (!mediaPlayer.vlcVout.areViewsAttached()) {
-                        // 3rd arg is subtitles = true: enables native surface_subtitles ViewStub
-                        // 4th arg is useTextureView = false: enables native SurfaceView hardware overlay
-                        // Bypasses OpenGLRenderer pipeline, eliminating Davey stalls and UI thread ANRs
-                        mediaPlayer.attachViews(videoLayout, null, true, false)
-                    }
+
+                    // Delay attachViews() until the FrameLayout has been measured by the Compose layout
+                    // pass and has a non-zero width/height. Calling attachViews() on a 0×0 surface causes
+                    // "Invalid surface size" errors in LibVLC, which triggers SurfaceView recreation and
+                    // adds 3-6 seconds of startup delay before playback begins.
+                    viewTreeObserver.addOnGlobalLayoutListener(
+                        object : android.view.ViewTreeObserver.OnGlobalLayoutListener {
+                            override fun onGlobalLayout() {
+                                if (width > 0 && height > 0) {
+                                    viewTreeObserver.removeOnGlobalLayoutListener(this)
+                                    if (!mediaPlayer.vlcVout.areViewsAttached()) {
+                                        // 3rd arg is subtitles = true: enables native surface_subtitles ViewStub
+                                        // 4th arg is useTextureView = false: enables native SurfaceView hardware overlay
+                                        // Bypasses OpenGLRenderer pipeline, eliminating Davey stalls and UI thread ANRs
+                                        mediaPlayer.attachViews(videoLayout, null, true, false)
+                                    }
+                                }
+                            }
+                        }
+                    )
                 }
             },
             update = { frameLayout ->
                 // Do NOT detach or reattach views on every Compose frame!
                 // Re-attaching views on Compose recompositions freezes the UI thread.
                 val videoLayout = frameLayout.getChildAt(0) as? VLCVideoLayout
-                if (videoLayout != null && !mediaPlayer.vlcVout.areViewsAttached()) {
+                if (videoLayout != null && !mediaPlayer.vlcVout.areViewsAttached() &&
+                    frameLayout.width > 0 && frameLayout.height > 0) {
                     currentVideoLayout = videoLayout
                     mediaPlayer.attachViews(videoLayout, null, true, false)
                 }

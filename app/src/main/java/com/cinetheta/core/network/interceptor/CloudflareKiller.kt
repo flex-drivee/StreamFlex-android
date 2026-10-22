@@ -50,11 +50,22 @@ class CloudflareKiller : Interceptor {
         var response = chain.proceed(request)
 
         // Do not attempt WebView challenge solving for HEAD probes, JSON APIs, manifests, or shorteners/direct file hosts
+        // Also skip AnimeDekho entirely — it uses its own dgt_gate cookie system handled by AnimeDekhoExtractor
         if (request.method.equals("HEAD", ignoreCase = true) ||
             urlString.contains("/collections/post/documents/search") ||
             urlString.contains("raw.githubusercontent.com") ||
             urlString.endsWith(".json") ||
             request.header("Accept")?.contains("application/json") == true ||
+            host.contains("animedekho.tv") ||
+            host.contains("animedekho.co") ||
+            host.contains("hindisubanime.co") ||
+            urlString.contains("dgt_gate") ||
+            urlString.contains("dgt_verify") ||
+            urlString.contains("/wp-json/dgt/") ||
+            urlString.contains("/skip/vshort") ||
+            urlString.contains("gplinks") ||
+            urlString.contains("droplink") ||
+            urlString.contains("cuty.io") ||
             urlString.contains("driveseed.org") ||
             urlString.contains("driveleech.org") ||
             urlString.contains("video-seed.xyz") ||
