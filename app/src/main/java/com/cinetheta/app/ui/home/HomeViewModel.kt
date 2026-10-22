@@ -76,7 +76,7 @@ class HomeViewModel(
                     }
                 }
 
-                val history = progressManager.getHistory()
+                val history = progressManager.getHistory().filter { !it.id.startsWith("live_") }
                 val popMovies = repository.getPopularMovies()
                 
                 // Define the categories to fetch

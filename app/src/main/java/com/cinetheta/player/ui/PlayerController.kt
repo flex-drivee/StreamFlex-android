@@ -109,8 +109,7 @@ class PlayerController(
                 }
 
                 // Periodically save progress every ~10 seconds of playback (skip live streams)
-                val isLiveStream = viewModel.uiState.value.session?.directStreamUrl != null || _allStreams.value.getOrNull(_currentStreamIndex.value)?.adaptive == true
-                if (!isLiveStream && st.isPlaying && (st.positionMs - lastSavedPosition > 10000L || st.positionMs < lastSavedPosition)) {
+                if (!isLiveContent && st.isPlaying && (st.positionMs - lastSavedPosition > 10000L || st.positionMs < lastSavedPosition)) {
                     progressManager.saveProgress(mediaId, progressKey, title, type, posterPath, st.positionMs, st.durationMs, viewModel.uiState.value.session?.currentEpisode?.id)
                     lastSavedPosition = st.positionMs
                 }
@@ -118,11 +117,18 @@ class PlayerController(
         }
     }
 
+    val isLiveContent: Boolean
+        get() = mediaId.startsWith("live_sport_") ||
+                mediaId.startsWith("live_") ||
+                viewModel.uiState.value.session?.directStreamUrl != null ||
+                _allStreams.value.getOrNull(_currentStreamIndex.value)?.adaptive == true
+
     fun setStreams(streams: List<StreamLink>) {
         if (streams.isEmpty()) {
             _allStreams.value = emptyList()
             return
         }
+        val previousStream = _allStreams.value.getOrNull(_currentStreamIndex.value)
         val isFirstTime = _allStreams.value.isEmpty()
         val isDifferentFirstStream = _allStreams.value.firstOrNull()?.url != streams.firstOrNull()?.url
         _allStreams.value = streams
@@ -137,6 +143,24 @@ class PlayerController(
             }
             _currentStreamIndex.value = targetIndex
             loadCurrentStream()
+        } else {
+            // Check if subtitles were newly added to the active stream
+            val curIdx = _currentStreamIndex.value
+            val currentStream = streams.getOrNull(curIdx)
+            val prevSubCount = previousStream?.subtitles?.size ?: 0
+            if (currentStream != null && currentStream.subtitles.size > prevSubCount && !isLiveContent) {
+                if (player.state.value.subtitleTracks.isEmpty()) {
+                    val curPos = state.value.positionMs
+                    val isPlaying = state.value.isPlaying
+                    player.load(currentStream)
+                    if (curPos > 1000L) {
+                        player.seekTo(curPos)
+                    }
+                    if (isPlaying) {
+                        player.play()
+                    }
+                }
+            }
         }
     }
     
@@ -151,8 +175,10 @@ class PlayerController(
     
     fun selectStream(index: Int) {
         if (index in _allStreams.value.indices && index != _currentStreamIndex.value) {
-            // Save progress of current stream before switching
-            progressManager.saveProgress(mediaId, progressKey, title, type, posterPath, state.value.positionMs, state.value.durationMs, viewModel.uiState.value.session?.currentEpisode?.id)
+            // Save progress of current stream before switching (only for VOD)
+            if (!isLiveContent) {
+                progressManager.saveProgress(mediaId, progressKey, title, type, posterPath, state.value.positionMs, state.value.durationMs, viewModel.uiState.value.session?.currentEpisode?.id)
+            }
             _currentStreamIndex.value = index
             loadCurrentStream()
         }
@@ -259,7 +285,9 @@ class PlayerController(
         } else {
             player.seekTo(0)
             lastSavedPosition = 0
-            progressManager.saveProgress(mediaId, progressKey, title, type, posterPath, 0, state.value.durationMs, viewModel.uiState.value.session?.currentEpisode?.id)
+            if (!isLiveContent) {
+                progressManager.saveProgress(mediaId, progressKey, title, type, posterPath, 0, state.value.durationMs, viewModel.uiState.value.session?.currentEpisode?.id)
+            }
         }
         showResumeDialog.value = false
         player.play()
@@ -282,8 +310,10 @@ class PlayerController(
     }
     
     fun release() {
-        // Save one final time
-        progressManager.saveProgress(mediaId, progressKey, title, type, posterPath, state.value.positionMs, state.value.durationMs, viewModel.uiState.value.session?.currentEpisode?.id)
+        // Save one final time (only for VOD content)
+        if (!isLiveContent) {
+            progressManager.saveProgress(mediaId, progressKey, title, type, posterPath, state.value.positionMs, state.value.durationMs, viewModel.uiState.value.session?.currentEpisode?.id)
+        }
         player.release()
     }
 }

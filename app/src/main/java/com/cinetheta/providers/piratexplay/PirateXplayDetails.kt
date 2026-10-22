@@ -22,19 +22,13 @@ class PirateXplayDetails {
     }
 
     suspend fun load(result: SearchResult, baseUrl: String): ProviderResult? = withContext(Dispatchers.IO) {
-        val isTV = result.mediaType == MediaType.TV
-        
-        if (isTV) {
-            val detailHtml = fetchHtml(result.url, baseUrl) ?: return@withContext null
-            val doc = HtmlParser.parse(detailHtml, baseUrl)
-            
-            val articles = doc.select("section.episodes article.episodes")
-            
-            if (articles.isEmpty()) {
-                Logger.w("[$TAG] No episode articles found for ${result.url}")
-                return@withContext null
-            }
-            
+        val detailHtml = fetchHtml(result.url, baseUrl) ?: return@withContext null
+        val doc = HtmlParser.parse(detailHtml, baseUrl)
+
+        val articles = doc.select("article.episodes, .episodes article, section.episodes article, li article.episodes")
+        val isTV = articles.isNotEmpty() || result.mediaType == MediaType.TV
+
+        if (isTV && articles.isNotEmpty()) {
             val seasonMap = mutableMapOf<Int, MutableList<ProviderEpisode>>()
             
             for (article in articles) {

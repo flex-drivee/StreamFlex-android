@@ -322,6 +322,10 @@ fun AppNavigation(
                     onMainPlayClick = { resumedEpisodeId ->
                         val intent = Intent(context, com.cinetheta.player.PlayerActivity::class.java).apply {
                             putExtra("MEDIA_ID", movieId)
+                            val activePlugin = try { com.cinetheta.app.di.ProviderModule.repository.selectedProviderId } catch (e: Exception) { null }
+                            if (!activePlugin.isNullOrBlank()) {
+                                putExtra("PLUGIN_PROVIDER_ID", activePlugin)
+                            }
                             
                             if (uiState.show != null) {
                                 putExtra("VIDEO_TITLE", uiState.show?.title ?: "Unknown Media")
@@ -373,6 +377,10 @@ fun AppNavigation(
                             putExtra("POSTER_PATH", uiState.show?.poster)
                             
                             putExtra("CURRENT_EPISODE_ID", episode.id)
+                            val activePlugin = try { com.cinetheta.app.di.ProviderModule.repository.selectedProviderId } catch (e: Exception) { null }
+                            if (!activePlugin.isNullOrBlank()) {
+                                putExtra("PLUGIN_PROVIDER_ID", activePlugin)
+                            }
                         }
                         context.startActivity(intent)
                     }

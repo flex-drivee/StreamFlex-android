@@ -329,9 +329,9 @@ fun PlayerControls(
                             IconButton(onClick = onPipClick, modifier = Modifier.size(44.dp)) {
                                 Icon(Icons.Outlined.PictureInPictureAlt, contentDescription = "PIP", tint = Color.White, modifier = Modifier.size(26.dp))
                             }
-                            // Fullscreen
+                            // Aspect Ratio (Fit, Stretch, Zoom)
                             IconButton(onClick = onFullscreenToggle, modifier = Modifier.size(44.dp)) {
-                                Icon(Icons.Outlined.Fullscreen, contentDescription = "Fullscreen", tint = Color.White, modifier = Modifier.size(30.dp))
+                                Icon(Icons.Outlined.AspectRatio, contentDescription = "Aspect Ratio", tint = Color.White, modifier = Modifier.size(28.dp))
                             }
                         }
                     }

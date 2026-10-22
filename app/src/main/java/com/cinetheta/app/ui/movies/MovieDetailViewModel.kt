@@ -89,14 +89,18 @@ class MovieDetailViewModel(
         }
     }
 
+    private var downloadJob: kotlinx.coroutines.Job? = null
+
     fun downloadMovie() {
         val movie = _uiState.value.movie ?: return
-        viewModelScope.launch {
+        downloadJob?.cancel()
+        downloadJob = viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isResolvingDownload = true, downloadStreamsAvailable = null, pendingDownloadEpisode = null)
             try {
                 streamRepository.resolveMovie(
                     title = movie.title,
-                    year = movie.year ?: 0
+                    year = movie.year ?: 0,
+                    tmdbId = contentId
                 ) { finalStreams ->
                     if (finalStreams.isPlayable && finalStreams.streams.isNotEmpty()) {
                         _uiState.value = _uiState.value.copy(
@@ -116,14 +120,16 @@ class MovieDetailViewModel(
 
     fun downloadEpisode(episode: Episode) {
         val show = _uiState.value.show ?: return
-        viewModelScope.launch {
+        downloadJob?.cancel()
+        downloadJob = viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isResolvingDownload = true, downloadStreamsAvailable = null, pendingDownloadEpisode = episode)
             try {
                 streamRepository.resolveEpisode(
                     title = show.title,
                     season = _uiState.value.selectedSeason,
                     episode = episode.episodeNumber,
-                    year = show.year ?: 0
+                    year = show.year ?: 0,
+                    tmdbId = contentId
                 ) { finalStreams ->
                     if (finalStreams.isPlayable && finalStreams.streams.isNotEmpty()) {
                         _uiState.value = _uiState.value.copy(
@@ -145,7 +151,13 @@ class MovieDetailViewModel(
     }
 
     fun cancelDownloadDialog() {
-        _uiState.value = _uiState.value.copy(downloadStreamsAvailable = null, pendingDownloadEpisode = null)
+        downloadJob?.cancel()
+        downloadJob = null
+        _uiState.value = _uiState.value.copy(
+            isResolvingDownload = false,
+            downloadStreamsAvailable = null,
+            pendingDownloadEpisode = null
+        )
     }
 }
 

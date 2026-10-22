@@ -127,6 +127,7 @@ class PlayerActivity : ComponentActivity() {
         }
         
         val directStreamUrl = intent.getStringExtra("DIRECT_STREAM_URL")
+        val backupStreamUrls = intent.getStringArrayListExtra("BACKUP_STREAM_URLS") ?: arrayListOf()
         @Suppress("UNCHECKED_CAST")
         val streamHeaders = intent.getSerializableExtra("STREAM_HEADERS") as? Map<String, String>
 
@@ -137,9 +138,14 @@ class PlayerActivity : ComponentActivity() {
             isShow = isShow,
             episodes = episodes,
             currentEpisode = currentEpisode,
-            pluginProviderId = intent.getStringExtra("PLUGIN_PROVIDER_ID"),
+            pluginProviderId = intent.getStringExtra("PLUGIN_PROVIDER_ID") ?: try {
+                com.cinetheta.app.di.ProviderModule.repository.selectedProviderId
+            } catch (e: Exception) {
+                null
+            },
             localFilePath = localFilePath,
             directStreamUrl = directStreamUrl,
+            backupStreamUrls = backupStreamUrls,
             streamHeaders = streamHeaders
         )
         
@@ -152,7 +158,26 @@ class PlayerActivity : ComponentActivity() {
             
             // Re-create the controller if it's null
             val controller = remember { 
-                val player = Media3PlayerFactory.create(context)
+                val isMovieBox = session.pluginProviderId?.equals("moviebox", ignoreCase = true) == true ||
+                                 mediaId.contains("moviebox", ignoreCase = true)
+                val isLive = !session.directStreamUrl.isNullOrBlank() ||
+                             mediaId.startsWith("live_sport_") ||
+                             mediaId.startsWith("live_") ||
+                             mediaId.contains("channel", ignoreCase = true) ||
+                             mediaId.contains("sport", ignoreCase = true) ||
+                             session.directStreamUrl?.contains(".m3u8", ignoreCase = true) == true
+                val isCastle = !isMovieBox && (
+                    session.pluginProviderId?.equals("castletv", ignoreCase = true) == true ||
+                    mediaId.contains("castletv", ignoreCase = true) ||
+                    (session.pluginProviderId == null && try { com.cinetheta.app.di.ProviderModule.repository.selectedProviderId.equals("castletv", ignoreCase = true) } catch (e: Exception) { false })
+                )
+
+                val player = com.cinetheta.player.core.HybridPlayer(
+                    context = context,
+                    mediaId = mediaId,
+                    initialIsLiveOrCastle = isCastle
+                )
+
                 val progressManager = PlaybackProgressManager(context)
                 val pluginPrefix = session.pluginProviderId?.let { "PLUGIN:$it:" } ?: ""
                 PlayerController(

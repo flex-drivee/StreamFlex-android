@@ -25,8 +25,8 @@ class MovieBoxProviderTest {
         val first = results.first()
         println("Found: ${first.title} (ID: ${first.id})")
 
-        // Now call play-info
-        val playUrl = "https://api3.aoneroom.com/wefeed-mobile-bff/subject-api/play-info?subjectId=${first.id}"
+        // Now call play-info/v2 (updated endpoint)
+        val playUrl = "https://api3.aoneroom.com/wefeed-mobile-bff/subject-api/play-info/v2?subjectId=${first.id}"
         val headers = MovieBoxCrypto.getHeaders(method = "GET", url = playUrl)
         
         val req = RequestBuilder()

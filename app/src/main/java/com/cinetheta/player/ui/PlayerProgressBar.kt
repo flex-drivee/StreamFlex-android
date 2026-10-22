@@ -31,34 +31,38 @@ fun PlayerProgressBar(
         bufferedPositionMs.toFloat() / durationMs
     } else 0f
 
+    val currentDuration by rememberUpdatedState(durationMs)
+    val currentOnSeekTo by rememberUpdatedState(onSeekTo)
+
     Canvas(
         modifier = modifier
             .fillMaxWidth()
             .height(24.dp)
-            .pointerInput(durationMs) {
+            .pointerInput(Unit) {
                 detectTapGestures { offset ->
-                    if (durationMs > 0) {
+                    if (currentDuration > 0) {
                         val fraction = (offset.x / size.width).coerceIn(0f, 1f)
-                        onSeekTo((fraction * durationMs).toLong())
+                        currentOnSeekTo((fraction * currentDuration).toLong())
                     }
                 }
             }
-            .pointerInput(durationMs) {
+            .pointerInput(Unit) {
                 detectDragGestures(
                     onDragStart = { offset ->
-                        if (durationMs > 0) {
+                        if (currentDuration > 0) {
                             val fraction = (offset.x / size.width).coerceIn(0f, 1f)
-                            dragPosition = (fraction * durationMs).toLong()
+                            dragPosition = (fraction * currentDuration).toLong()
                         }
                     },
                     onDrag = { change, _ ->
-                        if (durationMs > 0) {
+                        change.consume()
+                        if (currentDuration > 0) {
                             val fraction = (change.position.x / size.width).coerceIn(0f, 1f)
-                            dragPosition = (fraction * durationMs).toLong()
+                            dragPosition = (fraction * currentDuration).toLong()
                         }
                     },
                     onDragEnd = {
-                        dragPosition?.let { onSeekTo(it) }
+                        dragPosition?.let { currentOnSeekTo(it) }
                         dragPosition = null
                     },
                     onDragCancel = {

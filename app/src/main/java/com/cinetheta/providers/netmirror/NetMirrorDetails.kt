@@ -171,7 +171,7 @@ class NetMirrorDetails {
                 providerId = providerId,
                 title     = title,
                 detailUrl = result.url,
-                mediaType = result.mediaType,
+                mediaType = if (providerSeasons.isNotEmpty()) MediaType.TV else result.mediaType,
                 sources   = if (isMovie) allSources else emptyList(),
                 seasons   = providerSeasons,
                 year      = result.year,

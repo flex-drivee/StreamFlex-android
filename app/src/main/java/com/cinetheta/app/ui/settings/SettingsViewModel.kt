@@ -9,11 +9,17 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 enum class VideoPlayer(val title: String, val packageName: String?) {
-    SYSTEM("Native Player (Media3)", null),
-    VLC("VLC Player", "org.videolan.vlc"),
-    MX_PLAYER("MX Player", "com.mxtech.videoplayer.ad"),
-    MX_PLAYER_PRO("MX Player Pro", "com.mxtech.videoplayer.pro"),
-    JUST_PLAYER("Just (Video) Player", "com.brouken.player")
+    SYSTEM("Built-in Player (Auto: LibVLC & Media3)", null),
+    VLC("External VLC App", "org.videolan.vlc"),
+    MX_PLAYER("External MX Player App", "com.mxtech.videoplayer.ad"),
+    MX_PLAYER_PRO("External MX Player Pro App", "com.mxtech.videoplayer.pro"),
+    JUST_PLAYER("External Just Player App", "com.brouken.player")
+}
+
+enum class PlayerEngine(val key: String, val title: String, val description: String) {
+    AUTO("AUTO", "Auto (Smart Selection)", "LibVLC for Castle TV & Live Sports, Media3 for Movies/Shows"),
+    VLC("VLC", "LibVLC Engine", "Forces VLC for all playback (Best for Multi-Audio & Live Streams)"),
+    MEDIA3("MEDIA3", "Media3 / ExoPlayer", "Forces ExoPlayer for all playback (Fast seeking)")
 }
 
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
@@ -58,9 +64,14 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     val playerVideoQuality: StateFlow<String> = _playerVideoQuality.asStateFlow()
     
     private val _preferredPlayer = MutableStateFlow(
-        VideoPlayer.valueOf(prefs.getString("preferred_player", VideoPlayer.SYSTEM.name) ?: VideoPlayer.SYSTEM.name)
+        VideoPlayer.values().find { it.name == (prefs.getString("preferred_player", VideoPlayer.SYSTEM.name) ?: VideoPlayer.SYSTEM.name) } ?: VideoPlayer.SYSTEM
     )
     val preferredPlayer: StateFlow<VideoPlayer> = _preferredPlayer.asStateFlow()
+
+    private val _playerEngine = MutableStateFlow(
+        PlayerEngine.values().find { it.key.equals(prefs.getString("player_engine", PlayerEngine.AUTO.key), ignoreCase = true) } ?: PlayerEngine.AUTO
+    )
+    val playerEngine: StateFlow<PlayerEngine> = _playerEngine.asStateFlow()
 
     fun setAppTheme(theme: String) {
         prefs.edit().putString("app_theme", theme).apply()
@@ -117,6 +128,11 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         _preferredPlayer.value = player
     }
 
+    fun setPlayerEngine(engine: PlayerEngine) {
+        prefs.edit().putString("player_engine", engine.key).apply()
+        _playerEngine.value = engine
+    }
+
     /**
      * Clears all app caches: domain manifests, search results, TMDB items,
      * provider manifests, and Cloudflare cookies.
@@ -158,6 +174,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             _developerMode.value = false
             _playerVideoQuality.value = "Auto"
             _preferredPlayer.value = VideoPlayer.SYSTEM
+            _playerEngine.value = PlayerEngine.AUTO
             true
         } catch (e: Exception) {
             false

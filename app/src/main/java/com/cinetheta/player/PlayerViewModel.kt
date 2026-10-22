@@ -7,6 +7,7 @@ import com.cinetheta.domain.models.HostType
 import com.cinetheta.domain.models.StreamLink
 import com.cinetheta.domain.repositories.StreamRepository
 import com.cinetheta.player.episodes.PlayerEpisode
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,6 +24,7 @@ data class PlayerSession(
     val pluginProviderId: String? = null,
     val localFilePath: String? = null,
     val directStreamUrl: String? = null,
+    val backupStreamUrls: List<String> = emptyList(),
     val streamHeaders: Map<String, String>? = null
 )
 
@@ -65,18 +67,34 @@ class PlayerViewModel(
             try {
                 // Direct stream URL (e.g. Live Sports / TV Channels)
                 if (!session.directStreamUrl.isNullOrBlank()) {
-                    val liveStream = StreamLink(
-                        name = "Live Stream",
-                        url = session.directStreamUrl,
-                        quality = com.cinetheta.domain.models.Quality.P1080,
-                        headers = session.streamHeaders ?: emptyMap(),
-                        host = HostType.DIRECT,
-                        adaptive = true,
-                        contentType = com.cinetheta.core.network.detector.ContentType.HLS
+                    val streamList = mutableListOf<StreamLink>()
+                    streamList.add(
+                        StreamLink(
+                            name = if (session.backupStreamUrls.isNotEmpty()) "Server 1 (Primary)" else "Live Stream",
+                            url = session.directStreamUrl,
+                            quality = com.cinetheta.domain.models.Quality.P1080,
+                            headers = session.streamHeaders ?: emptyMap(),
+                            host = HostType.DIRECT,
+                            adaptive = true,
+                            contentType = com.cinetheta.core.network.detector.ContentType.HLS
+                        )
                     )
+                    session.backupStreamUrls.forEachIndexed { idx, backupUrl ->
+                        streamList.add(
+                            StreamLink(
+                                name = "Server ${idx + 2} (Mirror)",
+                                url = backupUrl,
+                                quality = com.cinetheta.domain.models.Quality.P1080,
+                                headers = session.streamHeaders ?: emptyMap(),
+                                host = HostType.DIRECT,
+                                adaptive = true,
+                                contentType = com.cinetheta.core.network.detector.ContentType.HLS
+                            )
+                        )
+                    }
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        streams = listOf(liveStream),
+                        streams = streamList,
                         isOffline = false
                     )
                     return@launch
@@ -140,30 +158,65 @@ class PlayerViewModel(
                     }
                 }
 
+                // Concurrently fetch subtitles for this movie/episode (OpenSubtitles v3)
+                val subsDeferred = async {
+                    try {
+                        com.cinetheta.domain.repositories.SubtitleRepository.getSubtitles(
+                            mediaId = session.mediaId,
+                            title = session.title,
+                            year = session.year,
+                            season = session.currentEpisode?.seasonNumber,
+                            episode = session.currentEpisode?.episodeNumber
+                        )
+                    } catch (e: Exception) {
+                        emptyList()
+                    }
+                }
+
+                // As soon as background subtitles resolve, attach them to the active stream list
+                val subsJob = viewModelScope.launch {
+                    val subs = subsDeferred.await()
+                    if (subs.isNotEmpty()) {
+                        val currentStreams = _uiState.value.streams
+                        if (currentStreams.isNotEmpty() && currentStreams.none { it.subtitles.isNotEmpty() }) {
+                            _uiState.value = _uiState.value.copy(
+                                streams = currentStreams.map { it.copy(subtitles = subs) }
+                            )
+                        }
+                    }
+                }
+
                 // 2. Check for Direct Plugin Sources
                 val directSources = com.cinetheta.app.ui.pluginsearch.PluginSharedData.takeSources()
                 if (directSources != null) {
                     val resolved = streamRepository.resolveSources(directSources) { currentStreams ->
                         if (currentStreams.isPlayable && currentStreams.streams.isNotEmpty()) {
+                            val finalSubs = if (currentStreams.streams.none { it.subtitles.isNotEmpty() } && subsDeferred.isCompleted) {
+                                try { subsDeferred.await() } catch (_: Exception) { emptyList() }
+                            } else emptyList()
+                            val enriched = if (finalSubs.isNotEmpty()) currentStreams.streams.map { it.copy(subtitles = finalSubs) } else currentStreams.streams
                             _uiState.value = _uiState.value.copy(
                                 isLoading = false,
-                                streams = currentStreams.streams
+                                streams = enriched
                             )
                         }
                     }
-                    if (_uiState.value.streams.isEmpty()) {
-                        if (resolved.isPlayable && resolved.streams.isNotEmpty()) {
-                            _uiState.value = _uiState.value.copy(
-                                isLoading = false,
-                                streams = resolved.streams
-                            )
-                        } else {
-                            _uiState.value = _uiState.value.copy(
-                                isLoading = false,
-                                streams = emptyList(),
-                                error = "Video not Available"
-                            )
-                        }
+                    val streamsToUse = if (resolved.isPlayable && resolved.streams.isNotEmpty()) resolved.streams else _uiState.value.streams
+                    if (streamsToUse.isNotEmpty()) {
+                        val finalSubs = if (streamsToUse.none { it.subtitles.isNotEmpty() }) {
+                            try { subsDeferred.await() } catch (_: Exception) { emptyList() }
+                        } else emptyList()
+                        val enriched = if (finalSubs.isNotEmpty()) streamsToUse.map { it.copy(subtitles = finalSubs) } else streamsToUse
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            streams = enriched
+                        )
+                    } else {
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            streams = emptyList(),
+                            error = "Video not Available"
+                        )
                     }
                     return@launch
                 }
@@ -184,12 +237,17 @@ class PlayerViewModel(
                         season = session.currentEpisode.seasonNumber,
                         episode = session.currentEpisode.episodeNumber,
                         year = session.year,
-                        pluginProviderId = session.pluginProviderId
+                        pluginProviderId = session.pluginProviderId,
+                        tmdbId = session.mediaId
                     ) { currentStreams ->
                         if (currentStreams.isPlayable && currentStreams.streams.isNotEmpty()) {
+                            val finalSubs = if (currentStreams.streams.none { it.subtitles.isNotEmpty() } && subsDeferred.isCompleted) {
+                                try { subsDeferred.await() } catch (_: Exception) { emptyList() }
+                            } else emptyList()
+                            val enriched = if (finalSubs.isNotEmpty()) currentStreams.streams.map { it.copy(subtitles = finalSubs) } else currentStreams.streams
                             _uiState.value = _uiState.value.copy(
                                 isLoading = false,
-                                streams = currentStreams.streams,
+                                streams = enriched,
                                 isOffline = false
                             )
                         }
@@ -197,32 +255,40 @@ class PlayerViewModel(
                 } else {
                     streamRepository.resolveMovie(
                         title = session.title,
-                        year = session.year
+                        year = session.year,
+                        tmdbId = session.mediaId
                     ) { currentStreams ->
                         if (currentStreams.isPlayable && currentStreams.streams.isNotEmpty()) {
+                            val finalSubs = if (currentStreams.streams.none { it.subtitles.isNotEmpty() } && subsDeferred.isCompleted) {
+                                try { subsDeferred.await() } catch (_: Exception) { emptyList() }
+                            } else emptyList()
+                            val enriched = if (finalSubs.isNotEmpty()) currentStreams.streams.map { it.copy(subtitles = finalSubs) } else currentStreams.streams
                             _uiState.value = _uiState.value.copy(
                                 isLoading = false,
-                                streams = currentStreams.streams,
+                                streams = enriched,
                                 isOffline = false
                             )
                         }
                     }
                 }
 
-                if (_uiState.value.streams.isEmpty()) {
-                    if (resolved.isPlayable && resolved.streams.isNotEmpty()) {
-                        _uiState.value = _uiState.value.copy(
-                            isLoading = false,
-                            streams = resolved.streams,
-                            isOffline = false
-                        )
-                    } else {
-                        _uiState.value = _uiState.value.copy(
-                            isLoading = false,
-                            streams = emptyList(),
-                            error = "Video not Available"
-                        )
-                    }
+                val finalCandidateStreams = if (resolved.isPlayable && resolved.streams.isNotEmpty()) resolved.streams else _uiState.value.streams
+                if (finalCandidateStreams.isNotEmpty()) {
+                    val finalSubs = if (finalCandidateStreams.none { it.subtitles.isNotEmpty() }) {
+                        try { subsDeferred.await() } catch (_: Exception) { emptyList() }
+                    } else emptyList()
+                    val enriched = if (finalSubs.isNotEmpty()) finalCandidateStreams.map { it.copy(subtitles = finalSubs) } else finalCandidateStreams
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        streams = enriched,
+                        isOffline = false
+                    )
+                } else {
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        streams = emptyList(),
+                        error = "Video not Available"
+                    )
                 }
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(

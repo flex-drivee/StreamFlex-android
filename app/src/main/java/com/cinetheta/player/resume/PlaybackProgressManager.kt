@@ -34,7 +34,7 @@ class PlaybackProgressManager(context: Context) {
         durationMs: Long,
         episodeId: String? = null
     ) {
-        if (durationMs <= 0 || mediaId.isBlank()) return
+        if (durationMs <= 0 || mediaId.isBlank() || mediaId.startsWith("live_") || type.contains("LIVE", ignoreCase = true)) return
         
         val percentage = positionMs.toFloat() / durationMs.toFloat()
         

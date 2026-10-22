@@ -6,6 +6,7 @@ data class LiveSportItem(
     val category: String, // "football", "cricket", "basketball", etc.
     val date: Long?,
     val isLive: Boolean,
+    val isAlwaysLive: Boolean = false,
     val poster: String?,
     val league: String? = null,
     val homeTeam: String? = null,

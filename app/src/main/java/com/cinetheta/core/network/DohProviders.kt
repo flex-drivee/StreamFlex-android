@@ -126,23 +126,31 @@ object DohProviders {
     val dns: Dns = object : Dns {
         override fun lookup(hostname: String): List<InetAddress> {
             val currentProvider = getSavedProvider()
-            val primary = getPrimaryDns(currentProvider)
-            val fallback = if (currentProvider == DohProvider.NONE) googleDns else Dns.SYSTEM
 
-            val rawAddresses = try {
-                val addresses = primary.lookup(hostname)
-                if (addresses.isNotEmpty()) addresses else fallback.lookup(hostname)
-            } catch (primaryEx: Exception) {
+            // Tiered fallback chain: If university or commercial Wi-Fi blocks one DoH provider (e.g. Google),
+            // automatically fall back to Cloudflare, Quad9, and finally System DNS.
+            val candidateDnsList = when (currentProvider) {
+                DohProvider.NONE -> listOf(Dns.SYSTEM, googleDns, cloudflareDns)
+                DohProvider.GOOGLE -> listOf(googleDns, cloudflareDns, quad9Dns, Dns.SYSTEM)
+                DohProvider.CLOUDFLARE -> listOf(cloudflareDns, googleDns, quad9Dns, Dns.SYSTEM)
+                DohProvider.ADGUARD -> listOf(adguardDns, cloudflareDns, googleDns, Dns.SYSTEM)
+                DohProvider.QUAD9 -> listOf(quad9Dns, cloudflareDns, googleDns, Dns.SYSTEM)
+            }
+
+            var lastException: Exception? = null
+            for (dnsService in candidateDnsList) {
                 try {
-                    fallback.lookup(hostname)
-                } catch (fallbackEx: Exception) {
-                    if (primaryEx is UnknownHostException) throw primaryEx
-                    if (fallbackEx is UnknownHostException) throw fallbackEx
-                    throw UnknownHostException("Unable to resolve host \"$hostname\": ${primaryEx.message}")
+                    val addresses = dnsService.lookup(hostname)
+                    if (addresses.isNotEmpty()) {
+                        return sanitizeAddresses(addresses)
+                    }
+                } catch (e: Exception) {
+                    lastException = e
                 }
             }
 
-            return sanitizeAddresses(rawAddresses)
+            throw lastException as? UnknownHostException
+                ?: UnknownHostException("Unable to resolve host \"$hostname\": ${lastException?.message}")
         }
     }
 

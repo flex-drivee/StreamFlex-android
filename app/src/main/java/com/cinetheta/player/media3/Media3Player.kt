@@ -39,6 +39,8 @@ class Media3Player(
 
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var progressJob: Job? = null
+    private var seekJob: Job? = null
+    private var pendingSeekPosition: Long? = null
     
     private val trackSelector = DefaultTrackSelector(context)
     
@@ -52,8 +54,8 @@ class Media3Player(
         .setBufferDurationsMs(
             /* minBufferMs = */ 15_000,
             /* maxBufferMs = */ 60_000,
-            /* bufferForPlaybackMs = */ 1_500,
-            /* bufferForPlaybackAfterRebufferMs = */ 3_000
+            /* bufferForPlaybackMs = */ 1_000,
+            /* bufferForPlaybackAfterRebufferMs = */ 1_500
         )
         .setPrioritizeTimeOverSizeThresholds(true)
         .build()
@@ -68,6 +70,7 @@ class Media3Player(
         .setTrackSelector(trackSelector)
         .setLoadControl(loadControl)
         .setLivePlaybackSpeedControl(livePlaybackSpeedControl)
+        .setSeekParameters(androidx.media3.exoplayer.SeekParameters.CLOSEST_SYNC)
         .setMediaSourceFactory(DefaultMediaSourceFactory(context, defaultExtractorsFactory))
         .build()
 
@@ -295,7 +298,7 @@ class Media3Player(
     }
 
     private fun updateState() {
-        val currentPos = exoPlayer.currentPosition
+        val currentPos = pendingSeekPosition ?: exoPlayer.currentPosition
         val dur = exoPlayer.duration.takeIf { it > 0 } ?: 0L
         val buf = exoPlayer.bufferedPosition
 
@@ -310,6 +313,9 @@ class Media3Player(
     }
 
     override fun load(stream: StreamLink) {
+        seekJob?.cancel()
+        seekJob = null
+        pendingSeekPosition = null
         _state.value = PlayerState(isBuffering = true) 
         val prefs = context.getSharedPreferences("cinetheta_settings", android.content.Context.MODE_PRIVATE)
         val enableSubtitles = prefs.getBoolean("enable_subtitles", true)
@@ -343,6 +349,15 @@ class Media3Player(
         requestHeaders["Accept"] = "*/*"
 
         val lowerUrl = stream.url.lowercase()
+        val isMovieBoxWebCdn = lowerUrl.contains("sbcdnw.hakunaymatata.com") ||
+                               lowerUrl.contains("bcdnxw.hakunaymatata.com") ||
+                               lowerUrl.contains("movie-box.co") ||
+                               lowerUrl.contains("movieboxhd.net")
+
+        val isMovieBoxDirectCdn = lowerUrl.contains("bcdn.hakunaymatata.com") ||
+                                  lowerUrl.contains("sbcdn.hakunaymatata.com") ||
+                                  lowerUrl.contains("macdn.aoneroom.com")
+
         val isDirectCdn = lowerUrl.contains("googleusercontent.com") ||
                           lowerUrl.contains("googlevideo.com") ||
                           lowerUrl.contains("pixeldrain.com") ||
@@ -350,7 +365,8 @@ class Media3Player(
                           lowerUrl.contains("publit.io") ||
                           lowerUrl.contains(".guru/") ||
                           lowerUrl.contains(".buzz/") ||
-                          lowerUrl.contains("mega.nz")
+                          lowerUrl.contains("mega.nz") ||
+                          isMovieBoxDirectCdn
 
         // Attach Referer only if not a direct CDN stream that rejects hotlinking
         if (!isDirectCdn) {
@@ -360,15 +376,31 @@ class Media3Player(
             }
         }
 
-        // Attach all stream headers (skipping Referer for direct CDNs)
+        // Attach all stream headers (skipping Referer and Origin for direct CDNs)
         stream.headers.forEach { (k, v) ->
             if (v.isNotBlank()) {
-                if (isDirectCdn && k.equals("Referer", ignoreCase = true)) {
-                    // omit referer
+                if (isDirectCdn && (k.equals("Referer", ignoreCase = true) || k.equals("Origin", ignoreCase = true))) {
+                    // omit referer/origin for direct CDNs that reject hotlinking
                 } else if (!k.equals("Connection", ignoreCase = true)) {
                     requestHeaders[k] = v
                 }
             }
+        }
+
+        // Safeguard: explicitly ensure direct CDNs do not have Referer or Origin attached
+        if (isMovieBoxDirectCdn) {
+            requestHeaders.remove("Referer")
+            requestHeaders.remove("Origin")
+        }
+
+        // MovieBox Web CDN safeguard: requires Referer: https://movie-box.co to prevent HTTP 429
+        if (isMovieBoxWebCdn && requestHeaders["Referer"].isNullOrBlank()) {
+            requestHeaders["Referer"] = com.cinetheta.providers.moviebox.MovieBoxConfig.STREAM_REFERER
+        }
+
+        // MovieBox Direct CDN safeguard: bcdn.hakunaymatata.com returns HTTP 428 if browser UA (Mozilla/5.0) is sent
+        if (isMovieBoxDirectCdn && (requestHeaders["User-Agent"]?.startsWith("Mozilla/5.0") == true || userAgent.startsWith("Mozilla/5.0"))) {
+            requestHeaders["User-Agent"] = com.cinetheta.providers.moviebox.MovieBoxCrypto.userAgent
         }
 
         // Attach cookies if present
@@ -416,8 +448,9 @@ class Media3Player(
             com.cinetheta.core.network.CineThetaHttpClient.streamingOkHttpClient
         }
 
+        val effectiveUserAgent = requestHeaders["User-Agent"] ?: userAgent
         val httpDataSourceFactory = androidx.media3.datasource.okhttp.OkHttpDataSource.Factory(okHttpClient)
-            .setUserAgent(userAgent)
+            .setUserAgent(effectiveUserAgent)
             .setDefaultRequestProperties(requestHeaders)
 
         val isContentUri = stream.url.startsWith("content://")
@@ -445,7 +478,7 @@ class Media3Player(
         val mediaSourceFactory = DefaultMediaSourceFactory(context, extractorsFactory)
             .setDataSourceFactory(dataSourceFactory)
 
-        // 5. Detect container / MIME type for links without standard file extensions (e.g. Pixeldrain, BuzzServer)
+        // 5. Detect container / MIME type for links without standard file extensions (e.g. Pixeldrain, BuzzServer, Live IPTV)
         val mimeType = when (stream.contentType) {
             com.cinetheta.core.network.detector.ContentType.M3U8,
             com.cinetheta.core.network.detector.ContentType.HLS -> androidx.media3.common.MimeTypes.APPLICATION_M3U8
@@ -453,20 +486,22 @@ class Media3Player(
             com.cinetheta.core.network.detector.ContentType.VIDEO -> {
                 val lower = stream.url.lowercase()
                 when {
-                    lower.contains(".m3u8") -> androidx.media3.common.MimeTypes.APPLICATION_M3U8
+                    lower.contains(".m3u8") || lower.contains(".m3u") -> androidx.media3.common.MimeTypes.APPLICATION_M3U8
                     lower.contains(".mpd") -> androidx.media3.common.MimeTypes.APPLICATION_MPD
                     lower.contains(".mp4") -> androidx.media3.common.MimeTypes.APPLICATION_MP4
                     lower.contains(".mkv") -> androidx.media3.common.MimeTypes.APPLICATION_MATROSKA
+                    lower.contains(".ts") -> androidx.media3.common.MimeTypes.VIDEO_MP2T
                     else -> null
                 }
             }
             else -> {
                 val lower = stream.url.lowercase()
                 when {
-                    lower.contains(".m3u8") -> androidx.media3.common.MimeTypes.APPLICATION_M3U8
+                    lower.contains(".m3u8") || lower.contains(".m3u") -> androidx.media3.common.MimeTypes.APPLICATION_M3U8
                     lower.contains(".mpd") -> androidx.media3.common.MimeTypes.APPLICATION_MPD
                     lower.contains(".mp4") -> androidx.media3.common.MimeTypes.APPLICATION_MP4
                     lower.contains(".mkv") -> androidx.media3.common.MimeTypes.APPLICATION_MATROSKA
+                    lower.contains(".ts") -> androidx.media3.common.MimeTypes.VIDEO_MP2T
                     else -> null
                 }
             }
@@ -565,11 +600,31 @@ class Media3Player(
     override fun play() { exoPlayer.play() }
     override fun pause() { exoPlayer.pause() }
     override fun seekTo(positionMs: Long) {
-        exoPlayer.seekTo(positionMs)
-        updateState()
+        val duration = exoPlayer.duration
+        val clamped = if (duration > 0) positionMs.coerceIn(0L, duration) else positionMs.coerceAtLeast(0L)
+        pendingSeekPosition = clamped
+        _state.value = _state.value.copy(positionMs = clamped)
+
+        seekJob?.cancel()
+        seekJob = scope.launch {
+            delay(100L)
+            val target = pendingSeekPosition ?: clamped
+            pendingSeekPosition = null
+            exoPlayer.seekTo(target)
+            updateState()
+        }
     }
-    override fun seekForward(ms: Long) { seekTo(exoPlayer.currentPosition + ms) }
-    override fun seekBackward(ms: Long) { seekTo((exoPlayer.currentPosition - ms).coerceAtLeast(0)) }
+
+    override fun seekForward(ms: Long) {
+        val basePos = pendingSeekPosition ?: exoPlayer.currentPosition
+        seekTo(basePos + ms)
+    }
+
+    override fun seekBackward(ms: Long) {
+        val basePos = pendingSeekPosition ?: exoPlayer.currentPosition
+        seekTo((basePos - ms).coerceAtLeast(0L))
+    }
+
     override fun setVolume(volume: Float) {
         exoPlayer.volume = volume
     }
@@ -580,6 +635,9 @@ class Media3Player(
     }
 
     override fun release() {
+        seekJob?.cancel()
+        seekJob = null
+        pendingSeekPosition = null
         stopProgressTracking()
         scope.cancel()
         mediaSession.release()
@@ -662,7 +720,11 @@ class Media3Player(
     }
 
     @androidx.compose.runtime.Composable
-    override fun Surface(modifier: androidx.compose.ui.Modifier, isFullScreen: Boolean) {
+    override fun Surface(
+        modifier: androidx.compose.ui.Modifier,
+        isFullScreen: Boolean,
+        resizeMode: Int
+    ) {
         val playerState = state.collectAsState()
         androidx.compose.ui.viewinterop.AndroidView(
             factory = { ctx ->
@@ -676,7 +738,7 @@ class Media3Player(
                         player = exoPlayer
                         useController = false
                         setShowBuffering(androidx.media3.ui.PlayerView.SHOW_BUFFERING_NEVER)
-                        resizeMode = if (isFullScreen) androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_ZOOM else androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FIT
+                        this.resizeMode = resizeMode
                         // Hide built-in subtitle view so it doesn't get scaled/cropped
                         subtitleView?.visibility = android.view.View.GONE
                     }
@@ -729,7 +791,7 @@ class Media3Player(
             },
             update = { frameLayout ->
                 val playerView = frameLayout.getChildAt(0) as androidx.media3.ui.PlayerView
-                playerView.resizeMode = if (isFullScreen) androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_ZOOM else androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FIT
+                playerView.resizeMode = resizeMode
                 if (frameLayout.childCount > 1) {
                     val subView = frameLayout.getChildAt(1) as? androidx.media3.ui.SubtitleView
                     if (subView != null) {

@@ -62,7 +62,7 @@ fun PlayerScreen(
     val countdownSeconds by controller.nextEpisodeManager.countdownSeconds.collectAsState()
 
     var showBuffering by remember { mutableStateOf(false) }
-    var isFullScreen by remember { mutableStateOf(false) }
+    var resizeMode by remember { mutableStateOf(androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FIT) }
 
     LaunchedEffect(state.isBuffering) {
         if (state.isBuffering) {
@@ -76,7 +76,20 @@ fun PlayerScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
-        controller.player.Surface(modifier = Modifier.fillMaxSize(), isFullScreen = isFullScreen)
+        val player = controller.player
+        if (player is com.cinetheta.player.media3.Media3Player) {
+            player.Surface(
+                modifier = Modifier.fillMaxSize(),
+                isFullScreen = false,
+                resizeMode = resizeMode
+            )
+        } else {
+            player.Surface(
+                modifier = Modifier.fillMaxSize(),
+                isFullScreen = false,
+                resizeMode = resizeMode
+            )
+        }
         
         if (isPiPMode && showBuffering) {
             CircularProgressIndicator(
@@ -105,7 +118,21 @@ fun PlayerScreen(
                     showSettingsDialog = true 
                 },
                 onEpisodesClick = { showEpisodeDrawer = true },
-                onFullscreenToggle = { isFullScreen = !isFullScreen },
+                onFullscreenToggle = {
+                    val nextMode = when (resizeMode) {
+                        androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FIT -> androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FILL
+                        androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FILL -> androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+                        else -> androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FIT
+                    }
+                    resizeMode = nextMode
+                    val toastText = when (nextMode) {
+                        androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FIT -> "Aspect Ratio: Fit (Original)"
+                        androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_FILL -> "Aspect Ratio: Stretch / Full Screen (No Crop)"
+                        androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_ZOOM -> "Aspect Ratio: Zoom / Crop"
+                        else -> "Aspect Ratio: Fit"
+                    }
+                    android.widget.Toast.makeText(context, toastText, android.widget.Toast.LENGTH_SHORT).show()
+                },
                 onSpeedClick = { 
                     initialSettingsTab = 4
                     showSettingsDialog = true 
@@ -215,12 +242,21 @@ fun PlayerScreen(
             )
         }
 
+    val activeEngine = if (controller.player is com.cinetheta.player.core.HybridPlayer) {
+        (controller.player as com.cinetheta.player.core.HybridPlayer).activeEngineName.collectAsState().value
+    } else if (controller.player is com.cinetheta.player.vlc.VlcPlayer) {
+        "VLC"
+    } else {
+        "MEDIA3"
+    }
+
     if (showSettingsDialog) {
         SettingsDialog(
             state = state,
             allStreams = allStreams,
             currentStreamIndex = currentStreamIndex,
             initialTab = initialSettingsTab,
+            activeEngine = activeEngine,
             onDismiss = { showSettingsDialog = false },
             onQualitySelected = { 
                 controller.player.setQuality(it)
@@ -252,6 +288,7 @@ fun SettingsDialog(
     allStreams: List<StreamLink>,
     currentStreamIndex: Int,
     initialTab: Int,
+    activeEngine: String = "MEDIA3",
     onDismiss: () -> Unit,
     onQualitySelected: (QualityOption) -> Unit,
     onAudioSelected: (AudioTrack) -> Unit,
@@ -396,6 +433,27 @@ fun SettingsDialog(
                         }
                         
                     }
+                }
+
+                HorizontalDivider(color = Color.DarkGray.copy(alpha = 0.5f))
+                val engineLabel = if (activeEngine == "VLC") "Active Engine: LibVLC (Multi-Audio & Live IPTV)" else "Active Engine: Media3 / ExoPlayer"
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Memory,
+                        contentDescription = null,
+                        tint = if (activeEngine == "VLC") Color(0xFFFF9800) else Color(0xFF00E5FF),
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = engineLabel,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.LightGray,
+                        fontSize = 11.sp
+                    )
                 }
             }
         }

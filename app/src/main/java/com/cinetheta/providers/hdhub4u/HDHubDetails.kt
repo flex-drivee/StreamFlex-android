@@ -72,7 +72,7 @@ class HDHubDetails : DetailParser {
                     title = newTitle,
                     detailUrl = pageUrl,
                     sources = parsed.sources,
-                    mediaType = result.mediaType,
+                    mediaType = if (parsed.seasons.isNotEmpty()) MediaType.TV else parsed.mediaType,
                     seasons = parsed.seasons,
                     year = parsed.year ?: result.year,
                     poster = parsed.poster ?: result.poster,

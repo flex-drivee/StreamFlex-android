@@ -95,7 +95,8 @@ class MovieBoxDetails {
 
                     if (!isTV) {
                         val sources = relatedIds.map { (id, lang) ->
-                            val source = MovieBoxMapper.toProviderSource(url = "$baseUrl/wefeed-mobile-bff/subject-api/play-info?subjectId=$id")
+                            // play-info/v2 is the new endpoint (verified via MovieBox-Tui reference)
+                            val source = MovieBoxMapper.toProviderSource(url = "$baseUrl/wefeed-mobile-bff/subject-api/play-info/v2?subjectId=$id")
                             source.copy(metadata = mapOf("language" to lang))
                         }
                         
@@ -114,7 +115,7 @@ class MovieBoxDetails {
                             val seasonsForLang = fetchSeasons(
                                 subjectId   = id,
                                 baseUrl     = baseUrl,
-                                basePlayUrl = "$baseUrl/wefeed-mobile-bff/subject-api/play-info",
+                                basePlayUrl = "$baseUrl/wefeed-mobile-bff/subject-api/play-info/v2",
                                 lang        = lang
                             )
                             allSeasons.addAll(seasonsForLang)
@@ -141,7 +142,7 @@ class MovieBoxDetails {
 
                         val fallbackSources = if (mergedSeasons.isEmpty()) {
                             relatedIds.map { (id, lang) ->
-                                val source = MovieBoxMapper.toProviderSource(url = "$baseUrl/wefeed-mobile-bff/subject-api/play-info?subjectId=$id")
+                                val source = MovieBoxMapper.toProviderSource(url = "$baseUrl/wefeed-mobile-bff/subject-api/play-info/v2?subjectId=$id")
                                 source.copy(metadata = mapOf("language" to lang))
                             }
                         } else emptyList()
@@ -352,28 +353,7 @@ class MovieBoxDetails {
     // "?"? Helpers "?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?
 
     private suspend fun fetchXUserToken(baseUrl: String) {
-        val url = "$baseUrl/wefeed-mobile-bff/tab/ranking-list?tabId=0&categoryType=4516404531735022304&page=1&perPage=1"
-        val headers = MovieBoxCrypto.getHeaders(
-            method = "GET",
-            url = url
-        )
-
-        val request = RequestBuilder()
-            .url(url)
-            .get()
-            .headers(headers)
-            .build()
-
-        withContext(Dispatchers.IO) {
-            when (val response = HttpClient.execute(request)) {
-                is NetworkResult.Success -> {
-                    response.data.header("x-user")?.let {
-                        MovieBoxCrypto.xUserToken = parseToken(it)
-                    }
-                }
-                else -> {}
-            }
-        }
+        MovieBoxCrypto.ensureToken(baseUrl)
     }
 
     private fun parseToken(xUserHeader: String): String? {

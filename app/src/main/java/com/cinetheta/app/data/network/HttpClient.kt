@@ -24,7 +24,7 @@ object HttpClient {
             level = HttpLoggingInterceptor.Level.BODY
         }
 
-        OkHttpClient.Builder()
+        val builder = OkHttpClient.Builder()
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
@@ -32,7 +32,8 @@ object HttpClient {
             .followSslRedirects(true)
             .cookieJar(JavaNetCookieJar(cookieManager))
             .addInterceptor(logging)
-            .build()
+
+        com.cinetheta.core.network.DohProviders.applyDoh(builder).build()
     }
 
     fun get(url: String, headers: Map<String, String> = emptyMap()): Response {
